@@ -1,0 +1,6 @@
+*
+!**/*/
+!.gitignore
+!MV3D/**
+!js/plugins/three.js
+!js/plugins/MV3D.js
