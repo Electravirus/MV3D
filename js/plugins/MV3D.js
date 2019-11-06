@@ -1,7 +1,7 @@
 /*:
 @plugindesc 3D rendering for RPG Maker MV with three.js
 @author Dread/Nyanak
-@version 0.1
+@version 0.1.1
 
 @help
 
@@ -2359,6 +2359,7 @@ const loadTexture=(src,x=0,y=0,w=0,h=0)=>new Promise((resolve,reject)=>{
 		texture.animationOrigin=new THREE.Vector2(x,y+h);
         resolve(texture);
     },null,error=>{
+    	SceneManager.catchException(new Error(`Error loading ${src}`));
         reject(error);
     });
 });

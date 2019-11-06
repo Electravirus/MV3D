@@ -6,7 +6,7 @@
 LICENSE: MIT
 https://github.com/mrdoob/three.js/
 
-Plugin for use with MV3D.js by Dread/Nyanak
+Plugin for use with MV3D.js
 
 This version of three.js has been edited slightly so alphamap will ignore
 offset and repeat. 
