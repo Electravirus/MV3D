@@ -1,6 +1,7 @@
 /*:
 @plugindesc 3D rendering for RPG Maker MV with three.js
 @author Dread/Nyanak
+@version 0.1
 
 @help
 
