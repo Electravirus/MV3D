@@ -1,247 +1,411 @@
 /*:
-@plugindesc 3D rendering in RPG Maker MV with three.js
+@plugindesc 3D rendering for RPG Maker MV with three.js
 @author Dread/Nyanak
 
 @help
-Requires three.js loaded as an addon.
-Requires WebGL
-
-To the right, you can configure custom heights for regions and terrain tags.
-By default, the plugin is configured to use regions 1-7.
-Terrain tag configuration also lets you set a texture offset, so the top
-and side of the tile can use different textures.
-
-Region heights only affects layer 1 tiles. Most A tiles are placed on layer 1,
-except the right half of A2 and a few tiles on A1.
-
-Tileset configurations should be placed in the notes of the tileset,
-and should be wrapped in a <MV3D></MV3D> block.
-
-Note that only A1, A2, A5, B,C, D, and E tiles can be configured.
-A3 and A4 tiles have their own hard-coded behavior, and can't be configured.
-
-Each tile's configuration should be on its own line. The start of the line
-should be in the format "img,x,y:", where img is the tilset image name
-(A1, A2, A3, A4, A5, B, C, D, or E), and x and y are the tile coordinates
-of the tile you want to configure, where 0,0 is the top left tile from that
-image.
-The rest of the line should be a list of configuration functions.
-
-Tileset Configuration functions: 
-
-height(n)
-- set the height of the tile to n.
-
-float(n)
-- How high above the surface vehicles will float.
-- Good for water tiles.
-
-top(img,x,y)
-side(img,x,y)
-texture(img,x,y)
-- use another tile's texture for the top, side, or both textures of this tile.
-- img is the name of the tileset image.
-- x & y are the tile coordinates.
 
-offsetTop(x,y)
-offsetSide(x,y)
-offset(x,y)
-- use a tile near this one for the top, side, or both textures.
-- x & y are the offset coordinates. example: (0,-1) will be the tile above.
-- should only be used to point to other tiles on the same tileset image.
+Make sure you have both the `three.js` plugin and `MV3D.js` plugin loaded, in
+that order.
 
-rectTop(img,x,y,w,h)
-rectSide(img,x,y,w,h)
-rect(img,x,y,w,h)
-- use a specified region on tileset image for the texture.
-- img is the name of the tileset image (A1, A2, A3, A4, A5, B, C, D, or E).
-- x & y are the pixel coordinates on the image for the top left of the region.
-- w & h are the width and height of the region in pixels.
+Now when you run your game, the map should be rendered in 3D.
 
-shape(name)
-- Use a different shape for the tile.
-- Currently only valid shape option is fence.
+The A3 and A4 tiles will be rendered as walls. You can also change the height
+of tiles using regions and terrain tags.
 
-For example, to give water tiles a waterfall side:
-<MV3D>
-A1,0,0:side(A1,1,1),height(2)
-</MV3D>
+By default, regions 1-7 are configured to affect the height.
 
-Or to make the pit in Outside_A2 3D:
-<MV3D>
-A2,5,3:rectTop(A2,504,504,48,48),rectSide(A2,504,480,48,24),height(-0.5)
-</MV3D>
+Terrain tag 1 is configured to use a cross shapes, so tiles with this tag will
+stand up like a tree.
 
-There are a few issues to be aware of when it comes to tile layering.
-Most A tiles are placed on the layer 1, except for the right half
-of A2 and a few tiles from A1 which are placed on layer 2.
-B C D and E tiles are all placed on layers 3 and 4.
+Terrain tag 2 is configured to use a fence shape. Try putting this tag on the
+fence autotiles that come with MV.
 
-Because of the way layering works, and because the pit tiles from the above
-example are put on layer 2, you need to make sure there's no tiles on
-layer 1, or you won't be able to see the pit.
+The regions and terrain tags can be reconfigured however you want.
 
+---
 
+## Tileset Configuration
 
-Event configurations can be placed in either the note or comment.
-Event configurations should be contained in an <mv3d: > tag, where
-a list of configuration functions goes after the colon.
+A more advanced feature, the tileset configuration should be placed in the
+tileset's note, and should be wrapped in an <mv3d></mv3d> block.
 
-Event Configuration functions: 
+Each line in the configuration should start by identifying the tile you want
+to configure, followed by a colon, and then a list of configuration functions.
 
-height(n)
-- set the height of the event above the ground.
+Choosing a tile is done with the format `img,x,y`, where img is name of the
+tileset image (A1, A2, B, C, etc.), and x and y are the position of that tile
+on the tileset. For example, `A2,0,0` would be the top left A2 tile. On the
+outdoor tileset, this would be the grass autotile.
 
-z(n)
-- set the z coordinate of the event. Ignores ground level.
+Each tile can have 3 different textures. The top texture, side texture, and
+inside texture. The side texture is used on the side of the tile when it has a
+positive height, and the inside texture is used when it has a negative height.
 
-x(n)
-- offsets the x position of the event's mesh.
+If inside texture isn't specified, all sides will use the same texture.  
+If side texture isn't specified, then sides will use the top texture.
 
-y(n)
-- offsets the y position of the event's mesh.
+---
 
-pos(x,y)
-- Changes the event's position.
-- when used in note, applies at map load.
-- when used in comment, applies at page setup.
-- Can be used to have multiple events at the same location.
-- prefix numbers with + or - to use relative coordinates.
+	texture(img,x,y)
+	top(img,x,y)
+	side(img,x,y)
+	inSide(img,x,y)
 
-side(name)
-- what sides of the mesh's faces will be rendered.
-- Valid side names are front, back, and double.
+These functions will use the specified tile for the current tile's textures.  
+texture() sets both the top and side textures.
 
-shape(name,...)
-- sets the shape of the event's mesh.
-- Valid shape names:
-flat - event lies flat on the ground like a tile.
-sprite - event rotates both pitch and yaw to face camera.
-tree - event stands straight up, rotating to match camera yaw.
-fence - event stands straight up, facing south. (rotate using rot)
+---
 
-scale(x,y)
-- Scales the event's mesh.
+	offset(x,y)
+	offsetTop(x,y)
+	offsetSide(x,y)
+	offsetInside(x,y)
 
-rot(n)
-- Rotates the event's mesh.
-- Only works with flat and fence shapes.
-- 0 is south, 90 is east, 180 is north, and 270 is west.
+These functions will use an offset to get a texture from a tile near this one.
+These should only be used to point to tiles on the same tileset image.
 
-bush(true/false)
-- Whether the event is affected by bush tiles.
+---
 
-shadow(true/false)
-- Whether the event has a shadow.
+	rect(img,x,y,w,h)
+	rectTop(img,x,y,w,h)
+	rectSide(img,x,y,w,h)
+	rectInside(img,x,y,w,h)
 
-shadowScale(n)
-- Scales the event's shadow.
+These functions use a specified region from a tileset image as the texture.
+They use pixel coordinates rather than tile coordinates.
 
+---
 
-To make a door event render on the edge of a building's wall, you might
-do something like this:
+	shape(s)
 
-<mv3d:shape(fence),z(0),y(0.51),scale(1,1.3)>
+The shape function can set the tile's shape to FLAT, FENCE, CROSS, or XCROSS.
+Each of which have their own behavior. FLAT is default.
 
+---
 
-Map Configuration functions: 
+	float(n)
 
+The float function will make water vehicles float a certain height above the
+tile.
 
-cameraMode(perspective/orthographic)
-mode(perspective/orthographic)
-- Set this map to use the specified projection.
+---
 
-cameraYaw(deg)
-yaw(deg)
-cameraPitch(deg)
-pitch(deg)
-- Set the pitch and yaw of the camera.
-- deg is the angle of rotation in degrees.
+	fringe(n)
 
-cameraDist(n)
-dist(n)
-- The distance of the camera from the player
+The fringe function will move the tile into the air by the specified distance.
+Usually used for tiles with star passability.
 
-cameraHeight(n)
-height(n)
-- Offsets the camera vertically. Useful for 1st person mode.
-- Camera will always be at least this high off the ground.
+---
 
-light(color,intensity)
-- Sets the ambient light for this map.
-- color should be a hex code. intensity is usually between 0 and 1.
+As a simple example, we'll give the water tile in the outdoor tileset a
+negative height so it will sink into the ground.
 
-fog(color,near,far)
-- color should be a hex code.
-- near and far can be omitted to just set the color.
+    <MV3D>
+      A1,0,0:top(A1,0,0),rectSide(A1,31,54,31,14),height(-0.3),float(0.1)
+    </MV3D>
 
+But this example doesn't look very good when we place it on the edge of a
+cliff, so we can configure it to use waterfall textures on the outside walls.
 
+    <mv3d>
+      A1,0,0:top(A1,0,0),side(A1,1,1),rectInside(A1,31,54,31,14),height(-0.3),float(0.1)
+    </mv3d>
 
+---
 
-Plugin Commands:
+## Event Configuration
 
-mv3d cameraMode <mode>
-- set the camera to PERSPECTIVE or ORTHOGRAPHIC mode.
+Event configurations can be placed in either the note or comment.  
+Event configurations should be contained in an <mv3d: > tag, where a list of
+configuration functions goes after the colon.
 
-mv3d pitch <deg> <time>
-mv3d yaw <deg> <time>
-- Set the camera pitch or yaw.
-- <deg> is the angle of rotation.
-- <time> is the number of seconds to complete rotation. 0 for instant.
-- If <deg> starts with + or -, it will be a relative rotation.
+---
 
-mv3d dist <N> <time>
-mv3d height <N> <time>
-- Sets the camera dist or height to <N>.
-- Use dist 0 to enter first person mode.
+	x(n)
+	y(n)
 
-mv3d rotationMode <mode>
-- Sets the input mode for rotating camera with keyboard.
-- Valid modes are OFF, AUTO, Q&E, and A&D.
+The x and y functions shift position of the event's mesh.
 
-mv3d pitchMode <on/off>
-- Sets whether player can change camera pitch with keyboard.
+---
 
-mv3d <vehicle> speed <N>
-mv3d <vehicle> scale <N>
-- Where <vehicle> is boat, ship, or airship, and <N> is the new value.
+	height(n)
 
-mv3d <vehicle> big <true/false>
-- "Big" vehicles need a 3x3 clearance away from any walls to move.
-- This can help avoid clipping problems with vehicles with a large scale.
+The height function sets the height of the event above the ground.
 
-mv3d airship height <N>
-- How high the airship flies.
+---
 
-mv3d airship ascentSpeed <N>
-mv3d airship descentSpeed <N>
-- How fast the airship ascends and descends.
-- Typical speeds are 1-6, but speeds outside this range will work fine too.
+	z(n)
 
-mv3d fog color <color> <time>
-mv3d fog near <N> <time>
-mv3d fog far <N> <time>
-mv3d fog dist <near> <far> <time>
-- color should be a hex code.
-- near and far are the start point and end point for the fog.
+The z function sets the z position of the event. Ignores ground level.
 
-mv3d light <color> <intensity> <time>
-mv3d light color <color> <time>
-mv3d light intensity <intensity> <time>
-- Set ambient lighting color and intensity.
-- intensity typically ranges from 0 to 1, but can also be above 1.
+---
 
+	pos(x,y)
 
+The Pos function sets the position of the event.   
+If in the note tag, position will only be set when the event is created.  
+If in the comments, position will be set when event changes pages.  
+Prefix numbers with + or - to use relative coordinates.  
 
-A note about coordinates:
-In RPG Maker maps, positive x is east and positive y is south.
-However, because of the coordinate system used by three.js,
-negative y is south in the 3d world. I have to flip the y coordinate
-when converting tiles and objects to 3D.
+---
 
-When configuring the plugin, you should treat positive y as south.
+	side(s)
 
+Which sides of the mesh will be rendered. Can be FRONT, BACK, or DOUBLE.
 
+---
+
+	shape(s)
+
+Sets the shape of the event's mesh.
+
+Valid shapes:
+
+ -   FLAT - Event lies flat on the ground like a tile.
+ - SPRITE - Event rotations both pitch and yaw to face camera.
+ -   TREE - Event stands straight up, rotating to match camera yaw.
+ -  FENCE - Event stands straight up, facing south. (rotate using rot)
+
+---
+
+	scale(x,y)
+
+Sets the scale of the event's mesh.
+
+
+---
+
+	rot(n)
+
+Rotates the event. Only works with flat and fence shapes.  
+0 is south, 90 is east, 180 is north, and 270 is west.  
+
+---
+
+	bush(true/false)
+
+Whether the event is affected by bush tiles.
+
+---
+
+	shadow(true/false)
+
+Whether the event has a shadow.
+
+---
+
+	shadowScale(n)
+
+Set's the scale of the event's shadow.
+
+---
+
+	alphaTest(n)
+
+Doesn't render any pixels below the alphaTest value.  
+0 means all alpha will be rendered. 1 means no alpha.  
+Can be useful for removing unwanted shadows in the textures.  
+
+---
+
+	lamp(color,intensity,distance)
+	flashlight(color,intensity,distance,angle)
+
+Sets up light sources on this event.  
+Color should be a hex code.  
+Intensity is the brightness of the light.  
+Distance is how far the light travels.   
+Angle is the width of the flashlight's beam.   
+
+If configured on note, these settings are applied only when event is created.  
+If in comment, settings applied when switching pages.
+
+---
+
+	flashlightYaw(deg)
+	flashlightPitch(deg)
+
+Sets the pitch and yaw of the event's flashlight.  
+Prefix the yaw angle with + or - to set yaw relative to event's facing.
+
+---
+
+	lightHeight(n)
+
+Sets the height of the light sources on the event.
+
+---
+
+As an example, to make a door event render on the edge of a building's wall,
+you might do something like this:
+
+    <mv3d:shape(fence),scale(0.9,1.3),y(0.51),rot(0),z(0)>
+
+---
+
+## Map Configuration
+
+Map configuration goes in the note area of the map settings. Configurations
+should be placed in an <mv3d></mv3d> block, which should contain a list of
+configuration functions.
+
+Some of these configurations apply when the map is loaded, and some affect how it's rendered
+
+---
+
+	light(color,intensity)
+	fog(color,near,far)
+
+Setup the ambient light and fog of the map.
+
+---
+
+	yaw(deg)
+	pitch(deg)
+	dist(n)
+	height(n)
+	cameraYaw(deg)
+	cameraPitch(deg)
+	cameraDist(n)
+	cameraHeight(n)
+
+Sets the camera yaw, pitch, distance, and height for the map.   
+
+---
+
+	mode(s)
+	cameraMode(s)
+
+Set either PERSPECTIVE or ORTHOGRAPHIC mode.
+
+---
+
+	edge(true/false)
+
+If false, walls aren't rendered at the edges of the map.
+
+---
+
+	ceiling(img,x,y,height)
+
+Uses the tile texture specified by `img,x,y` to render a ceiling for the map.  
+Good for indoor areas. If height isn't specified, default will be used.
+
+---
+
+## Plugin Commands
+
+In the following commands, the parts surrounded with angle bracks such as <n> are parameters.
+
+Some commands (like lamp and flashlight) act on a character. By default the
+target character will be the current event.
+You can define your own target using the following syntax:
+
+	mv3d @target rest of the command
+
+If the second word in the command starts with `@`, that will be interpreted
+as the target.   
+Valid targets:
+
+- @p or @player: Targets $gamePlayer.
+- @e0, @e1, @e2, @e25 etc: Targets event with specified id.
+- @f0, @f1, @f2, etc: Targets first, second, third follower, etc.
+- @v0, @v1, @v2: Boat, Ship, Airship.
+
+---
+
+	mv3d camera pitch <n> <t>
+	mv3d camera yaw <n> <t>
+	mv3d camera dist <n> <t>
+	mv3d camera height <n> <t>
+
+Sets the camera properties, where <n> is the new value and <t> is the time to
+interpolate to the new value.   
+Prefix <n> with + or - to modify the current value instead of setting a new
+value.
+
+---
+
+	mv3d camera mode <mode>
+
+Set camera mode to PERSPECTIVE or ORTHOGRAPHIC
+
+---
+
+	mv3d rotationMode <mode>
+
+Set the keyboard control mode for rotating the camera.
+
+Modes:
+
+- OFF - Can't rotate camera with keyboard.
+- AUTO - A&D while in 1st person mode. Otherwise Q&E.
+- Q&E - Rotate camera with Q&E keys.
+- A&D - Rotate camera with left & right or A&D. Move with Q&E.
+
+---
+
+	mv3d pitchMode <true/false>
+
+Allow player to control camera pitch with pageup and pagedown.
+
+---
+
+	mv3d fog color <color> <t>
+	mv3d fog near <n> <t>
+	mv3d fog far <n> <t>
+	mv3d fog dist <near> <far> <t>
+	mv3d fog <color> <near> <far> <t>
+
+<t> is time.  
+Prefix values with + or - to modify the current values instead of setting new
+values.
+
+---
+
+	mv3d light color <color> <t>
+	mv3d light intensity <n> <t>
+	mv3d light <color> <intensity> <t>
+
+---
+
+	mv3d @t lamp color <color> <t>
+	mv3d @t lamp intensity <n> <t>
+	mv3d @t lamp dist <n> <t>
+	mv3d @t lamp <color> <intensity> <dist> <t>
+
+---
+
+	mv3d @t flashlight color <color> <t>
+	mv3d @t flashlight intensity <n> <t>
+	mv3d @t flashlight dist <n> <t>
+	mv3d @t flashlight angle <deg> <t>
+	mv3d @t flashlight pitch <deg> <t>
+	mv3d @t flashlight yaw <deg> <t>
+	mv3d @t flashlight <color> <intensity> <dist> <angle> <t>
+
+Angle is beam width of the flashlight.
+
+---
+
+### Vehicle Commands
+
+	mv3d <vehicle> big <true/false>
+	mv3d <vehicle> scale <n>
+	mv3d <vehicle> speed <n>
+	mv3d airship ascentspeed <n>
+	mv3d airship descentspeed <n>
+	mv3d airship height <n>
+
+"Big" vehicles can't be piloted too close to walls. This can be useful to
+avoid clipping with vehicles with large scales.   
+Speed of the vehicle should be 1-6. It works the same as event speed.   
+A higher airship can fly over higher mountains. Perhaps you could let the
+player upgrade their airship's height and speed.
+
+---
+
+--------------------------------------------------
 
 @param wallheight
 @text Wall Height 1
@@ -720,7 +884,7 @@ window.MV3D={
 		return mode;
 	},
 	set rotationMode(v){
-		v=falseString(v.toUpperCase());
+		v=falseString(v);
 		this.saveData('keyboardYaw',v);
 		//this.setupInput();
 	},
@@ -882,7 +1046,7 @@ window.MV3D={
 
 	tilesetConfigurations:{},
 	mapConfigurations:{},
-	loadMapSettings(){
+	loadMapSettings( applySettings ){
 		//tileset
 		this.tilesetConfigurations={};
 		const lines = this.readConfigurationBlocks($gameMap.tileset().note);
@@ -905,6 +1069,9 @@ window.MV3D={
 			this.mapConfigurationFunctions,
 			mapconf,
 		);
+
+		if(!applySettings){ return; }
+
 		if('fog' in mapconf){
 			const fog = mapconf.fog;
 			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
@@ -1719,6 +1886,9 @@ class MapCell{
 						}
 						let sx,sy;
 						sx=(bx+(ax>0?0.5+hasRightEdge:1-hasLeftEdge))*MV3D.tileSize;
+						if(neededHeight<0){
+							sx=(bx+(ax>0?0+hasLeftEdge:1.5-hasRightEdge))*MV3D.tileSize;
+						}
 						if(isTileWaterfall(tileId)){
 							//waterfalls
 							sy=(by+az%2/2)*MV3D.tileSize;
@@ -2470,13 +2640,8 @@ class Character extends Sprite{
 		const configScale = this.getConfig('scale',new THREE.Vector2(1,1));
 		let scale = 1;
 		if(this.isVehicle){
-			if(this.isBoat){
-				scale = MV3D.BOAT_SETTINGS.scale;
-			}else if(this.isShip){
-				scale = MV3D.SHIP_SETTINGS.scale;
-			}else if(this.isAirship){
-				scale = MV3D.AIRSHIP_SETTINGS.scale;
-			}
+			const settings = MV3D[`${this._type.toUpperCase()}_SETTINGS`];
+			scale = MV3D.loadData( `${this._type}_scale`, settings.scale );
 		}
 		const xscale = this.patternWidth()/MV3D.tileSize * configScale.x * scale;
 		const yscale = this.patternHeight()/MV3D.tileSize * configScale.y * scale;
@@ -3087,7 +3252,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 		const mode=m?m[0]:'e';
 		m=target.match(/\d+/);
 		const id=m?Number(m[0]):0;
-		let char;
+		let char = MV3D.pluginCommands.CHAR;
 		switch(mode[0]){
 			case 's': /* self */ break;
 			case 'p': char=$gamePlayer; break;
@@ -3119,6 +3284,7 @@ MV3D.pluginCommands={
 			case 'dist'     :
 			case 'distance' : this.dist  (a[1],time); return;
 			case 'height'   : this.height(a[1],time); return;
+			case 'mode'     : this.cameramode(a[1]); return;
 			case 'pan':
 				time=this._TIME(a[3]);
 				return;
@@ -3455,7 +3621,7 @@ Game_Player.prototype.performTransfer = function() {
 	const newmap = this._newMapId !== $gameMap.mapId();
 	const needsReload = newmap || this._needsMapReload;
 	_performTransfer.apply(this,arguments);
-	if(newmap){ MV3D.loadMapSettings(); }
+	MV3D.loadMapSettings( newmap );
 	if(needsReload){ MV3D.clearMap(); }
 	if(MV3D.blendCameraDist.targetValue()<=0){
 		MV3D.blendCameraYaw.setValue(MV3D.dirToYaw($gamePlayer.direction()),0);
