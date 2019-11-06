@@ -2640,8 +2640,8 @@ class Character extends Sprite{
 		const configScale = this.getConfig('scale',new THREE.Vector2(1,1));
 		let scale = 1;
 		if(this.isVehicle){
-			const settings = MV3D[`${this._type.toUpperCase()}_SETTINGS`];
-			scale = MV3D.loadData( `${this._type}_scale`, settings.scale );
+			const settings = MV3D[`${this.char._type.toUpperCase()}_SETTINGS`];
+			scale = MV3D.loadData( `${this.char._type}_scale`, settings.scale );
 		}
 		const xscale = this.patternWidth()/MV3D.tileSize * configScale.x * scale;
 		const yscale = this.patternHeight()/MV3D.tileSize * configScale.y * scale;
