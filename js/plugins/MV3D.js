@@ -14,7 +14,7 @@ of tiles using regions and terrain tags.
 
 By default, regions 1-7 are configured to affect the height.
 
-Terrain tag 1 is configured to use a cross shapes, so tiles with this tag will
+Terrain tag 1 is configured to use a cross shape, so tiles with this tag will
 stand up like a tree.
 
 Terrain tag 2 is configured to use a fence shape. Try putting this tag on the
