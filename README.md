@@ -144,7 +144,7 @@ The z function sets the z position of the event. Ignores ground level.
 The Pos function sets the position of the event.   
 If in the note tag, position will only be set when the event is created.  
 If in the comments, position will be set when event changes pages.  
-Prefix numbers with + or - to use relative coordinates.  
+Prefix numbers with + to use relative coordinates.  
 
 ---
 
@@ -225,7 +225,7 @@ If in comment, settings applied when switching pages.
 	flashlightPitch(deg)
 
 Sets the pitch and yaw of the event's flashlight.  
-Prefix the yaw angle with + or - to set yaw relative to event's facing.
+Prefix the yaw angle with + to set yaw relative to event's facing.
 
 ---
 
@@ -311,6 +311,13 @@ Valid targets:
 - @f0, @f1, @f2, etc: Targets first, second, third follower, etc.
 - @v0, @v1, @v2: Boat, Ship, Airship.
 
+Some parameters can be prefixed with + to be set relative to the current
+value.
+
+For example:
+
+	mv3d camera yaw +-45 0.5
+
 ---
 
 	mv3d camera pitch <n> <t>
@@ -320,7 +327,7 @@ Valid targets:
 
 Sets the camera properties, where <n> is the new value and <t> is the time to
 interpolate to the new value.   
-Prefix <n> with + or - to modify the current value instead of setting a new
+Prefix <n> with + to modify the current value instead of setting a new
 value.
 
 ---
@@ -357,7 +364,7 @@ Allow player to control camera pitch with pageup and pagedown.
 	mv3d fog <color> <near> <far> <t>
 
 <t> is time.  
-Prefix values with + or - to modify the current values instead of setting new
+Prefix values with + to modify the current values instead of setting new
 values.
 
 ---
@@ -384,6 +391,20 @@ values.
 	mv3d @t flashlight <color> <intensity> <dist> <angle> <t>
 
 Angle is beam width of the flashlight.
+
+---
+
+	mv3d camera target @t <t>
+
+Change the camera's target.
+Camera will transition to the new target over time <t>.
+
+---
+
+	mv3d camera pan <x> <y> <t>
+	mv3d pan <x> <y> <t>
+
+Pans the camera view, relative to current target.
 
 ---
 

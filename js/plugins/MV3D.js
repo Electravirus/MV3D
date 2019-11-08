@@ -1,7 +1,7 @@
 /*:
 @plugindesc 3D rendering for RPG Maker MV with three.js
 @author Dread/Nyanak
-@version 0.1.1
+@version 0.2
 
 @help
 
@@ -146,7 +146,7 @@ The z function sets the z position of the event. Ignores ground level.
 The Pos function sets the position of the event.   
 If in the note tag, position will only be set when the event is created.  
 If in the comments, position will be set when event changes pages.  
-Prefix numbers with + or - to use relative coordinates.  
+Prefix numbers with + to use relative coordinates.  
 
 ---
 
@@ -227,7 +227,7 @@ If in comment, settings applied when switching pages.
 	flashlightPitch(deg)
 
 Sets the pitch and yaw of the event's flashlight.  
-Prefix the yaw angle with + or - to set yaw relative to event's facing.
+Prefix the yaw angle with + to set yaw relative to event's facing.
 
 ---
 
@@ -313,6 +313,13 @@ Valid targets:
 - @f0, @f1, @f2, etc: Targets first, second, third follower, etc.
 - @v0, @v1, @v2: Boat, Ship, Airship.
 
+Some parameters can be prefixed with + to be set relative to the current
+value.
+
+For example:
+
+	mv3d camera yaw +-45 0.5
+
 ---
 
 	mv3d camera pitch <n> <t>
@@ -322,7 +329,7 @@ Valid targets:
 
 Sets the camera properties, where <n> is the new value and <t> is the time to
 interpolate to the new value.   
-Prefix <n> with + or - to modify the current value instead of setting a new
+Prefix <n> with + to modify the current value instead of setting a new
 value.
 
 ---
@@ -359,7 +366,7 @@ Allow player to control camera pitch with pageup and pagedown.
 	mv3d fog <color> <near> <far> <t>
 
 <t> is time.  
-Prefix values with + or - to modify the current values instead of setting new
+Prefix values with + to modify the current values instead of setting new
 values.
 
 ---
@@ -386,6 +393,20 @@ values.
 	mv3d @t flashlight <color> <intensity> <dist> <angle> <t>
 
 Angle is beam width of the flashlight.
+
+---
+
+	mv3d camera target @t <t>
+
+Change the camera's target.
+Camera will transition to the new target over time <t>.
+
+---
+
+	mv3d camera pan <x> <y> <t>
+	mv3d pan <x> <y> <t>
+
+Pans the camera view, relative to current target.
 
 ---
 
@@ -822,6 +843,12 @@ there may be z-fighting issues. (default: 0.0100)
 const parameters = PluginManager.parameters('MV3D');
 const sleep=(ms=0)=>new Promise(resolve=>setTimeout(resolve,ms));
 
+if(!window.THREE){
+	sleep(1000).then(()=>{
+		SceneManager.catchException(new Error(`three.js must be loaded before MV3D.js`));
+	});
+}
+
 const SUBDIVISIONS = Number(parameters.meshSubdivision);
 const XAxis = new THREE.Vector3(1,0,0);
 const YAxis = new THREE.Vector3(0,1,0);
@@ -876,7 +903,7 @@ window.MV3D={
 	get rotationMode(){
 		let mode = this.loadData('keyboardYaw',this.KEYBOARD_YAW);
 		if(mode==='AUTO'){
-			if(this.blendCameraDist.targetValue()<=0){
+			if( MV3D.is1stPerson() ){
 				mode='A&D';
 			}else{
 				mode='Q&E';
@@ -893,6 +920,12 @@ window.MV3D={
 	set pitchMode(v){
 		v=falseString(v.toUpperCase());
 		this.saveData('keyboardPitch',v);
+	},
+
+	is1stPerson(useCurrent){
+		const k = useCurrent?'currentValue':'targetValue';
+		return this.getCameraTarget()===$gamePlayer && this.blendCameraTransition[k]()<=0
+		&& this.blendCameraDist[k]()<=0 && this.blendPanX[k]()===0 && this.blendPanY[k]()===0;
 	},
 
 	loadData(key,dfault){
@@ -923,6 +956,32 @@ window.MV3D={
 		this.updateCamera(true);
 	},
 
+	cameraTargets:[],
+	getCameraTarget(){
+		return this.cameraTargets[0];
+	},
+	setCameraTarget(char,time){
+		if(!char){ this.cameraTargets.length=0; return; }
+		this.cameraTargets.unshift(char);
+		if(this.cameraTargets.length>2){ this.cameraTargets.length=2; }
+		this.saveData('cameraTarget',getTargetString(char));
+		this.blendCameraTransition.value=1;
+		this.blendCameraTransition.setValue(0,time);
+	},
+	clearCameraTarget(){
+		this.cameraTargets.length=0;
+	},
+	resetCameraTarget(){
+		this.clearCameraTarget();
+		this.setCameraTarget($gamePlayer,0);
+	},
+	rememberCameraTarget(){
+		const target = MV3D.loadData('cameraTarget');
+		if(target){
+			this.setCameraTarget(targetChar(target),0);
+		}
+	},
+
 	setupBlenders(){
 		this.blendFogColor = new ColorBlender('fog_color',hexNumber(parameters.fog_color));
 		this.blendFogNear = new Blender('fog_near',Number(parameters.fog_near));
@@ -936,6 +995,9 @@ window.MV3D={
 		this.blendCameraHeight = new Blender('cameraHeight',Number(parameters.cameraHeight));
 		this.blendLightColor = new ColorBlender('light_color',0xffffff);
 		this.blendLightIntensity = new Blender('light_intensity',1);
+		this.blendPanX = new Blender('panX',0);
+		this.blendPanY = new Blender('panY',0);
+		this.blendCameraTransition = new Blender('cameraTransition',0);
 	},
 
 	setup(){
@@ -1410,7 +1472,7 @@ window.MV3D={
 			}else if(Input.isTriggered('rotright')){
 				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-90,0.5);
 			}
-			if(this.blendCameraDist.targetValue()<=0&&(Input.isTriggered('rotleft')||Input.isTriggered('rotright'))){
+			if(this.is1stPerson()&&(Input.isTriggered('rotleft')||Input.isTriggered('rotright'))){
 				this.playerFaceYaw();
 			}
 		}
@@ -1432,23 +1494,39 @@ window.MV3D={
 	},
 
 	updateCamera(reorient=false){
-		// follow player
-		if($gamePlayer && $gamePlayer.mv3d_sprite){
-			this.cameraStick.position.x=$gamePlayer._realX;
-			this.cameraStick.position.y=-$gamePlayer._realY;
-			const vehicle = $gamePlayer.vehicle();
-			if(vehicle&&vehicle.mv3d_sprite){
-				this.cameraStick.position.z = vehicle.mv3d_sprite.position.z;
-			}else{
-				this.cameraStick.position.z = $gamePlayer.mv3d_sprite.position.z;
+
+		if(!this.cameraTargets.length){
+			if($gamePlayer){
+				this.cameraTargets[0]=$gamePlayer;
 			}
-			/*
-			this.sun.position.x=$gamePlayer._realX+1;
-			this.sun.position.y=-$gamePlayer._realY-1;
-			this.sun.target.position.x=$gamePlayer._realX;
-			this.sun.target.position.y=-$gamePlayer._realY;
-			*/
 		}
+
+		if(this.blendCameraTransition.update() && this.cameraTargets.length>=2){
+			const t = this.blendCameraTransition.currentValue();
+			let char1=this.cameraTargets[0];
+			if(char1===$gamePlayer&&$gamePlayer.isInVehicle()){ char1=$gamePlayer.vehicle(); }
+			let char2=this.cameraTargets[1];
+			if(char2===$gamePlayer&&$gamePlayer.isInVehicle()){ char2=$gamePlayer.vehicle(); }
+			this.cameraStick.position.x = char1._realX*(1-t) + char2._realX*t;
+			this.cameraStick.position.y = -char1._realY*(1-t) - char2._realY*t;
+			if(char1.mv3d_sprite&&char2.mv3d_sprite){
+				this.cameraStick.position.z = char1.mv3d_sprite.position.z*(1-t) + char2.mv3d_sprite.position.z*t;
+			}else if(char1.mv3d_sprite){
+				this.cameraStick.position.z=char1.mv3d_sprite.position.z;
+			}
+		}else if(this.cameraTargets.length){
+			let char = this.getCameraTarget();
+			if(char===$gamePlayer&&$gamePlayer.isInVehicle()){ char=$gamePlayer.vehicle(); }
+			this.cameraStick.position.x=char._realX;
+			this.cameraStick.position.y=-char._realY;
+			if(char.mv3d_sprite){
+				this.cameraStick.position.z=char.mv3d_sprite.position.z;
+			}
+		}
+		this.blendPanX.update();
+		this.blendPanY.update();
+		this.cameraStick.position.x+=this.blendPanX.currentValue();
+		this.cameraStick.position.y-=this.blendPanY.currentValue();
 
 		const camera = this.activeCamera;
 
@@ -2822,7 +2900,7 @@ class Character extends Sprite{
 		}
 
 		if(this.char===$gamePlayer){
-			this.sprite.visible = MV3D.blendCameraDist.currentValue()>0;
+			this.sprite.visible = !MV3D.is1stPerson(true);
 		}
 
 		const bush = Boolean(this.char.bushDepth());
@@ -2963,14 +3041,14 @@ function inheritMethods(target,source,methodList){
 const _player_updateMove = Game_Player.prototype.updateMove;
 Game_Player.prototype.updateMove = function() {
 	_player_updateMove.apply(this,arguments);
-    if ( !this.isMoving() && MV3D.blendCameraDist.targetValue()<=0 ) {
+    if ( !this.isMoving() && MV3D.is1stPerson() ) {
         MV3D.playerFaceYaw();
     }
 };
 const _player_move_straight=Game_Player.prototype.moveStraight;
 Game_Player.prototype.moveStraight = function(d) {
 	_player_move_straight.apply(this,arguments);
-	if(!this.isMovementSucceeded()&&MV3D.blendCameraDist.targetValue()<=0){
+	if(!this.isMovementSucceeded()&&MV3D.is1stPerson()){
 		MV3D.playerFaceYaw();
 	}
 };
@@ -3229,7 +3307,7 @@ Scene_Map.prototype.processMapTouch = function() {
 const _player_findDirectionTo=Game_Player.prototype.findDirectionTo;
 Game_Player.prototype.findDirectionTo=function(){
 	const dir = _player_findDirectionTo.apply(this,arguments);
-	if(MV3D.blendCameraDist.targetValue()<=0 && dir){
+	if(MV3D.is1stPerson() && dir){
 		let yaw = MV3D.dirToYaw(dir);
 
 		MV3D.blendCameraYaw.setValue(yaw,0.25);
@@ -3244,40 +3322,22 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if(command.toLowerCase() !== 'mv3d'){
 		return _pluginCommand.apply(this,arguments);
 	}
-	MV3D.pluginCommands.FULL_COMMAND=[command,...args].join(' ');
+	const pc = new MV3D.PluginCommand();
+	pc.INTERPRETER=this;
+	pc.FULL_COMMAND=[command,...args].join(' ');
 	args=args.filter(v=>v);
-
-	MV3D.pluginCommands.CHAR=$gameMap.event(this._eventId);
+	pc.CHAR=$gameMap.event(this._eventId);
 	if(args[0]&&args[0][0]===('@')){
-		const target = args.shift().toLowerCase();
-		let m=target.match(/[a-z]+/);
-		const mode=m?m[0]:'e';
-		m=target.match(/\d+/);
-		const id=m?Number(m[0]):0;
-		let char = MV3D.pluginCommands.CHAR;
-		switch(mode[0]){
-			case 's': /* self */ break;
-			case 'p': char=$gamePlayer; break;
-			case 'e':
-				if(id){ char=$gameMap.event(id); }
-				break;
-			case 'v':
-				char=$gameMap.vehicle(id);
-				break;
-			case 'f':
-				char=$gamePlayer.followers()._data[id];
-				break;
-		}
-		MV3D.pluginCommands.CHAR=char;
+		pc.CHAR = pc.TARGET_CHAR(args.shift());
 	}
 
 	const com = args.shift().toLowerCase();
-	if(com in MV3D.pluginCommands){
-		MV3D.pluginCommands[com](...args);
+	if(com in pc){
+		pc[com](...args);
 	}
 };
 
-MV3D.pluginCommands={
+MV3D.PluginCommand=class{
 	async camera(...a){
 		var time=this._TIME(a[2]);
 		switch(a[0].toLowerCase()){
@@ -3287,24 +3347,29 @@ MV3D.pluginCommands={
 			case 'distance' : this.dist  (a[1],time); return;
 			case 'height'   : this.height(a[1],time); return;
 			case 'mode'     : this.cameramode(a[1]); return;
-			case 'pan':
-				time=this._TIME(a[3]);
-				return;
+			case 'target': this._cameraTarget(a[1],time); return;
+			case 'pan': this.pan(a[1],a[2],a[3]); return;
 		}
-	},
+	}
 	yaw(deg,time=1){
 		this._RELATIVE_BLEND(MV3D.blendCameraYaw,deg,time);
-		if ( MV3D.blendCameraDist.targetValue()<=0 ) { MV3D.playerFaceYaw(); }
-	},
-	pitch(deg,time=1){ this._RELATIVE_BLEND(MV3D.blendCameraPitch,deg,time); },
-	dist(n,time=1){ this._RELATIVE_BLEND(MV3D.blendCameraDist,n,time); },
-	height(n,time=1){ this._RELATIVE_BLEND(MV3D.blendCameraHeight,n,time); },
+		if ( MV3D.is1stPerson() ) { MV3D.playerFaceYaw(); }
+	}
+	pitch(deg,time=1){ this._RELATIVE_BLEND(MV3D.blendCameraPitch,deg,time); }
+	dist(n,time=1){ this._RELATIVE_BLEND(MV3D.blendCameraDist,n,time); }
+	height(n,time=1){ this._RELATIVE_BLEND(MV3D.blendCameraHeight,n,time); }
+	_cameraTarget(target,time){
+		MV3D.setCameraTarget(this.TARGET_CHAR(target), time);
+	}
 	pan(x,y,time=1){
-		// TODO????
-	},
+		console.log(x,y,time);
+		time=this._TIME(time);
+		this._RELATIVE_BLEND(MV3D.blendPanX,x,time);
+		this._RELATIVE_BLEND(MV3D.blendPanY,y,time);
+	}
 
-	rotationmode(mode){ MV3D.rotationMode=mode; },
-	pitchmode(mode){ MV3D.pitchMode=mode; },
+	rotationmode(mode){ MV3D.rotationMode=mode; }
+	pitchmode(mode){ MV3D.pitchMode=mode; }
 
 	_VEHICLE(vehicle,data,value){
 		data=data.toLowerCase();
@@ -3312,11 +3377,11 @@ MV3D.pluginCommands={
 		if(data==='big'){ value=booleanString(value); }
 		else{ value=relativeNumber(MV3D.loadData(key,0),value); }
 		MV3D.saveData(key,value);
-	},
-	boat(d,v){ this._VEHICLE('boat',d,v); },
-	ship(d,v){ this._VEHICLE('ship',d,v); },
-	airship(d,v){ this._VEHICLE('airship',d,v); },
-	cameramode(mode){ MV3D.cameraMode=mode; },
+	}
+	boat(d,v){ this._VEHICLE('boat',d,v); }
+	ship(d,v){ this._VEHICLE('ship',d,v); }
+	airship(d,v){ this._VEHICLE('airship',d,v); }
+	cameramode(mode){ MV3D.cameraMode=mode; }
 	fog(...a){
 		var time=this._TIME(a[2]);
 		switch(a[0].toLowerCase()){
@@ -3333,10 +3398,10 @@ MV3D.pluginCommands={
 		this._fogColor(a[0],time);
 		this._fogNear(a[1],time);
 		this._fogFar(a[2],time);
-	},
-	_fogColor(color,time){ MV3D.blendFogColor.setValue(hexNumber(color),time); },
-	_fogNear(n,time){ this._RELATIVE_BLEND(MV3D.blendFogNear,n,time); },
-	_fogFar(n,time){ this._RELATIVE_BLEND(MV3D.blendFogFar,n,time); },
+	}
+	_fogColor(color,time){ MV3D.blendFogColor.setValue(hexNumber(color),time); }
+	_fogNear(n,time){ this._RELATIVE_BLEND(MV3D.blendFogNear,n,time); }
+	_fogFar(n,time){ this._RELATIVE_BLEND(MV3D.blendFogFar,n,time); }
 	light(...a){
 		var time=this._TIME(a[2]);
 		switch(a[0].toLowerCase()){
@@ -3346,9 +3411,9 @@ MV3D.pluginCommands={
 		time=this._TIME(a[1]);
 		this._lightcolor(a[0],time);
 		this._lightintensity(a[0],time);
-	},
-	_lightColor(color,time=1){ MV3D.blendLightColor.setValue(hexNumber(color),time); },
-	_lightIntensity(n,time=1){ this._RELATIVE_BLEND(MV3D.blendLightIntensity,n,time); },
+	}
+	_lightColor(color,time=1){ MV3D.blendLightColor.setValue(hexNumber(color),time); }
+	_lightIntensity(n,time=1){ this._RELATIVE_BLEND(MV3D.blendLightIntensity,n,time); }
 	async lamp(...a){
 		const char = await this.AWAIT_CHAR(this.CHAR);
 		char.setupLamp();
@@ -3363,10 +3428,10 @@ MV3D.pluginCommands={
 		this._lampColor(char,a[0],time);
 		this._lampIntensity(char,a[1],time);
 		this._lampDistance(char,a[2],time);
-	},
-	_lampColor(char,color,time=1){ char.blendLampColor.setValue(hexNumber(color),time); },
-	_lampIntensity(char,n,time=1){ this._RELATIVE_BLEND(char.blendLampIntensity,n,time); },
-	_lampDistance(char,n,time=1){ this._RELATIVE_BLEND(char.blendLampDistance,n,time); },
+	}
+	_lampColor(char,color,time=1){ char.blendLampColor.setValue(hexNumber(color),time); }
+	_lampIntensity(char,n,time=1){ this._RELATIVE_BLEND(char.blendLampIntensity,n,time); }
+	_lampDistance(char,n,time=1){ this._RELATIVE_BLEND(char.blendLampDistance,n,time); }
 	async flashlight(...a){
 		const char = await this.AWAIT_CHAR(this.CHAR);
 		char.setupFlashlight();
@@ -3385,24 +3450,24 @@ MV3D.pluginCommands={
 		this._flashlightIntensity(char,a[1],time);
 		this._flashlightDistance(char,a[2],time);
 		this._flashlightAngle(char,a[3],time);
-	},
-	_flashlightColor(char,color,time){ char.blendFlashlightColor.setValue(hexNumber(color),time); },
-	_flashlightIntensity(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightIntensity,n,time); },
-	_flashlightDistance(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightDistance,n,time); },
-	_flashlightAngle(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightAngle,n,time); },
-	_flashlightPitch(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightPitch,n,time); },
-	_flashlightYaw(char,yaw,time){ char.flashlightTargetYaw=yaw; },
-	_RELATIVE_BLEND(blender,n,time){ blender.setValue(relativeNumber(blender.targetValue(),n),Number(time)); },
+	}
+	_flashlightColor(char,color,time){ char.blendFlashlightColor.setValue(hexNumber(color),time); }
+	_flashlightIntensity(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightIntensity,n,time); }
+	_flashlightDistance(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightDistance,n,time); }
+	_flashlightAngle(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightAngle,n,time); }
+	_flashlightPitch(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightPitch,n,time); }
+	_flashlightYaw(char,yaw,time){ char.flashlightTargetYaw=yaw; }
+	_RELATIVE_BLEND(blender,n,time){ blender.setValue(relativeNumber(blender.targetValue(),n),Number(time)); }
 	_TIME(time){
 		if(typeof time==='number'){ return time; }
 		time=Number(time);
 		if(Number.isNaN(time)){ return 1; }
 		return time;
-	},
+	}
 	ERROR_CHAR(){
 		console.warn(`MV3D: Plugin command \`${this.FULL_COMMAND}\` failed because target character was invalid.`);
 		//console.log(this.CHAR);
-	},
+	}
 	async AWAIT_CHAR(char){
 		if(!char){ return this.ERROR_CHAR(); }
 		let w=0;
@@ -3411,8 +3476,45 @@ MV3D.pluginCommands={
 			if(++w>10){ return this.ERROR_CHAR(); }
 		}
 		return char.mv3d_sprite;
-	},
+	}
+	TARGET_CHAR(target){
+		return targetChar(target,$gameMap.event(this.INTERPRETER._eventId),this.CHAR);
+	}
 };
+
+function targetChar(target,self=null,dfault=null){
+	if(!target){ return dfault; }
+	let m=target.toLowerCase().match(/[a-z]+/);
+	const mode=m?m[0]:'e';
+	m=target.match(/\d+/);
+	const id=m?Number(m[0]):0;
+	switch(mode[0]){
+		case 's': return self;
+		case 'p': return $gamePlayer;
+		case 'e':
+			if(!id){ return self; }
+			return $gameMap.event(id);
+		case 'v':
+			return $gameMap.vehicle(id);
+		case 'f':
+			return $gamePlayer.followers()._data[id];
+	}
+	return char;
+}
+function getTargetString(char){
+	if( char instanceof Game_Player){
+		return `@p`;
+	}
+	if( char instanceof Game_Event ){
+		return `@e${char._eventId}`;
+	}
+	if( char instanceof Game_Follower){
+		return `@f${$gamePlayer._followers._data.indexOf(char)}`;
+	}
+	if( char instanceof Game_Vehicle){
+		return `@v${$gameMap._vehicles.indexOf(char)}`;
+	}
+}
 
 function hexNumber(n){
 	n=String(n);
@@ -3424,7 +3526,8 @@ function hexNumber(n){
 
 function relativeNumber(current,n){
 		if(n===''){ return +current; }
-		const relative = /^[+-]/.test(n);
+		const relative = /^[+]/.test(n);
+		if(relative){n=n.substr(1);}
 		n=Number(n);
 		if(Number.isNaN(n)){ return +current; }
 		if(relative){
@@ -3621,35 +3724,38 @@ Spriteset_Map.prototype.createTilemap=function(){
 const _performTransfer=Game_Player.prototype.performTransfer;
 Game_Player.prototype.performTransfer = function() {
 	const newmap = this._newMapId !== $gameMap.mapId();
-	const needsReload = newmap || this._needsMapReload;
+	//const needsReload = newmap || this._needsMapReload;
 	_performTransfer.apply(this,arguments);
 	MV3D.loadMapSettings( newmap );
-	if(needsReload){ MV3D.clearMap(); }
-	if(MV3D.blendCameraDist.targetValue()<=0){
+	if(newmap){
+		MV3D.resetCameraTarget();
+	}
+	if( MV3D.is1stPerson() ){
 		MV3D.blendCameraYaw.setValue(MV3D.dirToYaw($gamePlayer.direction()),0);
 	}
-	MV3D.updateCamera(true);
+	//MV3D.updateCamera(true);
 	MV3D.updateMap();
-	MV3D.createCharacters();
-	//MV3D.reloadMap();
-	MV3D.updateCamera();
 };
-/*
+
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
+	const newmap = this._newMapId !== $gameMap.mapId();
+
 	_onMapLoaded.apply(this,arguments);
-	MV3D.loadMapSettings();
-	//MV3D.reloadMap();
+	MV3D.loadMapSettings( false );
+	MV3D.rememberCameraTarget();
+
+	MV3D.clearMap();
 	MV3D.updateMap();
 	MV3D.createCharacters();
-	MV3D.updateCamera();
-	//MV3D.setupInput();
+	MV3D.updateCamera(true);
 };
-*/
+
 _title_start=Scene_Title.prototype.start;
 Scene_Title.prototype.start = function() {
 	_title_start.apply(this,arguments);
 	MV3D.clearMap();
+	MV3D.clearCameraTarget();
 };
 
 _sprite_char_setchar = Sprite_Character.prototype.setCharacter;
