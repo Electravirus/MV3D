@@ -1,7 +1,7 @@
 /*:
 @plugindesc 3D rendering for RPG Maker MV with three.js
 @author Dread/Nyanak
-@version 0.2
+@version 0.2.1
 
 @help
 
@@ -234,6 +234,12 @@ Prefix the yaw angle with + to set yaw relative to event's facing.
 	lightHeight(n)
 
 Sets the height of the light sources on the event.
+
+---
+
+	lightOffset(x,y)
+
+Offsets the position of the event's light sources.
 
 ---
 
@@ -1274,6 +1280,7 @@ window.MV3D={
 		flashlightpitch(conf,deg='90'){ conf.flashlightPitch=Number(deg); },
 		flashlightyaw(conf,deg='+0'){ conf.flashlightYaw=deg; },
 		lightheight(conf,n=1){ conf.lightHeight = Number(n); },
+		lightoffset(conf,x=0,y=0){ conf.lightOffset = {x:+x,y:+y}; },
 		alphatest(conf,n=1){ conf.alphaTest = Number(n); }
 	},
 	mapConfigurationFunctions:{
@@ -2667,7 +2674,7 @@ class Character extends Sprite{
 			const flashlightConfig = this.getConfig('flashlight');
 			this.blendFlashlightColor.setValue(flashlightConfig.color,0.5);
 			this.blendFlashlightIntensity.setValue(flashlightConfig.intensity,0.5);
-			this.blendFlashlightDistance.setValue(flashlightConfig.intensity,0.5);
+			this.blendFlashlightDistance.setValue(flashlightConfig.distance,0.5);
 			this.blendFlashlightAngle.setValue(flashlightConfig.angle,0.5);
 			this.blendFlashlightPitch.setValue(this.getConfig('flashlightPitch',90),0.25);
 			this.flashlightTargetYaw=this.getConfig('flashlightYaw','+0');
@@ -2923,18 +2930,24 @@ class Character extends Sprite{
 
 		const billboardOffset = new THREE.Vector2(0,-1).rotateAround(v2origin,degtorad(MV3D.blendCameraYaw.currentValue())).multiplyScalar(0.45);
 		const facingOffset = new THREE.Vector2(0,1).rotateAround(v2origin,degtorad(MV3D.dirToYaw(this.char.direction()))).multiplyScalar(0.45);
+		const lightOffset = this.getConfig('lightOffset',null);
+		this.lampOrigin.position.setScalar(0);
+		this.flashlightOrigin.position.setScalar(0);
 		if(this.shape===MV3D.configurationShapes.SPRITE){
 			this.sprite.position.x+=billboardOffset.x;
 			this.sprite.position.y+=billboardOffset.y;
 			this.lampOrigin.position.x=billboardOffset.x;
 			this.lampOrigin.position.y=billboardOffset.y;
-		}else{
+		}else if(!lightOffset){
 			this.lampOrigin.position.x=billboardOffset.x/2;
 			this.lampOrigin.position.y=billboardOffset.y/2;
 		}
 		//this.flashlightOrigin.position.x=facingOffset.x;
 		this.flashlightOrigin.position.y=facingOffset.y;
-
+		if(lightOffset){
+			this.lampOrigin.position.x+=lightOffset.x;
+			this.lampOrigin.position.y-=lightOffset.y;
+		}
 
 		//this.position.z=Math.abs(Math.sin(Date.now()/1000));
 		const tilemap = getTilemapSync();
@@ -3729,6 +3742,7 @@ Game_Player.prototype.performTransfer = function() {
 	MV3D.loadMapSettings( newmap );
 	if(newmap){
 		MV3D.resetCameraTarget();
+		MV3D.clearMap();
 	}
 	if( MV3D.is1stPerson() ){
 		MV3D.blendCameraYaw.setValue(MV3D.dirToYaw($gamePlayer.direction()),0);
@@ -3739,13 +3753,11 @@ Game_Player.prototype.performTransfer = function() {
 
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
-	const newmap = this._newMapId !== $gameMap.mapId();
-
 	_onMapLoaded.apply(this,arguments);
 	MV3D.loadMapSettings( false );
 	MV3D.rememberCameraTarget();
 
-	MV3D.clearMap();
+	//MV3D.clearMap();
 	MV3D.updateMap();
 	MV3D.createCharacters();
 	MV3D.updateCamera(true);

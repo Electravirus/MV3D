@@ -235,6 +235,12 @@ Sets the height of the light sources on the event.
 
 ---
 
+	lightOffset(x,y)
+
+Offsets the position of the event's light sources.
+
+---
+
 As an example, to make a door event render on the edge of a building's wall,
 you might do something like this:
 
