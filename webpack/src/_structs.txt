@@ -1,0 +1,130 @@
+/*~struct~RegionHeight:
+@param regionId
+@text Region Id
+@type Number
+@min 1 @max 255
+@default 1
+
+@param height
+@text Height
+@type Number
+@min -9999 @max 9999
+@decimals 1
+@default 2.0
+*/
+
+/*~struct~TTagHeight:
+@param terrainTag
+@text Terrain Tag
+@type Number
+@min 1 @max 7
+@default 1
+
+@param height
+@text Height
+@type Number
+@min -9999 @max 9999
+@decimals 1
+@default 2.0
+
+@param topOffsetX
+@text Top Offset X
+@desc use the tile left or right of this as top texture
+@type Number
+@min -9999 @max 9999
+@default 0
+
+@param topOffsetY
+@text Top Offset Y
+@desc use the tile above or below this as top texture
+@type Number
+@min -9999 @max 9999
+@default 0
+
+@param sideOffsetX
+@text Side Offset X
+@desc use the tile left or right of this as side texture
+@type Number
+@min -9999 @max 9999
+@default 0
+
+@param sideOffsetY
+@text Side Offset Y
+@desc use the tile above or below this as side texture
+@type Number
+@min -9999 @max 9999
+@default 0
+
+@param shape
+@text Tile Shape
+@type combo
+@type combo
+@option FLAT
+@option FENCE
+@option CROSS
+@option XCROSS
+@default FLAT
+*/
+
+/*~struct~BoatStruct:
+@param scale
+@text Scale
+@type Number
+@decimals 1
+@default 1
+
+@param zoff
+@text Z Offset
+@type Number
+@min -9999 @max 9999
+@decimals 2
+@default 0.0
+
+@param big
+@text Big
+@desc If true, vehicle requires a 3x3 space to move through. good for vehicles with large scales.
+@type Boolean
+@default false
+
+*/
+
+/*~struct~AirshipStruct:
+@param scale
+@text Scale
+@type Number
+@decimals 1
+@default 1
+
+@param height
+@text Height
+@type Number
+@decimals 1
+@default 2.0
+
+@param shadowScale
+@text Shadow Scale
+@desc The default size of character shadows.
+@type Number
+@decimals 1
+@default 1.0
+
+@param shadowDist
+@text Shadow Distance
+@desc How far above the ground before Airship's shadow fades completely. 
+@type Number
+@decimals 1
+@default 6.0
+
+@param big
+@text Big
+@desc If true, vehicle requires a 3x3 space to move through. good for vehicles with large scales.
+@type Boolean
+@default false
+
+@param bushLanding
+@text Land on Bush Tiles
+@desc Whether the airship can land on bush tiles.
+@type Boolean
+@default false
+
+*/

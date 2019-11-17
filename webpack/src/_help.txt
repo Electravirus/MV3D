@@ -1,7 +1,3 @@
- MV3D
-======
-
-A 3D rendering plugin for RPG Maker MV.
 
 If you are making a game with this plugin, please consider supporting my patreon.
 https://www.patreon.com/cutievirus
