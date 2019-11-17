@@ -1,3 +1,3 @@
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
 @author Dread/Nyanak
-@version 0.2.1
+@version 0.3
