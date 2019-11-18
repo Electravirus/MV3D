@@ -59,6 +59,13 @@ export const falseString=s=>{
 }
 falseString.values=['OFF','FALSE','UNDEFINED','NULL','DISABLE','DISABLED'];
 
+let lastSnooze=0;
+export const snooze=async()=>{
+	if(performance.now()-lastSnooze>16){
+		await sleep(0);
+		lastSnooze=performance.now();
+	}
+}
 export const sleep=(ms=0)=>new Promise(resolve=>setTimeout(resolve,ms));
 export const degtorad=deg=>deg*Math.PI/180;
 export const radtodeg=rad=>rad*180/Math.PI;

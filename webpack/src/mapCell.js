@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { TransformNode, Mesh, MeshBuilder, Vector3, Vector2, FRONTSIDE, BACKSIDE, WORLDSPACE, LOCALSPACE, DOUBLESIDE, Plane } from "./mod_babylon.js";
-import { tileSize, XAxis, YAxis, tileWidth, tileHeight } from './util.js';
+import { tileSize, XAxis, YAxis, tileWidth, tileHeight, sleep, snooze } from './util.js';
 
 const SOURCEPLANE_GROUND = new Plane(0, 1, -Math.pow(0.1,100), 0);
 const SOURCEPLANE_WALL = new Plane(0,0,-1,0);
@@ -16,14 +16,34 @@ export class MapCell extends TransformNode{
 		this.x=this.ox; this.y=this.oy;
 		this.key=key;
 
-		this.load();
+		//this.load();
 	}
 	update(){
 		const loopPos = mv3d.loopCoords((this.cx+0.5)*mv3d.CELL_SIZE,(this.cy+0.5)*mv3d.CELL_SIZE);
 		this.x=loopPos.x-mv3d.CELL_SIZE/2;
 		this.y=loopPos.y-mv3d.CELL_SIZE/2;
 	}
-	createMesh(width=1,height=1,side=FRONTSIDE, isWall){
+	getCachedMesh(width=1,height=1,side=FRONTSIDE,isWall=false){
+		const key = `${width},${height}|${side}|${+isWall}`;
+		let mesh;
+		if(key in MapCell.meshCache){
+			mesh=MapCell.meshCache[key].clone();
+		}else{
+			mesh = MeshBuilder.CreatePlane('tile',{
+				sideOrientation: side,
+				width:width, height:height,
+				//subdivisions:1,
+				sourcePlane: isWall ? SOURCEPLANE_WALL : SOURCEPLANE_GROUND,
+			},mv3d.scene);
+			MapCell.meshCache[key]=mesh;
+			mv3d.scene.removeMesh(mesh);
+			mesh=mesh.clone();
+		}
+		this.submeshes.push(mesh);
+		mesh.parent=this;
+		return mesh;
+	}
+	createMesh(width=1,height=1,side=FRONTSIDE, isWall=false){
 		const mesh = MeshBuilder.CreatePlane('tile',{
 			sideOrientation: side,
 			width:width, height:height,
@@ -31,9 +51,10 @@ export class MapCell extends TransformNode{
 			sourcePlane: isWall ? SOURCEPLANE_WALL : SOURCEPLANE_GROUND,
 		},mv3d.scene);
 		this.submeshes.push(mesh);
+		mesh.parent=this;
 		return mesh;
 	}
-	load(){
+	async load(){
 		const shapes = mv3d.configurationShapes;
 		this.submeshes=[];
 		// load all tiles in mesh
@@ -74,9 +95,12 @@ export class MapCell extends TransformNode{
 					this.loadCross(tileConf,x,y,z,l,wallHeight);
 				}
 			}
+			await snooze();
+			if(!mv3d.mapLoaded){ this.earlyExit(); return; }
 		}
 		// merge meshes
 		if(this.submeshes.length){
+			this.submeshes.forEach(mesh=>mesh.parent=null);
 			this.mesh=Mesh.MergeMeshes(this.submeshes,true,undefined,undefined,false,true);
 		}else{
 			console.warn("MV3D: Created empty map cell!");
@@ -84,6 +108,16 @@ export class MapCell extends TransformNode{
 		}
 		this.mesh.parent=this;
 		delete this.submeshes;
+	}
+	earlyExit(){
+		console.warn(`MV3D: Map cleared before cell[${this.cx},${this.cy}] finished loading.`)
+		if(this.submeshes){
+			for (const mesh of this.submeshes){
+				mesh.dispose();
+			}
+			this.submeshes.length=0;
+		}
+
 	}
 	loadTile(tileConf,x,y,z,l,ceiling=false){
 		const tileId = ceiling?tileConf.bottomId:tileConf.topId;
@@ -97,7 +131,7 @@ export class MapCell extends TransformNode{
 			rects = mv3d.getTileRects(tileId);
 		}
 		for (const rect of rects){
-			const mesh = this.createMesh(1-isAutotile/2,1-isAutotile/2,ceiling?BACKSIDE:FRONTSIDE);
+			const mesh = this.getCachedMesh(1-isAutotile/2,1-isAutotile/2,ceiling?BACKSIDE:FRONTSIDE);
 			mesh.material = mv3d.getCachedTileMaterial(setN,rect.x,rect.y,rect.width,rect.height, mv3d.getMaterialOptions(tileId));
 			mesh.x = x + (rect.ox|0)/tileSize() - 0.25*isAutotile;
 			mesh.y = y + (rect.oy|0)/tileSize() - 0.25*isAutotile;
@@ -144,7 +178,7 @@ export class MapCell extends TransformNode{
 			const rot = Math.atan2(np.x, np.y);
 			if(configRect || !Tilemap.isAutotile(tileId)){
 				const rect = configRect ? configRect : mv3d.getTileRects(tileId)[0];
-				const mesh = this.createMesh(1,neededHeight,FRONTSIDE,true);
+				const mesh = this.getCachedMesh(1,neededHeight,FRONTSIDE,true);
 				if(neededHeight<0){ mesh.scaling.y*=-1; }
 				mesh.material = mv3d.getCachedTileMaterial(setN,rect.x,rect.y,rect.width,rect.height, mv3d.getMaterialOptions(tileId));
 				//mesh.rotate(XAxis,-Math.PI/2,WORLDSPACE);
@@ -192,7 +226,7 @@ export class MapCell extends TransformNode{
 						}else{
 							sy=(by+(az===0?0:az===wallParts-1?1.5:1-az%2*0.5))*tileSize();
 						}
-						const mesh = this.createMesh(0.5,partHeight,FRONTSIDE,true);
+						const mesh = this.getCachedMesh(0.5,partHeight,FRONTSIDE,true);
 						//mesh.rotate(XAxis,-Math.PI/2,WORLDSPACE);
 						mesh.rotate(YAxis,-rot,WORLDSPACE);
 						mesh.x=wallPos.x;
@@ -231,7 +265,7 @@ export class MapCell extends TransformNode{
 			if(isAutotile&&!configRect){
 				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId);
 				for (let az=0;az<=1;++az){
-					const mesh = this.createMesh(0.5,wallHeight/2,DOUBLESIDE,true);
+					const mesh = this.getCachedMesh(0.5,wallHeight/2,DOUBLESIDE,true);
 					//mesh.rotate(XAxis,-Math.PI/2,WORLDSPACE);
 					mesh.rotate(YAxis,-rot,WORLDSPACE);
 					mesh.material = mv3d.getCachedTileMaterial(setN,
@@ -246,7 +280,7 @@ export class MapCell extends TransformNode{
 				}
 			}else{
 				const rect = configRect ? configRect : mv3d.getTileRects(tileId)[0];
-				const mesh = this.createMesh(0.5,wallHeight,DOUBLESIDE,true);
+				const mesh = this.getCachedMesh(0.5,wallHeight,DOUBLESIDE,true);
 				//mesh.rotate(XAxis,-Math.PI/2,WORLDSPACE);
 				mesh.rotate(YAxis,-rot,WORLDSPACE);
 				mesh.material = mv3d.getCachedTileMaterial(setN,
@@ -276,7 +310,7 @@ export class MapCell extends TransformNode{
 		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
 		for (let i=0; i<=1; ++i){
 			for (const rect of rects){
-				const mesh = this.createMesh(1-isAutotile/2,partHeight,DOUBLESIDE,true);
+				const mesh = this.getCachedMesh(1-isAutotile/2,partHeight,DOUBLESIDE,true);
 				mesh.x = x;
 				mesh.y = y;
 				mesh.z = z - (rect.oy|0)/tileHeight()*wallHeight - partHeight/2;
@@ -318,3 +352,4 @@ MapCell.neighborPositions = [
 	new Vector2( 0,-1),
 	new Vector2(-1, 0),
 ];
+MapCell.meshCache={};

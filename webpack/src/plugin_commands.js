@@ -97,7 +97,7 @@ mv3d.PluginCommand=class{
 			//case 'intensity': this._lightIntensity(a[1],time); return;
 		}
 		time=this._TIME(a[1]);
-		this._lightcolor(a[0],time);
+		this._lightColor(a[0],time);
 		//this._lightintensity(a[0],time);
 	}
 	_lightColor(color,time=1){ mv3d.blendAmbientColor.setValue(makeColor(color).toNumber(),time); }

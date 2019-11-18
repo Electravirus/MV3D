@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { MapCell } from './mapCell.js';
-import { sleep } from './util.js';
+import { sleep, snooze } from './util.js';
 import { Vector2 } from './mod_babylon.js';
 
 Object.assign(mv3d,{
@@ -67,22 +67,23 @@ Object.assign(mv3d,{
 			if($gameMap.isLoopVertical()){ cy = cy.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
 			cellsToLoad.push(new Vector2(cx,cy));
 		}
-		const cameraCellPos = new Vector2(Math.round(this.cameraStick.x/this.CELL_SIZE),Math.round(this.cameraStick.y/this.CELL_SIZE));
+		const cameraCellPos = new Vector2(Math.round(this.cameraStick.x/this.CELL_SIZE-0.5),Math.round(this.cameraStick.y/this.CELL_SIZE-0.5));
 		cellsToLoad.sort((a,b)=>Vector2.DistanceSquared(a,cameraCellPos)-Vector2.DistanceSquared(b,cameraCellPos));
 		for (const cellpos of cellsToLoad){
 			let {x:cx,y:cy} = cellpos;
-			this.loadMapCell(cx,cy);
-			await sleep(1);
+			await this.loadMapCell(cx,cy);
+			await snooze();
 			if(!this.mapLoaded){ this.mapUpdating=false; return; }
 		}
 		this.mapUpdating=false;
 	},
 
-	loadMapCell(cx,cy){
+	async loadMapCell(cx,cy){
 		const key = [cx,cy].toString();
 		if(key in this.cells){ return; }
 		const cell = new MapCell(cx,cy);
 		this.cells[key]=cell;
+		await cell.load();
 	},
 
 });
