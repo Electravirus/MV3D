@@ -116,7 +116,7 @@ Object.assign(mv3d,{
 		fringe(conf,n){ conf.fringe=Number(n); },
 		float(conf,n){ conf.float=Number(n); },
 		texture(conf,img,x,y){
-			const tileId = mv3d.constructTileId(img,x,y)
+			const tileId = mv3d.constructTileId(img,x,y);
 			conf.sideId = conf.topId = tileId;
 		},
 		top(conf,img,x,y){ conf.topId=mv3d.constructTileId(img,x,y); },

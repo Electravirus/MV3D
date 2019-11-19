@@ -60,13 +60,20 @@ export class MapCell extends TransformNode{
 		// load all tiles in mesh
 		const cellWidth = Math.min(mv3d.CELL_SIZE,$gameMap.width()-this.cx*mv3d.CELL_SIZE);
 		const cellHeight = Math.min(mv3d.CELL_SIZE,$gameMap.height()-this.cy*mv3d.CELL_SIZE);
+		const ceiling = {
+			bottomId: mv3d.getMapConfig('ceiling',0),
+			height:  mv3d.getMapConfig('ceilingHeight',mv3d.CEILING_HEIGHT),
+			cull: false,
+		}
 		for (let y=0; y<cellHeight; ++y)
 		for (let x=0; x<cellWidth; ++x){
+			ceiling.cull=false;
 			let nlnowall = 0; // the number of layers in a row that haven't had walls.
 			const tileData = mv3d.getTileData(this.ox+x,this.oy+y);
 			for (let l=0; l<4; ++l){
+				if(mv3d.isTileEmpty(tileData[l])){ continue; }
 				let z = mv3d.getStackHeight(this.ox+x,this.oy+y,l);
-				const tileConf = mv3d.getTileConfig(tileData[l]);
+				const tileConf = mv3d.getTileTextureOffsets(tileData[l],x,y,l);
 				const shape = tileConf.shape;
 				tileConf.realId = tileData[l];
 				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
@@ -88,6 +95,7 @@ export class MapCell extends TransformNode{
 					}else{
 						++nlnowall;
 					}
+					if(z>=ceiling.height){ ceiling.cull=true; }
 				}else{ nlnowall=0; }
 				if(shape===shapes.FENCE){
 					this.loadFence(tileConf,x,y,z,l,wallHeight);
@@ -95,7 +103,11 @@ export class MapCell extends TransformNode{
 					this.loadCross(tileConf,x,y,z,l,wallHeight);
 				}
 			}
-			await snooze();
+			if(!mv3d.isTileEmpty(ceiling.bottomId) && !ceiling.cull){
+				this.loadTile(ceiling,x,y,ceiling.height,0,true);
+			}
+
+			await sleep();
 			if(!mv3d.mapLoaded){ this.earlyExit(); return; }
 		}
 		// merge meshes
@@ -172,8 +184,10 @@ export class MapCell extends TransformNode{
 				const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,l,!(tileConf.height<0));
 				if(wallHeight>0&&neighborHeight>=z
 				||wallHeight<0&&neighborHeight<=z){ continue; }
+				//neededHeight = Math.min(wallHeight, z-neighborHeight);
 				neededHeight = Math.min(Math.abs(wallHeight), Math.abs(z-neighborHeight))*Math.sign(wallHeight);
 			}
+			const sign = Math.sign(neededHeight);
 			const wallPos = new Vector3( x+np.x/2, y+np.y/2, z );
 			const rot = Math.atan2(np.x, np.y);
 			if(configRect || !Tilemap.isAutotile(tileId)){
@@ -208,6 +222,9 @@ export class MapCell extends TransformNode{
 						if(mv3d.isTableTile(tileConf.realId)){
 							hasLeftEdge = leftHeight!=z;
 							hasRightEdge = rightHeight!=z;
+						}if(wallHeight<0){
+							hasLeftEdge = true;
+							hasRightEdge = true;
 						}else{
 							hasLeftEdge = leftHeight<z-az*partHeight;
 							hasRightEdge = rightHeight<z-az*partHeight;
@@ -226,12 +243,12 @@ export class MapCell extends TransformNode{
 						}else{
 							sy=(by+(az===0?0:az===wallParts-1?1.5:1-az%2*0.5))*tileSize();
 						}
-						const mesh = this.getCachedMesh(0.5,partHeight,FRONTSIDE,true);
+						const mesh = this.getCachedMesh(0.5,partHeight,wallHeight<0?BACKSIDE:FRONTSIDE,true);
 						//mesh.rotate(XAxis,-Math.PI/2,WORLDSPACE);
 						mesh.rotate(YAxis,-rot,WORLDSPACE);
 						mesh.x=wallPos.x;
 						mesh.y=wallPos.y;
-						mesh.z= z - partHeight/2 - partHeight*az + l*mv3d.LAYER_DIST;
+						mesh.z= z - partHeight*sign/2 - partHeight*sign*az + l*mv3d.LAYER_DIST;
 						mesh.translate(XAxis,0.25*ax,LOCALSPACE);
 						mesh.material = mv3d.getCachedTileMaterial(setN,sx,sy,sw,sh, mv3d.getMaterialOptions(tileId));
 					}
@@ -353,3 +370,11 @@ MapCell.neighborPositions = [
 	new Vector2(-1, 0),
 ];
 MapCell.meshCache={};
+
+class MapCellFinalized {
+	
+}
+
+class MapCellBuilder {
+
+}

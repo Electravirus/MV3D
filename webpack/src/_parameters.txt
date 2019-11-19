@@ -178,14 +178,14 @@ there may be z-fighting issues. (default: 0.0100)
 @desc use regions to determine tile height.
 @parent tileconfig
 @type struct<RegionHeight>[]
-@default ["{\"regionId\":\"1\",\"height\":\"1.0\"}","{\"regionId\":\"2\",\"height\":\"2.0\"}","{\"regionId\":\"3\",\"height\":\"3.0\"}","{\"regionId\":\"4\",\"height\":\"4.0\"}","{\"regionId\":\"5\",\"height\":\"5.0\"}","{\"regionId\":\"6\",\"height\":\"6.0\"}","{\"regionId\":\"7\",\"height\":\"7.0\"}"]
+@default ["{\"regionId\":\"1\",\"conf\":\"height(1)\"}","{\"regionId\":\"2\",\"conf\":\"height(2)\"}","{\"regionId\":\"3\",\"conf\":\"height(3)\"}","{\"regionId\":\"4\",\"conf\":\"height(4)\"}","{\"regionId\":\"5\",\"conf\":\"height(5)\"}","{\"regionId\":\"6\",\"conf\":\"height(6)\"}","{\"regionId\":\"7\",\"conf\":\"height(7)\"}"]
 
 @param ttags
 @text Terrain Tags
 @desc use terrain tags to determine tile height.
 @parent tileconfig
 @type struct<TTagHeight>[]
-@default ["{\"terrainTag\":\"1\",\"height\":\"1.0\",\"topOffsetX\":\"0\",\"topOffsetY\":\"0\",\"sideOffsetX\":\"0\",\"sideOffsetY\":\"0\",\"shape\":\"XCROSS\"}","{\"terrainTag\":\"2\",\"height\":\"1.0\",\"topOffsetX\":\"0\",\"topOffsetY\":\"0\",\"sideOffsetX\":\"0\",\"sideOffsetY\":\"0\",\"shape\":\"FENCE\"}"]
+@default ["{\"terrainTag\":\"1\",\"conf\":\"height(1),shape(xcross)\"}","{\"terrainTag\":\"2\",\"conf\":\"height(1),shape(fence)\"}"]
 
 @param characters
 @text Characters

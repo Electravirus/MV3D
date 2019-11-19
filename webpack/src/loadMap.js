@@ -65,14 +65,18 @@ Object.assign(mv3d,{
 			let cx=ix, cy=iy;
 			if($gameMap.isLoopHorizontal()){ cx = cx.mod(Math.ceil($gameMap.width()/mv3d.CELL_SIZE)); }
 			if($gameMap.isLoopVertical()){ cy = cy.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
-			cellsToLoad.push(new Vector2(cx,cy));
+			const key = [cx,cy].toString();
+			if(!(key in this.cells)){
+				cellsToLoad.push(new Vector2(cx,cy));
+			}
 		}
 		const cameraCellPos = new Vector2(Math.round(this.cameraStick.x/this.CELL_SIZE-0.5),Math.round(this.cameraStick.y/this.CELL_SIZE-0.5));
 		cellsToLoad.sort((a,b)=>Vector2.DistanceSquared(a,cameraCellPos)-Vector2.DistanceSquared(b,cameraCellPos));
+		cellsToLoad.length=Math.min(1,cellsToLoad.length);
 		for (const cellpos of cellsToLoad){
 			let {x:cx,y:cy} = cellpos;
 			await this.loadMapCell(cx,cy);
-			await snooze();
+			await sleep();
 			if(!this.mapLoaded){ this.mapUpdating=false; return; }
 		}
 		this.mapUpdating=false;

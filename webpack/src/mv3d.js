@@ -91,6 +91,8 @@ const mv3d = {
 		for (const key in this.cells){
 			this.cells[key].update();
 		}
+
+		this.updateSerializer();
 	},
 
 	loadData(key,dfault){

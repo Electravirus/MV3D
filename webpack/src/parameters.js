@@ -57,18 +57,16 @@ Object.assign(mv3d,{
 	setupParameters(){
 		for (let entry of JSON.parse(parameters.regions)){
 			entry=JSON.parse(entry);
-			this.REGION_DATA[entry.regionId]={
-				height: Number(entry.height),
-			};
+			const regionData = this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions)
+			this.REGION_DATA[entry.regionId]=regionData;
+			if ('height' in regionData){
+				regionData.regionHeight = regionData.height;
+				delete regionData.height;
+			}
 		}
 		for (let entry of JSON.parse(parameters.ttags)){
 			entry=JSON.parse(entry);
-			this.TTAG_DATA[entry.terrainTag]={
-				height: Number(entry.height),
-				offsetTop: new Vector2(Number(entry.topOffsetX),Number(entry.topOffsetY)),
-				offsetSide: new Vector2(Number(entry.sideOffsetX),Number(entry.sideOffsetY)),
-				shape: this.configurationShapes[entry.shape.toUpperCase()],
-			};
+			this.TTAG_DATA[entry.terrainTag]=this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions);
 		}
 
 		this.BOAT_SETTINGS.scale=Number(this.BOAT_SETTINGS.scale);

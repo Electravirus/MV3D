@@ -20,6 +20,8 @@ export const {
 	StandardMaterial,
 	Mesh,
 	MeshBuilder,
+	AssetsManager,
+	SceneSerializer,
 } = BABYLON;
 
 export const {

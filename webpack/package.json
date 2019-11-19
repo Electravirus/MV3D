@@ -8,7 +8,7 @@
     "build": "webpack"
   },
   "author": "Dread/Nyanak",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "devDependencies": {
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"

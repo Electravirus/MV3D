@@ -14,7 +14,7 @@ ${fs.readFileSync("src/_structs.txt")}
 `;
 
 module.exports = {
-	target:'web',
+	target:'node-webkit',
 	entry:'./src/index.js',
 	output:{
 		filename:'mv3d-babylon.js',

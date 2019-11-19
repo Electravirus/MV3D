@@ -357,13 +357,6 @@ class Character extends Sprite{
 	}
 
 	updateFlashlightDirection(){
-		/*
-		const yaw = degtorad(this.blendFlashlightYaw.currentValue());
-		const pitch = degtorad(this.blendFlashlightPitch.currentValue());
-		this.flashlight.direction.x=Math.sin(yaw)*Math.sin(pitch);
-		this.flashlight.direction.z=-Math.cos(yaw)*Math.sin(pitch);
-		this.flashlight.direction.y=-Math.cos(pitch);
-		*/
 		this.flashlightOrigin.yaw=this.blendFlashlightYaw.currentValue();
 		this.flashlightOrigin.pitch=-this.blendFlashlightPitch.currentValue();
 		this.flashlightOrigin.position.set(0,0,0);
@@ -397,18 +390,6 @@ class Character extends Sprite{
 				this.lamp.range=this.blendLampDistance.currentValue();
 			}
 		}
-		/*
-		if(this.flashlight&&this.lamp){
-			const flashlightComponents = this.blendFlashlightColor.currentComponents().map(c=>c*this.flashlight.intensity/4);
-			const lampComponents = this.blendLampColor.currentComponents().map(c=>c*this.lamp.intensity/4);
-			this.material.emissiveColor.set(...flashlightComponents.map((c,i)=>(c+lampComponents[i])/2));
-
-		}else if(this.flashlight){
-			this.material.emissiveColor.set(...this.blendFlashlightColor.currentComponents().map(c=>c*this.flashlight.intensity/4));
-		}else if(this.lamp){
-			this.material.emissiveColor.set(...this.blendLampColor.currentComponents().map(c=>c*this.lamp.intensity/4));
-		}
-		*/
 	}
 
 	makeBlender(key,dfault,clazz=Blender){
@@ -454,6 +435,7 @@ class Character extends Sprite{
 			//	backfaceCulling=false;
 			//}
 			break;
+		case shapes.XCROSS:
 		case shapes.CROSS:
 			geometry = Sprite.Meshes.CROSS;
 			//backfaceCulling=false;
@@ -487,26 +469,54 @@ class Character extends Sprite{
 		}
 		if(!this._isEnabled){ return; }
 
+		if(this.material){
+			this.updateNormal();
+		}else{
+			this.updateEmpty();
+		}
+		//this.mesh.renderOutline=true;
+		//this.mesh.outlineWidth=1;
+
+	}
+
+	updateNormal(){
 		if(this.isImageChanged()){
 			this.updateCharacter();
 		}
 		if(this.patternChanged()){
 			this.updateFrame();
 		}
-
-		if(this.shape===mv3d.configurationShapes.SPRITE){
+		const shapes = mv3d.configurationShapes;
+		if(this.shape===shapes.SPRITE){
 			this.mesh.pitch = mv3d.blendCameraPitch.currentValue()-90;
 			this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
-		}else if(this.shape===mv3d.configurationShapes.TREE){
+		}else if(this.shape===shapes.TREE){
 			this.mesh.pitch=0;
 			this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
 		}else{
 			this.mesh.pitch=0;
 			this.mesh.yaw=this.getConfig('rot',0);
+			if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
 		}
-		//this.mesh.renderOutline=true;
-		//this.mesh.outlineWidth=1;
 
+		this.updateBush();
+
+		this.tileHeight = mv3d.getWalkHeight(this.char._realX,this.char._realY);
+
+		this.updatePosition();
+		this.updateElevation();
+		if(this.shadow){ this.updateShadow(); }
+		this.updateLights();
+	}
+
+	updateEmpty(){
+		this.tileHeight = mv3d.getWalkHeight(this.char._realX,this.char._realY);
+		this.updatePosition();
+		this.updateElevation();
+		this.updateLights();
+	}
+
+	updateBush(){
 		this.bush = Boolean(this.char.bushDepth());
 		if(this.bush && this.hasBush()){
 			if(!this.material.opacityTexture){
@@ -519,14 +529,6 @@ class Character extends Sprite{
 				this.material.useAlphaFromDiffuseTexture=false;
 			}
 		}
-
-		this.tileHeight = mv3d.getWalkHeight(this.char._realX,this.char._realY);
-
-		this.updatePosition();
-		this.updateElevation();
-		if(this.shadow){ this.updateShadow(); }
-		this.updateLights();
-
 	}
 
 	updatePosition(){

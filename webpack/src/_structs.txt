@@ -5,12 +5,11 @@
 @min 1 @max 255
 @default 1
 
-@param height
-@text Height
-@type Number
-@min -9999 @max 9999
-@decimals 1
-@default 2.0
+@param conf
+@text Configuration Functions
+@desc See tileset configuration for list of functions
+@type Text
+@default height(2)
 */
 
 /*~struct~TTagHeight:
@@ -20,50 +19,11 @@
 @min 1 @max 7
 @default 1
 
-@param height
-@text Height
-@type Number
-@min -9999 @max 9999
-@decimals 1
-@default 2.0
-
-@param topOffsetX
-@text Top Offset X
-@desc use the tile left or right of this as top texture
-@type Number
-@min -9999 @max 9999
-@default 0
-
-@param topOffsetY
-@text Top Offset Y
-@desc use the tile above or below this as top texture
-@type Number
-@min -9999 @max 9999
-@default 0
-
-@param sideOffsetX
-@text Side Offset X
-@desc use the tile left or right of this as side texture
-@type Number
-@min -9999 @max 9999
-@default 0
-
-@param sideOffsetY
-@text Side Offset Y
-@desc use the tile above or below this as side texture
-@type Number
-@min -9999 @max 9999
-@default 0
-
-@param shape
-@text Tile Shape
-@type combo
-@type combo
-@option FLAT
-@option FENCE
-@option CROSS
-@option XCROSS
-@default FLAT
+@param conf
+@text Configuration Functions
+@desc See tileset configuration for list of functions
+@type Text
+@default height(0),shape(flat)
 */
 
 /*~struct~BoatStruct:

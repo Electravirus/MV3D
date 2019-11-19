@@ -12,3 +12,4 @@ import './assets.js';
 import './characters.js';
 import './movement.js';
 import './parallax.js';
+import './serializer.js';
