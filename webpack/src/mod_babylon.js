@@ -19,6 +19,7 @@ export const {
 	Texture,
 	StandardMaterial,
 	Mesh,
+	VertexData,
 	MeshBuilder,
 	AssetsManager,
 	SceneSerializer,

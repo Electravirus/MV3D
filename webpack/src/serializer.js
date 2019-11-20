@@ -8,7 +8,7 @@ Scene_Boot.prototype.start=function(){
 }
 const isPlaytest = Utils.isOptionValid('test');
 
-DataManager._databaseFiles.push({name:'mv3d_data',src:'../MV3D/mv3d_data.json'});
+DataManager._databaseFiles.push({name:'mv3d_data',src:`../${mv3d.MV3D_FOLDER}/mv3d_data.json`});
 let _mv3d_data;
 const mv3d_data_handler={
 	get(target,key){
@@ -37,7 +37,7 @@ Object.assign(mv3d,{
 		if(_mv3d_data._dirty&&!writing_mv3d_data){
 			writing_mv3d_data=true;
 			_mv3d_data._dirty=false;
-			await saveFile('MV3D/mv3d_data.json',JSON.stringify(_mv3d_data));
+			await saveFile(`${mv3d.MV3D_FOLDER}/mv3d_data.json`,JSON.stringify(_mv3d_data));
 			writing_mv3d_data=false;
 		}
 	},
@@ -46,14 +46,14 @@ Object.assign(mv3d,{
 		const assetsManager = new AssetsManager(this.scene);
 		for (const vector of vectors){
 			const key = [vector2.x,vector2.y].toString();
-			assetsManager.addMeshTask(key,'','./',`MV3D/finalizedMaps/${$gameMap.mapId().padZero(3)}/${key}.babylon`);
+			assetsManager.addMeshTask(key,'','./',`${mv3d.MV3D_FOLDER}/finalizedMaps/${$gameMap.mapId().padZero(3)}/${key}.babylon`);
 		}
 		assetsManager.load();
 	},
 
 	async finalizeCell(cell){
 		const meshdata = SceneSerializer.SerializeMesh(cell.mesh);
-		const fileName = `MV3D/finalizedMaps/${$gameMap.mapId().padZero(3)}/${[cell.cx,cell.cy]}.babylon`;
+		const fileName = `${mv3d.MV3D_FOLDER}/finalizedMaps/${$gameMap.mapId().padZero(3)}/${[cell.cx,cell.cy]}.babylon`;
 		await saveFile(fileName,JSON.stringify(meshdata));
 	},
 

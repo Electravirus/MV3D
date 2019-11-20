@@ -24,7 +24,7 @@ Object.assign(mv3d,{
 		return $gameMap.tilesetFlags()[tileId]>>12;
 	},
 
-	getMaterialOptions(tileId){
+	getMaterialOptions(tileId,x,y,l){
 		const options={};
 		/*
 		const ttag = this.getTerrainTag(tileId);
@@ -32,13 +32,23 @@ Object.assign(mv3d,{
 			const tagdata = this.TTAG_DATA[ttag];
 		}
 		*/
-		const conf = this.tilesetConfigurations[this.normalizeAutotileId(tileId)];
+		const conf = this.getTileConfig(tileId,x,y,l);
 		if(conf){
 			if ('alpha' in conf){ options.alpha=conf.alpha; }
 			if ('transparent' in conf){ options.transparent=conf.transparent; }
 			if ('glow' in conf){ options.glow=conf.glow; }
 		}
 		return options;
+	},
+
+	getTileAnimationData(tileId){
+		const animData={animX:0,animY:0};
+		if(Tilemap.isTileA1(tileId)){
+			const kind = Tilemap.getAutotileKind(tileId);
+			animData.animX=kind<=1?2:kind<=3?0:kind%2?0:2;
+			animData.animY=kind<=3?0:kind%2?1:0; 
+		}
+		return animData;
 	},
 
 	getTileConfig(tileId,x,y,l){

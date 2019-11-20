@@ -8,6 +8,43 @@ Object.assign(mv3d,{
 	textureCache:{},
 	materialCache:{},
 
+	getCachedTilesetTexture(setN,animX=0,animY=0){
+		const key = `TS:${setN}|${animX},${animY}`;
+		if(key in this.textureCache){
+			return this.textureCache[key];
+		}
+		const tsName = $gameMap.tileset().tilesetNames[setN];
+		if(!tsName){
+			return this.getErrorTexture();
+		}
+		const textureSrc=`img/tilesets/${tsName}.png`;
+		const texture = new Texture(textureSrc,this.scene);
+		texture.hasAlpha=true;
+		texture.onLoadObservable.addOnce(()=>{
+			if(this.textureCache[key]!==texture){ return; }
+			texture.updateSamplingMode(1);
+			if(animX||animY){
+				const { width, height } = texture.getBaseSize();
+				texture.frameData={x:0,y:0,w:width,h:height};
+				texture.animX = animX;
+				texture.animY = animY;
+				this.animatedTextures.push(texture);
+			}
+		});
+		this.textureCache[key]=texture;
+		return texture;
+	},
+	getCachedTilesetTextureAsync(setN,animX=0,animY=0){return new Promise((resolve,reject)=>{
+		const texture = this.getCachedTileTexture(setN,animX,animY);
+		//if(texture.isError){ return void reject(); }
+		if(texture.isReady()){
+			resolve(texture);
+		}else{
+			texture.onLoadObservable.addOnce(()=>{ resolve(texture); });
+		}
+	})},
+
+	/** @deprecated */
 	getCachedTileTexture(setN,x,y,w,h){
 		const key = `${setN}|${x},${y}|${w},${h}`;
 		if(key in this.textureCache){
@@ -44,17 +81,57 @@ Object.assign(mv3d,{
 
 	getErrorTexture(){
 		if(this.errorTexture){ return this.errorTexture; }
-		this.errorTexture = new Texture("MV3D/errorTexture.png",this.scene);
+		this.errorTexture = new Texture(`${mv3d.MV3D_FOLDER}/errorTexture.png`,this.scene);
+		this.errorTexture.isError=true;
 		return this.errorTexture;
 	},
 
 	getBushAlphaTexture(){
 		if(this.bushAlphaTexture){ return this.bushAlphaTexture; }
-		this.bushAlphaTexture = new Texture("MV3D/bushAlpha.png",this.scene);
+		this.bushAlphaTexture = new Texture(`${mv3d.MV3D_FOLDER}/bushAlpha.png`,this.scene);
 		this.bushAlphaTexture.getAlphaFromRGB=true;
 		return this.bushAlphaTexture;
 	},
 
+	getCachedTilesetMaterial(setN,animX=0,animY=0,options={}){
+		this.processMaterialOptions(options);
+		const key = `TS:${setN}|${animX},${animY}|${this.getExtraBit(options)}`;
+		if(key in this.materialCache){
+			return this.materialCache[key];
+		}
+		const texture = this.getCachedTilesetTexture(setN,animX,animY);
+		const material = new StandardMaterial(key, this.scene);
+		material.diffuseTexture=texture;
+		if(options.transparent){
+			material.opacityTexture=texture;
+			material.alpha=options.alpha;
+		}
+		material.alphaCutOff = mv3d.ALPHA_CUTOFF;
+		material.ambientColor.set(1,1,1);
+		material.emissiveColor.set(options.glow,options.glow,options.glow);
+		material.specularColor.set(0,0,0);
+		this.materialCache[key]=material;
+		return material;
+	},
+
+	getCachedTilesetMaterialAsync(setN,animX=0,animY=0,options={}){return new Promise((resolve,reject)=>{
+		const material = this.getCachedTilesetMaterial(setN,animX,animY,options);
+		const texture = material.diffuseTexture;
+		if(texture.isReady()){
+			resolve(material);
+		}else{
+			texture.onLoadObservable.addOnce(()=>{ resolve(material); });
+		}
+	})},
+
+	async getCachedTilesetMaterialForTile(tileId,x,y,l){
+		const setN = mv3d.getSetNumber(tileId);
+		const options = mv3d.getMaterialOptions(tileId,x,y,l);
+		const animData = mv3d.getTileAnimationData(tileId);
+		return await mv3d.getCachedTilesetMaterialAsync(setN,animData.animX,animData.animY,options);
+	},
+
+	/** @deprecated */
 	getCachedTileMaterial(setN,x,y,w,h,options={}){
 		this.processMaterialOptions(options);
 		const key = `${setN}|${x},${y}|${w},${h}|${this.getExtraBit(options)}`;

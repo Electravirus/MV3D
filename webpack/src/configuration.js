@@ -192,7 +192,9 @@ Object.assign(mv3d,{
 		flashlightyaw(conf,deg='+0'){ conf.flashlightYaw=deg; },
 		lightheight(conf,n=1){ conf.lightHeight = Number(n); },
 		lightoffset(conf,x=0,y=0){ conf.lightOffset = {x:+x,y:+y}; },
-		alphatest(conf,n=1){ conf.alphaTest = Number(n); }
+		alpha(conf,n){
+			conf.alpha=Number(n);
+		},
 	},
 	mapConfigurationFunctions:{
 		light(conf,color){

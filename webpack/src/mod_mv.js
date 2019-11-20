@@ -60,7 +60,15 @@ const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
 	_onMapLoaded.apply(this,arguments);
 	if(!mv3d.mapLoaded){
+		mv3d.mapReady=false;
+		//mv3d.mapReady=true;
 		mv3d.loadMap();
 	}
 	mv3d.updateBlenders(true);
+};
+
+const _map_isReady = Scene_Map.prototype.isReady;
+Scene_Map.prototype.isReady = function() {
+	let ready = _map_isReady.apply(this,arguments);
+	return ready && mv3d.mapReady;
 };

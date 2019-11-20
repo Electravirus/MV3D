@@ -8,6 +8,7 @@ export default parameters;
 Object.assign(mv3d,{
 	CAMERA_MODE:"PERSPECTIVE",
 	ORTHOGRAPHIC_DIST:100,
+	MV3D_FOLDER:"img/MV3D",
 
 	ANIM_DELAY:Number(parameters.animDelay),
 	ALPHA_CUTOFF:Math.max(0.01,parameters.alphatest),

@@ -49,7 +49,7 @@ Object.assign(mv3d,{
 		]);
 
 		Sprite.Meshes.SHADOW=Sprite.Meshes.FLAT.clone('shadow mesh');
-		const shadowTexture = new Texture("MV3D/shadow.png");
+		const shadowTexture = new Texture(`${mv3d.MV3D_FOLDER}/shadow.png`);
 		const shadowMaterial = new StandardMaterial('shadow material', mv3d.scene);
 		shadowMaterial.diffuseTexture=shadowTexture;
 		shadowMaterial.opacityTexture=shadowTexture;
@@ -499,7 +499,7 @@ class Character extends Sprite{
 			if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
 		}
 
-		this.updateBush();
+		this.updateAlpha();
 
 		this.tileHeight = mv3d.getWalkHeight(this.char._realX,this.char._realY);
 
@@ -516,9 +516,11 @@ class Character extends Sprite{
 		this.updateLights();
 	}
 
-	updateBush(){
+	updateAlpha(){
+		let hasAlpha=this.hasConfig('alpha');
 		this.bush = Boolean(this.char.bushDepth());
 		if(this.bush && this.hasBush()){
+			hasAlpha=true;
 			if(!this.material.opacityTexture){
 				this.material.opacityTexture=mv3d.getBushAlphaTexture();
 				this.material.useAlphaFromDiffuseTexture=true;
@@ -528,6 +530,13 @@ class Character extends Sprite{
 				this.material.opacityTexture=null;
 				this.material.useAlphaFromDiffuseTexture=false;
 			}
+		}
+		if(hasAlpha){
+			this.material.useAlphaFromDiffuseTexture=true;
+			this.material.alpha=this.getConfig('alpha',1);
+		}else{
+			this.material.useAlphaFromDiffuseTexture=false;
+			this.material.alpha=1;
 		}
 	}
 

@@ -5,7 +5,8 @@ import { Vector2 } from './mod_babylon.js';
 
 Object.assign(mv3d,{
 
-    mapLoaded: false,
+	mapLoaded: false,
+	mapReady: false,
 	clearMap(){
 		this.mapLoaded=false;
 		// clear materials and textures
@@ -72,14 +73,17 @@ Object.assign(mv3d,{
 		}
 		const cameraCellPos = new Vector2(Math.round(this.cameraStick.x/this.CELL_SIZE-0.5),Math.round(this.cameraStick.y/this.CELL_SIZE-0.5));
 		cellsToLoad.sort((a,b)=>Vector2.DistanceSquared(a,cameraCellPos)-Vector2.DistanceSquared(b,cameraCellPos));
-		cellsToLoad.length=Math.min(1,cellsToLoad.length);
+		//if(this.mapReady){
+		//	cellsToLoad.length=Math.min(1,cellsToLoad.length);
+		//}
 		for (const cellpos of cellsToLoad){
 			let {x:cx,y:cy} = cellpos;
 			await this.loadMapCell(cx,cy);
-			await sleep();
+			if(this.mapReady){ await sleep(); }
 			if(!this.mapLoaded){ this.mapUpdating=false; return; }
 		}
 		this.mapUpdating=false;
+		this.mapReady=true;
 	},
 
 	async loadMapCell(cx,cy){
