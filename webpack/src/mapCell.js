@@ -24,40 +24,8 @@ export class MapCell extends TransformNode{
 		this.x=loopPos.x-mv3d.CELL_SIZE/2;
 		this.y=loopPos.y-mv3d.CELL_SIZE/2;
 	}
-	getCachedMesh(width=1,height=1,side=FRONTSIDE,isWall=false){
-		const key = `${width},${height}|${side}|${+isWall}`;
-		let mesh;
-		if(key in MapCell.meshCache){
-			mesh=MapCell.meshCache[key].clone();
-		}else{
-			mesh = MeshBuilder.CreatePlane('tile',{
-				sideOrientation: side,
-				width:width, height:height,
-				//subdivisions:1,
-				sourcePlane: isWall ? SOURCEPLANE_WALL : SOURCEPLANE_GROUND,
-			},mv3d.scene);
-			MapCell.meshCache[key]=mesh;
-			mv3d.scene.removeMesh(mesh);
-			mesh=mesh.clone();
-		}
-		this.submeshes.push(mesh);
-		mesh.parent=this;
-		return mesh;
-	}
-	createMesh(width=1,height=1,side=FRONTSIDE, isWall=false){
-		const mesh = MeshBuilder.CreatePlane('tile',{
-			sideOrientation: side,
-			width:width, height:height,
-			//subdivisions:1,
-			sourcePlane: isWall ? SOURCEPLANE_WALL : SOURCEPLANE_GROUND,
-		},mv3d.scene);
-		this.submeshes.push(mesh);
-		mesh.parent=this;
-		return mesh;
-	}
 	async load(){
 		const shapes = mv3d.configurationShapes;
-		this.submeshes=[];
 		this.builder = new CellMeshBuilder();
 		// load all tiles in mesh
 		const cellWidth = Math.min(mv3d.CELL_SIZE,$gameMap.width()-this.cx*mv3d.CELL_SIZE);
@@ -110,32 +78,14 @@ export class MapCell extends TransformNode{
 			}
 
 			//if(mv3d.mapReady){ await sleep(); }
-			if(!mv3d.mapLoaded){ this.earlyExit(); return; }
+			//if(!mv3d.mapLoaded){ this.earlyExit(); return; }
 		}
-		// merge meshes
-		if(this.submeshes.length){
-			this.submeshes.forEach(mesh=>mesh.parent=null);
-			this.mesh=Mesh.MergeMeshes(this.submeshes,true,undefined,undefined,false,true);
-		}else{
-			console.warn("MV3D: Created empty map cell!");
-			this.mesh = new Mesh("empty mesh",mv3d.scene);
+		
+		this.mesh=this.builder.build();
+		if(this.mesh){
+			this.mesh.parent=this;
 		}
-		this.mesh.parent=this;
-		delete this.submeshes;
-		this.mesh2=this.builder.build();
-		if(this.mesh2){
-			this.mesh2.parent=this;
-		}
-	}
-	earlyExit(){
-		console.warn(`MV3D: Map cleared before cell[${this.cx},${this.cy}] finished loading.`)
-		if(this.submeshes){
-			for (const mesh of this.submeshes){
-				mesh.dispose();
-			}
-			this.submeshes.length=0;
-		}
-
+		delete this.builder
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false){
 		const tileId = ceiling?tileConf.bottomId:tileConf.topId;
