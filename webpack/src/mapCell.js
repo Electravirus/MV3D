@@ -39,7 +39,7 @@ export class MapCell extends TransformNode{
 			for (let l=0; l<4; ++l){
 				if(mv3d.isTileEmpty(tileData[l])){ ++nlnowall; continue; }
 				let z = mv3d.getStackHeight(this.ox+x,this.oy+y,l);
-				const tileConf = mv3d.getTileTextureOffsets(tileData[l],x,y,l);
+				const tileConf = mv3d.getTileTextureOffsets(tileData[l],this.ox+x,this.oy+y,l);
 				const shape = tileConf.shape;
 				tileConf.realId = tileData[l];
 				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
@@ -121,12 +121,14 @@ export class MapCell extends TransformNode{
 				const neighborHeight = mv3d.getFringeHeight(this.ox+x+np.x,this.oy+y+np.y,l);
 				if(neighborHeight===z){ continue; }
 			}else{
-				const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,l,!(tileConf.height<0));
+				const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,!(tileConf.depth>0));
 				neededHeight = z-neighborHeight;
+				if(neededHeight>0&&l>0){ neededHeight=Math.min(wallHeight,neededHeight); }
 			}
-			if(tileConf.height<0&&neededHeight<0){
+			if(tileConf.depth>0&&neededHeight<0){
 				if(mv3d.tileHasPit(this.ox+x+np.x,this.oy+y+np.y,l)){ continue; }
-				neededHeight = Math.max(neededHeight,tileConf.height);
+				//if(mv3d.isTilePit(this.ox+x+np.x,this.oy+y+np.y,l)){ continue; }
+				neededHeight = Math.max(neededHeight,-tileConf.depth);
 				if(tileConf.hasInsideConf){
 					texture_side='inside';
 				}
@@ -160,7 +162,7 @@ export class MapCell extends TransformNode{
 				const leftHeight = mv3d.getStackHeight(this.ox+x+npl.x,this.oy+y+npl.y,l);
 				const rightHeight = mv3d.getStackHeight(this.ox+x+npr.x,this.oy+y+npr.y,l);
 				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId);
-				let wallParts=Math.abs(Math.round(neededHeight*2));
+				let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
 				let partHeight=Math.abs(neededHeight/wallParts);
 				let sw = tileSize()/2;
 				let sh = tileSize()/2;

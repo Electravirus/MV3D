@@ -209,6 +209,7 @@ Object.assign(mv3d,{
 
 	tilesetConfigurationFunctions:{
 		height(conf,n){ conf.height=Number(n); },
+		depth(conf,n){ conf.depth=Number(n); },
 		fringe(conf,n){ conf.fringe=Number(n); },
 		float(conf,n){ conf.float=Number(n); },
 		top:TextureConfigurator('top'),

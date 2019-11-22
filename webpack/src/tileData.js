@@ -139,26 +139,20 @@ Object.assign(mv3d,{
 		if(tilemap&&tilemap._isHigherTile(tileId)){ return 0; }
 
 		const conf =this.getTileConfig(tileId,x,y,l);
-		if('regionHeight' in conf){
-			let height = conf.regionHeight;
-			if(conf.height<0){ height += conf.height; }
-			return height;
-		}
+		let height = 0;
 		if('height' in conf){
-			return conf.height;
+			height = conf.height;
+		}else if(this.isWallTile(tileId)){
+			height = this.WALL_HEIGHT;
+		}else if(tilemap&&tilemap._isTableTile(tileId)){
+			height = this.TABLE_HEIGHT;
+		}else if(this.isSpecialShape(conf.shape)){
+			height = 1;
 		}
-
-		//if(this.isTileEmpty(tileId)){ return 0; }
-		if(this.isWallTile(tileId)){
-			return this.WALL_HEIGHT;
+		if('depth' in conf){
+			height -= conf.depth;
 		}
-		if(tilemap&&tilemap._isTableTile(tileId)){
-			return this.TABLE_HEIGHT;
-		}
-		if(this.isSpecialShape(conf.shape)){
-			return 1;
-		}
-		return 0;
+		return height;
 	},
 
 	getStackHeight(x,y,layerId=3){
@@ -225,8 +219,8 @@ Object.assign(mv3d,{
 			if(this.isSpecialShape(shape)){
 				return height;
 			}
-			if(ignorePits&&data.height<0){
-				height-=data.height;
+			if(ignorePits&&data.depth>0){
+				height+=data.depth;
 			}
 			height+=this.getTileHeight(x,y,l);
 		}
@@ -238,9 +232,15 @@ Object.assign(mv3d,{
 		for(let l=0; l<=layerId; ++l){
 			const tileId=tileData[l];
 			const conf = this.getTileConfig(tileId,x,y,l);
-			if(conf.height<0){ return true; }
+			if(conf.depth>0){ return true; }
 		}
 		return false;
+	},
+
+	isTilePit(x,y,l){
+		const tileId=this.getTileData(x,y)[l];
+		const conf = this.getTileConfig(tileId,x,y,l);
+		return conf.depth>0;
 	},
 
 	getTileRects(tileId){

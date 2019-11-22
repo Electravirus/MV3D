@@ -61,10 +61,17 @@ Object.assign(mv3d,{
 			entry=JSON.parse(entry);
 			const regionData = this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions)
 			this.REGION_DATA[entry.regionId]=regionData;
+			/*
 			if ('height' in regionData){
-				regionData.regionHeight = regionData.height;
+				regionData.region_height = regionData.height;
 				delete regionData.height;
 			}
+			if ('depth' in regionData){
+				regionData.region_depth = regionData.depth;
+				delete regionData.depth;
+			}
+			*/
+			
 		}
 		for (let entry of JSON.parse(parameters.ttags)){
 			entry=JSON.parse(entry);
