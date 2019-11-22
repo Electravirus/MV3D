@@ -45,7 +45,7 @@ class ConfigurationFunction{
 				}
 			}
 			if(gi>this.groups.length){ break; }
-			params[this.groups[gi][i]]=params[`group${gi+1}`][i]=match[3];
+			params[this.groups[gi][i]]=params[`group${gi+1}`][i]=match[3].trim();
 			++i;
 		}
 		this.func(conf,params);
