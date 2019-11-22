@@ -124,10 +124,11 @@ Object.assign(mv3d,{
 		}
 	})},
 
-	async getCachedTilesetMaterialForTile(tileId,x,y,l){
-		const setN = mv3d.getSetNumber(tileId);
-		const options = mv3d.getMaterialOptions(tileId,x,y,l);
-		const animData = mv3d.getTileAnimationData(tileId);
+	async getCachedTilesetMaterialForTile(tileConf,side){
+		const setN = mv3d.getSetNumber(tileConf[`${side}_id`]);
+		const options = mv3d.getMaterialOptions(tileConf,side);
+		const animData = mv3d.getTileAnimationData(tileConf,side);
+		//console.log(options);
 		return await mv3d.getCachedTilesetMaterialAsync(setN,animData.animX,animData.animY,options);
 	},
 

@@ -1,6 +1,85 @@
 import mv3d from './mv3d.js';
 import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2 } from './mod_babylon.js';
-import { makeColor, relativeNumber, booleanString } from './util.js';
+import { makeColor, relativeNumber, booleanString, falseString } from './util.js';
+
+class ConfigurationFunction{
+	constructor(parameters,func){
+		this.groups = parameters.match(/\[?[^[\]|]+\]?/g);
+		this.labels={};
+		for(let i=0;i<this.groups.length;++i){
+			while(this.groups[i]&&this.groups[i][0]==='['){
+				this.labels[this.groups[i].slice(1,-1)]=i;
+				this.groups.splice(i,1);
+			}
+			if( i > this.groups.length ){ break; }
+			this.groups[i]=this.groups[i].split(',').map(s=>s.trim());
+		}
+		this.func=func;
+	}
+	run(conf,rawparams){
+		const r=/([,|])?(?:(\w+):)?([^,|\r\n]+)/g
+		let match;
+		let i=0;
+		let gi=0;
+		const params={};
+		for(let _gi=0;_gi<this.groups.length;++_gi){
+			params[`group${_gi+1}`]=[];
+		}
+		while(match=r.exec(rawparams)){
+			if(match[1]==='|'||i>=this.groups[gi].length){
+				i=0; ++gi;
+			}
+			if(match[2]){
+				if(match[2] in this.labels){
+					gi=this.labels[match[2]];
+				}else{
+					let foundMatch=false;
+					grouploop:for(let _gi=0;_gi<this.groups.length;++_gi) for(let _i=0;_i<this.groups[_gi].length;++_i){
+						if(this.groups[_gi][_i]===match[2]){
+							foundMatch=true;
+							gi=_gi; i=_i;
+							break grouploop;
+						}
+					}
+					if(!foundMatch){ break; }
+				}
+			}
+			if(gi>this.groups.length){ break; }
+			params[this.groups[gi][i]]=params[`group${gi+1}`][i]=match[3];
+			++i;
+		}
+		this.func(conf,params);
+	}
+}
+
+function TextureConfigurator(name,extraParams=''){
+	const paramlist = `img,x,y,w,h|${extraParams}|alpha|glow[anim]animx,animy`;
+	return new ConfigurationFunction(paramlist,function(conf,params){
+		if(params.group1.length===5){
+			const [img,x,y,w,h] = params.group1;
+			conf[`${name}_id`] = mv3d.constructTileId(img,0,0);
+			conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
+		}else if(params.group1.length===3){
+			const [img,x,y] = params.group1;
+			conf[`${name}_id`] = mv3d.constructTileId(img,x,y);
+		}else if(params.group1.length===2){
+			const [x,y] = params.group1;
+			conf[`${name}_offset`] = new Vector2(Number(x),Number(y));
+		}
+		if(params.animx&&params.animy){
+			conf[`${name}_animData`]={ animX:Number(params.animx), animY:Number(params.animy) };
+		}
+		if(params.height){
+			conf[`${name}_height`]=Number(params.height);
+		}
+		if(params.alpha){
+			conf[`${name}_alpha`]=Number(params.alpha);
+		}
+		if(params.glow){
+			conf[`${name}_glow`]=Number(params.glow);
+		}
+	});
+}
 
 Object.assign(mv3d,{
 	tilesetConfigurations:{},
@@ -64,6 +143,18 @@ Object.assign(mv3d,{
 		return dfault;
 	},
 
+	getCeilingConfig(){
+		let conf={};
+		for (const key in this.mapConfigurations){
+			if(key.startsWith('ceiling_')){
+				conf[key.replace('ceiling_','bottom_')]=this.mapConfigurations[key];
+			}
+		}
+		conf.bottom_id = this.getMapConfig('ceiling_id',0);
+		conf.height = this.getMapConfig('ceiling_height',this.CEILING_HEIGHT);
+		return conf;
+	},
+
 	readConfigurationBlocks(note){
 		const findBlocks = /<MV3D>([\s\S]*?)<\/MV3D>/gi;
 		let contents = '';
@@ -90,7 +181,12 @@ Object.assign(mv3d,{
 		while(match = readConfigurations.exec(line)){
 			const key = match[1].toLowerCase();
 			if(key in functionset){
-				functionset[key](conf,...match[2].split(','));
+				//functionset[key](conf, ...match[2].split('|').map(s=>s?s.split(','):[]) );
+				if(functionset[key] instanceof ConfigurationFunction){
+					functionset[key].run(conf,match[2]);
+				}else{
+					functionset[key](conf, ...match[2].split(','));
+				}
 			}
 		}
 		return conf;
@@ -115,44 +211,16 @@ Object.assign(mv3d,{
 		height(conf,n){ conf.height=Number(n); },
 		fringe(conf,n){ conf.fringe=Number(n); },
 		float(conf,n){ conf.float=Number(n); },
-		texture(conf,img,x,y){
-			const tileId = mv3d.constructTileId(img,x,y);
-			conf.sideId = conf.topId = tileId;
-		},
-		top(conf,img,x,y){ conf.topId=mv3d.constructTileId(img,x,y); },
-		side(conf,img,x,y){ conf.sideId=mv3d.constructTileId(img,x,y); },
-		inside(conf,img,x,y){ conf.insideId=mv3d.constructTileId(img,x,y); },
-		offset(conf,x,y){
-			conf.offsetSide = conf.offsetTop = new Vector2(Number(x),Number(y));
-		},
-		offsettop(conf,x,y){
-			conf.offsetTop = new Vector2(Number(x),Number(y));
-		},
-		offsetside(conf,x,y){
-			conf.offsetSide = new Vector2(Number(x),Number(y));
-		},
-		offsetinside(conf,x,y){
-			conf.offsetInside = new Vector2(Number(x),Number(y));
-		},
-		rect(conf,img,x,y,w,h){
-			this.recttop(conf,img,x,y,w,h);
-			this.rectside(conf,img,x,y,w,h);
-		},
-		recttop(conf,img,x,y,w,h){
-			conf.topId = mv3d.constructTileId(img,0,0);
-			conf.rectTop = new PIXI.Rectangle(x,y,w,h);
-			conf.rectTop.setN = mv3d.getSetNumber(conf.topId);
-		},
-		rectside(conf,img,x,y,w,h){
-			conf.sideId = mv3d.constructTileId(img,0,0);
-			conf.rectSide = new PIXI.Rectangle(x,y,w,h);
-			conf.rectSide.setN = mv3d.getSetNumber(conf.sideId);
-		},
-		rectinside(conf,img,x,y,w,h){
-			conf.insideId = mv3d.constructTileId(img,0,0);
-			conf.rectInside = new PIXI.Rectangle(x,y,w,h);
-			conf.rectInside.setN = mv3d.getSetNumber(conf.insideId);
-		},
+		top:TextureConfigurator('top'),
+		side:TextureConfigurator('side'),
+		inside:TextureConfigurator('inside'),
+		bottom:TextureConfigurator('bottom'),
+		texture:Object.assign(TextureConfigurator('hybrid'),{
+			func(conf,params){
+				mv3d.tilesetConfigurationFunctions.top.func(conf,params);
+				mv3d.tilesetConfigurationFunctions.side.func(conf,params);
+			}
+		}),
 		shape(conf,name){
 			conf.shape=mv3d.configurationShapes[name.toUpperCase()];
 		},
@@ -163,31 +231,30 @@ Object.assign(mv3d,{
 		glow(conf,n){ conf.glow=Number(n); },
 	},
 	eventConfigurationFunctions:{
-		height(conf,n){
-			conf.height=Number(n);
-		},
+		height(conf,n){ conf.height=Number(n); },
 		z(conf,n){ conf.z=Number(n); },
 		x(conf,n){ conf.x=Number(n); },
 		y(conf,n){ conf.y=Number(n); },
-		side(conf,name){ conf.side=mv3d.configurationSides[name.toLowerCase()]; },
 		scale(conf,x,y){ conf.scale = new Vector2(Number(x),Number(y)); },
 		rot(conf,n){ conf.rot=Number(n); },
-		bush(conf,bool){ conf.bush = bool.toLowerCase()=='true'; },
-		shadow(conf,bool){ conf.shadow = bool.toLowerCase()=='true'; },
-		shadowscale(conf,n){ conf.shadowScale = Number(n); },
+		bush(conf,bool){ conf.bush = booleanString(bool); },
+		shadow(conf,n){ conf.shadow = Number(falseString(n)); },
 		shape(conf,name){
 			conf.shape=mv3d.configurationShapes[name.toUpperCase()];
 		},
 		pos(conf,x,y){
 			conf.pos={x:x,y:y};
 		},
-		light(){ this.lamp(...arguments); },
-		lamp(conf,color='ffffff',intensity=1,distance=mv3d.LIGHT_DIST){
+		lamp:new ConfigurationFunction('color,intensity,distance|height',function(conf,params){
+			const {color='white',intensity=1,distance=mv3d.LIGHT_DIST} = params;
 			conf.lamp={color:makeColor(color).toNumber(),intensity:Number(intensity),distance:Number(distance)};
-		},
-		flashlight(conf,color='ffffff',intensity=1,distance=mv3d.LIGHT_DIST,angle=mv3d.LIGHT_ANGLE){
+		}),
+		flashlight:new ConfigurationFunction('color,intensity,distance,angle|yaw,pitch',function(conf,params){
+			const {color='white',intensity=1,distance=mv3d.LIGHT_DIST,angle=mv3d.LIGHT_ANGLE} = params;
 			conf.flashlight={color:makeColor(color).toNumber(),intensity:Number(intensity),distance:Number(distance),angle:Number(angle)};
-		},
+			if(params.yaw){ conf.flashlightYaw=params.yaw; }
+			if(params.pitch){ conf.flashlightPitch=Number(params.pitch); }
+		}),
 		flashlightpitch(conf,deg='90'){ conf.flashlightPitch=Number(deg); },
 		flashlightyaw(conf,deg='+0'){ conf.flashlightYaw=deg; },
 		lightheight(conf,n=1){ conf.lightHeight = Number(n); },
@@ -200,28 +267,22 @@ Object.assign(mv3d,{
 		light(conf,color){
 			conf.light={color:makeColor(color).toNumber()};
 		},
-		fog(conf,color,near,far){
+		fog:new ConfigurationFunction('color|near,far',function(conf,params){
+			const {color,near,far} = params;
 			if(!conf.fog){ conf.fog={}; }
-			color=makeColor(color).toNumber(); near=Number(near); far=Number(far);
-			if(!Number.isNaN(color)){ conf.fog.color=color; }
-			if(!Number.isNaN(near)){ conf.fog.near=near; }
-			if(!Number.isNaN(far)){ conf.fog.far=far; }
-		},
-		yaw(conf,n){this.camerayaw(conf,n);},
-		pitch(conf,n){this.camerapitch(conf,n);},
-		camerayaw(conf,n){ conf.cameraYaw=Number(n); },
-		camerapitch(conf,n){ conf.cameraPitch=Number(n); },
-		dist(conf,n){ this.cameradist(conf,n); },
-		cameradist(conf,n){ conf.cameraDist=Number(n); },
-		height(conf,n){ this.cameraheight(conf,n); },
-		cameraheight(conf,n){ conf.cameraHeight=Number(n); },
-		mode(conf,mode){ this.cameramode(conf,mode); },
-		cameramode(conf,mode){ conf.cameraMode=mode; },
-		edge(conf,bool){ conf.edge = booleanString(bool); },
-		ceiling(conf,img,x,y,height=mv3d.CEILING_HEIGHT){
-			conf.ceiling = mv3d.constructTileId(img,x,y);
-			conf.ceilingHeight = height;
-		},
+			if(color){ conf.fog.color=makeColor(color).toNumber(); }
+			if(near){ conf.fog.near=Number(near); }
+			if(far){ conf.fog.far=Number(far); }
+		}),
+		camera:new ConfigurationFunction('yaw,pitch|dist|height|mode',function(conf,params){
+			const {yaw,pitch,dist,height,mode}=params;
+			if(yaw){ conf.cameraYaw=Number(yaw); }
+			if(pitch){ conf.cameraPitch=Number(pitch) }
+			if(dist){ conf.cameraDist=Number(dist); }
+			if(height){ conf.cameraHeight=Number(height); }
+			if(mode){ conf.cameraMode=mode; }
+		}),
+		ceiling:TextureConfigurator('ceiling','height'),
 	},
 
 });

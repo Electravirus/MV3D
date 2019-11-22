@@ -121,10 +121,6 @@ class Character extends Sprite{
 		this.isPlayer = this.char instanceof Game_Player;
 		this.isFollower = this.char instanceof Game_Follower;
 
-		if(this.isEvent){
-			this.eventConfigure();
-		}
-
 		this.elevation = 0;
 
 		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
@@ -138,6 +134,10 @@ class Character extends Sprite{
 		this.lightOrigin = new TransformNode('light origin',mv3d.scene);
 		this.lightOrigin.parent=this;
 		this.setupLights();
+		
+		if(this.isEvent){
+			this.eventConfigure();
+		}
 	}
 
 	isTextureReady(){
@@ -265,7 +265,6 @@ class Character extends Sprite{
 				relativeNumber(event.y,pos.y),
 			);
 		}
-		/*
 		this.setupEventLights();
 
 		if('lamp' in this.settings_event_page){
@@ -283,7 +282,6 @@ class Character extends Sprite{
 			this.blendFlashlightPitch.setValue(this.getConfig('flashlightPitch',90),0.25);
 			this.flashlightTargetYaw=this.getConfig('flashlightYaw','+0');
 		}
-		*/
 	}
 
 	setupMesh(){
@@ -299,6 +297,16 @@ class Character extends Sprite{
 		}
 	}
 
+	setupEventLights(){
+		const flashlightConfig = this.getConfig('flashlight');
+		const lampConfig = this.getConfig('lamp');
+		if(flashlightConfig && !this.flashlight){
+			this.setupFlashlight();
+		}
+		if(lampConfig && !this.lamp){
+			this.setupLamp();
+		}
+	}
 	setupLights(){
 		if('flashlightColor' in this.char.mv3d_blenders){
 			this.setupFlashlight();
@@ -321,8 +329,8 @@ class Character extends Sprite{
 		this.blendFlashlightDistance = this.makeBlender('flashlightDistance',config.distance);
 		this.blendFlashlightAngle = this.makeBlender('flashlightAngle',config.angle);
 		this.flashlight = new SpotLight('flashlight',Vector3.Zero(),Vector3.Zero(),
-			degtorad(this.blendFlashlightAngle.targetValue()),0,mv3d.scene);
-		this.flashlight.exponent = 64800*Math.pow(this.blendFlashlightAngle.targetValue(),-2);
+			degtorad(this.blendFlashlightAngle.targetValue()+mv3d.FLASHLIGHT_EXTRA_ANGLE),0,mv3d.scene);
+		this.updateFlashlightExp();
 		this.flashlight.range = this.blendFlashlightDistance.targetValue();
 		this.flashlight.intensity=this.blendFlashlightIntensity.targetValue();
 		this.flashlight.diffuse.set(...this.blendFlashlightColor.targetComponents());
@@ -337,6 +345,10 @@ class Character extends Sprite{
 		this.flashlightTargetYaw=this.getConfig('flashlightYaw','+0');
 		this.updateFlashlightDirection();
 		this.setupMesh();
+	}
+
+	updateFlashlightExp(){
+		this.flashlight.exponent = 64800*Math.pow(this.blendFlashlightAngle.targetValue(),-2);
 	}
 
 	setupLamp(){
@@ -378,8 +390,8 @@ class Character extends Sprite{
 				this.flashlight.diffuse.set(...this.blendFlashlightColor.currentComponents());
 				this.flashlight.intensity=this.blendFlashlightIntensity.currentValue();
 				this.flashlight.range=this.blendFlashlightDistance.currentValue();
-				this.flashlight.angle=degtorad(this.blendFlashlightAngle.currentValue());
-				this.flashlight.exponent = 64800*Math.pow(this.blendFlashlightAngle.targetValue(),-2);
+				this.flashlight.angle=degtorad(this.blendFlashlightAngle.currentValue()+mv3d.FLASHLIGHT_EXTRA_ANGLE);
+				this.updateFlashlightExp();
 				this.updateFlashlightDirection();
 			}
 		}
@@ -616,7 +628,7 @@ class Character extends Sprite{
 	}
 
 	updateShadow(){
-		let shadowVisible = this.getConfig('shadow', this.shape!=mv3d.configurationShapes.FLAT );
+		let shadowVisible = Boolean(this.getConfig('shadow', this.shape!=mv3d.configurationShapes.FLAT ));
 
 		if(shadowVisible&&(this.isPlayer||this.isFollower)){
 			const myIndex = mv3d.characters.indexOf(this);
@@ -642,7 +654,7 @@ class Character extends Sprite{
 		const shadowFadeDist = this.isAirship? mv3d.AIRSHIP_SETTINGS.shadowDist : mv3d.SHADOW_DIST;
 		const shadowStrength = Math.max(0,1-Math.abs(shadowDist)/shadowFadeDist);
 		this.shadow.z = -shadowDist;
-		const shadowScale = this.isAirship? mv3d.AIRSHIP_SETTINGS.shadowScale : this.getConfig('shadowScale',mv3d.SHADOW_SCALE);
+		const shadowScale = this.isAirship? mv3d.AIRSHIP_SETTINGS.shadowScale : this.getConfig('shadow',mv3d.SHADOW_SCALE);
 		this.shadow.scaling.setAll(shadowScale*shadowStrength);
 		if(!this.shadow.isAnInstance){
 			this.shadow.visibility=shadowStrength-0.5*this.bush;//visibility doesn't work with instancing

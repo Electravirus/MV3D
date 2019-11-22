@@ -24,24 +24,23 @@ Object.assign(mv3d,{
 		return $gameMap.tilesetFlags()[tileId]>>12;
 	},
 
-	getMaterialOptions(tileId,x,y,l){
+	getMaterialOptions(conf,side){
 		const options={};
-		/*
-		const ttag = this.getTerrainTag(tileId);
-		if(ttag && ttag in this.TTAG_DATA){
-			const tagdata = this.TTAG_DATA[ttag];
+		if ('alpha' in conf){ options.alpha=conf.alpha; }
+		if ('glow' in conf){ options.glow=conf.glow; }
+		if(side){
+			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
+			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
 		}
-		*/
-		const conf = this.getTileConfig(tileId,x,y,l);
-		if(conf){
-			if ('alpha' in conf){ options.alpha=conf.alpha; }
-			if ('transparent' in conf){ options.transparent=conf.transparent; }
-			if ('glow' in conf){ options.glow=conf.glow; }
-		}
+		if('alpha' in options){ options.transparent=true; }
 		return options;
 	},
 
-	getTileAnimationData(tileId){
+	getTileAnimationData(tileConf,side){
+		const tileId=tileConf[`${side}_id`];
+		if(`${side}_animData` in tileConf){
+			return tileConf[`${side}_animData`];
+		}
 		const animData={animX:0,animY:0};
 		if(Tilemap.isTileA1(tileId)){
 			const kind = Tilemap.getAutotileKind(tileId);
@@ -74,30 +73,30 @@ Object.assign(mv3d,{
 		const conf = this.getTileConfig(tileId,x,y,l);
 		const tileRange = Tilemap.isAutotile(tileId)?48:1;
 		const tilemap = this.getTilemap();
-		conf.hasInsideConf=Boolean(conf.offsetInside||conf.rectInside||('insideId' in conf));
-		conf.hasBottomConf=Boolean(conf.offsetBottom||conf.rectBottom||('bottomId' in conf));
-		if(conf.topId==null){ 
-			conf.topId=tileId;
-			if(conf.offsetTop){
-				conf.topId = tileId+conf.offsetTop.x*tileRange+conf.offsetTop.y*tileRange*8;
+		conf.hasInsideConf=Boolean(conf.inside_offset||conf.rectInside||('inside_id' in conf));
+		conf.hasBottomConf=Boolean(conf.bottom_offset||conf.rectBottom||('bottom_id' in conf));
+		if(conf.top_id==null){ 
+			conf.top_id=tileId;
+			if(conf.top_offset){
+				conf.top_id = tileId+conf.top_offset.x*tileRange+conf.top_offset.y*tileRange*8;
 			}
 		 }
-		if(conf.sideId==null){
-			conf.sideId=tileId;
-			if(conf.offsetSide){
-				conf.sideId = tileId+conf.offsetSide.x*tileRange+conf.offsetSide.y*tileRange*8;
+		if(conf.side_id==null){
+			conf.side_id=tileId;
+			if(conf.side_offset){
+				conf.side_id = tileId+conf.side_offset.x*tileRange+conf.side_offset.y*tileRange*8;
 			}
 		}
-		if(conf.insideId==null){ 
-			conf.insideId=conf.sideId;
-			if(conf.offsetInside){
-				conf.insideId=tileId+conf.offsetInside.x*tileRange+conf.offsetInside.y*tileRange*8;
+		if(conf.inside_id==null){ 
+			conf.inside_id=conf.side_id;
+			if(conf.inside_offset){
+				conf.inside_id=tileId+conf.inside_offset.x*tileRange+conf.inside_offset.y*tileRange*8;
 			}
 		}
-		if(conf.bottomId==null){
-			conf.bottomId=conf.topId;
-			if(conf.offsetBottom){
-				conf.bottomId=tileId+conf.offsetBottom.x*tileRange+conf.offsetBottom.y*tileRange*8;
+		if(conf.bottom_id==null){
+			conf.bottom_id=conf.top_id;
+			if(conf.bottom_offset){
+				conf.bottom_id=tileId+conf.bottom_offset.x*tileRange+conf.bottom_offset.y*tileRange*8;
 			}
 		}
 		conf.fringeHeight=conf.height||0;

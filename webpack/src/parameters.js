@@ -36,6 +36,7 @@ Object.assign(mv3d,{
 	LIGHT_DECAY: 1,
 	LIGHT_DIST: 3,
 	LIGHT_ANGLE: 45,
+	FLASHLIGHT_EXTRA_ANGLE: 10,
 
 	CHARACTER_SHADOWS:booleanString(parameters.characterShadows),
 	SHADOW_SCALE:Number(parameters.shadowScale),
