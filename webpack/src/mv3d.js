@@ -63,9 +63,9 @@ const mv3d = {
 
 		this.updateAnimations();
 
-		this.updateBlenders();
-
 		this.updateCharacters();
+
+		this.updateBlenders();
 
 		// input
 		if( mv3d.KEYBOARD_TURN || this.is1stPerson() ){

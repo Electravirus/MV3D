@@ -511,6 +511,10 @@ class Character extends Sprite{
 			if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
 		}
 
+		if(this.char===$gamePlayer){
+			this.mesh.visibility = +!mv3d.is1stPerson(true);
+		}
+
 		this.updateAlpha();
 
 		this.tileHeight = mv3d.getWalkHeight(this.char._realX,this.char._realY);

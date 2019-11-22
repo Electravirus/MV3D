@@ -133,7 +133,7 @@ Object.assign(mv3d,{
 		if($gameMap.isLoopVertical()){ y=y.mod($dataMap.height); }
 
 		const tileId=this.getTileData(x,y)[l];
-		if(this.isTileEmpty(tileId)){ return 0; }
+		if(this.isTileEmpty(tileId)&&l>0){ return 0; }
 		// finge tiles don't stack normally. fringeHeight property should be used when drawing them.
 		const tilemap=this.getTilemap();
 		if(tilemap&&tilemap._isHigherTile(tileId)){ return 0; }
@@ -148,6 +148,7 @@ Object.assign(mv3d,{
 			return conf.height;
 		}
 
+		//if(this.isTileEmpty(tileId)){ return 0; }
 		if(this.isWallTile(tileId)){
 			return this.WALL_HEIGHT;
 		}
@@ -176,7 +177,7 @@ Object.assign(mv3d,{
 		let tileHeight=0;
 		for(let l=0; l<=3; ++l){
 			const tileId=tileData[l];
-			if(this.isTileEmpty(tileId)){ continue; }
+			if(this.isTileEmpty(tileId)&&l>0){ continue; }
 			height += tileHeight;
 			tileHeight = this.getTileHeight(rx,ry,l);
 			const data = this.getTileConfig(tileId,rx,ry,l);
@@ -230,6 +231,16 @@ Object.assign(mv3d,{
 			height+=this.getTileHeight(x,y,l);
 		}
 		return height;
+	},
+
+	tileHasPit(x,y,layerId=3){
+		const tileData=this.getTileData(x,y);
+		for(let l=0; l<=layerId; ++l){
+			const tileId=tileData[l];
+			const conf = this.getTileConfig(tileId,x,y,l);
+			if(conf.height<0){ return true; }
+		}
+		return false;
 	},
 
 	getTileRects(tileId){

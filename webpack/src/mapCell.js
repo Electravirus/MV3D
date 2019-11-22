@@ -55,7 +55,7 @@ export class MapCell extends TransformNode{
 
 					}
 					//decide whether to draw walls
-					if(wallHeight){
+					if(wallHeight||l===0){
 						await this.loadWalls(tileConf,x,y,z,l,wallHeight + nlnowall*mv3d.LAYER_DIST);
 						nlnowall=0;
 					}else{
@@ -104,45 +104,44 @@ export class MapCell extends TransformNode{
 		}
 	}
 	async loadWalls(tileConf,x,y,z,l,wallHeight){
-		const realWallHeight = wallHeight;
 		const isFringe = mv3d.isFringeTile(tileConf.realId);
 		for (let ni=0; ni<MapCell.neighborPositions.length; ++ni){
 			const np = MapCell.neighborPositions[ni];
+
 			// don't render walls on edge of map (unless it loops)
 			if( !mv3d.getMapConfig('edge',true) )
 			if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
 			||(this.oy+y+np.y>=$dataMap.height||this.oy+y+np.y<0)&&!$gameMap.isLoopVertical()){
 				continue;
 			}
-			if(tileConf.height<0 && z<mv3d.getStackHeight(this.ox+x+np.x,this.oy+y+np.y,l)){
-				wallHeight=tileConf.height;
-			}else{
-				wallHeight=realWallHeight;
-			}
-			let tileId=tileConf.side_id;
-			let configRect;
-			let texture_side='side';
-			if(wallHeight<0 && tileConf.hasInsideConf){
-				tileId=tileConf.inside_id;
-				if(tileConf.inside_rect){ configRect = tileConf.inside_rect; }
-				texture_side='inside';
-			}else{
-				if(tileConf.side_rect){ configRect = tileConf.side_rect; }
-			}
-			const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,texture_side);
 
 			let neededHeight=wallHeight;
+			let tileId=tileConf.side_id,configRect,texture_side='side';
 			if(isFringe){
 				const neighborHeight = mv3d.getFringeHeight(this.ox+x+np.x,this.oy+y+np.y,l);
 				if(neighborHeight===z){ continue; }
 			}else{
 				const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,l,!(tileConf.height<0));
-				if(wallHeight>0&&neighborHeight>=z
-				||wallHeight<0&&neighborHeight<=z){ continue; }
-				//neededHeight = Math.min(wallHeight, z-neighborHeight);
-				neededHeight = Math.min(Math.abs(wallHeight), Math.abs(z-neighborHeight))*Math.sign(wallHeight);
+				neededHeight = z-neighborHeight;
 			}
-			const sign = Math.sign(neededHeight);
+			if(tileConf.height<0&&neededHeight<0){
+				if(mv3d.tileHasPit(this.ox+x+np.x,this.oy+y+np.y,l)){ continue; }
+				neededHeight = Math.max(neededHeight,tileConf.height);
+				if(tileConf.hasInsideConf){
+					texture_side='inside';
+				}
+			}
+			else if(neededHeight<=0){ continue; }
+
+			if(texture_side==='inside'){
+				tileId=tileConf.inside_id;
+				if(tileConf.inside_rect){ configRect = tileConf.inside_rect; }
+			}else{
+				if(tileConf.side_rect){ configRect = tileConf.side_rect; }
+			}
+
+			const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,texture_side);
+
 			const wallPos = new Vector3( x+np.x/2, y+np.y/2, z );
 			const rot = -Math.atan2(np.x, np.y);
 			if(configRect || !Tilemap.isAutotile(tileId)){
@@ -177,9 +176,6 @@ export class MapCell extends TransformNode{
 						if(mv3d.isTableTile(tileConf.realId)){
 							hasLeftEdge = leftHeight!=z;
 							hasRightEdge = rightHeight!=z;
-						}if(wallHeight<0){
-							hasLeftEdge = true;
-							hasRightEdge = true;
 						}else{
 							hasLeftEdge = leftHeight<z-az*partHeight;
 							hasRightEdge = rightHeight<z-az*partHeight;
@@ -188,9 +184,6 @@ export class MapCell extends TransformNode{
 						sx=bx*tileSize();
 						sy=by*tileSize();
 						sx=(bx+(ax>0?0.5+hasRightEdge:1-hasLeftEdge))*tileSize();
-						if(neededHeight<0){
-							sx=(bx+(ax>0?0+hasLeftEdge:1.5-hasRightEdge))*tileSize();
-						}
 						if(mv3d.isWaterfallTile(tileId)){
 							sy=(by+az%2/2)*tileSize();
 						}else if(mv3d.isTableTile(tileId)){
