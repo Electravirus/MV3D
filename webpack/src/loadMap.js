@@ -46,10 +46,10 @@ Object.assign(mv3d,{
 		// unload Far cells? implement if needed.
 		// get range of cells based on render distance
 		const bounds = {
-			left:Math.floor((this.cameraStick.x-this.RENDER_DIST)/this.CELL_SIZE),
-			right:Math.floor((this.cameraStick.x+this.RENDER_DIST)/this.CELL_SIZE),
-			top:Math.floor((this.cameraStick.y-this.RENDER_DIST)/this.CELL_SIZE),
-			bottom:Math.floor((this.cameraStick.y+this.RENDER_DIST)/this.CELL_SIZE),
+			left:Math.floor((this.cameraStick.x-this.CELL_DIST)/this.CELL_SIZE),
+			right:Math.floor((this.cameraStick.x+this.CELL_DIST)/this.CELL_SIZE),
+			top:Math.floor((this.cameraStick.y-this.CELL_DIST)/this.CELL_SIZE),
+			bottom:Math.floor((this.cameraStick.y+this.CELL_DIST)/this.CELL_SIZE),
 		}
 		//clamp cell range to map
 		if(!$gameMap.isLoopHorizontal()){
@@ -73,9 +73,9 @@ Object.assign(mv3d,{
 		}
 		const cameraCellPos = new Vector2(Math.round(this.cameraStick.x/this.CELL_SIZE-0.5),Math.round(this.cameraStick.y/this.CELL_SIZE-0.5));
 		cellsToLoad.sort((a,b)=>Vector2.DistanceSquared(a,cameraCellPos)-Vector2.DistanceSquared(b,cameraCellPos));
-		//if(this.mapReady){
-		//	cellsToLoad.length=Math.min(1,cellsToLoad.length);
-		//}
+		if(this.mapReady){
+			cellsToLoad.length=Math.min(25,cellsToLoad.length);
+		}
 		for (const cellpos of cellsToLoad){
 			let {x:cx,y:cy} = cellpos;
 			await this.loadMapCell(cx,cy);

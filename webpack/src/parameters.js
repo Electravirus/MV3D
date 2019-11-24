@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { hexNumber,booleanString,falseString, makeColor } from './util.js';
-import { Vector2 } from './mod_babylon.js';
+import { Vector2, Texture } from './mod_babylon.js';
 
 const parameters = PluginManager.parameters('mv3d-babylon');
 export default parameters;
@@ -23,8 +23,10 @@ Object.assign(mv3d,{
 	CEILING_HEIGHT:Number(parameters.ceilingHeight),
 	LAYER_DIST:Number(parameters.layerDist),
 
-	CELL_SIZE:10,
+	CELL_SIZE: Number(parameters.cellSize),
+	CELL_DIST: Number(parameters.cellDist),
 	RENDER_DIST: Number(parameters.renderDist),
+	MIPMAP:booleanString(parameters.mipmap),
 
 	FOG_COLOR: makeColor(parameters.fogColor).toNumber(),
 	FOG_NEAR: Number(parameters.fogNear),
@@ -93,5 +95,7 @@ Object.assign(mv3d,{
 
 
 		this.EVENT_SHAPE=this.configurationShapes[parameters.eventShape.toUpperCase()];
+
+		//Texture.DEFAULT_ANISOTROPIC_FILTERING_LEVEL=0;
 	},
 });

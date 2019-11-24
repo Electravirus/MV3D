@@ -18,7 +18,7 @@ Object.assign(mv3d,{
 			return this.getErrorTexture();
 		}
 		const textureSrc=`img/tilesets/${tsName}.png`;
-		const texture = new Texture(textureSrc,this.scene);
+		const texture = new Texture(textureSrc,this.scene,!mv3d.MIPMAP);
 		texture.hasAlpha=true;
 		texture.onLoadObservable.addOnce(()=>{
 			if(this.textureCache[key]!==texture){ return; }
@@ -61,8 +61,6 @@ Object.assign(mv3d,{
 			if(this.textureCache[key]!==texture){ return; }
 			texture.crop(x,y,w,h);
 			texture.updateSamplingMode(1);
-			//texture.anisotropicFilteringLevel=4;
-			//texture.noMipmap=false;
 			if(setN===0){
 				const tx = x/tileWidth();
 				const ty = y/tileHeight();

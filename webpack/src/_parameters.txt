@@ -3,13 +3,19 @@
 
 @param renderDist
 @text Render Distance
-@desc The distance in tiles that will be rendered in 3D.
+@desc The maximum distance that can be rendered by the camera.
 @parent graphics
 @type Number
-@default 20
+@default 25
 
 @param antialiasing
 @text Antialiasing
+@parent graphics
+@type Boolean
+@default true
+
+@param mipmap
+@text Mipmapping
 @parent graphics
 @type Boolean
 @default true
@@ -37,6 +43,22 @@
 @min 0.01 @max 1
 @default 0.51
 
+@param map
+@text Map Settings
+
+@param cellDist
+@text Cell Load Radius
+@desc The radius around the player that tiles will be loaded.
+@parent map
+@type Number
+@default 20
+
+@param cellSize
+@text Cell Size
+@parent map
+@type Number
+@default 10
+
 @param fog
 @text Fog
 
@@ -53,7 +75,7 @@
 @parent fog
 @type Number
 @decimals 1
-@default 15.0
+@default 20.0
 
 @param fogFar
 @text Fog End Distance
@@ -61,7 +83,7 @@
 @parent fog
 @type Number
 @decimals 1
-@default 20.0
+@default 25.0
 
 @param light
 @text Light & Shadow

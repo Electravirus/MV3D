@@ -246,13 +246,13 @@ Object.assign(mv3d,{
 		pos(conf,x,y){
 			conf.pos={x:x,y:y};
 		},
-		lamp:new ConfigurationFunction('color,intensity,distance|height',function(conf,params){
-			const {color='white',intensity=1,distance=mv3d.LIGHT_DIST} = params;
-			conf.lamp={color:makeColor(color).toNumber(),intensity:Number(intensity),distance:Number(distance)};
+		lamp:new ConfigurationFunction('color,intensity,range',function(conf,params){
+			const {color='white',intensity=1,range=mv3d.LIGHT_DIST} = params;
+			conf.lamp={color:makeColor(color).toNumber(),intensity:Number(intensity),distance:Number(range)};
 		}),
-		flashlight:new ConfigurationFunction('color,intensity,distance,angle|yaw,pitch',function(conf,params){
-			const {color='white',intensity=1,distance=mv3d.LIGHT_DIST,angle=mv3d.LIGHT_ANGLE} = params;
-			conf.flashlight={color:makeColor(color).toNumber(),intensity:Number(intensity),distance:Number(distance),angle:Number(angle)};
+		flashlight:new ConfigurationFunction('color,intensity,range,angle|yaw,pitch',function(conf,params){
+			const {color='white',intensity=1,range=mv3d.LIGHT_DIST,angle=mv3d.LIGHT_ANGLE} = params;
+			conf.flashlight={color:makeColor(color).toNumber(),intensity:Number(intensity),distance:Number(range),angle:Number(angle)};
 			if(params.yaw){ conf.flashlightYaw=params.yaw; }
 			if(params.pitch){ conf.flashlightPitch=Number(params.pitch); }
 		}),
@@ -263,6 +263,9 @@ Object.assign(mv3d,{
 		alpha(conf,n){
 			conf.alpha=Number(n);
 		},
+		dirfix(conf,b){
+			conf.dirfix=Boolean(b);
+		}
 	},
 	mapConfigurationFunctions:{
 		light(conf,color){
@@ -284,6 +287,9 @@ Object.assign(mv3d,{
 			if(mode){ conf.cameraMode=mode; }
 		}),
 		ceiling:TextureConfigurator('ceiling','height'),
+		edge(conf,bool){
+			conf.edge=bool;
+		}
 	},
 
 });

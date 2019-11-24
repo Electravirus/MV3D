@@ -187,7 +187,8 @@ class Character extends Sprite{
 		return this.px!==this.characterPatternX() || this.py!==this.characterPatternY();
 	}
 	characterPatternY(){
-		if(this.isEvent && this.char.isObjectCharacter()){
+		const dirfix = this.getConfig('dirfix', this.isEvent && this.char.isObjectCharacter());
+		if(dirfix){
 			return this.char.direction()/2-1;
 		}
 		let dir = mv3d.transformDirectionYaw(this.char.direction());
