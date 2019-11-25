@@ -99,11 +99,10 @@ Object.assign(mv3d,{
 			for(let ky=range2[0];ky<=range2[range2.length-1];++ky){
 				const key = `${match[1]},${kx},${ky}`;
 				const tileId=this.constructTileId(...key.split(','));
-				if(tileId in this.tilesetConfigurations){
-					Object.assign(this.tilesetConfigurations[tileId],conf);
-				}else{
-					this.tilesetConfigurations[tileId]=conf;
+				if(!(tileId in this.tilesetConfigurations)){
+					this.tilesetConfigurations[tileId]={};
 				}
+				Object.assign(this.tilesetConfigurations[tileId],conf);
 			}
 
 		}
