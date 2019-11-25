@@ -88,17 +88,24 @@ Object.assign(mv3d,{
 		//tileset
 		this.tilesetConfigurations={};
 		const lines = this.readConfigurationBlocks($gameMap.tileset().note);
-		const readLines = /^\s*([abcde]\d?\s*,\s*\d+\s*,\s*\d+)\s*:(.*)$/gmi;
+		//const readLines = /^\s*([abcde]\d?\s*,\s*\d+\s*,\s*\d+)\s*:(.*)$/gmi;
+		const readLines = /^\s*([abcde]\d?)\s*,\s*(\d+(?:-\d+)?)\s*,\s*(\d+(?:-\d+)?)\s*:(.*)$/gmi;
 		let match;
 		while(match = readLines.exec(lines)){
-			const key = match[1];
-			const conf = this.readConfigurationFunctions(match[2],this.tilesetConfigurationFunctions);
-			const tileId=this.constructTileId(...key.split(','));
-			if(tileId in this.tilesetConfigurations){
-				Object.assign(this.tilesetConfigurations[tileId],conf);
-			}else{
-				this.tilesetConfigurations[tileId]=conf;
+			const conf = this.readConfigurationFunctions(match[4],this.tilesetConfigurationFunctions);
+			const range1 = match[2].split('-').map(s=>Number(s));
+			const range2 = match[3].split('-').map(s=>Number(s));
+			for(let kx=range1[0];kx<=range1[range1.length-1];++kx)
+			for(let ky=range2[0];ky<=range2[range2.length-1];++ky){
+				const key = `${match[1]},${kx},${ky}`;
+				const tileId=this.constructTileId(...key.split(','));
+				if(tileId in this.tilesetConfigurations){
+					Object.assign(this.tilesetConfigurations[tileId],conf);
+				}else{
+					this.tilesetConfigurations[tileId]=conf;
+				}
 			}
+
 		}
 		//map
 		const mapconf=this.mapConfigurations={};
@@ -264,7 +271,7 @@ Object.assign(mv3d,{
 			conf.alpha=Number(n);
 		},
 		dirfix(conf,b){
-			conf.dirfix=Boolean(b);
+			conf.dirfix=booleanString(b);
 		}
 	},
 	mapConfigurationFunctions:{
@@ -287,8 +294,8 @@ Object.assign(mv3d,{
 			if(mode){ conf.cameraMode=mode; }
 		}),
 		ceiling:TextureConfigurator('ceiling','height'),
-		edge(conf,bool){
-			conf.edge=bool;
+		edge(conf,b){
+			conf.edge=booleanString(b);
 		}
 	},
 

@@ -29,7 +29,7 @@ Game_CharacterBase.prototype.canPass = function(x, y, d) {
 	}
 	const tileHeight1 = mv3d.getWalkHeight(x,y);
 	const tileHeight2 = mv3d.getWalkHeight(x2,y2);
-	if(tileHeight1!==tileHeight2){ return false; }
+	if(Math.abs(tileHeight1-tileHeight2)>mv3d.STAIR_THRESH){ return false; }
 	return true;
 };
 

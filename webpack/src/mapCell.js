@@ -85,6 +85,7 @@ export class MapCell extends TransformNode{
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false){
 		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;
+		if(mv3d.isTileEmpty(tileId)){ return; }
 		const configRect = ceiling?tileConf.bottom_rect:tileConf.top_rect;
 		const isAutotile = Tilemap.isAutotile(tileId)&&!configRect;
 		let rects;
@@ -117,6 +118,7 @@ export class MapCell extends TransformNode{
 
 			let neededHeight=wallHeight;
 			let tileId=tileConf.side_id,configRect,texture_side='side';
+			if(mv3d.isTileEmpty(tileId)){ continue; }
 			if(isFringe){
 				const neighborHeight = mv3d.getFringeHeight(this.ox+x+np.x,this.oy+y+np.y,l);
 				if(neighborHeight===z){ continue; }
@@ -208,6 +210,7 @@ export class MapCell extends TransformNode{
 	}
 	async loadFence(tileConf,x,y,z,l,wallHeight){
 		const tileId = tileConf.side_id;
+		if(mv3d.isTileEmpty(tileId)){ return; }
 		const configRect = tileConf.side_rect;
 		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'side');
 		const isAutotile = Tilemap.isAutotile(tileId);
@@ -258,6 +261,7 @@ export class MapCell extends TransformNode{
 	}
 	async loadCross(tileConf,x,y,z,l,wallHeight){
 		const tileId = tileConf.side_id;
+		if(mv3d.isTileEmpty(tileId)){ return; }
 		const configRect = tileConf.side_rect;
 		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'side');
 		const isAutotile = Tilemap.isAutotile(tileId);

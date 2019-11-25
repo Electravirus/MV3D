@@ -28,6 +28,8 @@ Object.assign(mv3d,{
 	RENDER_DIST: Number(parameters.renderDist),
 	MIPMAP:booleanString(parameters.mipmap),
 
+	STAIR_THRESH: Number(parameters.stairThresh),
+
 	FOG_COLOR: makeColor(parameters.fogColor).toNumber(),
 	FOG_NEAR: Number(parameters.fogNear),
 	FOG_FAR: Number(parameters.fogFar), 

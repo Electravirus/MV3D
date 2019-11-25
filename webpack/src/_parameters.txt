@@ -118,7 +118,7 @@
 @default 4.0
 
 @param input
-@text Input
+@text Input & Movement
 
 @param keyboardPitch
 @text Control pitch with keyboard
@@ -140,6 +140,14 @@
 @desc In 1st person mode, Q&E will strafe left and right.
 @type Boolean
 @default true
+
+@param stairThresh
+@text Stair Threshold
+@desc If the distance in height between two tiles is less than this, they will be passable.
+@parent input
+@type Number
+@decimals 2
+@default 0.1
 
 @param tileconfig
 @text Tile Config
