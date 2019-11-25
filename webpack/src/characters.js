@@ -88,7 +88,8 @@ class Sprite extends TransformNode{
 	}
 	disposeMaterial(){
 		if(this.material){
-			this.material.dispose(true,true);
+			this.material.dispose();
+			this.texture.dispose();
 			this.material=null;
 			this.texture=null;
 			this.bitmap=null;
@@ -171,6 +172,8 @@ class Character extends Sprite{
 			this.setTileMaterial(this._tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
+		}else{
+			this.setEnabled(false);
 		}
 	}
 	updateCharacterFrame(){
@@ -468,11 +471,13 @@ class Character extends Sprite{
 			this.dispose();
 		}
 
+
 		this.visible=this.char.mv_sprite.visible;
 		if(typeof this.char.isVisible === 'function'){
 			this.visible=this.visible&&this.char.isVisible();
 		}
-		if(!this.material){
+		this.disabled=!this.visible;
+		if(this.char.isTransparent() || !this._characterName&&!this._tileId){
 			this.visible=false;
 		}
 		if(!this._isEnabled){
@@ -480,7 +485,14 @@ class Character extends Sprite{
 		}else{
 			if(!this.visible){ this.setEnabled(false); }
 		}
-		if(!this._isEnabled){ return; }
+
+
+		if(this.isImageChanged()){
+			this.updateCharacter();
+		}
+		if(this.patternChanged()){
+			this.updateFrame();
+		}
 
 		if(this.material){
 			this.updateNormal();
@@ -493,12 +505,6 @@ class Character extends Sprite{
 	}
 
 	updateNormal(){
-		if(this.isImageChanged()){
-			this.updateCharacter();
-		}
-		if(this.patternChanged()){
-			this.updateFrame();
-		}
 		const shapes = mv3d.configurationShapes;
 		if(this.shape===shapes.SPRITE){
 			this.mesh.pitch = mv3d.blendCameraPitch.currentValue()-90;
