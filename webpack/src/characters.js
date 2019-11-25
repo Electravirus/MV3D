@@ -540,7 +540,7 @@ class Character extends Sprite{
 	}
 
 	updateAlpha(){
-		let hasAlpha=this.hasConfig('alpha');
+		let hasAlpha=this.hasConfig('alpha')||this.char.opacity()<255;
 		this.bush = Boolean(this.char.bushDepth());
 		if(this.bush && this.hasBush()){
 			hasAlpha=true;
@@ -556,7 +556,7 @@ class Character extends Sprite{
 		}
 		if(hasAlpha){
 			this.material.useAlphaFromDiffuseTexture=true;
-			this.material.alpha=this.getConfig('alpha',1);
+			this.material.alpha=this.getConfig('alpha',1)*this.char.opacity()/255;
 		}else{
 			this.material.useAlphaFromDiffuseTexture=false;
 			this.material.alpha=1;

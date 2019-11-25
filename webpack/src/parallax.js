@@ -28,6 +28,6 @@ Game_Map.prototype.updateScroll = function() {
 };
 
 Game_CharacterBase.prototype.isNearTheScreen = function() {
-	return Math.abs(this.x - mv3d.cameraStick.position.x)<=mv3d.RENDER_DIST
-	&& Math.abs(-this.y - mv3d.cameraStick.position.y)<=mv3d.RENDER_DIST;
+	return Math.abs(this.x - mv3d.cameraStick.x)<=mv3d.RENDER_DIST
+	&& Math.abs(this.y - mv3d.cameraStick.y)<=mv3d.RENDER_DIST;
 };
