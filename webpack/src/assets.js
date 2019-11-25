@@ -44,39 +44,6 @@ Object.assign(mv3d,{
 		}
 	})},
 
-	/** @deprecated */
-	getCachedTileTexture(setN,x,y,w,h){
-		const key = `${setN}|${x},${y}|${w},${h}`;
-		if(key in this.textureCache){
-			return this.textureCache[key];
-		}
-		const tsName = $gameMap.tileset().tilesetNames[setN];
-		if(!tsName){
-			return this.getErrorTexture();
-		}
-		const textureSrc=`img/tilesets/${tsName}.png`;
-		const texture = new Texture(textureSrc,this.scene);
-		texture.hasAlpha=true;
-		texture.onLoadObservable.addOnce(()=>{
-			if(this.textureCache[key]!==texture){ return; }
-			texture.crop(x,y,w,h);
-			texture.updateSamplingMode(1);
-			if(setN===0){
-				const tx = x/tileWidth();
-				const ty = y/tileHeight();
-				if(tx<6||tx>=8||ty>=6){
-					const isWaterfall = tx>=6&&tx<8||tx>=14;
-					texture.animX = isWaterfall ? 0 : 2;
-					texture.animY = isWaterfall ? 1 : 0;
-					texture.frameData={x:x,y:y,w:w,h:h};
-					this.animatedTextures.push(texture);
-				}
-			}
-		});
-		this.textureCache[key]=texture;
-		return texture;
-	},
-
 	getErrorTexture(){
 		if(this.errorTexture){ return this.errorTexture; }
 		this.errorTexture = new Texture(`${mv3d.MV3D_FOLDER}/errorTexture.png`,this.scene);
@@ -128,29 +95,6 @@ Object.assign(mv3d,{
 		const animData = mv3d.getTileAnimationData(tileConf,side);
 		//console.log(options);
 		return await mv3d.getCachedTilesetMaterialAsync(setN,animData.animX,animData.animY,options);
-	},
-
-	/** @deprecated */
-	getCachedTileMaterial(setN,x,y,w,h,options={}){
-		this.processMaterialOptions(options);
-		const key = `${setN}|${x},${y}|${w},${h}|${this.getExtraBit(options)}`;
-		if(key in this.materialCache){
-			return this.materialCache[key];
-		}
-		const texture = this.getCachedTileTexture(setN,x,y,w,h);
-		const material = new StandardMaterial(key, this.scene);
-		material.diffuseTexture=texture;
-		if(options.transparent){ // alpha blending
-			// materials with alpha blending don't cast shadows.
-			material.opacityTexture=texture;
-			material.alpha=options.alpha;
-		}
-		material.alphaCutOff = mv3d.ALPHA_CUTOFF;
-		material.ambientColor.set(1,1,1);
-		material.emissiveColor.set(options.glow,options.glow,options.glow);
-		material.specularColor.set(0,0,0);
-		this.materialCache[key]=material;
-		return material;
 	},
 
 	processMaterialOptions(options){
