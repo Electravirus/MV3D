@@ -1,15 +1,24 @@
+
  MV3D
 ======
 
 A 3D rendering plugin for RPG Maker MV.
+
 
 If you are making a game with this plugin, please consider supporting my
 patreon.  
 https://www.patreon.com/cutievirus  
 A list of patrons can be found at the bottom of this file.
 
-Make sure you have both the `babylon.js` plugin and `mv3d-babylon.js` plugin
-loaded, in that order.
+## Getting started
+
+To use the plugin on a new or existing project, download [plugin.zip] and
+extract the files into your project directory.
+Then, load `babylon.js` and `mv3d-babylon.js` as plugins in that order.
+
+[plugin.zip]:
+https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
+
 
 Now when you run your game, the map should be rendered in 3D.
 
@@ -218,18 +227,12 @@ Example: rot(45)
 ### Event Lights
 
 The lamp function attaches a point light to the event.
-
-Parameter list:
-color,intensity,range
-
+Parameter list: color,intensity,range
 Examples: lamp(white,0.5,1), lamp(#ff8888,1,3)
 
 
 The flashlight function attaches a spotlight to the event.
-
-Parameter list:
-color,intensity,range,angle|yaw,pitch
-
+Parameter list: color,intensity,range,angle|yaw,pitch
 Examples: flashlight(#ffffff,2,6,30), flashlight(red,2,6,45|90)
 
 
@@ -452,6 +455,6 @@ player upgrade their airship's height and speed.
 
 
 
-#Patrons:
+## Patrons:
 
 - Whitely

@@ -4,8 +4,15 @@ patreon.
 https://www.patreon.com/cutievirus  
 A list of patrons can be found at the bottom of this file.
 
-Make sure you have both the `babylon.js` plugin and `mv3d-babylon.js` plugin
-loaded, in that order.
+## Getting started
+
+To use the plugin on a new or existing project, download [plugin.zip] and
+extract the files into your project directory.
+Then, load `babylon.js` and `mv3d-babylon.js` as plugins in that order.
+
+[plugin.zip]:
+https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
+
 
 Now when you run your game, the map should be rendered in 3D.
 
@@ -442,6 +449,6 @@ player upgrade their airship's height and speed.
 
 
 
-#Patrons:
+## Patrons:
 
 - Whitely

@@ -10,8 +10,10 @@
   "author": "Dread/Nyanak",
   "license": "MIT",
   "devDependencies": {
+    "glob": "^7.1.6",
     "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "yazl": "^2.5.1"
   },
   "dependencies": {}
 }

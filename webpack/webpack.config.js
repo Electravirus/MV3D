@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
+const yazl = require('yazl');
+const glob = require('glob');
 
 const getBanner=()=>`/*:
 ${fs.readFileSync("src/_info.txt")}
@@ -11,6 +13,12 @@ ${fs.readFileSync("src/_help.txt")}
 ${fs.readFileSync("src/_parameters.txt")}
 */
 ${fs.readFileSync("src/_structs.txt")}
+`;
+
+const getReadme=()=>`
+${fs.readFileSync("src/_readme_header.txt")}
+
+${fs.readFileSync("src/_help.txt")}
 `;
 
 module.exports = {
@@ -49,6 +57,24 @@ module.exports = {
 			raw: true,
 			banner: getBanner,
 		}),
+		{apply:compiler=>compiler.hooks.done.tap('myDonePlugin',compilation=>{
+			fs.writeFile('../README.md',getReadme(),err=>{
+				if(err){ console.error("Couldn't write README.md!"); }
+				else{ console.log("Created README.md"); }
+			});
+
+			const mv3d_files = glob.sync("../img/MV3D/**/*",{nodir:true});
+			const zipfile = new yazl.ZipFile();
+			zipfile.addFile('../js/plugins/babylon.js','js/plugins/babylon.js');
+			zipfile.addFile('../js/plugins/mv3d-babylon.js','js/plugins/mv3d-babylon.js');
+			for (const file of mv3d_files){
+				zipfile.addFile(file,path.relative('../',file));
+			}
+			zipfile.outputStream.pipe(fs.createWriteStream('../plugin.zip')).on('close',()=>{
+				console.log(`Created plugin.zip`);
+			});
+			zipfile.end();
+		})},
 	],
 
 };
