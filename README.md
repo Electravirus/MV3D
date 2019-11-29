@@ -459,3 +459,4 @@ player upgrade their airship's height and speed.
 
 - Whitely
 - Yorae Rasante
+- Izybelle
