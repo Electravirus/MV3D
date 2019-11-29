@@ -295,6 +295,9 @@ Object.assign(mv3d,{
 		ceiling:TextureConfigurator('ceiling','height'),
 		edge(conf,b){
 			conf.edge=booleanString(b);
+		},
+		disable(conf,b){
+			conf.mv3d=booleanString(b);
 		}
 	},
 

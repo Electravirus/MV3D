@@ -1,4 +1,4 @@
-import { Engine, Scene, HemisphericLight, TransformNode, FreeCamera, Node, Vector2, Vector3, Color3, FOGMODE_LINEAR, DirectionalLight, ShadowGenerator, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA } from "./mod_babylon.js";
+import { Engine, Scene, HemisphericLight, TransformNode, FreeCamera, Node, Vector2, Vector3, Color3, FOGMODE_LINEAR, DirectionalLight, ShadowGenerator, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods } from "./mod_babylon.js";
 import { v3origin, degtorad, tileSize } from "./util.js";
 
 
@@ -6,6 +6,7 @@ const mv3d = {
 
 	setup(){
 		this.setupParameters();
+		setupBabylonMods();
 
 		this.canvas = document.createElement('canvas');
 		this.texture = PIXI.Texture.fromCanvas(this.canvas);
@@ -27,8 +28,25 @@ const mv3d = {
 		this.camera.minZ=0.1;
 		this.camera.maxZ=this.RENDER_DIST;
 
-		//this.sunlight = new DirectionalLight('sunlight', new Vector3(-1,-1,1), this.scene);
-		//this.shadowGenerator = new ShadowGenerator(1024,this.sunlight);
+		if(this.DYNAMIC_SHADOWS){
+			this.sunNode = new TransformNode("sunNode",this.scene);
+			this.sunlight = new DirectionalLight('sunlight', new Vector3(0,-1,0), this.scene);
+			this.sunlight.parent=this.sunNode;
+			this.shadowGenerator = new ShadowGenerator(this.DYNAMIC_SHADOW_RES,this.sunlight);
+			//this.shadowGenerator.bias=0.0013;
+			this.shadowGenerator.bias=0.0006;
+			this.shadowGenerator.normalBias=0.01;
+			//this.shadowGenerator.forceBackFacesOnly=true;
+			//this.shadowGenerator.useCloseExponentialShadowMap=true;
+			this.shadowGenerator.usePercentageCloserFiltering=true;
+			//this.shadowGenerator.usePoissonSampling=true;
+			this.sunlight.shadowFrustumSize=this.DYNAMIC_SHADOW_DIST;
+			this.shadowGenerator.frustumEdgeFalloff=this.DYNAMIC_SHADOW_FALLOFF;
+			this.sunlight.shadowMinZ=-this.RENDER_DIST;
+			this.sunlight.shadowMaxZ=this.RENDER_DIST;
+			this.sunNode.pitch=45;
+			this.sunNode.yaw=45;
+		}
 
 		this.scene.ambientColor = new Color3(1,1,1);
 		this.scene.fogMode=FOGMODE_LINEAR;
@@ -66,6 +84,13 @@ const mv3d = {
 		this.updateCharacters();
 
 		this.updateBlenders();
+
+		// update sunlight
+		if(this.sunlight){
+			//this.sunNode.x=this.cameraStick.x;
+			//this.sunNode.y=this.cameraStick.y;
+			this.sunNode.position.copyFrom(this.cameraStick.position);
+		}
 
 		// input
 		if( mv3d.KEYBOARD_TURN || this.is1stPerson() ){

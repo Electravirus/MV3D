@@ -80,6 +80,12 @@ export class MapCell extends TransformNode{
 		this.mesh=this.builder.build();
 		if(this.mesh){
 			this.mesh.parent=this;
+			this.mesh.alphaIndex=0;
+			if(mv3d.DYNAMIC_SHADOWS){
+				this.mesh.receiveShadows=true;
+				//mv3d.shadowGenerator.getShadowMap().renderList.push(this.mesh);
+				mv3d.shadowGenerator.addShadowCaster(this.mesh);
+			}
 		}
 		delete this.builder
 	}

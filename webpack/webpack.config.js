@@ -5,6 +5,11 @@ const TerserPlugin = require('terser-webpack-plugin');
 const yazl = require('yazl');
 const glob = require('glob');
 
+const sound=(()=>{const player=require('play-sound')({});return sound=>{
+	const cp=player.play(sound,err=>{});
+	setTimeout(()=>cp.kill(),1000);
+}})();
+
 const getBanner=()=>`/*:
 ${fs.readFileSync("src/_info.txt")}
 @help
@@ -57,7 +62,11 @@ module.exports = {
 			raw: true,
 			banner: getBanner,
 		}),
-		{apply:compiler=>compiler.hooks.done.tap('myDonePlugin',compilation=>{
+		{apply:compiler=>compiler.hooks.done.tap('myDonePlugin',stats=>{
+			if(stats.compilation.errors.length){
+				sound('../audio/se/Buzzer1.ogg');
+				return;
+			}
 			fs.writeFile('../README.md',getReadme(),err=>{
 				if(err){ console.error("Couldn't write README.md!"); }
 				else{ console.log("Created README.md"); }
@@ -74,6 +83,7 @@ module.exports = {
 				console.log(`Created plugin.zip`);
 			});
 			zipfile.end();
+			sound('../audio/se/Computer.ogg');
 		})},
 	],
 

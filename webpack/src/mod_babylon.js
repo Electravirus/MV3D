@@ -112,3 +112,11 @@ Scene.prototype.removeMesh=function(mesh){
 
 // color
 Color3.prototype.toNumber=Color4.prototype.toNumber=function(){return this.r*255<<16|this.g*255<<8|this.b*255;}
+
+// hack babylon
+export function setupBabylonMods(){
+	BABYLON.Effect.ShadersStore.shadowMapPixelShader=BABYLON.Effect.ShadersStore.shadowMapPixelShader.replace(
+		'if (texture2D(diffuseSampler,vUV).a<0.4)',
+		`if (texture2D(diffuseSampler,vUV).a<${mv3d.ALPHA_CUTOFF})`,
+	);
+};

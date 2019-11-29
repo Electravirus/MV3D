@@ -53,6 +53,7 @@ Object.assign(mv3d,{
 		const shadowMaterial = new StandardMaterial('shadow material', mv3d.scene);
 		shadowMaterial.diffuseTexture=shadowTexture;
 		shadowMaterial.opacityTexture=shadowTexture;
+		shadowMaterial.specularColor.set(0,0,0);
 		Sprite.Meshes.SHADOW.material=shadowMaterial;
 		
 		for (const key in Sprite.Meshes){

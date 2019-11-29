@@ -72,3 +72,12 @@ Scene_Map.prototype.isReady = function() {
 	let ready = _map_isReady.apply(this,arguments);
 	return ready && mv3d.mapReady;
 };
+
+// Title
+
+const _title_start=Scene_Title.prototype.start;
+Scene_Title.prototype.start = function() {
+	_title_start.apply(this,arguments);
+	mv3d.clearMap();
+	mv3d.clearCameraTarget();
+};

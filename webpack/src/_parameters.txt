@@ -85,25 +85,25 @@
 @decimals 1
 @default 25.0
 
-@param light
+@param shadow
 @text Light & Shadow
 
 @param ambientColor
 @text Ambient Color
 @desc The color of the ambient light.
-@parent light
+@parent shadow
 @type Color
 @default white
 
 @param characterShadows
-@text Character Shadows
-@parent light
+@text Fake Character Shadows
+@parent shadow
 @type Boolean
 @default true
 
 @param shadowScale
 @text Default Shadow Scale
-@parent light
+@parent shadow
 @desc The default size of character shadows.
 @type Number
 @decimals 1
@@ -111,11 +111,37 @@
 
 @param shadowDist
 @text Shadow Distance
-@parent light
+@parent shadow
 @desc How far above the ground before a character's shadow fades completely. 
 @type Number
 @decimals 1
 @default 4.0
+
+@param dynShadowEnabled
+@text Use Dynamic Shadows
+@parent shadow
+@type Boolean
+@default true
+
+@param dynShadowDist
+@text Dynamic Shadow Render Distance
+@parent shadow
+@type Number
+@default 20
+
+@param dynShadowRes
+@text Dynamic Shadow Resolution
+@parent shadow
+@type Number
+@default 1024
+
+@param dynShadowFalloff
+@text Dynamic Shadow Falloff
+@parent shadow
+@desc How smoothly the shadow fades at the edge of render distance.
+@type Number
+@decimals 2
+@default 0.5
 
 @param input
 @text Input & Movement

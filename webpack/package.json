@@ -11,6 +11,7 @@
   "license": "MIT",
   "devDependencies": {
     "glob": "^7.1.6",
+    "play-sound": "^1.1.3",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
     "yazl": "^2.5.1"
