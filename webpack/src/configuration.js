@@ -83,8 +83,7 @@ function TextureConfigurator(name,extraParams=''){
 
 Object.assign(mv3d,{
 	tilesetConfigurations:{},
-	mapConfigurations:{},
-	loadMapSettings(){
+	loadTilesetSettings(){
 		//tileset
 		this.tilesetConfigurations={};
 		const lines = this.readConfigurationBlocks($gameMap.tileset().note);
@@ -106,6 +105,9 @@ Object.assign(mv3d,{
 			}
 
 		}
+	},
+	mapConfigurations:{},
+	loadMapSettings(){
 		//map
 		const mapconf=this.mapConfigurations={};
 		this.readConfigurationFunctions(
@@ -296,8 +298,8 @@ Object.assign(mv3d,{
 		edge(conf,b){
 			conf.edge=booleanString(b);
 		},
-		disable(conf,b){
-			conf.mv3d=booleanString(b);
+		disable(conf){
+			conf.disabled=true;
 		}
 	},
 

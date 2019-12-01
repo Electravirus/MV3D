@@ -11,6 +11,7 @@ Game_CharacterBase.prototype.canPass = function(x, y, d) {
 	if(!_characterBase_canPass.apply(this,arguments)){
 		return false;
 	}
+	if (mv3d.isDisabled()){return true; }
 	const x2 = $gameMap.roundXWithDirection(x, d);
 	const y2 = $gameMap.roundYWithDirection(y, d);
 	if(this===$gamePlayer){
@@ -72,6 +73,7 @@ function vehicleObstructed(){
 
 const _airship_land_ok = Game_Map.prototype.isAirshipLandOk;
 Game_Map.prototype.isAirshipLandOk = function(x, y) {
+	if (mv3d.isDisabled()){ return _airship_land_ok.apply(this,arguments); }
 	if(vehicleObstructed.call(this.airship(),x,y,true)){ return false; }
 	if(mv3d.AIRSHIP_SETTINGS.bushLanding){
 		return this.checkPassage(x, y, 0x0f);
@@ -83,6 +85,7 @@ Game_Map.prototype.isAirshipLandOk = function(x, y) {
 
 const _player_updateVehicleGetOn = Game_Player.prototype.updateVehicleGetOn;
 Game_Player.prototype.updateVehicleGetOn = function() {
+	if (mv3d.isDisabled()){ return _player_updateVehicleGetOn.apply(this,arguments); }
 	const vehicle = this.vehicle();
 	const speed = mv3d.loadData(`${vehicle._type}_speed`,vehicle._moveSpeed);
 	this.vehicle().setMoveSpeed(speed);
@@ -90,9 +93,9 @@ Game_Player.prototype.updateVehicleGetOn = function() {
 };
 
 // jump
-
 const _charBase_jump = Game_CharacterBase.prototype.jump;
 Game_CharacterBase.prototype.jump = function(xPlus, yPlus) {
+	if (mv3d.isDisabled()){ return _charBase_jump.apply(this,arguments); }
 	this.mv3d_jumpHeightStart = mv3d.getWalkHeight(this.x,this.y);
 	this.mv3d_jumpHeightEnd = mv3d.getWalkHeight(this.x+xPlus,this.y+yPlus);
 	_charBase_jump.apply(this,arguments);

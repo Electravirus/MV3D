@@ -81,13 +81,15 @@ export class MapCell extends TransformNode{
 		if(this.mesh){
 			this.mesh.parent=this;
 			this.mesh.alphaIndex=0;
-			if(mv3d.DYNAMIC_SHADOWS){
-				this.mesh.receiveShadows=true;
-				//mv3d.shadowGenerator.getShadowMap().renderList.push(this.mesh);
-				mv3d.shadowGenerator.addShadowCaster(this.mesh);
-			}
+			mv3d.callFeatures('createCellMesh',this.mesh);
 		}
 		delete this.builder
+	}
+	dispose(){
+		super.dispose(...arguments);
+		if(this.mesh){
+			mv3d.callFeatures('destroyCellMesh',this.mesh);
+		}
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false){
 		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;

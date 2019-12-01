@@ -74,6 +74,7 @@ export const tileSize=()=>tileWidth();
 export const tileWidth=()=>Game_Map.prototype.tileWidth();
 export const tileHeight=()=>Game_Map.prototype.tileHeight();
 
+
 // useful consts
 export const XAxis = new Vector3(1,0,0);
 export const YAxis = new Vector3(0,1,0);

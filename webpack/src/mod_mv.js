@@ -25,11 +25,16 @@ Scene_Map.prototype.update = function(){
 	mv3d.update();
 }
 
-ShaderTilemap.prototype.renderWebGL = function(renderer) {};
+const _renderWebGL = ShaderTilemap.prototype.renderWebGL;
+ShaderTilemap.prototype.renderWebGL = function(renderer) {
+	if(mv3d.mapDisabled){ _renderWebGL.apply(this,arguments); }
+};
 
 const _createTilemap=Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap=function(){
 	_createTilemap.apply(this,arguments);
+	mv3d.mapDisabled = mv3d.isDisabled();
+	if(mv3d.mapDisabled){ return; }
 	this._tilemap.visible=false;
 	this._baseSprite.addChild( new PIXI.Sprite(mv3d.texture) );
 };
@@ -58,8 +63,11 @@ Game_Player.prototype.performTransfer = function() {
 
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
+	console.log("map loaded",mv3d.mapLoaded)
+	mv3d.loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
 	if(!mv3d.mapLoaded){
+		mv3d.loadTilesetSettings();
 		mv3d.mapReady=false;
 		//mv3d.mapReady=true;
 		mv3d.loadMap();

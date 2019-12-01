@@ -96,7 +96,7 @@
 @default white
 
 @param characterShadows
-@text Fake Character Shadows
+@text Character Shadows
 @parent shadow
 @type Boolean
 @default true
@@ -116,32 +116,6 @@
 @type Number
 @decimals 1
 @default 4.0
-
-@param dynShadowEnabled
-@text Use Dynamic Shadows
-@parent shadow
-@type Boolean
-@default true
-
-@param dynShadowDist
-@text Dynamic Shadow Render Distance
-@parent shadow
-@type Number
-@default 20
-
-@param dynShadowRes
-@text Dynamic Shadow Resolution
-@parent shadow
-@type Number
-@default 1024
-
-@param dynShadowFalloff
-@text Dynamic Shadow Falloff
-@parent shadow
-@desc How smoothly the shadow fades at the edge of render distance.
-@type Number
-@decimals 2
-@default 0.5
 
 @param input
 @text Input & Movement

@@ -8,7 +8,18 @@ Scene_Boot.prototype.start=function(){
 }
 const isPlaytest = Utils.isOptionValid('test');
 
-DataManager._databaseFiles.push({name:'mv3d_data',src:`../${mv3d.MV3D_FOLDER}/mv3d_data.json`});
+if(isPlaytest){
+	const fs = require('fs');
+	const path = require('path');
+	const fileName = path.resolve(nw.__dirname,'data/mv3d_data.json');
+	if(!fs.existsSync(fileName)) {
+		fs.writeFileSync(fileName,JSON.stringify({
+			id:crypto.getRandomValues(new Uint32Array(1))[0],
+		}));
+	}
+}
+
+DataManager._databaseFiles.push({name:'mv3d_data',src:`mv3d_data.json`});
 let _mv3d_data;
 const mv3d_data_handler={
 	get(target,key){
@@ -37,7 +48,7 @@ Object.assign(mv3d,{
 		if(_mv3d_data._dirty&&!writing_mv3d_data){
 			writing_mv3d_data=true;
 			_mv3d_data._dirty=false;
-			await saveFile(`${mv3d.MV3D_FOLDER}/mv3d_data.json`,JSON.stringify(_mv3d_data));
+			await saveFile(`data/mv3d_data.json`,JSON.stringify(_mv3d_data));
 			writing_mv3d_data=false;
 		}
 	},

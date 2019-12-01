@@ -28,25 +28,7 @@ const mv3d = {
 		this.camera.minZ=0.1;
 		this.camera.maxZ=this.RENDER_DIST;
 
-		if(this.DYNAMIC_SHADOWS){
-			this.sunNode = new TransformNode("sunNode",this.scene);
-			this.sunlight = new DirectionalLight('sunlight', new Vector3(0,-1,0), this.scene);
-			this.sunlight.parent=this.sunNode;
-			this.shadowGenerator = new ShadowGenerator(this.DYNAMIC_SHADOW_RES,this.sunlight);
-			//this.shadowGenerator.bias=0.0013;
-			this.shadowGenerator.bias=0.0006;
-			this.shadowGenerator.normalBias=0.01;
-			//this.shadowGenerator.forceBackFacesOnly=true;
-			//this.shadowGenerator.useCloseExponentialShadowMap=true;
-			this.shadowGenerator.usePercentageCloserFiltering=true;
-			//this.shadowGenerator.usePoissonSampling=true;
-			this.sunlight.shadowFrustumSize=this.DYNAMIC_SHADOW_DIST;
-			this.shadowGenerator.frustumEdgeFalloff=this.DYNAMIC_SHADOW_FALLOFF;
-			this.sunlight.shadowMinZ=-this.RENDER_DIST;
-			this.sunlight.shadowMaxZ=this.RENDER_DIST;
-			this.sunNode.pitch=45;
-			this.sunNode.yaw=45;
-		}
+		this.callFeatures('setup');
 
 		this.scene.ambientColor = new Color3(1,1,1);
 		this.scene.fogMode=FOGMODE_LINEAR;
@@ -117,7 +99,7 @@ const mv3d = {
 			this.cells[key].update();
 		}
 
-		this.updateSerializer();
+		this.updateData();
 	},
 
 	loadData(key,dfault){
@@ -151,6 +133,20 @@ const mv3d = {
 		const k = useCurrent?'currentValue':'targetValue';
 		return this.getCameraTarget()===$gamePlayer && this.blendCameraTransition[k]()<=0
 		&& this.blendCameraDist[k]()<=0 && this.blendPanX[k]()===0 && this.blendPanY[k]()===0;
+	},
+
+	isDisabled(){
+		return this.getMapConfig('disabled')||this.loadData('disabled');
+	},
+	disable(fadeType=2){
+		mv3d.saveData('disabled',true);
+		//SceneManager.goto(Scene_Map);
+		$gamePlayer.reserveTransfer($gameMap.mapId(),$gamePlayer.x,$gamePlayer.y,$gamePlayer.direction(),fadeType);
+	},
+	enable(fadeType=2){
+		mv3d.saveData('disabled',false);
+		//SceneManager.goto(Scene_Map);
+		$gamePlayer.reserveTransfer($gameMap.mapId(),$gamePlayer.x,$gamePlayer.y,$gamePlayer.direction(),fadeType);
 	},
 
 	loopCoords(x,y){

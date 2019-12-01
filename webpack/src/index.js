@@ -12,4 +12,9 @@ import './assets.js';
 import './characters.js';
 import './movement.js';
 import './parallax.js';
-import './serializer.js';
+import './data.js';
+import './features.js';
+import './plugin_support/plugin_support.js';
+
+//features
+//import './feature-dynamicShadows.js';

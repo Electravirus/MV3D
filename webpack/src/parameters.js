@@ -41,11 +41,12 @@ Object.assign(mv3d,{
 	LIGHT_DIST: 3,
 	LIGHT_ANGLE: 45,
 	FLASHLIGHT_EXTRA_ANGLE: 10,
-
+	/*
 	DYNAMIC_SHADOWS:booleanString(parameters.dynShadowEnabled),
 	DYNAMIC_SHADOW_DIST:Number(parameters.dynShadowDist),
 	DYNAMIC_SHADOW_RES:Number(parameters.dynShadowRes),
 	DYNAMIC_SHADOW_FALLOFF:Number(parameters.dynShadowFalloff),
+	*/
 	CHARACTER_SHADOWS:booleanString(parameters.characterShadows),
 	SHADOW_SCALE:Number(parameters.shadowScale),
 	SHADOW_DIST:Number(parameters.shadowDist),

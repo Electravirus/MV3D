@@ -30,19 +30,18 @@ Object.assign(mv3d,{
 		this.characters.length=0;
 		this.resetCameraTarget();
 
-		if(this.DYNAMIC_SHADOWS){
-			this.shadowGenerator.getShadowMap().renderList.splice(0,Infinity);
-		}
+		this.callFeatures('clearMap');
 	},
 
 	loadMap(){
-		this.loadMapSettings();
 		//this.cameraStick.x=$gamePlayer._realX;
 		//this.cameraStick.y=$gamePlayer._realY;
 		this.updateBlenders();
 		this.updateMap();
 		this.createCharacters();
 		this.rememberCameraTarget();
+
+		this.callFeatures('loadMap');
 	},
 
 	async updateMap(){

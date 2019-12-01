@@ -145,6 +145,8 @@ mv3d.PluginCommand=class{
 	_flashlightAngle(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightAngle,n,time); }
 	_flashlightPitch(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightPitch,n,time); }
 	_flashlightYaw(char,yaw,time){ char.flashlightTargetYaw=yaw; }
+	disable(fadeType){ mv3d.disable(fadeType); }
+	enable(fadeType){ mv3d.enable(fadeType); }
 	_RELATIVE_BLEND(blender,n,time){ blender.setValue(relativeNumber(blender.targetValue(),n),Number(time)); }
 	_TIME(time){
 		if(typeof time==='number'){ return time; }

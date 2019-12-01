@@ -68,7 +68,9 @@ const raycastPredicate=mesh=>{
 	return true;
 }
 
+const _process_map_touch = Scene_Map.prototype.processMapTouch;
 Scene_Map.prototype.processMapTouch = function() {
+	if (mv3d.isDisabled()){ return _process_map_touch.apply(this,arguments); }
 	if (TouchInput.isTriggered() || this._touchCount > 0) {
 		if (TouchInput.isPressed()) {
 			if (this._touchCount === 0 || this._touchCount >= 15) {
