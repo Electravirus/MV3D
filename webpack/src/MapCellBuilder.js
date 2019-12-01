@@ -97,9 +97,6 @@ class SubMeshBuilder{
 			uvr.x2,uvr.y2,
 		];
 		const indices=[1,0,2,1,2,3];
-		if(flip){
-			for(let i=0;i<normals.length;++i){ normals[i]*=-1; }
-		}
 		this.pushNewData(positions,indices,normals,uvs);
 	}
 	pushNewData(positions,indices,normals,uvs){

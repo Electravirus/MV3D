@@ -60,10 +60,14 @@ Game_Player.prototype.performTransfer = function() {
 };
 
 // On Map Load
+let mapNeedsClear=false;
 
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
-	console.log("map loaded",mv3d.mapLoaded)
+	if(mapNeedsClear){
+		mv3d.clearMap();
+		mapNeedsClear=false;
+	}
 	mv3d.loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
 	if(!mv3d.mapLoaded){
@@ -73,6 +77,12 @@ Scene_Map.prototype.onMapLoaded=function(){
 		mv3d.loadMap();
 	}
 	mv3d.updateBlenders(true);
+};
+
+const _onLoadSuccess = Scene_Load.prototype.onLoadSuccess;
+Scene_Load.prototype.onLoadSuccess = function() {
+	_onLoadSuccess.apply(this,arguments);
+	mapNeedsClear=true;
 };
 
 const _map_isReady = Scene_Map.prototype.isReady;
