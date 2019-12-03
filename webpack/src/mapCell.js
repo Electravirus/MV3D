@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { TransformNode, Mesh, MeshBuilder, Vector3, Vector2, FRONTSIDE, BACKSIDE, WORLDSPACE, LOCALSPACE, DOUBLESIDE, Plane } from "./mod_babylon.js";
-import { tileSize, XAxis, YAxis, tileWidth, tileHeight, sleep, snooze } from './util.js';
+import { tileSize, XAxis, YAxis, tileWidth, tileHeight, sleep, snooze, sin, cos } from './util.js';
 import { CellMeshBuilder } from './MapCellBuilder.js';
 
 const SOURCEPLANE_GROUND = new Plane(0, 1, -Math.pow(0.1,100), 0);
@@ -34,13 +34,14 @@ export class MapCell extends TransformNode{
 		for (let y=0; y<cellHeight; ++y)
 		for (let x=0; x<cellWidth; ++x){
 			ceiling.cull=false;
-			let nlnowall = 0; // the number of layers in a row that haven't had walls.
+			let hasSpecialShape=false;
 			const tileData = mv3d.getTileData(this.ox+x,this.oy+y);
 			for (let l=0; l<4; ++l){
-				if(mv3d.isTileEmpty(tileData[l])){ ++nlnowall; continue; }
+				if(mv3d.isTileEmpty(tileData[l])){ continue; }
 				let z = mv3d.getStackHeight(this.ox+x,this.oy+y,l);
 				const tileConf = mv3d.getTileTextureOffsets(tileData[l],this.ox+x,this.oy+y,l);
 				const shape = tileConf.shape;
+				if(mv3d.isSpecialShape(shape)){ hasSpecialShape = true; }
 				tileConf.realId = tileData[l];
 				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
 				//tileConf.isFringe = mv3d.isFringeTile(tileData[l]);
@@ -49,24 +50,24 @@ export class MapCell extends TransformNode{
 				z+=tileConf.fringe;
 				if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
 				if(!shape||shape===shapes.FLAT){
-					await this.loadTile(tileConf,x,y,z,l);
+					const hasWall=wallHeight||l===0;
+					await this.loadTile(tileConf,x,y,z+l*mv3d.LAYER_DIST*!hasWall,l);
 					//decide if we need to draw bottom of tile
-					if(tileConf.hasBottomConf||tileConf.height>0&&(l>0||tileConf.fringe>0)){
-
+					if(wallHeight>0&&hasSpecialShape||tileConf.fringe>0){
+						await this.loadTile(tileConf,x,y,z-wallHeight,l,true);
 					}
 					//decide whether to draw walls
 					if(wallHeight||l===0){
-						await this.loadWalls(tileConf,x,y,z,l,wallHeight + nlnowall*mv3d.LAYER_DIST);
-						nlnowall=0;
-					}else{
-						++nlnowall;
+						await this.loadWalls(tileConf,x,y,z,l,wallHeight);
 					}
 					if(z>=ceiling.height){ ceiling.cull=true; }
-				}else{ nlnowall=0; }
+				}
 				if(shape===shapes.FENCE){
 					await this.loadFence(tileConf,x,y,z,l,wallHeight);
 				}else if(shape===shapes.CROSS||shape===shapes.XCROSS){
 					await this.loadCross(tileConf,x,y,z,l,wallHeight);
+				}else if(shape===shapes.SLOPE){
+					await this.loadSlope(tileConf,x,y,z,l,wallHeight);
 				}
 			}
 			if(!mv3d.isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
@@ -107,111 +108,114 @@ export class MapCell extends TransformNode{
 			this.builder.addFloorFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
 				x + (rect.ox|0)/tileSize() - 0.25*isAutotile,
 				y + (rect.oy|0)/tileSize() - 0.25*isAutotile,
-				z + l*mv3d.LAYER_DIST,
-				1-isAutotile/2, 1-isAutotile/2, ceiling
+				z,
+				1-isAutotile/2, 1-isAutotile/2, {flip:ceiling}
 			);
 		}
 	}
 	async loadWalls(tileConf,x,y,z,l,wallHeight){
+		for (const np of MapCell.neighborPositions){
+			await this.loadWall(tileConf,x,y,z,l,wallHeight,np);
+		}
+	}
+	async loadWall(tileConf,x,y,z,l,wallHeight,np){
 		const isFringe = mv3d.isFringeTile(tileConf.realId);
-		for (let ni=0; ni<MapCell.neighborPositions.length; ++ni){
-			const np = MapCell.neighborPositions[ni];
+		// don't render walls on edge of map (unless it loops)
+		if( !mv3d.getMapConfig('edge',true) )
+		if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
+		||(this.oy+y+np.y>=$dataMap.height||this.oy+y+np.y<0)&&!$gameMap.isLoopVertical()){
+			return;
+		}
 
-			// don't render walls on edge of map (unless it loops)
-			if( !mv3d.getMapConfig('edge',true) )
-			if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
-			||(this.oy+y+np.y>=$dataMap.height||this.oy+y+np.y<0)&&!$gameMap.isLoopVertical()){
-				continue;
+		let neededHeight=wallHeight;
+		let tileId=tileConf.side_id,configRect,texture_side='side';
+		if(mv3d.isTileEmpty(tileId)){ return; }
+		if(isFringe){
+			const neighborHeight = mv3d.getFringeHeight(this.ox+x+np.x,this.oy+y+np.y,l);
+			if(neighborHeight===z){ return; }
+		}else{
+			const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,!(tileConf.depth>0));
+			neededHeight = z-neighborHeight;
+			if(neededHeight>0&&l>0){ neededHeight=Math.min(wallHeight,neededHeight); }
+		}
+		if(tileConf.depth>0&&neededHeight<0){
+			if(mv3d.tileHasPit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
+			//if(mv3d.isTilePit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
+			neededHeight = Math.max(neededHeight,-tileConf.depth);
+			if(tileConf.hasInsideConf){
+				texture_side='inside';
 			}
+		}
+		else if(neededHeight<=0){ return; }
 
-			let neededHeight=wallHeight;
-			let tileId=tileConf.side_id,configRect,texture_side='side';
-			if(mv3d.isTileEmpty(tileId)){ continue; }
-			if(isFringe){
-				const neighborHeight = mv3d.getFringeHeight(this.ox+x+np.x,this.oy+y+np.y,l);
-				if(neighborHeight===z){ continue; }
-			}else{
-				const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,!(tileConf.depth>0));
-				neededHeight = z-neighborHeight;
-				if(neededHeight>0&&l>0){ neededHeight=Math.min(wallHeight,neededHeight); }
+		if(texture_side==='inside'){
+			tileId=tileConf.inside_id;
+			if(tileConf.inside_rect){ configRect = tileConf.inside_rect; }
+		}else{
+			if(tileConf.side_rect){ configRect = tileConf.side_rect; }
+		}
+
+		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,texture_side);
+
+		const wallPos = new Vector3( x+np.x/2, y+np.y/2, z );
+		const rot = -Math.atan2(np.x, np.y);
+		if(configRect || !Tilemap.isAutotile(tileId)){
+			const rect = configRect ? configRect : mv3d.getTileRects(tileId)[0];
+			const builderOptions={};
+			if(neededHeight<0){ builderOptions.flip=true; }
+			this.builder.addWallFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+				wallPos.x,
+				wallPos.y,
+				z - neededHeight/2,
+				1,Math.abs(neededHeight), rot, builderOptions
+			);
+		}else{ // Autotile
+			//const npl=MapCell.neighborPositions[(+ni-1).mod(4)];
+			//const npr=MapCell.neighborPositions[(+ni+1).mod(4)];
+			const npl=new Vector2(-np.y,np.x);
+			const npr=new Vector2(np.y,-np.x);
+			const leftHeight = mv3d.getStackHeight(this.ox+x+npl.x,this.oy+y+npl.y,l);
+			const rightHeight = mv3d.getStackHeight(this.ox+x+npr.x,this.oy+y+npr.y,l);
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId);
+			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
+			let partHeight=Math.abs(neededHeight/wallParts);
+			let sw = tileSize()/2;
+			let sh = tileSize()/2;
+			if(mv3d.isTableTile(tileConf.realId)){
+				sh=tileSize()/3;
+				wallParts=1;
+				partHeight=wallHeight;
+				//partHeight=neededHeight;
 			}
-			if(tileConf.depth>0&&neededHeight<0){
-				if(mv3d.tileHasPit(this.ox+x+np.x,this.oy+y+np.y,l)){ continue; }
-				//if(mv3d.isTilePit(this.ox+x+np.x,this.oy+y+np.y,l)){ continue; }
-				neededHeight = Math.max(neededHeight,-tileConf.depth);
-				if(tileConf.hasInsideConf){
-					texture_side='inside';
-				}
-			}
-			else if(neededHeight<=0){ continue; }
-
-			if(texture_side==='inside'){
-				tileId=tileConf.inside_id;
-				if(tileConf.inside_rect){ configRect = tileConf.inside_rect; }
-			}else{
-				if(tileConf.side_rect){ configRect = tileConf.side_rect; }
-			}
-
-			const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,texture_side);
-
-			const wallPos = new Vector3( x+np.x/2, y+np.y/2, z );
-			const rot = -Math.atan2(np.x, np.y);
-			if(configRect || !Tilemap.isAutotile(tileId)){
-				const rect = configRect ? configRect : mv3d.getTileRects(tileId)[0];
-				const builderOptions={};
-				if(neededHeight<0){ builderOptions.flip=true; }
-				this.builder.addWallFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
-					wallPos.x,
-					wallPos.y,
-					z - neededHeight/2,
-					1,Math.abs(neededHeight), rot, builderOptions
-				);
-			}else{ // Autotile
-				const npl=MapCell.neighborPositions[(+ni-1).mod(4)];
-				const npr=MapCell.neighborPositions[(+ni+1).mod(4)];
-				const leftHeight = mv3d.getStackHeight(this.ox+x+npl.x,this.oy+y+npl.y,l);
-				const rightHeight = mv3d.getStackHeight(this.ox+x+npr.x,this.oy+y+npr.y,l);
-				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId);
-				let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
-				let partHeight=Math.abs(neededHeight/wallParts);
-				let sw = tileSize()/2;
-				let sh = tileSize()/2;
-				if(mv3d.isTableTile(tileConf.realId)){
-					sh=tileSize()/3;
-					wallParts=1;
-					partHeight=wallHeight;
-					//partHeight=neededHeight;
-				}
-				for (let ax=-1; ax<=1; ax+=2){
-					for(let az=0;az<wallParts;++az){
-						let hasLeftEdge,hasRightEdge;
-						if(mv3d.isTableTile(tileConf.realId)){
-							hasLeftEdge = leftHeight!=z;
-							hasRightEdge = rightHeight!=z;
-						}else{
-							hasLeftEdge = leftHeight<z-az*partHeight;
-							hasRightEdge = rightHeight<z-az*partHeight;
-						}
-						let sx,sy;
-						sx=bx*tileSize();
-						sy=by*tileSize();
-						sx=(bx+(ax>0?0.5+hasRightEdge:1-hasLeftEdge))*tileSize();
-						if(mv3d.isWaterfallTile(tileId)){
-							sy=(by+az%2/2)*tileSize();
-						}else if(mv3d.isTableTile(tileId)){
-							sy=(by+5/3)*tileSize();
-						}else{
-							sy=(by+(az===0?0:az===wallParts-1?1.5:1-az%2*0.5))*tileSize();
-						}
-						const builderOptions={};
-						if(neededHeight<0){ builderOptions.flip=true; }
-						this.builder.addWallFace(tsMaterial,sx,sy,sw,sh,
-							wallPos.x+0.25*ax*Math.cos(rot),
-							wallPos.y+0.25*ax*Math.sin(rot),
-							z - neededHeight*(neededHeight<0) - partHeight/2 - partHeight*az + l*mv3d.LAYER_DIST,
-							0.5,partHeight, rot, builderOptions
-						);
+			for (let ax=-1; ax<=1; ax+=2){
+				for(let az=0;az<wallParts;++az){
+					let hasLeftEdge,hasRightEdge;
+					if(mv3d.isTableTile(tileConf.realId)){
+						hasLeftEdge = leftHeight!=z;
+						hasRightEdge = rightHeight!=z;
+					}else{
+						hasLeftEdge = leftHeight<z-az*partHeight;
+						hasRightEdge = rightHeight<z-az*partHeight;
 					}
+					let sx,sy;
+					sx=bx*tileSize();
+					sy=by*tileSize();
+					sx=(bx+(ax>0?0.5+hasRightEdge:1-hasLeftEdge))*tileSize();
+					if(mv3d.isWaterfallTile(tileId)){
+						sy=(by+az%2/2)*tileSize();
+					}else if(mv3d.isTableTile(tileId)){
+						sy=(by+5/3)*tileSize();
+					}else{
+						sy=(by+(az===0?0:az===wallParts-1?1.5:1-az%2*0.5))*tileSize();
+					}
+					const builderOptions={};
+					if(neededHeight<0){ builderOptions.flip=true; }
+					this.builder.addWallFace(tsMaterial,sx,sy,sw,sh,
+						wallPos.x+0.25*ax*Math.cos(rot),
+						wallPos.y+0.25*ax*Math.sin(rot),
+						z - neededHeight*(neededHeight<0) - partHeight/2 - partHeight*az,
+						0.5,partHeight, rot, builderOptions
+					);
 				}
 			}
 		}
@@ -294,6 +298,45 @@ export class MapCell extends TransformNode{
 				);
 			}
 		}
+	}
+	async loadSlope(tileConf,x,y,z,l,wallHeight){
+		//const rot = Math.random()*Math.PI*2;
+		const rot = Math.round((Math.random()*Math.PI*2)/(Math.PI/2))*Math.PI/2;
+		//const rot=0;
+		const n1=new Vector2(-sin(rot+Math.PI),cos(rot+Math.PI));
+		if(mv3d.getCullingHeight(this.ox+x+n1.x,this.oy+y+n1.y,l)<=z){
+			await this.loadWall(tileConf,x,y,z,l,wallHeight,n1)
+		}
+		await this.loadSlopeTop(tileConf,x,y,z,l,wallHeight,rot);
+	}
+	async loadSlopeTop(tileConf,x,y,z,l,wallHeight,rot){
+		const tileId=tileConf.top_id;
+		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'top');
+		const isAutotile = Tilemap.isAutotile(tileId)&&!tileConf.top_rect;
+		if(isAutotile){
+			const rects = mv3d.getTileRects(tileId);
+			for (let i=0;i<rects.length;++i){
+				const rect = rects[i];
+				const ix=(i+1)%2*-2+1, iy=(Math.floor(i/2)+1)%2*2-1;
+				const hx=Math.max(0,sin(rot)*ix)*wallHeight/2;
+				const hy=Math.max(0,cos(rot)*iy)*wallHeight/2;
+				this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+					x + rect.ox/tileSize() - 0.25,
+					y + rect.oy/tileSize() - 0.25,
+					z - wallHeight + hx + hy,
+					0.5, 0.5, rot, {uvrot:true}
+				);
+			}
+		}else{
+			const rect = tileConf.top_rect?tileConf.top_rect:mv3d.getTileRects(tileId)[0];
+			this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+				x, y, z - wallHeight,
+				1, 1, rot, {}
+			);
+		}
+	}
+	async loadSlopeSide(tileConf,x,y,z,l,wallHeight){
+		
 	}
 	getAutotileCorner(tileId,realId=tileId){
 		const kind = Tilemap.getAutotileKind(tileId);

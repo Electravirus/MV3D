@@ -286,7 +286,7 @@ Object.assign(mv3d,{
 
 	isSpecialShape(shape){
 		const shapes = mv3d.configurationShapes;
-		return shape===shapes.FENCE||shape===shapes.CROSS||shape===shapes.XCROSS;
+		return shape===shapes.FENCE||shape===shapes.CROSS||shape===shapes.XCROSS||shape===shapes.SLOPE;
 	},
 
 	constructTileId(img,x,y){

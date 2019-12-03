@@ -27,10 +27,32 @@ export class CellMeshBuilder{
 			builder.addWallFace(x,y,z,w,h,rot,uvRect,options);
 		}
 	}
-	addFloorFace(material,tx,ty,tw,th,x,y,z,w,h,flip){
+	addFloorFace(material,tx,ty,tw,th,x,y,z,w,h,options={}){
 		const builder = this.getBuilder(material);
 		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
-		builder.addFloorFace(x,y,z,w,h,flip,uvRect);
+		builder.addFloorFace(x,y,z,w,h,uvRect,options);
+		if(options.double){
+			options.flip=!options.flip;
+			builder.addFloorFace(x,y,z,w,h,uvRect,options);
+		}
+	}
+	addSlopeFace(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+		const builder = this.getBuilder(material);
+		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		builder.addSlopeFace(x,y,z,w,h,rot,uvRect,options);
+		if(options.double){
+			options.flip=!options.flip;
+			builder.addSlopeFace(x,y,z,w,h,rot,uvRect,options);
+		}
+	}
+	addSlopeSide(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+		const builder = this.getBuilder(material);
+		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		builder.addSlopeSide(x,y,z,w,h,rot,uvRect,options);
+		if(options.double){
+			options.flip=!options.flip;
+			builder.addSlopeSide(x,y,z,w,h,rot,uvRect,options);
+		}
 	}
 }
 
@@ -66,22 +88,14 @@ class SubMeshBuilder{
 			x+ww*xf, y-hh, z-ww*zf,
 		];
 		const normals=[ -zf,0,-xf, -zf,0,-xf, -zf,0,-xf, -zf,0,-xf ];
-		const uvs = [
-			uvr.x1,uvr.y1,
-			uvr.x2,uvr.y1,
-			uvr.x1,uvr.y2,
-			uvr.x2,uvr.y2,
-		];
-		const indices=[1,0,2,1,2,3];
-		if(options.flip){
-			indices.reverse();
-			for(let i=0;i<normals.length;++i){ normals[i]*=-1; }
-		}
+		const uvs = SubMeshBuilder.getDefaultUvs(uvr);
+		const indices=SubMeshBuilder.getDefaultIndices();
+		if(options.flip){ SubMeshBuilder.flipFace(indices,normals); }
 		this.pushNewData(positions,indices,normals,uvs);
 	}
-	addFloorFace(x,z,y,w,h,flip,uvr){
+	addFloorFace(x,z,y,w,h,uvr,options){
 		z=-z;y=y;
-		const f=flip*-2+1;
+		const f=Boolean(options.flip)*-2+1;
 		const ww=f*w/2, hh=h/2;
 		const positions = [
 			x-ww, y, z+hh,
@@ -90,13 +104,47 @@ class SubMeshBuilder{
 			x+ww, y, z-hh,
 		];
 		const normals=[ 0,f,0, 0,f,0, 0,f,0, 0,f,0 ];
+		const uvs = SubMeshBuilder.getDefaultUvs(uvr);
+		const indices=SubMeshBuilder.getDefaultIndices();
+		this.pushNewData(positions,indices,normals,uvs);
+	}
+	addSlopeFace(x,z,y,w,h,rot,uvr,options){
+		z=-z;y=y;
+		const xf=Math.round(Math.cos(rot)*1000)/1000;
+		const zf=Math.round(Math.sin(rot)*1000)/1000;
+		const ww=w/2;
+		const positions = [
+			x-ww*xf+ww*zf, y+h, z+ww*zf+ww*xf,
+			x+ww*xf+ww*zf, y+h, z-ww*zf+ww*xf,
+			x-ww*xf-ww*zf, y, z+ww*zf-ww*xf,
+			x+ww*xf-ww*zf, y, z-ww*zf-ww*xf,
+		];
+		const hn=Math.pow(2,-h);
+		const ihn=1-hn;
+		const normals=[ -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn ];
+		const uvs = SubMeshBuilder.getDefaultUvs(uvr);
+		const indices=SubMeshBuilder.getDefaultIndices();
+		if(options.flip){ SubMeshBuilder.flipFace(indices,normals); }
+		this.pushNewData(positions,indices,normals,uvs);
+	}
+	addSlopeSide(x,z,y,w,h,rot,uvr,options){
+		z=-z;y=y;
+		const xf=Math.round(Math.cos(rot)*1000)/1000;
+		const zf=Math.round(Math.sin(rot)*1000)/1000;
+		const ww=w/2, hh=h/2;
+		const positions = [
+			x-ww*xf, y+h, z+ww*zf,
+			x-ww*xf, y, z+ww*zf,
+			x+ww*xf, y, z-ww*zf,
+		];
+		const normals=[ -zf,0,-xf, -zf,0,-xf, -zf,0,-xf ];
 		const uvs = [
 			uvr.x1,uvr.y1,
-			uvr.x2,uvr.y1,
 			uvr.x1,uvr.y2,
 			uvr.x2,uvr.y2,
 		];
-		const indices=[1,0,2,1,2,3];
+		const indices=[0,1,2];
+		if(options.flip){ SubMeshBuilder.flipFace(indices,normals); }
 		this.pushNewData(positions,indices,normals,uvs);
 	}
 	pushNewData(positions,indices,normals,uvs){
@@ -114,5 +162,18 @@ class SubMeshBuilder{
 			x2:(x+w)/width,
 			y2:(height-y-h)/height,
 		};
+	}
+	static getDefaultUvs(uvr){
+		return [
+			uvr.x1,uvr.y1,
+			uvr.x2,uvr.y1,
+			uvr.x1,uvr.y2,
+			uvr.x2,uvr.y2,
+		];
+	}
+	static getDefaultIndices(){ return [1,0,2,1,2,3]; }
+	static flipFace(indices,normals){
+		indices.reverse();
+		for(let i=0;i<normals.length;++i){ normals[i]*=-1; }
 	}
 }

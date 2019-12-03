@@ -70,6 +70,9 @@ export const sleep=(ms=0)=>new Promise(resolve=>setTimeout(resolve,ms));
 export const degtorad=deg=>deg*Math.PI/180;
 export const radtodeg=rad=>rad*180/Math.PI;
 
+export const sin=r=>Math.round(Math.sin(r)*1000)/1000;
+export const cos=r=>Math.round(Math.cos(r)*1000)/1000;
+
 export const tileSize=()=>tileWidth();
 export const tileWidth=()=>Game_Map.prototype.tileWidth();
 export const tileHeight=()=>Game_Map.prototype.tileHeight();

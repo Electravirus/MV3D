@@ -212,6 +212,7 @@ Object.assign(mv3d,{
 		FENCE:4,
 		CROSS:5,
 		XCROSS:6,
+		SLOPE:7,
     },
     
 
