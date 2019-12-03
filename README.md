@@ -461,4 +461,4 @@ player upgrade their airship's height and speed.
 - Yorae Rasante
 - Izybelle
 - A Memory of Eternity
-- John Stasio
+- Pumpkin Boss
