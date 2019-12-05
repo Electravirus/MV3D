@@ -212,6 +212,7 @@ Object.assign(mv3d,{
 		FENCE:4,
 		CROSS:5,
 		XCROSS:6,
+		SLOPE:7,
     },
     
 
@@ -220,6 +221,10 @@ Object.assign(mv3d,{
 		depth(conf,n){ conf.depth=Number(n); },
 		fringe(conf,n){ conf.fringe=Number(n); },
 		float(conf,n){ conf.float=Number(n); },
+		slope(conf,n=1){
+			conf.shape=mv3d.configurationShapes.SLOPE;
+			conf.slopeHeight=Number(n);
+		},
 		top:TextureConfigurator('top'),
 		side:TextureConfigurator('side'),
 		inside:TextureConfigurator('inside'),

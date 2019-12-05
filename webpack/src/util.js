@@ -70,6 +70,11 @@ export const sleep=(ms=0)=>new Promise(resolve=>setTimeout(resolve,ms));
 export const degtorad=deg=>deg*Math.PI/180;
 export const radtodeg=rad=>rad*180/Math.PI;
 
+export const sin=r=>unround(Math.sin(r));
+export const cos=r=>unround(Math.cos(r));
+
+export const unround=n=>Math.round(n*1000)/1000;
+
 export const tileSize=()=>tileWidth();
 export const tileWidth=()=>Game_Map.prototype.tileWidth();
 export const tileHeight=()=>Game_Map.prototype.tileHeight();
@@ -81,3 +86,6 @@ export const YAxis = new Vector3(0,1,0);
 export const ZAxis = new Vector3(0,0,1);
 export const v2origin = new Vector2(0,0);
 export const v3origin = new Vector3(0,0,0);
+
+export const PI = Math.PI;
+export const PI2 = Math.PI*2;
