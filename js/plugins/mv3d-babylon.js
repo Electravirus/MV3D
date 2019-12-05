@@ -1,7 +1,7 @@
 /*:
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
 @author Dread/Nyanak
-@version 0.3.5
+@version 0.3.6
 @help
 
 If you are making a game with this plugin, please consider supporting my
@@ -165,6 +165,14 @@ shape() function. Valid shapes are FLAT, FENCE, CROSS, and XCROSS.
 Examples: shape(fence), shape(xcross)
 
 
+
+### Slope Tiles
+
+Slope tiles can be used to make hills or stairs to move between elevations.
+The slope tiles will automatically try to choose their direction. Directional
+passage can be used to prevent the slope tile from facing certain directions.  
+Example: slope(1)
+
 ---
 
 
@@ -308,6 +316,9 @@ Example: ceiling(A4,0,0|2)
 The edge function sets whether to render walls at the map edge.  
 Examples: edge(true), edge(false)
 
+The disable function will turn off the 3D rendering for the map.  
+Example: disable()
+
 
 ---
 
@@ -432,6 +443,13 @@ Pans the camera view, relative to current target.
 
 ---
 
+    mv3d disable
+    mv3d enable
+
+Turns 3D rendering on or off.
+
+---
+
 ### Vehicle Commands
 
     mv3d <vehicle> big <true/false>
@@ -449,10 +467,7 @@ A higher airship can fly over higher mountains. Perhaps you could let the
 player upgrade their airship's height and speed.
 
 
-
 ---
-
-
 
 ## Patrons:
 
