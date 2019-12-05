@@ -36,7 +36,7 @@ module.exports = {
 	watch: true,
 	watchOptions: {
 		ignored: /node_modules/,
-		aggregateTimeout: 100,
+		//aggregateTimeout: 100,
 		//poll: 1000,
 	},
 	mode: 'production',

@@ -49,16 +49,22 @@ export class MapCell extends TransformNode{
 				const wallHeight = mv3d.getTileHeight(this.ox+x,this.oy+y,l)||tileConf.height||0;
 				z+=tileConf.fringe;
 				if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
-				if(!shape||shape===shapes.FLAT){
+				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
 					const hasWall=wallHeight||l===0;
-					await this.loadTile(tileConf,x,y,z+l*mv3d.LAYER_DIST*!hasWall,l);
+					if(!shape||shape===shapes.FLAT){
+						await this.loadTile(tileConf,x,y,z+l*mv3d.LAYER_DIST*!hasWall,l);
+						if(wallHeight||l===0){
+							await this.loadWalls(tileConf,x,y,z,l,wallHeight);
+						}
+					}else if(shape===shapes.SLOPE){
+						await this.loadSlope(tileConf,x,y,z,l,tileConf.slopeHeight||1);
+						if(wallHeight||l===0){
+							await this.loadWalls(tileConf,x,y,z-(tileConf.slopeHeight||1),l,wallHeight);
+						}
+					}
 					//decide if we need to draw bottom of tile
 					if(wallHeight>0&&hasSpecialShape||tileConf.fringe>0){
 						await this.loadTile(tileConf,x,y,z-wallHeight,l,true);
-					}
-					//decide whether to draw walls
-					if(wallHeight||l===0){
-						await this.loadWalls(tileConf,x,y,z,l,wallHeight);
 					}
 					if(z>=ceiling.height){ ceiling.cull=true; }
 				}
@@ -66,8 +72,6 @@ export class MapCell extends TransformNode{
 					await this.loadFence(tileConf,x,y,z,l,wallHeight);
 				}else if(shape===shapes.CROSS||shape===shapes.XCROSS){
 					await this.loadCross(tileConf,x,y,z,l,wallHeight);
-				}else if(shape===shapes.SLOPE){
-					await this.loadSlope(tileConf,x,y,z,l,wallHeight);
 				}
 			}
 			if(!mv3d.isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
@@ -176,7 +180,7 @@ export class MapCell extends TransformNode{
 			const npr=new Vector2(np.y,-np.x);
 			const leftHeight = mv3d.getStackHeight(this.ox+x+npl.x,this.oy+y+npl.y,l);
 			const rightHeight = mv3d.getStackHeight(this.ox+x+npr.x,this.oy+y+npr.y,l);
-			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId);
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
 			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
 			let partHeight=Math.abs(neededHeight/wallParts);
 			let sw = tileSize()/2;
@@ -245,7 +249,7 @@ export class MapCell extends TransformNode{
 			}
 
 			if(isAutotile&&!configRect){
-				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId);
+				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
 				for (let az=0;az<=1;++az){
 					this.builder.addWallFace(tsMaterial,
 						(edge ? (bx+rightSide*1.5) : (bx+1-rightSide*0.5) )*tileWidth(),
@@ -299,17 +303,25 @@ export class MapCell extends TransformNode{
 			}
 		}
 	}
-	async loadSlope(tileConf,x,y,z,l,wallHeight){
+	async loadSlope(tileConf,x,y,z,l,slopeHeight){
 		//const rot = Math.random()*Math.PI*2;
-		const rot = Math.round((Math.random()*Math.PI*2)/(Math.PI/2))*Math.PI/2;
-		//const rot=0;
+		//const rot = Math.round((Math.random()*Math.PI*2)/(Math.PI/2))*Math.PI/2;
+		const rot=mv3d.getSlopeDirection(this.ox+x,this.oy+y,l);
 		const n1=new Vector2(-sin(rot+Math.PI),cos(rot+Math.PI));
-		if(mv3d.getCullingHeight(this.ox+x+n1.x,this.oy+y+n1.y,l)<=z){
-			await this.loadWall(tileConf,x,y,z,l,wallHeight,n1)
+		if(mv3d.getCullingHeight(this.ox+x+n1.x,this.oy+y+n1.y,l)<z){
+			await this.loadWall(tileConf,x,y,z,l+1,slopeHeight,n1);
 		}
-		await this.loadSlopeTop(tileConf,x,y,z,l,wallHeight,rot);
+		const n2=new Vector2(n1.y,-n1.x);
+		if(mv3d.getCullingHeight(this.ox+x+n2.x,this.oy+y+n2.y,l)<z){
+			await this.loadSlopeSide(tileConf,x+n2.x/2,y+n2.y/2,z,l,slopeHeight,rot+Math.PI/2);
+		}
+		const n3=new Vector2(-n1.y,n1.x);
+		if(mv3d.getCullingHeight(this.ox+x+n3.x,this.oy+y+n3.y,l)<z){
+			await this.loadSlopeSide(tileConf,x+n3.x/2,y+n3.y/2,z,l,slopeHeight,rot+Math.PI/2,{flip:true});
+		}
+		await this.loadSlopeTop(tileConf,x,y,z,l,slopeHeight,rot);
 	}
-	async loadSlopeTop(tileConf,x,y,z,l,wallHeight,rot){
+	async loadSlopeTop(tileConf,x,y,z,l,slopeHeight,rot){
 		const tileId=tileConf.top_id;
 		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'top');
 		const isAutotile = Tilemap.isAutotile(tileId)&&!tileConf.top_rect;
@@ -318,27 +330,40 @@ export class MapCell extends TransformNode{
 			for (let i=0;i<rects.length;++i){
 				const rect = rects[i];
 				const ix=(i+1)%2*-2+1, iy=(Math.floor(i/2)+1)%2*2-1;
-				const hx=Math.max(0,sin(rot)*ix)*wallHeight/2;
-				const hy=Math.max(0,cos(rot)*iy)*wallHeight/2;
+				const hx=Math.max(0,sin(rot)*ix)*slopeHeight/2;
+				const hy=Math.max(0,cos(rot)*iy)*slopeHeight/2;
 				this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
 					x + rect.ox/tileSize() - 0.25,
 					y + rect.oy/tileSize() - 0.25,
-					z - wallHeight + hx + hy,
-					0.5, 0.5, rot, {uvrot:true}
+					z - slopeHeight + hx + hy,
+					0.5, slopeHeight/2, rot, {autotile:true}
 				);
 			}
 		}else{
 			const rect = tileConf.top_rect?tileConf.top_rect:mv3d.getTileRects(tileId)[0];
 			this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
-				x, y, z - wallHeight,
-				1, 1, rot, {}
+				x, y, z - slopeHeight,
+				1, slopeHeight, rot, {}
 			);
 		}
 	}
-	async loadSlopeSide(tileConf,x,y,z,l,wallHeight){
-		
+	async loadSlopeSide(tileConf,x,y,z,l,slopeHeight,rot,options={}){
+		const tileId=tileConf.side_id;
+		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'side');
+		const isAutotile = Tilemap.isAutotile(tileId)&&!tileConf.side_rect;
+		let rect;
+		if(isAutotile){
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+			rect={x:(bx+0.5)*tileWidth(),y:(by+0.5)*tileHeight(),width:tileWidth(),height:tileHeight()};
+		}else{
+			rect = tileConf.side_rect?tileConf.side_rect:mv3d.getTileRects(tileId)[0];
+		}
+		this.builder.addSlopeSide(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+			x, y, z - slopeHeight,
+			1, slopeHeight, rot, options
+		);
 	}
-	getAutotileCorner(tileId,realId=tileId){
+	getAutotileCorner(tileId,realId=tileId,excludeTop=true){
 		const kind = Tilemap.getAutotileKind(tileId);
 		let tx = kind%8;
 		let ty = Math.floor(kind / 8);
@@ -348,18 +373,24 @@ export class MapCell extends TransformNode{
 		by=ty;
 		if(Tilemap.isTileA1(tileId)){
 			if(kind<4){
-				by=3*(kind%2)+1;
 				bx=6*Math.floor(kind/2);
+				by=3*(kind%2) + excludeTop;
 			}else{
 				bx=8*Math.floor(tx/4) + (kind%2)*6;
-				by=ty*6 + Math.floor(tx%4/2)*3 + 1-(tx%2);
+				by=ty*6 + Math.floor(tx%4/2)*3 + excludeTop*!(tx%2);
+				//if(excludeTop&&!(kind%2)){ by+=1; }
 			}
+			if(excludeTop&&kind>=4&&!(kind%2)){ by+=1; }
 		}else if(Tilemap.isTileA2(tileId)){
-			by=(ty-2)*3+1;
+			by=(ty-2)*3 + excludeTop;
 		}else if (Tilemap.isTileA3(tileId)){
 			by=(ty-6)*2;
 		}else if (Tilemap.isTileA4(tileId)){
-			by=(ty-10)*2.5+(ty%2?0.5:0);
+			if(excludeTop){
+				by=Math.ceil((ty-10)*2.5+0.5);
+			}else{
+				by=(ty-10)*2.5+(ty%2?0.5:0);
+			}
 		}
 		return {x:bx,y:by};
 	}

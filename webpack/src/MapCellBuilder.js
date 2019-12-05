@@ -1,5 +1,6 @@
 import mv3d from "./mv3d.js";
 import { Mesh, VertexData } from "./mod_babylon.js";
+import { cos, sin, tileWidth, tileHeight, unround, PI, PI2 } from "./util.js";
 
 export class CellMeshBuilder{
 	constructor(){
@@ -78,8 +79,8 @@ class SubMeshBuilder{
 	}
 	addWallFace(x,z,y,w,h,rot,uvr,options){
 		z=-z;y=y;
-		const xf=Math.round(Math.cos(rot)*1000)/1000;
-		const zf=Math.round(Math.sin(rot)*1000)/1000;
+		const xf=cos(rot);
+		const zf=sin(rot);
 		const ww=w/2, hh=h/2;
 		const positions = [
 			x-ww*xf, y+hh, z+ww*zf,
@@ -110,10 +111,15 @@ class SubMeshBuilder{
 	}
 	addSlopeFace(x,z,y,w,h,rot,uvr,options){
 		z=-z;y=y;
-		const xf=Math.round(Math.cos(rot)*1000)/1000;
-		const zf=Math.round(Math.sin(rot)*1000)/1000;
-		const ww=w/2;
-		const positions = [
+		const xf=cos(rot);
+		const zf=sin(rot);
+		const ww=w/2, hh=h/2;
+		const positions = options.autotile ? [
+			x-ww, y+hh+hh*Math.round(sin(-rot+PI*1/4)), z+hh,
+			x+ww, y+hh+hh*Math.round(sin(-rot+PI*3/4)), z+hh,
+			x-ww, y+hh+hh*Math.round(sin(-rot+PI*7/4)), z-hh,
+			x+ww, y+hh+hh*Math.round(sin(-rot+PI*5/4)), z-hh,
+		] : [
 			x-ww*xf+ww*zf, y+h, z+ww*zf+ww*xf,
 			x+ww*xf+ww*zf, y+h, z-ww*zf+ww*xf,
 			x-ww*xf-ww*zf, y, z+ww*zf-ww*xf,
@@ -122,15 +128,15 @@ class SubMeshBuilder{
 		const hn=Math.pow(2,-h);
 		const ihn=1-hn;
 		const normals=[ -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn ];
-		const uvs = SubMeshBuilder.getDefaultUvs(uvr);
+		let uvs = SubMeshBuilder.getDefaultUvs(uvr);
 		const indices=SubMeshBuilder.getDefaultIndices();
 		if(options.flip){ SubMeshBuilder.flipFace(indices,normals); }
 		this.pushNewData(positions,indices,normals,uvs);
 	}
 	addSlopeSide(x,z,y,w,h,rot,uvr,options){
 		z=-z;y=y;
-		const xf=Math.round(Math.cos(rot)*1000)/1000;
-		const zf=Math.round(Math.sin(rot)*1000)/1000;
+		const xf=cos(rot);
+		const zf=sin(rot);
 		const ww=w/2, hh=h/2;
 		const positions = [
 			x-ww*xf, y+h, z+ww*zf,

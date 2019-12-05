@@ -1,5 +1,6 @@
 import mv3d from './mv3d.js';
-import { v2origin, tileSize } from './util.js';
+import { v2origin, tileSize, degtorad, sin, tileWidth, cos, tileHeight } from './util.js';
+import { MapCell } from './mapCell.js';
 
 Object.assign(mv3d,{
 
@@ -138,6 +139,7 @@ Object.assign(mv3d,{
 		const tilemap=this.getTilemap();
 		if(tilemap&&tilemap._isHigherTile(tileId)){ return 0; }
 
+		const shapes=this.configurationShapes;
 		const conf =this.getTileConfig(tileId,x,y,l);
 		let height = 0;
 		if('height' in conf){
@@ -147,10 +149,16 @@ Object.assign(mv3d,{
 		}else if(tilemap&&tilemap._isTableTile(tileId)){
 			height = this.TABLE_HEIGHT;
 		}else if(this.isSpecialShape(conf.shape)){
-			height = 1;
+			switch(conf.shape){
+				case shapes.SLOPE: height=0; break;
+				default: height=1; break;
+			}
 		}
 		if('depth' in conf){
 			height -= conf.depth;
+		}
+		if(conf.shape===shapes.SLOPE){
+			height += conf.slopeHeight||1;
 		}
 		return height;
 	},
@@ -163,22 +171,63 @@ Object.assign(mv3d,{
 		return height;
 	},
 
-	getWalkHeight(x,y){
+	getSlopeDirection(x,y,l,fullData=false){
+		const slopeHeight = this.getTileHeight(x,y,l);
+		const stackHeight = this.getStackHeight(x,y,l);
+		const neighborPositions = MapCell.neighborPositions;
+		const flags = $gameMap.tilesetFlags();
+		const flag = flags[this.getTileData(x,y)[l]];
+		let direction;
+		for(let i=0;i<neighborPositions.length;++i){
+			const n=neighborPositions[i];
+			const d={neighbor: n,favor:0};
+			const nHeight=this.getWalkHeight(x+n.x,y+n.y,true);
+			const oHeight=this.getWalkHeight(x-n.x,y-n.y,true);
+			if(Math.abs(stackHeight-oHeight)<=mv3d.STAIR_THRESH){ d.favor+=1; }
+			if(Math.abs(stackHeight-slopeHeight-nHeight)<=mv3d.STAIR_THRESH){ d.favor+=1; }
+			d.dir = 5-3*n.y+n.x;
+			if(flag&(1<<(d.dir/2-1))){ d.favor-=3; }
+			if(flag&(1<<((10-d.dir)/2-1))){ d.favor-=3; }
+			if(!direction||d.favor>direction.favor){ direction=d; }
+		}
+		direction.rot=degtorad(180-this.dirToYaw(direction.dir));
+		if(fullData){ return direction; }
+		return direction.rot;
+	},
+
+	getWalkHeight(x,y,ignoreSlopes=false){
 		// get the height of characters for given x,y coord. Uses float coords. Should support ramps.
 		const rx=Math.round(x), ry=Math.round(y);
 		const tileData=this.getTileData(rx,ry);
 		let height=0;
-		let tileHeight=0;
+		let lastHeight=0;
 		for(let l=0; l<=3; ++l){
 			const tileId=tileData[l];
 			if(this.isTileEmpty(tileId)&&l>0){ continue; }
-			height += tileHeight;
-			tileHeight = this.getTileHeight(rx,ry,l);
+			height += lastHeight;
 			const data = this.getTileConfig(tileId,rx,ry,l);
 			const shape = data.shape;
+			if(shape===this.configurationShapes.SLOPE){
+				if(ignoreSlopes){
+					lastHeight=data.slopeHeight||1;
+					height+=this.getTileHeight(rx,ry,l) - lastHeight;
+				}else{
+					const rot=this.getSlopeDirection(rx,ry,l);
+					const xf=sin(rot), yf=-cos(rot);
+					let px=(x+0.5)%1, py=(y+0.5)%1;
+					if(Math.sign(xf<0)){ px=1-px; }
+					if(Math.sign(yf<0)){ py=1-py; }
+					const slopeHeight = data.slopeHeight||1;
+					const sf=Math.abs(xf)*px + Math.abs(yf)*py;
+					height+=this.getTileHeight(rx,ry,l)-slopeHeight+slopeHeight*sf;
+					lastHeight=0;
+				}
+			}else{
+				lastHeight = this.getTileHeight(rx,ry,l);
+			}
 			if(!this.isSpecialShape(shape)){
-				height+=tileHeight;
-				tileHeight=0;
+				height+=lastHeight;
+				lastHeight=0;
 			}
 		}
 		return height;
@@ -217,6 +266,10 @@ Object.assign(mv3d,{
 			const data = this.getTileConfig(tileId,x,y,l);
 			const shape = data.shape;
 			if(this.isSpecialShape(shape)){
+				if(shape===this.configurationShapes.SLOPE){
+					height+=this.getTileHeight(x,y,l);
+					height-=data.slopeHeight||1;
+				}
 				return height;
 			}
 			if(ignorePits&&data.depth>0){
