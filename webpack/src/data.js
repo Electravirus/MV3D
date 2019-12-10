@@ -76,6 +76,7 @@ class DataProxy{
 	}
 }
 DataProxy.list=[];
+mv3d.DataProxy=DataProxy;
 
 const _onBoot = Scene_Boot.prototype.start;
 Scene_Boot.prototype.start=function(){

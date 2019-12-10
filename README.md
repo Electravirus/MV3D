@@ -8,6 +8,8 @@ A 3D rendering plugin for RPG Maker MV.
 If you are making a game with this plugin, please consider supporting my
 patreon.  
 https://www.patreon.com/cutievirus  
+You can also unlock some patron-only features by becoming a patron, such as
+Dynamic Shadows.  
 A list of patrons can be found at the bottom of this file.
 
 ## Getting started

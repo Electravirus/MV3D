@@ -186,7 +186,7 @@ Object.assign(mv3d,{
 			if(Math.abs(stackHeight-oHeight)<=mv3d.STAIR_THRESH){ d.favor+=1; }
 			if(Math.abs(stackHeight-slopeHeight-nHeight)<=mv3d.STAIR_THRESH){ d.favor+=1; }
 			d.dir = 5-3*n.y+n.x;
-			if(flag&(1<<(d.dir/2-1))){ d.favor-=3; }
+			if(flag&(1<<(d.dir/2-1))){ d.favor-=4; }
 			if(flag&(1<<((10-d.dir)/2-1))){ d.favor-=3; }
 			if(!direction||d.favor>direction.favor){ direction=d; }
 		}

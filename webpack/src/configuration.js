@@ -249,10 +249,13 @@ Object.assign(mv3d,{
 		z(conf,n){ conf.z=Number(n); },
 		x(conf,n){ conf.x=Number(n); },
 		y(conf,n){ conf.y=Number(n); },
-		scale(conf,x,y){ conf.scale = new Vector2(Number(x),Number(y)); },
+		scale(conf,x,y=x){ conf.scale = new Vector2(Number(x),Number(y)); },
 		rot(conf,n){ conf.rot=Number(n); },
 		bush(conf,bool){ conf.bush = booleanString(bool); },
-		shadow(conf,n){ conf.shadow = Number(falseString(n)); },
+		shadow(conf,n,dist){
+			conf.shadow = Number(falseString(n));
+			if(dist!=null){ conf.shadowDist=Number(dist); }
+		},
 		shape(conf,name){
 			conf.shape=mv3d.configurationShapes[name.toUpperCase()];
 		},
@@ -282,7 +285,9 @@ Object.assign(mv3d,{
 	},
 	mapConfigurationFunctions:{
 		light(conf,color){
-			conf.light={color:makeColor(color).toNumber()};
+			if(color.toLowerCase()==='default'){ color=mv3d.AMBIENT_COLOR; }
+			else{ color=makeColor(color).toNumber(); }
+			conf.light={color:color};
 		},
 		fog:new ConfigurationFunction('color|near,far',function(conf,params){
 			const {color,near,far} = params;

@@ -27,18 +27,10 @@
 */
 
 /*~struct~BoatStruct:
-@param scale
-@text Scale
-@type Number
-@decimals 1
-@default 1
-
-@param zoff
-@text Z Offset
-@type Number
-@min -9999 @max 9999
-@decimals 2
-@default 0.0
+@param conf
+@text Settings
+@type Text
+@default shadow(0.8,4),shape(sprite),scale(1),bush(false)
 
 @param big
 @text Big
@@ -49,31 +41,16 @@
 */
 
 /*~struct~AirshipStruct:
-@param scale
-@text Scale
-@type Number
-@decimals 1
-@default 1
+@param conf
+@text Settings
+@type Text
+@default shadow(1,6),shape(sprite),scale(1),bush(false)
 
 @param height
-@text Height
+@text Elevation
 @type Number
 @decimals 1
 @default 2.0
-
-@param shadowScale
-@text Shadow Scale
-@desc The default size of character shadows.
-@type Number
-@decimals 1
-@default 1.0
-
-@param shadowDist
-@text Shadow Distance
-@desc How far above the ground before Airship's shadow fades completely. 
-@type Number
-@decimals 1
-@default 6.0
 
 @param big
 @text Big

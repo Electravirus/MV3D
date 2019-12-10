@@ -74,9 +74,9 @@ function vehicleNotObstructed(x, y, strict=true){
 	}
 	const tileHeight = mv3d.getWalkHeight(x,y);
 	let posZ = this.mv3d_sprite.z;
-	if('zoff' in settings){
-		posZ-=settings.zoff;
-	}
+	//if('zoff' in settings){
+	//	posZ-=settings.zoff;
+	//}
 	if(tileHeight>posZ){ return false; }
 	if(!big){ return true; }
 	for (let ox=-1;ox<=1;++ox)

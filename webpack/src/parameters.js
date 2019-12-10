@@ -33,7 +33,7 @@ Object.assign(mv3d,{
 	FOG_COLOR: makeColor(parameters.fogColor).toNumber(),
 	FOG_NEAR: Number(parameters.fogNear),
 	FOG_FAR: Number(parameters.fogFar), 
-	AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
+	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
 
 
 	LIGHT_HEIGHT: 0.5,
@@ -47,9 +47,11 @@ Object.assign(mv3d,{
 	DYNAMIC_SHADOW_RES:Number(parameters.dynShadowRes),
 	DYNAMIC_SHADOW_FALLOFF:Number(parameters.dynShadowFalloff),
 	*/
+	/*
 	CHARACTER_SHADOWS:booleanString(parameters.characterShadows),
 	SHADOW_SCALE:Number(parameters.shadowScale),
 	SHADOW_DIST:Number(parameters.shadowDist),
+	*/
 
 	KEYBOARD_PITCH: booleanString(parameters.keyboardPitch),
 	KEYBOARD_TURN: booleanString(parameters.keyboardTurn),
@@ -59,7 +61,7 @@ Object.assign(mv3d,{
 	TTAG_DATA:{},
 
 	EVENT_HEIGHT:Number(parameters.eventHeight),
-	VEHICLE_BUSH:booleanString(parameters.vehicleBush),
+	//VEHICLE_BUSH:booleanString(parameters.vehicleBush),
 	BOAT_SETTINGS:JSON.parse(parameters.boatSettings),
 	SHIP_SETTINGS:JSON.parse(parameters.shipSettings),
 	AIRSHIP_SETTINGS:JSON.parse(parameters.airshipSettings),
@@ -87,22 +89,44 @@ Object.assign(mv3d,{
 			this.TTAG_DATA[entry.terrainTag]=this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions);
 		}
 
-		this.BOAT_SETTINGS.scale=Number(this.BOAT_SETTINGS.scale);
-		this.BOAT_SETTINGS.zoff=Number(this.BOAT_SETTINGS.zoff);
+		this.EVENT_CHAR_SETTINGS = this.readConfigurationFunctions(
+			parameters.eventCharDefaults,
+			this.eventConfigurationFunctions,
+		);
+		this.EVENT_OBJ_SETTINGS = this.readConfigurationFunctions(
+			parameters.eventObjDefaults,
+			this.eventConfigurationFunctions,
+		);
+		this.EVENT_TILE_SETTINGS = this.readConfigurationFunctions(
+			parameters.eventTileDefaults,
+			this.eventConfigurationFunctions,
+		);
+
 		this.BOAT_SETTINGS.big=booleanString(this.BOAT_SETTINGS.big);
-		this.SHIP_SETTINGS.scale=Number(this.SHIP_SETTINGS.scale);
-		this.SHIP_SETTINGS.zoff=Number(this.SHIP_SETTINGS.zoff);
 		this.SHIP_SETTINGS.big=booleanString(this.SHIP_SETTINGS.big);
-		this.AIRSHIP_SETTINGS.scale=Number(this.AIRSHIP_SETTINGS.scale);
 		this.AIRSHIP_SETTINGS.height=Number(this.AIRSHIP_SETTINGS.height);
-		this.AIRSHIP_SETTINGS.shadowScale=Number(this.AIRSHIP_SETTINGS.shadowScale);
-		this.AIRSHIP_SETTINGS.shadowDist=Number(this.AIRSHIP_SETTINGS.shadowDist);
 		this.AIRSHIP_SETTINGS.big=booleanString(this.AIRSHIP_SETTINGS.big);
 		this.AIRSHIP_SETTINGS.bushLanding=booleanString(this.AIRSHIP_SETTINGS.bushLanding);
 
-
-		this.EVENT_SHAPE=this.configurationShapes[parameters.eventShape.toUpperCase()];
+		this.BOAT_SETTINGS.conf = this.readConfigurationFunctions(
+			this.BOAT_SETTINGS.conf,
+			this.eventConfigurationFunctions,
+		);
+		this.SHIP_SETTINGS.conf = this.readConfigurationFunctions(
+			this.SHIP_SETTINGS.conf,
+			this.eventConfigurationFunctions,
+		);
+		this.AIRSHIP_SETTINGS.conf = this.readConfigurationFunctions(
+			this.AIRSHIP_SETTINGS.conf,
+			this.eventConfigurationFunctions,
+		);
 
 		//Texture.DEFAULT_ANISOTROPIC_FILTERING_LEVEL=0;
 	},
+});
+
+Object.defineProperties(mv3d,{
+	AMBIENT_COLOR:{
+		get(){ return mv3d.featureEnabled('dynamicShadows')?0x888888:0xffffff; }
+	}
 });

@@ -3,7 +3,7 @@ import mv3d from './mv3d.js';
 const gameMap_parallaxOx = Game_Map.prototype.parallaxOx;
 Game_Map.prototype.parallaxOx = function() {
 	let ox = gameMap_parallaxOx.apply(this,arguments);
-	if (mv3d.mapDisabled){ return; }
+	if (mv3d.mapDisabled){ return ox; }
 	if(this._parallaxLoopX){
 		return ox - mv3d.blendCameraYaw.currentValue()*816/90;
 	}
@@ -12,7 +12,7 @@ Game_Map.prototype.parallaxOx = function() {
 const gameMap_parallaxOy = Game_Map.prototype.parallaxOy;
 Game_Map.prototype.parallaxOy = function() {
 	let oy = gameMap_parallaxOy.apply(this,arguments);
-	if (mv3d.mapDisabled){ return; }
+	if (mv3d.mapDisabled){ return oy; }
 	if(this._parallaxLoopY){
 		return oy - mv3d.blendCameraPitch.currentValue()*816/90;
 	}

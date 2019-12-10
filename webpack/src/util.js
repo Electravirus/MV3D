@@ -89,3 +89,10 @@ export const v3origin = new Vector3(0,0,0);
 
 export const PI = Math.PI;
 export const PI2 = Math.PI*2;
+
+const util = {
+	makeColor,hexNumber,relativeNumber,booleanString,falseString,
+	snooze,sleep,degtorad,radtodeg,sin,cos,unround,tileSize,tileWidth,tileHeight,
+	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
+};
+export default util;

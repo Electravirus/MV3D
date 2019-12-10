@@ -127,11 +127,11 @@ class Character extends Sprite{
 
 		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
 
-		if(mv3d.CHARACTER_SHADOWS){
+		//if(mv3d.CHARACTER_SHADOWS){
 			//this.shadow = Sprite.Meshes.SHADOW.createInstance();
 			this.shadow = Sprite.Meshes.SHADOW.clone();
 			this.shadow.parent=this.spriteOrigin;
-		}
+		//}
 
 		this.lightOrigin = new TransformNode('light origin',mv3d.scene);
 		this.lightOrigin.parent=this;
@@ -208,27 +208,41 @@ class Character extends Sprite{
 		if(!this.isTextureReady()){ return; }
 		const configScale = this.getConfig('scale',new Vector2(1,1));
 		let scale = 1;
-		if(this.isVehicle){
-			const settings = mv3d[`${this.char._type.toUpperCase()}_SETTINGS`];
-			scale = mv3d.loadData( `${this.char._type}_scale`, settings.scale );
-		}
 		const xscale = this.patternWidth()/tileSize() * configScale.x * scale;
 		const yscale = this.patternHeight()/tileSize() * configScale.y * scale;
 		this.mesh.scaling.set(xscale,yscale,yscale);
 	}
 
+	getDefaultConfigObject(){
+		if(this.isVehicle){
+			return mv3d[`${this.char._type.toUpperCase()}_SETTINGS`].conf;
+		}
+		if(this.char.isTile()){
+			return mv3d.EVENT_TILE_SETTINGS;
+		}else if(this.isEvent && this.char.isObjectCharacter()){
+			return mv3d.EVENT_OBJ_SETTINGS;
+		}else{
+			return mv3d.EVENT_CHAR_SETTINGS;
+		}
+	}
+
 	getConfig(key,dfault=undefined){
-		if(!this.settings_event){ return dfault; }
-		if(key in this.settings_event_page){
-			return this.settings_event_page[key];
-		}else if(key in this.settings_event){
-			return this.settings_event[key];
+		if(this.settings_event){
+			if(key in this.settings_event_page){
+				return this.settings_event_page[key];
+			}else if(key in this.settings_event){
+				return this.settings_event[key];
+			}
+		}
+		const EVENT_SETTINGS = this.getDefaultConfigObject();
+		if(key in EVENT_SETTINGS){
+			return EVENT_SETTINGS[key];
 		}
 		return dfault;
 	}
 	hasConfig(key){
-		if(!this.settings_event){ return false; }
-		return key in this.settings_event_page || key in this.settings_event;
+		return this.settings_event&&(key in this.settings_event_page||key in this.settings_event)
+		|| key in this.getDefaultConfigObject();
 	}
 
 	eventConfigure(){
@@ -290,11 +304,15 @@ class Character extends Sprite{
 	}
 
 	setupMesh(){
-		this.mesh.parent = this.spriteOrigin;
-		this.mesh.character=this;
-		this.mesh.order=this.order;
-		if(this.material){
-			this.mesh.material=this.material;
+		if(!this.mesh.mv3d_isSetup){
+			mv3d.callFeatures('createCharMesh',this.mesh);
+			this.mesh.parent = this.spriteOrigin;
+			this.mesh.character=this;
+			this.mesh.order=this.order;
+			if(this.material){
+				this.mesh.material=this.material;
+			}
+			this.mesh.mv3d_isSetup=true;
 		}
 		if(this.flashlight){
 			this.flashlight.excludedMeshes.splice(0,Infinity);
@@ -424,19 +442,14 @@ class Character extends Sprite{
 	}
 
 	hasBush(){
-		if(this.isEvent){
-			return this.getConfig('bush',!this._tileId);
-		}
-		if(this.isVehicle){
-			return mv3d.VEHICLE_BUSH;
-		}
-		return true;
+		return this.getConfig('bush',!(
+			this.char.isTile() || this.isVehicle
+			|| this.isEvent && this.char.isObjectCharacter()
+		));
 	}
 
 	getShape(){
-		return this.getConfig('shape',
-			this.char.isTile() ? mv3d.configurationShapes.FLAT : mv3d.EVENT_SHAPE
-		);
+		return this.getConfig('shape', mv3d.configurationShapes.SPRITE );
 	}
 	updateShape(){
 		const newshape = this.getShape();
@@ -461,6 +474,7 @@ class Character extends Sprite{
 			//backfaceCulling=false;
 			break;
 		}
+		mv3d.callFeatures('destroyCharMesh',this.mesh);
 		this.mesh.dispose();
 		this.mesh=geometry.clone();
 		//this.material.backfaceCulling=backfaceCulling;
@@ -598,11 +612,6 @@ class Character extends Sprite{
 		let newElevation = this.tileHeight;
 		if(this.isVehicle || (this.isPlayer||this.isFollower)&&$gamePlayer.vehicle()){
 			newElevation += mv3d.getFloatHeight(Math.round(this.char._realX),Math.round(this.char._realY));
-			if(this.char===$gameMap.vehicle('boat')){
-				newElevation += mv3d.BOAT_SETTINGS.zoff;
-			}else if(this.char===$gameMap.vehicle('ship')){
-				newElevation += mv3d.SHIP_SETTINGS.zoff;
-			}
 		}
 
 		if(this.isAirship && $gamePlayer.vehicle()===this.char){
@@ -619,23 +628,30 @@ class Character extends Sprite{
 			}
 			this.z = this.elevation;
 			this.z += mv3d.loadData('airship_height',mv3d.AIRSHIP_SETTINGS.height)*this.char._altitude/this.char.maxAltitude();
-		}else if(this.char.isJumping()){
-			let jumpProgress = 1-(this.char._jumpCount/(this.char._jumpPeak*2));
-			let jumpHeight = Math.pow(jumpProgress-0.5,2)*-4+1;
-			let jumpDiff = Math.abs(this.char.mv3d_jumpHeightEnd - this.char.mv3d_jumpHeightStart);
-			this.z = this.char.mv3d_jumpHeightStart*(1-jumpProgress)
-			+ this.char.mv3d_jumpHeightEnd*jumpProgress + jumpHeight*jumpDiff/2
-			+this.char.jumpHeight()/tileSize();
 		}else{
-			this.elevation=newElevation;
-			this.z=this.elevation;
+			if(this.char.isJumping()){
+				let jumpProgress = 1-(this.char._jumpCount/(this.char._jumpPeak*2));
+				let jumpHeight = Math.pow(jumpProgress-0.5,2)*-4+1;
+				let jumpDiff = Math.abs(this.char.mv3d_jumpHeightEnd - this.char.mv3d_jumpHeightStart);
+				this.z = this.char.mv3d_jumpHeightStart*(1-jumpProgress)
+				+ this.char.mv3d_jumpHeightEnd*jumpProgress + jumpHeight*jumpDiff/2
+				+this.char.jumpHeight()/tileSize();
+			}else{
+				this.elevation=newElevation;
+				this.z=this.elevation;
+			}
+			const height = this.getConfig('height',this.char._priorityType===2?mv3d.EVENT_HEIGHT:0);
+			if(height>0){
+				this.z += height;
+			}else{
+				this.spriteOrigin.z += height;
+			}
+			
 		}
 
-		if(this.isEvent){
-			this.z += this.getConfig('height',this.char._priorityType===2?mv3d.EVENT_HEIGHT:0);
-			if(this.hasConfig('z')){
-				this.z=this.getConfig('z',0);
-			}
+		if(this.hasConfig('z')){
+			this.spriteOrigin.z=0;
+			this.z=this.getConfig('z',0);
 		}
 	}
 
@@ -663,10 +679,10 @@ class Character extends Sprite{
 
 		const shadowBase = Math.min(0,this.getConfig('height',0));
 		const shadowDist = Math.max(this.z - this.tileHeight, shadowBase);
-		const shadowFadeDist = this.isAirship? mv3d.AIRSHIP_SETTINGS.shadowDist : mv3d.SHADOW_DIST;
+		const shadowFadeDist = this.getConfig('shadowDist',4);
 		const shadowStrength = Math.max(0,1-Math.abs(shadowDist)/shadowFadeDist);
 		this.shadow.z = -shadowDist;
-		const shadowScale = this.isAirship? mv3d.AIRSHIP_SETTINGS.shadowScale : this.getConfig('shadow',mv3d.SHADOW_SCALE);
+		const shadowScale = this.getConfig('shadow',1);
 		this.shadow.scaling.setAll(shadowScale*shadowStrength);
 		if(!this.shadow.isAnInstance){
 			this.shadow.visibility=shadowStrength-0.5*this.bush;//visibility doesn't work with instancing

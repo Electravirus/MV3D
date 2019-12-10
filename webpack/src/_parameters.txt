@@ -85,38 +85,6 @@
 @decimals 1
 @default 25.0
 
-@param shadow
-@text Light & Shadow
-
-@param ambientColor
-@text Ambient Color
-@desc The color of the ambient light.
-@parent shadow
-@type Color
-@default white
-
-@param characterShadows
-@text Character Shadows
-@parent shadow
-@type Boolean
-@default true
-
-@param shadowScale
-@text Default Shadow Scale
-@parent shadow
-@desc The default size of character shadows.
-@type Number
-@decimals 1
-@default 0.8
-
-@param shadowDist
-@text Shadow Distance
-@parent shadow
-@desc How far above the ground before a character's shadow fades completely. 
-@type Number
-@decimals 1
-@default 4.0
-
 @param input
 @text Input & Movement
 
@@ -220,14 +188,23 @@ there may be z-fighting issues. (default: 0.0100)
 @param characters
 @text Characters
 
-@param eventShape
-@text Default Event Shape
+@param eventCharDefaults
+@text Character Event Settings
 @parent characters
-@type combo
-@option FLAT
-@option SPRITE
-@option TREE
-@default SPRITE
+@type Text
+@default shadow(0.8,4),shape(sprite),scale(1)
+
+@param eventObjDefaults
+@text Object Event Settings
+@parent characters
+@type Text
+@default shadow(0),shape(sprite),scale(1)
+
+@param eventTileDefaults
+@text Tile Event Settings
+@parent characters
+@type Text
+@default shadow(0),shape(flat),scale(1)
 
 @param eventHeight
 @text Event "Above Characters" Default Height
@@ -240,23 +217,16 @@ there may be z-fighting issues. (default: 0.0100)
 @text Boat Settings
 @parent characters
 @type struct<BoatStruct>
-@default {"scale":"1","zoff":"-0.16","big":"false"}
+@default {"conf":"shadow(0.8,4),shape(sprite),scale(1),bush(false)","big":"false"}
 
 @param shipSettings
 @text Ship Settings
 @parent characters
 @type struct<BoatStruct>
-@default {"scale":"1","zoff":"0.0","big":"false"}
+@default {"conf":"shadow(0.8,4),shape(sprite),scale(1),bush(false)","big":"false"}
 
 @param airshipSettings
 @text Airship Settings
 @parent characters
 @type struct<AirshipStruct>
-@default {"scale":"1","height":"2.0","shadowScale":"1.0","shadowDist":"6.0","big":"false","bushLanding":"false"}
-
-@param vehicleBush
-@text Vehicle Bush
-@parent characters
-@desc Whether vehicles should be affected by bush tiles.
-@type Boolean
-@default false
+@default {"conf":"shadow(1,6),shape(sprite),scale(1),bush(false)","height":"2.0","big":"false","bushLanding":"false"}

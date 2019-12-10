@@ -1,8 +1,9 @@
 import { Engine, Scene, HemisphericLight, TransformNode, FreeCamera, Node, Vector2, Vector3, Color3, FOGMODE_LINEAR, DirectionalLight, ShadowGenerator, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods } from "./mod_babylon.js";
-import { v3origin, degtorad, tileSize } from "./util.js";
+import util, { v3origin, degtorad, tileSize } from "./util.js";
 
 
 const mv3d = {
+	util:util,
 
 	setup(){
 		this.setupParameters();
