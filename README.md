@@ -480,3 +480,4 @@ player upgrade their airship's height and speed.
 - A Memory of Eternity
 - Pumpkin Boss
 - JosephSeraph
+- HuskyTrooper

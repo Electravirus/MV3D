@@ -10,7 +10,11 @@ export class CellMeshBuilder{
 		const submeshBuildersArray=Object.values(this.submeshBuilders);
 		if(!submeshBuildersArray.length){ return null; }
 		const submeshes = submeshBuildersArray.map(builder=>builder.build());
-		const mesh = Mesh.MergeMeshes(submeshes,true,undefined,undefined,false,true);
+		const totalVertices = submeshes.reduce((total,mesh)=>{
+			if(typeof total!=='number'){ total=total.getTotalVertices(); }
+			return total+mesh.getTotalVertices();
+		});
+		const mesh = Mesh.MergeMeshes(submeshes,true,totalVertices>65536,undefined,false,true);
 		return mesh;
 	}
 	getBuilder(material){
@@ -96,17 +100,20 @@ class SubMeshBuilder{
 	}
 	addFloorFace(x,z,y,w,h,uvr,options){
 		z=-z;y=y;
-		const f=Boolean(options.flip)*-2+1;
-		const ww=f*w/2, hh=h/2;
+		//const f=Boolean(options.flip)*-2+1;
+		//const ww=f*w/2, hh=h/2;
+		const ww=w/2, hh=h/2;
 		const positions = [
 			x-ww, y, z+hh,
 			x+ww, y, z+hh,
 			x-ww, y, z-hh,
 			x+ww, y, z-hh,
 		];
-		const normals=[ 0,f,0, 0,f,0, 0,f,0, 0,f,0 ];
+		//const normals=[ 0,f,0, 0,f,0, 0,f,0, 0,f,0 ];
+		const normals=[ 0,1,0, 0,1,0, 0,1,0, 0,1,0 ];
 		const uvs = SubMeshBuilder.getDefaultUvs(uvr);
 		const indices=SubMeshBuilder.getDefaultIndices();
+		if(options.flip){ SubMeshBuilder.flipFace(indices,normals); }
 		this.pushNewData(positions,indices,normals,uvs);
 	}
 	addSlopeFace(x,z,y,w,h,rot,uvr,options){

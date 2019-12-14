@@ -75,6 +75,7 @@ Object.assign(mv3d,{
 		material.ambientColor.set(1,1,1);
 		material.emissiveColor.set(options.glow,options.glow,options.glow);
 		material.specularColor.set(0,0,0);
+		if(!isNaN(this.LIGHT_LIMIT)){ material.maxSimultaneousLights=this.LIGHT_LIMIT; }
 		this.materialCache[key]=material;
 		return material;
 	},

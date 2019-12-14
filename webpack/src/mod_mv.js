@@ -57,20 +57,25 @@ Game_Player.prototype.performTransfer = function() {
 		mv3d.clearMap();
 	}
 	_performTransfer.apply(this,arguments);
+	if(mv3d.is1stPerson()){
+		mv3d.blendCameraYaw.setValue(mv3d.dirToYaw($gamePlayer.direction(),0));
+	}
 };
 
 // On Map Load
-let mapNeedsClear=false;
-
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
-	if(mapNeedsClear){
+	if(mv3d.needClearMap){
 		mv3d.clearMap();
-		mapNeedsClear=false;
+		mv3d.needClearMap=false;
+	}else if(mv3d.needReloadMap){
+		mv3d.reloadMap();
+		mv3d.needReloadMap=false;
 	}
 	mv3d.loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
 	if(!mv3d.mapLoaded){
+		mv3d.applyMapSettings()
 		mv3d.loadTilesetSettings();
 		mv3d.mapReady=false;
 		//mv3d.mapReady=true;
@@ -82,7 +87,7 @@ Scene_Map.prototype.onMapLoaded=function(){
 const _onLoadSuccess = Scene_Load.prototype.onLoadSuccess;
 Scene_Load.prototype.onLoadSuccess = function() {
 	_onLoadSuccess.apply(this,arguments);
-	mapNeedsClear=true;
+	mv3d.needClearMap=true;
 };
 
 const _map_isReady = Scene_Map.prototype.isReady;

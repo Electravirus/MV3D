@@ -115,7 +115,9 @@ Object.assign(mv3d,{
 			this.mapConfigurationFunctions,
 			mapconf,
         );
-        
+	},
+	applyMapSettings(){
+		const mapconf = this.mapConfigurations;
 		if('fog' in mapconf){
 			const fog = mapconf.fog;
 			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
@@ -141,7 +143,7 @@ Object.assign(mv3d,{
 		if('cameraYaw' in mapconf){
 			this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
 		}
-    },
+	},
     
 
 	getMapConfig(key,dfault){
@@ -160,6 +162,7 @@ Object.assign(mv3d,{
 		}
 		conf.bottom_id = this.getMapConfig('ceiling_id',0);
 		conf.height = this.getMapConfig('ceiling_height',this.CEILING_HEIGHT);
+		conf.skylight = this.getMapConfig('ceiling_skylight',false);
 		return conf;
 	},
 
@@ -279,6 +282,7 @@ Object.assign(mv3d,{
 		alpha(conf,n){
 			conf.alpha=Number(n);
 		},
+		glow(conf,n){ conf.glow=Number(n); },
 		dirfix(conf,b){
 			conf.dirfix=booleanString(b);
 		}
@@ -304,7 +308,7 @@ Object.assign(mv3d,{
 			if(height){ conf.cameraHeight=Number(height); }
 			if(mode){ conf.cameraMode=mode; }
 		}),
-		ceiling:TextureConfigurator('ceiling','height'),
+		ceiling:TextureConfigurator('ceiling','height,skylight'),
 		edge(conf,b){
 			conf.edge=booleanString(b);
 		},

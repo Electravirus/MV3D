@@ -1,21 +1,31 @@
-@param graphics
-@text Graphics
+@param options
+@text Option Settings
 
 @param renderDist
-@text Render Distance
+@text Default Render Distance
 @desc The maximum distance that can be rendered by the camera.
-@parent graphics
+@parent options
 @type Number
 @default 25
 
-@param antialiasing
-@text Antialiasing
-@parent graphics
+@param mipmap
+@text Mipmap Default
+@parent options
 @type Boolean
 @default true
 
-@param mipmap
-@text Mipmapping
+@param mipmapOption
+@text Mipmap Option
+@desc Should Mipmapping appear on options menu?
+@parent options
+@type Boolean
+@default true
+
+@param graphics
+@text Graphics
+
+@param antialiasing
+@text Antialiasing
 @parent graphics
 @type Boolean
 @default true
@@ -43,21 +53,29 @@
 @min 0.01 @max 1
 @default 0.51
 
+@param lightLimit
+@text Lights Per Mesh
+@parent graphics
+@type Number
+@min 4
+@default auto
+
 @param map
 @text Map Settings
 
-@param cellDist
-@text Cell Load Radius
-@desc The radius around the player that tiles will be loaded.
-@parent map
-@type Number
-@default 20
-
 @param cellSize
 @text Cell Size
+@desc The size of the chunks the map is divided into.
 @parent map
 @type Number
 @default 10
+
+@param unloadCells
+@text Unload Far Cells
+@desc Unload cells outside the render distance.
+@parent map
+@type Boolean
+@default false
 
 @param fog
 @text Fog

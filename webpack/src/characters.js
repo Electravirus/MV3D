@@ -82,6 +82,7 @@ class Sprite extends TransformNode{
 		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
 		this.material.ambientColor.set(1,1,1);
 		this.material.specularColor.set(0,0,0);
+		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
 		this.mesh.material=this.material;
 	}
 	onTextureLoaded(){
@@ -139,6 +140,8 @@ class Character extends Sprite{
 		
 		if(this.isEvent){
 			this.eventConfigure();
+		}else{
+			this.onConfigure();
 		}
 	}
 
@@ -161,6 +164,7 @@ class Character extends Sprite{
 		super.onTextureLoaded();
 		this.updateFrame();
 		this.updateScale();
+		this.onConfigure();
 	}
 
 	updateCharacter(){
@@ -301,6 +305,15 @@ class Character extends Sprite{
 			this.blendFlashlightPitch.setValue(this.getConfig('flashlightPitch',90),0.25);
 			this.flashlightTargetYaw=this.getConfig('flashlightYaw','+0');
 		}
+
+		this.onConfigure();
+	}
+
+	onConfigure(){
+		if(this.material){
+			const glow = this.getConfig('glow',0);
+			this.material.emissiveColor.set(glow,glow,glow);
+		}
 	}
 
 	setupMesh(){
@@ -353,6 +366,7 @@ class Character extends Sprite{
 		this.blendFlashlightAngle = this.makeBlender('flashlightAngle',config.angle);
 		this.flashlight = new SpotLight('flashlight',Vector3.Zero(),Vector3.Zero(),
 			degtorad(this.blendFlashlightAngle.targetValue()+mv3d.FLASHLIGHT_EXTRA_ANGLE),0,mv3d.scene);
+		this.flashlight.renderPriority=2;
 		this.updateFlashlightExp();
 		this.flashlight.range = this.blendFlashlightDistance.targetValue();
 		this.flashlight.intensity=this.blendFlashlightIntensity.targetValue();
@@ -385,6 +399,7 @@ class Character extends Sprite{
 		this.blendLampIntensity = this.makeBlender('lampIntensity',config.intensity);
 		this.blendLampDistance = this.makeBlender('lampDistance',config.distance);
 		this.lamp = new PointLight('lamp',Vector3.Zero(),mv3d.scene);
+		this.lamp.renderPriority=1;
 		this.lamp.diffuse.set(...this.blendLampColor.targetComponents());
 		this.lamp.intensity=this.blendLampIntensity.targetValue();
 		this.lamp.range=this.blendLampDistance.targetValue();

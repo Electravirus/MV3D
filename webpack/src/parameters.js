@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { hexNumber,booleanString,falseString, makeColor } from './util.js';
-import { Vector2, Texture } from './mod_babylon.js';
+import { Vector2, Texture, ORTHOGRAPHIC_CAMERA } from './mod_babylon.js';
 
 const parameters = PluginManager.parameters('mv3d-babylon');
 export default parameters;
@@ -23,10 +23,11 @@ Object.assign(mv3d,{
 	CEILING_HEIGHT:Number(parameters.ceilingHeight),
 	LAYER_DIST:Number(parameters.layerDist),
 
+	UNLOAD_CELLS: booleanString(parameters.unloadCells),
 	CELL_SIZE: Number(parameters.cellSize),
-	CELL_DIST: Number(parameters.cellDist),
 	RENDER_DIST: Number(parameters.renderDist),
 	MIPMAP:booleanString(parameters.mipmap),
+	MIPMAP_OPTION:booleanString(parameters.mipmapOption),
 
 	STAIR_THRESH: Number(parameters.stairThresh),
 
@@ -35,7 +36,7 @@ Object.assign(mv3d,{
 	FOG_FAR: Number(parameters.fogFar), 
 	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
 
-
+	LIGHT_LIMIT: Number(parameters.lightLimit),
 	LIGHT_HEIGHT: 0.5,
 	LIGHT_DECAY: 1,
 	LIGHT_DIST: 3,
@@ -123,6 +124,17 @@ Object.assign(mv3d,{
 
 		//Texture.DEFAULT_ANISOTROPIC_FILTERING_LEVEL=0;
 	},
+
+	updateParameters(){
+		if(this.camera.mode===ORTHOGRAPHIC_CAMERA){
+			this.camera.maxZ=this.RENDER_DIST;
+			this.camera.minZ=-this.RENDER_DIST;
+		}else{
+			this.camera.maxZ=this.RENDER_DIST;
+			this.camera.minZ=0.1;
+		}
+		this.callFeatures('updateParameters');
+	}
 });
 
 Object.defineProperties(mv3d,{

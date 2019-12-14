@@ -9,6 +9,16 @@ Object.assign(mv3d,{
 	mapReady: false,
 	clearMap(){
 		this.mapLoaded=false;
+		this.clearMapCells();
+		for (const char of this.characters){
+			char.dispose(false,true);
+		}
+		this.characters.length=0;
+		this.resetCameraTarget();
+
+		this.callFeatures('clearMap');
+	},
+	clearMapCells(){
 		// clear materials and textures
 		for (const key in this.textureCache){
 			this.textureCache[key].dispose();
@@ -24,13 +34,10 @@ Object.assign(mv3d,{
 			this.cells[key].dispose(false,true);
 		}
 		this.cells={};
-		for (const char of this.characters){
-			char.dispose(false,true);
-		}
-		this.characters.length=0;
-		this.resetCameraTarget();
-
-		this.callFeatures('clearMap');
+	},
+	reloadMap(){
+		this.clearMapCells();
+		this.callFeatures('reloadMap');
 	},
 
 	loadMap(){
@@ -48,13 +55,16 @@ Object.assign(mv3d,{
 		if(this.mapUpdating){ return; }
 		this.mapLoaded=true;
 		this.mapUpdating=true;
-		// unload Far cells? implement if needed.
+		// unload Far cells
+		for (const key in this.cells){
+			this.cells[key].unload=true;
+		}
 		// get range of cells based on render distance
 		const bounds = {
-			left:Math.floor((this.cameraStick.x-this.CELL_DIST)/this.CELL_SIZE),
-			right:Math.floor((this.cameraStick.x+this.CELL_DIST)/this.CELL_SIZE),
-			top:Math.floor((this.cameraStick.y-this.CELL_DIST)/this.CELL_SIZE),
-			bottom:Math.floor((this.cameraStick.y+this.CELL_DIST)/this.CELL_SIZE),
+			left:Math.floor((this.cameraStick.x-this.RENDER_DIST)/this.CELL_SIZE),
+			right:Math.floor((this.cameraStick.x+this.RENDER_DIST)/this.CELL_SIZE),
+			top:Math.floor((this.cameraStick.y-this.RENDER_DIST)/this.CELL_SIZE),
+			bottom:Math.floor((this.cameraStick.y+this.RENDER_DIST)/this.CELL_SIZE),
 		}
 		//clamp cell range to map
 		if(!$gameMap.isLoopHorizontal()){
@@ -72,8 +82,16 @@ Object.assign(mv3d,{
 			if($gameMap.isLoopHorizontal()){ cx = cx.mod(Math.ceil($gameMap.width()/mv3d.CELL_SIZE)); }
 			if($gameMap.isLoopVertical()){ cy = cy.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
 			const key = [cx,cy].toString();
-			if(!(key in this.cells)){
+			if(key in this.cells){
+				this.cells[key].unload=false;
+			}else{
 				cellsToLoad.push(new Vector2(cx,cy));
+			}
+		}
+		for (const key in this.cells){
+			if(mv3d.UNLOAD_CELLS && this.cells[key].unload){
+				this.cells[key].dispose();
+				delete this.cells[key];
 			}
 		}
 		const cameraCellPos = new Vector2(Math.round(this.cameraStick.x/this.CELL_SIZE-0.5),Math.round(this.cameraStick.y/this.CELL_SIZE-0.5));

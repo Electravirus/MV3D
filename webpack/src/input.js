@@ -33,6 +33,7 @@ function getInputDescriptor(menumode,p3mode,p1mode){
 		get(){
 			if(assignedValue!=undefined){ return assignedValue; }
 			if(!(SceneManager._scene instanceof Scene_Map)){ return menumode; }
+			if(mv3d.isDisabled()){ return p3mode; }
 			if(mv3d.is1stPerson()){ return p1mode; }
 			return p3mode;
 		},
@@ -40,7 +41,9 @@ function getInputDescriptor(menumode,p3mode,p1mode){
 	};
 }
 
+const _getInputDirection = Game_Player.prototype.getInputDirection;
 Game_Player.prototype.getInputDirection = function() {
+	if (mv3d.isDisabled()){ return _getInputDirection.apply(this,arguments); }
 	let dir = Input.dir4;
 	return mv3d.transformDirectionYaw(dir,mv3d.blendCameraYaw.currentValue(),true);
 };
@@ -48,6 +51,7 @@ Game_Player.prototype.getInputDirection = function() {
 const _player_updateMove = Game_Player.prototype.updateMove;
 Game_Player.prototype.updateMove = function() {
 	_player_updateMove.apply(this,arguments);
+	if (mv3d.isDisabled()){ return; }
 	if ( !this.isMoving() && mv3d.is1stPerson() ) {
 		mv3d.playerFaceYaw();
 	}
@@ -55,6 +59,7 @@ Game_Player.prototype.updateMove = function() {
 const _player_move_straight=Game_Player.prototype.moveStraight;
 Game_Player.prototype.moveStraight = function(d) {
 	_player_move_straight.apply(this,arguments);
+	if (mv3d.isDisabled()){ return; }
 	if(!this.isMovementSucceeded()&&mv3d.is1stPerson()){
 		mv3d.playerFaceYaw();
 	}
@@ -97,6 +102,7 @@ Scene_Map.prototype.processMapTouch = function() {
 const _player_findDirectionTo=Game_Player.prototype.findDirectionTo;
 Game_Player.prototype.findDirectionTo=function(){
 	const dir = _player_findDirectionTo.apply(this,arguments);
+	if(mv3d.isDisabled()){ return dir; }
 	if(mv3d.is1stPerson() && dir){
 		let yaw = mv3d.dirToYaw(dir);
 

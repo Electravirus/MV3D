@@ -43,6 +43,14 @@ const mv3d = {
 		this.setupInput();
 
 		this.setupSpriteMeshes();
+
+		if(isNaN(this.LIGHT_LIMIT)){
+			const _sortLightsByPriority=BABYLON.Scene.prototype.sortLightsByPriority;
+			BABYLON.Scene.prototype.sortLightsByPriority=function(){
+				_sortLightsByPriority.apply(this,arguments);
+				mv3d.updateAutoLightLimit();
+			};
+		}
 	},
 
 	updateCanvas(){
@@ -68,37 +76,34 @@ const mv3d = {
 
 		this.updateBlenders();
 
-		// update sunlight
-		if(this.sunlight){
-			//this.sunNode.x=this.cameraStick.x;
-			//this.sunNode.y=this.cameraStick.y;
-			this.sunNode.position.copyFrom(this.cameraStick.position);
-		}
-
 		// input
-		if( mv3d.KEYBOARD_TURN || this.is1stPerson() ){
-			if(Input.isTriggered('rotleft')){
-				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+90,0.5);
-			}else if(Input.isTriggered('rotright')){
-				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-90,0.5);
+		if(!mv3d.isDisabled()){
+			if( mv3d.KEYBOARD_TURN || this.is1stPerson() ){
+				if(Input.isTriggered('rotleft')){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+90,0.5);
+				}else if(Input.isTriggered('rotright')){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-90,0.5);
+				}
+				if(this.is1stPerson()&&(Input.isTriggered('rotleft')||Input.isTriggered('rotright'))){
+					this.playerFaceYaw();
+				}
 			}
-			if(this.is1stPerson()&&(Input.isTriggered('rotleft')||Input.isTriggered('rotright'))){
-				this.playerFaceYaw();
-			}
-		}
-		if( mv3d.KEYBOARD_PITCH ){
-			if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
-				// do nothing
-			}else if(Input.isPressed('pageup')){
-				this.blendCameraPitch.setValue(Math.min(180,this.blendCameraPitch.targetValue()+1.5),0.1);
-			}else if(Input.isPressed('pagedown')){
-				this.blendCameraPitch.setValue(Math.max(0,this.blendCameraPitch.targetValue()-1.5),0.1);
+			if( mv3d.KEYBOARD_PITCH ){
+				if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
+					// do nothing
+				}else if(Input.isPressed('pageup')){
+					this.blendCameraPitch.setValue(Math.min(180,this.blendCameraPitch.targetValue()+1.5),0.1);
+				}else if(Input.isPressed('pagedown')){
+					this.blendCameraPitch.setValue(Math.max(0,this.blendCameraPitch.targetValue()-1.5),0.1);
+				}
 			}
 		}
 
 		for (const key in this.cells){
 			this.cells[key].update();
 		}
+
+		this.callFeatures('update');
 
 		this.updateData();
 	},
@@ -115,10 +120,15 @@ const mv3d = {
 
 	updateCameraMode(){
 		const mode = this.cameraMode;
+		let updated=false;
 		if(mode.startsWith('O')){
-			if(this.camera.mode!==ORTHOGRAPHIC_CAMERA){ this.camera.mode=ORTHOGRAPHIC_CAMERA; }
+			if(this.camera.mode!==ORTHOGRAPHIC_CAMERA){ this.camera.mode=ORTHOGRAPHIC_CAMERA; updated=true; }
 		}else{
-			if(this.camera.mode!==PERSPECTIVE_CAMERA){ this.camera.mode=PERSPECTIVE_CAMERA; }
+			if(this.camera.mode!==PERSPECTIVE_CAMERA){ this.camera.mode=PERSPECTIVE_CAMERA; updated=true; }
+		}
+		if(updated){
+			this.callFeatures('updateCameraMode');
+			this.updateParameters();
 		}
 	},
 	get cameraMode(){
@@ -190,6 +200,25 @@ const mv3d = {
 		}
 		if(dir>1){ dir+=(dir+1)%2*2-1; }
 		return dir*2+2;
+	},
+
+	autoLightLimit(lightLimit){
+		if(isNaN(this.LIGHT_LIMIT)){
+			return Math.max(4,lightLimit);
+		}else{
+			return this.LIGHT_LIMIT;
+		}
+	},
+
+	updateAutoLightLimit(){
+		const lightLimit=this.autoLightLimit(mv3d.scene.lights.length);
+		for(const m of Object.values(mv3d.materialCache)){
+			m.maxSimultaneousLights=lightLimit;
+		}
+		for(const char of this.characters){
+			if(!char.material){ continue; }
+			char.material.maxSimultaneousLights=this.autoLightLimit(char.mesh.lightSources.length);
+		}
 	},
 
 }

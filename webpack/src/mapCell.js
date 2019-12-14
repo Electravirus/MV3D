@@ -75,7 +75,7 @@ export class MapCell extends TransformNode{
 				}
 			}
 			if(!mv3d.isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
-				await this.loadTile(ceiling,x,y,ceiling.height,0,true);
+				await this.loadTile(ceiling,x,y,ceiling.height,0,true,!ceiling.skylight);
 			}
 
 			//if(mv3d.mapReady){ await sleep(); }
@@ -96,7 +96,7 @@ export class MapCell extends TransformNode{
 			mv3d.callFeatures('destroyCellMesh',this.mesh);
 		}
 	}
-	async loadTile(tileConf,x,y,z,l,ceiling=false){
+	async loadTile(tileConf,x,y,z,l,ceiling=false,double=false){
 		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;
 		if(mv3d.isTileEmpty(tileId)){ return; }
 		const configRect = ceiling?tileConf.bottom_rect:tileConf.top_rect;
@@ -113,7 +113,7 @@ export class MapCell extends TransformNode{
 				x + (rect.ox|0)/tileSize() - 0.25*isAutotile,
 				y + (rect.oy|0)/tileSize() - 0.25*isAutotile,
 				z,
-				1-isAutotile/2, 1-isAutotile/2, {flip:ceiling}
+				1-isAutotile/2, 1-isAutotile/2, {flip:ceiling,double:double}
 			);
 		}
 	}

@@ -95,21 +95,25 @@ Object.assign(mv3d,{
 			if(this.camera.mode===ORTHOGRAPHIC_CAMERA){
 				//this.camera.zoom=10/this.blendCameraDist.currentValue();
 				//this.camera.updateProjectionMatrix();
-				this.camera.maxZ=this.RENDER_DIST;
-				this.camera.minZ=-this.RENDER_DIST;
+				//this.camera.maxZ=this.RENDER_DIST;
+				//this.camera.minZ=-this.RENDER_DIST;
 			}else{
-				
 				if(this.cameraNode.z<0){ this.cameraNode.z=0; }
-				this.camera.maxZ=this.RENDER_DIST;
-				this.camera.minZ=0.1;
+				//this.camera.maxZ=this.RENDER_DIST;
+				//this.camera.minZ=0.1;
 			}
 			this.cameraNode.z += this.blendCameraHeight.currentValue();
 		}
 
 		//fog
 		if(reorient|this.blendFogColor.update()|this.blendFogNear.update()|this.blendFogFar.update()){
-			this.scene.fogStart=this.blendFogNear.currentValue();
-			this.scene.fogEnd=this.blendFogFar.currentValue();
+			if(mv3d.featureEnabled('alphaFog')){
+				this.scene.fogStart=this.blendFogNear.currentValue();
+				this.scene.fogEnd=this.blendFogFar.currentValue();
+			}else{
+				this.scene.fogStart=Math.min(mv3d.RENDER_DIST-1,this.blendFogNear.currentValue());
+				this.scene.fogEnd=Math.min(mv3d.RENDER_DIST,this.blendFogFar.currentValue());
+			}
 			this.scene.fogColor.copyFromFloats(
 				this.blendFogColor.r.currentValue()/255,
 				this.blendFogColor.g.currentValue()/255,
@@ -125,7 +129,6 @@ Object.assign(mv3d,{
 				this.blendAmbientColor.b.currentValue()/255,
 			);
 		}
-
 	},
 
 });

@@ -115,8 +115,13 @@ Color3.prototype.toNumber=Color4.prototype.toNumber=function(){return this.r*255
 
 // hack babylon
 export function setupBabylonMods(){
-	BABYLON.Effect.ShadersStore.shadowMapPixelShader=BABYLON.Effect.ShadersStore.shadowMapPixelShader.replace(
+	hackShaderAlphaCutoff('shadowMapPixelShader');
+	hackShaderAlphaCutoff('depthPixelShader');
+};
+
+function hackShaderAlphaCutoff(shader){
+	BABYLON.Effect.ShadersStore[shader]=BABYLON.Effect.ShadersStore[shader].replace(
 		'if (texture2D(diffuseSampler,vUV).a<0.4)',
 		`if (texture2D(diffuseSampler,vUV).a<${mv3d.ALPHA_CUTOFF})`,
 	);
-};
+}
