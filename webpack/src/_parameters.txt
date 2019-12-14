@@ -85,7 +85,7 @@
 @desc The color of the fog. Use css color code or name (example: #ffffff)
 @parent fog
 @type Color
-@default white
+@default black
 
 @param fogNear
 @text Fog Start Distance

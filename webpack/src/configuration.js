@@ -143,6 +143,11 @@ Object.assign(mv3d,{
 		if('cameraYaw' in mapconf){
 			this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
 		}
+		if($gameMap.parallaxName()){
+			mv3d.scene.clearColor.set(0,0,0,0);
+		}else{
+			mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),1);
+		}
 	},
     
 
