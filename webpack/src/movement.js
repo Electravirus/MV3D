@@ -31,14 +31,14 @@ Game_CharacterBase.prototype.canPass = function(x, y, d) {
 	const tileHeight1 = mv3d.getWalkHeight(x,y);
 	const tileHeight2 = mv3d.getWalkHeight(x2,y2);
 	if(Math.abs(tileHeight1-tileHeight2)>mv3d.STAIR_THRESH){
-		if(canPassRamp(x,y,d,tileHeight1,tileHeight2)){ return true; }
-		if(canPassRamp(x2,y2,10-d,tileHeight2,tileHeight1)){ return true; }
+		if(canPassRamp(x,y,d)){ return true; }
+		if(canPassRamp(x2,y2,10-d)){ return true; }
 		return false; 
 	}
 	return true;
 };
 
-function canPassRamp(x,y,d,th1,th2){
+function canPassRamp(x,y,d){
 	const tileData = mv3d.getTileData(x,y);
 	let l,slopeId,slopeHeight;
 	for (l=tileData.length-1;l>=0;--l){
@@ -50,6 +50,10 @@ function canPassRamp(x,y,d,th1,th2){
 		}
 	}
 	if(!slopeId){ return false; }
+	const x2 = $gameMap.roundXWithDirection(x, d);
+	const y2 = $gameMap.roundYWithDirection(y, d);
+	const th1 = mv3d.getWalkHeight(x,y);
+	const th2 = mv3d.getWalkHeight(x2,y2,true);
 	const {dir:sd} = mv3d.getSlopeDirection(x,y,l,true);
 	if(sd===d)if(Math.abs(th2-(th1-slopeHeight/2))<=mv3d.STAIR_THRESH){ return true; }
 	if(sd===10-d)if(Math.abs(th2-(th1+slopeHeight/2))<=mv3d.STAIR_THRESH){ return true; }
