@@ -529,6 +529,7 @@ class Character extends Sprite{
 		}else{
 			this.updateEmpty();
 		}
+		this.updateAnimations();
 		//this.mesh.renderOutline=true;
 		//this.mesh.outlineWidth=1;
 
@@ -701,6 +702,23 @@ class Character extends Sprite{
 		this.shadow.scaling.setAll(shadowScale*shadowStrength);
 		if(!this.shadow.isAnInstance){
 			this.shadow.visibility=shadowStrength-0.5*this.bush;//visibility doesn't work with instancing
+		}
+	}
+
+	updateAnimations(){
+		if(this.char.isBalloonPlaying()){
+			if(!this._balloon){
+				this._balloon=mv3d.showBalloon(this);
+			}
+			this._balloon.update();
+		}else{
+			if(this._balloon){
+				this._balloon.dispose();
+				this._balloon=null;
+			}
+		}
+		for(const animation of this.char.mv_sprite._animationSprites){
+			animation.mv3d_animation.update();
 		}
 	}
 

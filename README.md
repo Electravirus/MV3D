@@ -481,3 +481,6 @@ player upgrade their airship's height and speed.
 - Pumpkin Boss
 - JosephSeraph
 - HuskyTrooper
+- rpgmakerunion.ru
+- CrysHistory
+- Fyoha

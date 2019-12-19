@@ -103,8 +103,12 @@ Object.assign(mv3d,{
 			let {x:cx,y:cy} = cellpos;
 			await this.loadMapCell(cx,cy);
 			if(this.mapReady){ await sleep(); }
-			if(!this.mapLoaded){ this.mapUpdating=false; return; }
+			if(!this.mapLoaded){ this.endMapUpdate(); return; }
 		}
+		this.endMapUpdate();
+	},
+
+	endMapUpdate(){
 		this.mapUpdating=false;
 		this.mapReady=true;
 	},

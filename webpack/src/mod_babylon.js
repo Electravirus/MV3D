@@ -1,3 +1,5 @@
+import './mod_babylon_2.js'
+
 const BABYLON = window.BABYLON;
 export const {
 	Scene,
@@ -23,6 +25,8 @@ export const {
 	MeshBuilder,
 	AssetsManager,
 	SceneSerializer,
+	Sprite,
+	SpriteManager,
 } = BABYLON;
 
 export const {
@@ -59,7 +63,7 @@ Texture.prototype.crop=function(x=0,y=0,w=0,h=0){
 	this.vOffset=1-y/height-this.vScale;
 }
 
-Object.defineProperties(Node.prototype,{
+const _mixin_xyz = {
 	x:{
 		get(){ return this.position?this.position.x:undefined; },
 		set(v){ if(this.position){ this.position.x=v; } },
@@ -72,7 +76,8 @@ Object.defineProperties(Node.prototype,{
 		get(){ return this.position?this.position.y:undefined; },
 		set(v){ if(this.position){ this.position.y=v; } },
 	},
-
+};
+const _mixin_angles = {
 	pitch:{
 		get(){ return this.rotation?-radtodeg(this.rotation.x):undefined; },
 		set(v){ if(this.rotation){ this.rotation.x=-degtorad(v); } },
@@ -85,7 +90,10 @@ Object.defineProperties(Node.prototype,{
 		get(){ return this.rotation?-radtodeg(this.rotation.z):undefined; },
 		set(v){  if(this.rotation){ this.rotation.z=-degtorad(v); } },
 	},
-});
+}
+Object.defineProperties(Node.prototype,_mixin_xyz);
+Object.defineProperties(Node.prototype,_mixin_angles);
+Object.defineProperties(Sprite.prototype,_mixin_xyz);
 
 // mesh sorting
 

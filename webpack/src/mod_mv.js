@@ -36,7 +36,8 @@ Spriteset_Map.prototype.createTilemap=function(){
 	mv3d.mapDisabled = mv3d.isDisabled();
 	if(mv3d.mapDisabled){ return; }
 	this._tilemap.visible=false;
-	this._baseSprite.addChild( new PIXI.Sprite(mv3d.texture) );
+	mv3d.pixiSprite=new PIXI.Sprite(mv3d.texture);
+	this._baseSprite.addChild( mv3d.pixiSprite );
 };
 
 const _sprite_char_setchar = Sprite_Character.prototype.setCharacter;

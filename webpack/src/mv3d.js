@@ -221,6 +221,17 @@ const mv3d = {
 		}
 	},
 
+	getFieldSize(dist=mv3d.blendCameraDist.currentValue()){
+		const size = Math.tan(mv3d.camera.fov/2)*dist*2*48;
+		return {
+			width:size*mv3d.engine.getAspectRatio(mv3d.camera),
+			height:size,
+		};
+	},
+	getScaleForDist(dist=mv3d.blendCameraDist.currentValue()){
+		return Graphics.height/this.getFieldSize(dist).height;
+	},
+
 }
 window.mv3d=mv3d;
 export default mv3d;
