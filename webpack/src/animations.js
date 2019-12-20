@@ -62,7 +62,7 @@ Balloon.Manager=function(){
 const _start_animation = Sprite_Base.prototype.startAnimation;
 Sprite_Base.prototype.startAnimation = function(){
 	_start_animation.apply(this,arguments);
-	if(mv3d.mapDisabled){ return; }
+	if(mv3d.mapDisabled||!(SceneManager._scene instanceof Scene_Map)){ return; }
 	const animationSprite = this._animationSprites[this._animationSprites.length-1];
 	mv3d.pixiSprite.addChild(animationSprite);
 };
@@ -70,7 +70,7 @@ Sprite_Base.prototype.startAnimation = function(){
 const _animation_updateScreenFlash=Sprite_Animation.prototype.updateScreenFlash;
 Sprite_Animation.prototype.updateScreenFlash = function() {
 	_animation_updateScreenFlash.apply(this,arguments);
-	if(!mv3d.mapDisabled){
+	if(!mv3d.mapDisabled&&(SceneManager._scene instanceof Scene_Map)){
 		this._screenFlashSprite.x = 0;
 		this._screenFlashSprite.y = 0;
 	}
@@ -79,7 +79,7 @@ Sprite_Animation.prototype.updateScreenFlash = function() {
 const _update_animation_sprites = Sprite_Base.prototype.updateAnimationSprites;
 Sprite_Base.prototype.updateAnimationSprites = function() {
 	_update_animation_sprites.apply(this,arguments);
-	if(mv3d.mapDisabled||!this._animationSprites.length){ return; }
+	if(mv3d.mapDisabled||!this._animationSprites.length||!(SceneManager._scene instanceof Scene_Map)){ return; }
 	if(!this._character.mv3d_sprite){ return; }
 	for (const animationSprite of this._animationSprites){
 

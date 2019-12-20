@@ -17,7 +17,7 @@ class ConfigurationFunction{
 		this.func=func;
 	}
 	run(conf,rawparams){
-		const r=/([,|])?(?:(\w+):)?([^,|\r\n]+)/g
+		const r=/([,|]+)? *(?:(\w+) *: *)?([^,|\r\n]+)/g
 		let match;
 		let i=0;
 		let gi=0;
@@ -26,8 +26,11 @@ class ConfigurationFunction{
 			params[`group${_gi+1}`]=[];
 		}
 		while(match=r.exec(rawparams)){
-			if(match[1]==='|'||i>=this.groups[gi].length){
-				i=0; ++gi;
+			if(match[1])for(const delimiter of match[1]){
+				if(delimiter===','){ ++i; }
+				if(delimiter==='|'||i>=this.groups[gi].length){
+					i=0; ++gi;
+				}
 			}
 			if(match[2]){
 				if(match[2] in this.labels){
@@ -46,7 +49,6 @@ class ConfigurationFunction{
 			}
 			if(gi>this.groups.length){ break; }
 			params[this.groups[gi][i]]=params[`group${gi+1}`][i]=match[3].trim();
-			++i;
 		}
 		this.func(conf,params);
 	}
