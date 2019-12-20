@@ -22,10 +22,12 @@ const mv3d = {
 		this.camera = new FreeCamera("camera",new Vector3(0,0,0),this.scene);
 		this.camera.parent=this.cameraNode;
 		this.camera.fov=degtorad(mv3d.FOV);
+		/*
 		this.camera.orthoLeft=-Graphics.width/2/tileSize();
 		this.camera.orthoRight=Graphics.width/2/tileSize();
 		this.camera.orthoTop=Graphics.height/2/tileSize();
 		this.camera.orthoBottom=-Graphics.height/2/tileSize();
+		*/
 		this.camera.minZ=0.1;
 		this.camera.maxZ=this.RENDER_DIST;
 
@@ -127,6 +129,7 @@ const mv3d = {
 			if(this.camera.mode!==PERSPECTIVE_CAMERA){ this.camera.mode=PERSPECTIVE_CAMERA; updated=true; }
 		}
 		if(updated){
+			this.updateBlenders(true);
 			this.callFeatures('updateCameraMode');
 			this.updateParameters();
 		}
@@ -222,14 +225,20 @@ const mv3d = {
 	},
 
 	getFieldSize(dist=mv3d.blendCameraDist.currentValue()){
-		const size = Math.tan(mv3d.camera.fov/2)*dist*2*48;
+		const size = Math.tan(mv3d.camera.fov/2)*dist*2;
 		return {
 			width:size*mv3d.engine.getAspectRatio(mv3d.camera),
 			height:size,
 		};
 	},
 	getScaleForDist(dist=mv3d.blendCameraDist.currentValue()){
-		return Graphics.height/this.getFieldSize(dist).height;
+		return Graphics.height/this.getFieldSize(dist).height/48;
+	},
+	getScreenPosition(node,offset=Vector3.Zero()){
+		const matrix = node.parent ? node.parent.getWorldMatrix() : BABYLON.Matrix.Identity();
+		const pos = node instanceof Vector3 ? node.add(offset) : node.position.add(offset);
+		const projected = Vector3.Project(pos,matrix,mv3d.scene.getTransformMatrix(),mv3d.camera.viewport);
+		return {x:projected.x*Graphics.width, y:projected.y*Graphics.height, behindCamera:projected.z>1};
 	},
 
 }

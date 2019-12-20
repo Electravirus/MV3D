@@ -93,6 +93,11 @@ Object.assign(mv3d,{
 			this.cameraNode.position.set(0,0,0);
 			this.cameraNode.translate(ZAxis,-this.blendCameraDist.currentValue(),LOCALSPACE);
 			if(this.camera.mode===ORTHOGRAPHIC_CAMERA){
+				const fieldSize = this.getFieldSize();
+				this.camera.orthoLeft=-fieldSize.width/2;
+				this.camera.orthoRight=fieldSize.width/2;
+				this.camera.orthoTop=fieldSize.height/2;
+				this.camera.orthoBottom=-fieldSize.height/2;
 				//this.camera.zoom=10/this.blendCameraDist.currentValue();
 				//this.camera.updateProjectionMatrix();
 				//this.camera.maxZ=this.RENDER_DIST;

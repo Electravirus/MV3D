@@ -1,4 +1,3 @@
-import './mod_babylon_2.js'
 
 const BABYLON = window.BABYLON;
 export const {

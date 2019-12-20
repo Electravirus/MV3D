@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { Sprite, SpriteManager, TransformNode, Vector3 } from './mod_babylon.js';
+import { Sprite, SpriteManager, TransformNode, Vector3, ORTHOGRAPHIC_CAMERA } from './mod_babylon.js';
 
 Object.assign(mv3d,{
 	showAnimation(char){
@@ -57,110 +57,14 @@ Balloon.Manager=function(){
 	return Balloon.manager;
 }
 
-// Animations
-class Animation{
-	constructor(animation){
-		this.animation=animation;
-		this.spriteList=[];
-		this.managers={};
-	}
-	resetSpriteList(){
-		for(const animationSprite of this.spriteList ){
-			animationSprite.unused=true;
-		}
-	}
-	clearUnusedSprites(){
-		for(let i=this.spriteList.length-1;i>=0;--i){
-			const animationSprite = this.spriteList[i];
-			if(animationSprite.unused){
-				animationSprite.dispose();
-				this.spriteList.splice(i,1);
-			}
-		}
-	}
-	update(){
-		this.resetSpriteList();
-		const frameData = this.animation._animation.frames[this.animation.currentFrameIndex()];
-		for(let i=0; i<this.animation._cellSprites.length; ++i){
-			const cell = this.animation._cellSprites[i];
-			if(!cell.visible || !cell.bitmap){ continue; }
-			const sprite = this.getAnimationSprite(cell.bitmap._url, mv3d.blendModes[cell.blendMode]);
-			sprite.x=this.animation._target._character._realX;
-			sprite.y=this.animation._target._character._realY;
-			sprite.width=4*cell.scale.x;
-			sprite.height=4*cell.scale.y;
-			const pattern = frameData[i][0];
-			sprite.cellIndex=pattern;
-			console.log(sprite);
-		}
-		this.clearUnusedSprites();
-	}
-	getAnimationSprite(url,blendMode){
-		let sprite;
-		for(const animationSprite of this.spriteList ){
-			if(animationSprite.url===url
-			&&animationSprite._manager.blendMode===blendMode
-			&&animationSprite.unused){
-				animationSprite.unused=false;
-				sprite=animationSprite;
-			}
-		}
-		if(!sprite){
-			const manager = this.getManager(url,blendMode);
-			sprite = new Sprite('animationSprite',manager);
-			this.spriteList.push(sprite);
-		}
-		return sprite;
-	}
-	getManager(url,blendMode){
-		const key = `${blendMode}|${url}`;
-		if(!this.managers[key]){
-			this.managers[key] = new SpriteManager('animationManager',url,16,192,mv3d.scene);
-			this.managers[key].texture.onLoadObservable.addOnce(()=>{
-				this.managers[key].texture.updateSamplingMode(1);
-			});
-			this.managers[key].renderingGroupId=1;
-			this.managers[key].alphaMode=blendMode;
-		}
-		return this.managers[key];
-	}
-	remove(){
-		for(const animationSprite of this.spriteList ){
-			animationSprite.dispose();
-		}
-		this.spriteList.length=0;
-		for(const key in this.managers){
-			this.managers[key].dispose();
-		}
-	}
-}
-
-
 // mod animations
 
-const _createScreenFlashSprite = Sprite_Animation.prototype.createScreenFlashSprite;
-Sprite_Animation.prototype.createScreenFlashSprite=function(){
-	_createScreenFlashSprite.apply(this,arguments);
-	if(!mv3d.mapDisabled){
-		mv3d.pixiSprite.addChild(this._screenFlashSprite);
-	}
-};
-
-const _animation_initialize = Sprite_Animation.prototype.initialize;
-Sprite_Animation.prototype.initialize = function() {
-	_animation_initialize.apply(this,arguments);
-	this.mv3d_animation=new Animation(this);
-};
-
-const _animation_remove = Sprite_Animation.prototype.remove;
-Sprite_Animation.prototype.remove=function(){
-	if(!mv3d.mapDisabled){
-		if(this._screenFlashSprite){
-			this.addChild(this._screenFlashSprite);
-		}
-		this.mv3d_animation.remove();
-	}
-	_animation_remove.apply(this,arguments);
+const _start_animation = Sprite_Base.prototype.startAnimation;
+Sprite_Base.prototype.startAnimation = function(){
+	_start_animation.apply(this,arguments);
+	if(mv3d.mapDisabled){ return; }
+	const animationSprite = this._animationSprites[this._animationSprites.length-1];
+	mv3d.pixiSprite.addChild(animationSprite);
 };
 
 const _animation_updateScreenFlash=Sprite_Animation.prototype.updateScreenFlash;
@@ -170,4 +74,32 @@ Sprite_Animation.prototype.updateScreenFlash = function() {
 		this._screenFlashSprite.x = 0;
 		this._screenFlashSprite.y = 0;
 	}
+};
+
+const _update_animation_sprites = Sprite_Base.prototype.updateAnimationSprites;
+Sprite_Base.prototype.updateAnimationSprites = function() {
+	_update_animation_sprites.apply(this,arguments);
+	if(mv3d.mapDisabled||!this._animationSprites.length){ return; }
+	if(!this._character.mv3d_sprite){ return; }
+	for (const animationSprite of this._animationSprites){
+
+		const p = animationSprite._animation.position;
+		const offset = new Vector3(0,p==3?0:p===1?0.5:p===0?1:0,0);
+		const animationOrigin = Vector3.TransformCoordinates(offset,this._character.mv3d_sprite.mesh.getWorldMatrix());
+		const pos = mv3d.getScreenPosition(animationOrigin);
+		const dist = Vector3.Distance(mv3d.camera.globalPosition,animationOrigin);
+		const scale = mv3d.camera.mode===ORTHOGRAPHIC_CAMERA ? mv3d.getScaleForDist() : mv3d.getScaleForDist(dist);
+
+		animationSprite.behindCamera = pos.behindCamera;
+		animationSprite.update();
+		animationSprite.x=pos.x;
+		animationSprite.y=pos.y;
+		animationSprite.scale.set(scale,scale);
+	}
+};
+
+const _update_cell = Sprite_Animation.prototype.updateCellSprite;
+Sprite_Animation.prototype.updateCellSprite = function(sprite,cell) {
+	_update_cell.apply(this,arguments);
+	if(this.behindCamera){ sprite.visible=false; }
 };

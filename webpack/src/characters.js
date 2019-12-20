@@ -717,9 +717,6 @@ class Character extends Sprite{
 				this._balloon=null;
 			}
 		}
-		for(const animation of this.char.mv_sprite._animationSprites){
-			animation.mv3d_animation.update();
-		}
 	}
 
 	dispose(...args){
