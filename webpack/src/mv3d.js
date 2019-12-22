@@ -31,8 +31,6 @@ const mv3d = {
 		this.camera.minZ=0.1;
 		this.camera.maxZ=this.RENDER_DIST;
 
-		this.callFeatures('setup');
-
 		this.scene.ambientColor = new Color3(1,1,1);
 		this.scene.fogMode=FOGMODE_LINEAR;
 
@@ -45,6 +43,8 @@ const mv3d = {
 		this.setupInput();
 
 		this.setupSpriteMeshes();
+
+		this.callFeatures('setup');
 
 		if(isNaN(this.LIGHT_LIMIT)){
 			const _sortLightsByPriority=BABYLON.Scene.prototype.sortLightsByPriority;

@@ -286,7 +286,8 @@ how the map is rendered.
 ### Light and Fog
 
 The light function will set the ambient light level for the map.  
-Examples: light(white), light(gray), light(#222222), light(rebeccaPurple)
+The ambient function is an alias for the light function.  
+Examples: light(white), ambient(gray), ambient(#222222), light(rebeccaPurple)
 
 The fog function sets the color and distance of the fog.  
 Parameter list: color|near,far  
@@ -407,9 +408,10 @@ values.
 
 ---
 
-    mv3d light color <color> <t>
-    mv3d light intensity <n> <t>
-    mv3d light <color> <intensity> <t>
+    mv3d light <color> <t>
+    mv3d ambient <color> <t>
+
+Sets the color for the ambient light.
 
 ---
 
@@ -484,3 +486,6 @@ player upgrade their airship's height and speed.
 - rpgmakerunion.ru
 - CrysHistory
 - Fyoha
+- GamesOfShadows
+- 中华国哥
+- 冬空 橙

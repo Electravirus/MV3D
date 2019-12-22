@@ -90,6 +90,7 @@ mv3d.PluginCommand=class{
 	_fogColor(color,time){ mv3d.blendFogColor.setValue(makeColor(color).toNumber(),time); }
 	_fogNear(n,time){ this._RELATIVE_BLEND(mv3d.blendFogNear,n,time); }
 	_fogFar(n,time){ this._RELATIVE_BLEND(mv3d.blendFogFar,n,time); }
+	get ambient(){ return this.light; }
 	light(...a){
 		var time=this._TIME(a[2]);
 		switch(a[0].toLowerCase()){

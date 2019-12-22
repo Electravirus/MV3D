@@ -258,7 +258,7 @@ export class MapCell extends TransformNode{
 						x+np.x/4,
 						y+np.y/4,
 						z-wallHeight/4-az*wallHeight/2,
-						0.5,wallHeight/2, -rot, {double:true}
+						0.5,wallHeight/2, -rot, {double:true, abnormal:mv3d.ABNORMAL}
 					);
 				}
 			}else{
@@ -298,7 +298,7 @@ export class MapCell extends TransformNode{
 					x+trans*Math.cos(irot),
 					y+trans*Math.sin(irot),
 					z - (rect.oy|0)/tileHeight()*wallHeight - partHeight/2,
-					1-isAutotile/2,partHeight, irot, {double:true}
+					1-isAutotile/2,partHeight, irot, {double:true, abnormal:mv3d.ABNORMAL}
 				);
 			}
 		}

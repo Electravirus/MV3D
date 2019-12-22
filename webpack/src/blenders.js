@@ -134,6 +134,8 @@ Object.assign(mv3d,{
 				this.blendAmbientColor.b.currentValue()/255,
 			);
 		}
+
+		this.callFeatures('blend',reorient);
 	},
 
 });
@@ -234,3 +236,6 @@ export class ColorBlender{
 		return [this.r.targetValue()/255,this.g.targetValue()/255,this.b.targetValue()/255];
 	}
 }
+
+mv3d.Blender=Blender;
+mv3d.ColorBlender=ColorBlender;

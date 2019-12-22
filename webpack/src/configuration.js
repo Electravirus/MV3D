@@ -53,6 +53,7 @@ class ConfigurationFunction{
 		this.func(conf,params);
 	}
 }
+mv3d.ConfigurationFunction=ConfigurationFunction;
 
 function TextureConfigurator(name,extraParams=''){
 	const paramlist = `img,x,y,w,h|${extraParams}|alpha|glow[anim]animx,animy`;
@@ -150,6 +151,8 @@ Object.assign(mv3d,{
 		}else{
 			mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),1);
 		}
+
+		this.callFeatures('applyMapSettings',mapconf);
 	},
     
 
@@ -276,7 +279,7 @@ Object.assign(mv3d,{
 			const {color='white',intensity=1,range=mv3d.LIGHT_DIST} = params;
 			conf.lamp={color:makeColor(color).toNumber(),intensity:Number(intensity),distance:Number(range)};
 		}),
-		flashlight:new ConfigurationFunction('color,intensity,range,angle|yaw,pitch',function(conf,params){
+		flashlight:new ConfigurationFunction('color,intensity,range,angle[dir]yaw,pitch',function(conf,params){
 			const {color='white',intensity=1,range=mv3d.LIGHT_DIST,angle=mv3d.LIGHT_ANGLE} = params;
 			conf.flashlight={color:makeColor(color).toNumber(),intensity:Number(intensity),distance:Number(range),angle:Number(angle)};
 			if(params.yaw){ conf.flashlightYaw=params.yaw; }
@@ -295,6 +298,7 @@ Object.assign(mv3d,{
 		}
 	},
 	mapConfigurationFunctions:{
+		get ambient(){ return this.light; },
 		light(conf,color){
 			if(color.toLowerCase()==='default'){ color=mv3d.AMBIENT_COLOR; }
 			else{ color=makeColor(color).toNumber(); }
@@ -321,7 +325,7 @@ Object.assign(mv3d,{
 		},
 		disable(conf){
 			conf.disabled=true;
-		}
+		},
 	},
 
 });

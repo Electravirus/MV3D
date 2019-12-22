@@ -92,10 +92,11 @@ class SubMeshBuilder{
 			x-ww*xf, y-hh, z+ww*zf,
 			x+ww*xf, y-hh, z-ww*zf,
 		];
-		const normals=[ -zf,0,-xf, -zf,0,-xf, -zf,0,-xf, -zf,0,-xf ];
+		let normals = [ -zf,0,-xf, -zf,0,-xf, -zf,0,-xf, -zf,0,-xf ];
 		const uvs = SubMeshBuilder.getDefaultUvs(uvr);
 		const indices=SubMeshBuilder.getDefaultIndices();
 		if(options.flip){ SubMeshBuilder.flipFace(indices,normals); }
+		if(options.abnormal){ normals=[ 0,1,0, 0,1,0, 0,1,0, 0,1,0]; }
 		this.pushNewData(positions,indices,normals,uvs);
 	}
 	addFloorFace(x,z,y,w,h,uvr,options){

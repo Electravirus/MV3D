@@ -19,6 +19,8 @@ export const {
 	TransformNode,
 	Texture,
 	StandardMaterial,
+	ShaderMaterial,
+	Effect,
 	Mesh,
 	VertexData,
 	MeshBuilder,
@@ -50,6 +52,7 @@ export const WORLDSPACE = BABYLON.Space.WORLD,
 
 import mv3d from './mv3d.js';
 import { radtodeg, degtorad } from './util.js';
+import { hackShaders } from './shaders.js';
 
 Texture.prototype.crop=function(x=0,y=0,w=0,h=0){
 	const { width, height } = this.getBaseSize();
@@ -122,13 +125,8 @@ Color3.prototype.toNumber=Color4.prototype.toNumber=function(){return this.r*255
 
 // hack babylon
 export function setupBabylonMods(){
-	hackShaderAlphaCutoff('shadowMapPixelShader');
-	hackShaderAlphaCutoff('depthPixelShader');
+	hackShaders();
 };
 
-function hackShaderAlphaCutoff(shader){
-	BABYLON.Effect.ShadersStore[shader]=BABYLON.Effect.ShadersStore[shader].replace(
-		'if (texture2D(diffuseSampler,vUV).a<0.4)',
-		`if (texture2D(diffuseSampler,vUV).a<${mv3d.ALPHA_CUTOFF})`,
-	);
-}
+
+
