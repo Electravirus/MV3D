@@ -59,8 +59,8 @@ Balloon.Manager=function(){
 
 // mod animations
 
-const _start_animation = Sprite_Base.prototype.startAnimation;
-Sprite_Base.prototype.startAnimation = function(){
+const _start_animation = Sprite_Character.prototype.startAnimation;
+Sprite_Character.prototype.startAnimation = function(){
 	_start_animation.apply(this,arguments);
 	if(mv3d.mapDisabled||!(SceneManager._scene instanceof Scene_Map)){ return; }
 	const animationSprite = this._animationSprites[this._animationSprites.length-1];
@@ -76,8 +76,8 @@ Sprite_Animation.prototype.updateScreenFlash = function() {
 	}
 };
 
-const _update_animation_sprites = Sprite_Base.prototype.updateAnimationSprites;
-Sprite_Base.prototype.updateAnimationSprites = function() {
+const _update_animation_sprites = Sprite_Character.prototype.updateAnimationSprites;
+Sprite_Character.prototype.updateAnimationSprites = function() {
 	_update_animation_sprites.apply(this,arguments);
 	if(mv3d.mapDisabled||!this._animationSprites.length||!(SceneManager._scene instanceof Scene_Map)){ return; }
 	if(!this._character.mv3d_sprite){ return; }
