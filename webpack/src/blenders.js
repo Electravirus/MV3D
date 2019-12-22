@@ -43,8 +43,6 @@ Object.assign(mv3d,{
 		this.blendCameraDist = new Blender('cameraDist',10);
 		this.blendCameraHeight = new Blender('cameraHeight',0.7);
 		this.blendAmbientColor = new ColorBlender('ambientColor',this.AMBIENT_COLOR);
-		this.blendSunlightColor = new ColorBlender('light_color',0xffffff);
-		this.blendSunlightIntensity = new Blender('light_intensity',1);
 		this.blendPanX = new Blender('panX',0);
 		this.blendPanY = new Blender('panY',0);
 		this.blendCameraTransition = new Blender('cameraTransition',0);
