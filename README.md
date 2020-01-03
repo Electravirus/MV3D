@@ -181,6 +181,13 @@ Shadow pen can be used to force slope to face a certain direction.
 Draw a shadow on the side you want the slope to face.
 Example: slope(1), slope(0.45,n), slope(2,e)
 
+### Tile Passage
+
+The pass function will change the passage rules for the tile.  
+This can be used to get star passage on A tiles, or to have different passage
+rules depending on if 3D is enabled.
+Examples: pass(o), pass(x), pass(*)
+
 ---
 
 
