@@ -36,9 +36,11 @@ export class MapCell extends TransformNode{
 			ceiling.cull=false;
 			let hasSpecialShape=false;
 			const tileData = mv3d.getTileData(this.ox+x,this.oy+y);
-			for (let l=0; l<4; ++l){
+			let lastZ=Infinity;
+			for (let l=3; l>=0; --l){
 				if(mv3d.isTileEmpty(tileData[l])){ continue; }
 				let z = mv3d.getStackHeight(this.ox+x,this.oy+y,l);
+				if(lastZ<z){ continue; } lastZ=z;
 				const tileConf = mv3d.getTileTextureOffsets(tileData[l],this.ox+x,this.oy+y,l);
 				const shape = tileConf.shape;
 				if(mv3d.isSpecialShape(shape)){ hasSpecialShape = true; }
@@ -46,9 +48,9 @@ export class MapCell extends TransformNode{
 				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
 				//tileConf.isFringe = mv3d.isFringeTile(tileData[l]);
 				//tileConf.isTable = mv3d.isTableTile(tileData[l]);
-				const wallHeight = mv3d.getTileHeight(this.ox+x,this.oy+y,l)||tileConf.height||0;
-				z+=tileConf.fringe;
-				if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
+				let wallHeight = mv3d.getTileHeight(this.ox+x,this.oy+y,l)||tileConf.height||0;
+				//z+=tileConf.fringe;
+				//if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
 				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
 					const hasWall=wallHeight||l===0;
 					if(!shape||shape===shapes.FLAT){
@@ -57,9 +59,11 @@ export class MapCell extends TransformNode{
 							await this.loadWalls(tileConf,x,y,z,l,wallHeight);
 						}
 					}else if(shape===shapes.SLOPE){
-						await this.loadSlope(tileConf,x,y,z,l,tileConf.slopeHeight||1);
+						const slopeHeight = tileConf.slopeHeight||1;
+						wallHeight -= slopeHeight;
+						await this.loadSlope(tileConf,x,y,z,l,slopeHeight);
 						if(wallHeight||l===0){
-							await this.loadWalls(tileConf,x,y,z-(tileConf.slopeHeight||1),l,wallHeight);
+							await this.loadWalls(tileConf,x,y,z-slopeHeight,l,wallHeight);
 						}
 					}
 					//decide if we need to draw bottom of tile
@@ -123,7 +127,7 @@ export class MapCell extends TransformNode{
 		}
 	}
 	async loadWall(tileConf,x,y,z,l,wallHeight,np){
-		const isFringe = mv3d.isFringeTile(tileConf.realId);
+		const isFringe = mv3d.isFringeTile(tileConf.realId)||tileConf.fringe>0;
 		// don't render walls on edge of map (unless it loops)
 		if( !mv3d.getMapConfig('edge',true) )
 		if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
@@ -134,14 +138,11 @@ export class MapCell extends TransformNode{
 		let neededHeight=wallHeight;
 		let tileId=tileConf.side_id,configRect,texture_side='side';
 		if(mv3d.isTileEmpty(tileId)){ return; }
-		if(isFringe){
-			const neighborHeight = mv3d.getFringeHeight(this.ox+x+np.x,this.oy+y+np.y,l);
-			if(neighborHeight===z){ return; }
-		}else{
-			const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,!(tileConf.depth>0));
-			neededHeight = z-neighborHeight;
-			if(neededHeight>0&&l>0){ neededHeight=Math.min(wallHeight,neededHeight); }
-		}
+		
+		const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,!(tileConf.depth>0));
+		neededHeight = z-neighborHeight;
+		if(neededHeight>0&&(l>0||isFringe)){ neededHeight=Math.min(wallHeight,neededHeight); }
+
 		if(tileConf.depth>0&&neededHeight<0){
 			if(mv3d.tileHasPit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
 			//if(mv3d.isTilePit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }

@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { v2origin, tileSize, degtorad, sin, tileWidth, cos, tileHeight } from './util.js';
+import { v2origin, tileSize, degtorad, sin, tileWidth, cos, tileHeight, overload } from './util.js';
 import { MapCell } from './mapCell.js';
 
 Object.assign(mv3d,{
@@ -21,9 +21,30 @@ Object.assign(mv3d,{
 		}
 	},
 
+	getShadowBits(x,y){
+		return this.getTilemap()._readMapData(x,y,4);
+	},
+
 	getTerrainTag(tileId){
 		return $gameMap.tilesetFlags()[tileId]>>12;
 	},
+
+	getTilePassage:overload({
+		1(tileId){ return this.getTilePassage(tileId,this.getTileConfig(tileId)); },
+		2(tileId,conf){
+			if('pass' in conf){
+				return conf.pass;
+			}
+			const flag = $gameMap.tilesetFlags()[tileId];
+			if( (flag&0x10) ){ return this.configurationPassage.THROUGH; }
+			if( (flag&0x0f)===0x0f ){ return this.configurationPassage.WALL; }
+			else{ return this.configurationPassage.FLOOR; }
+		},
+		3(x,y,l){
+			const tileId=this.getTileData(x,y)[l];
+			return this.getTilePassage(tileId,this.getTileConfig(tileId,x,y,l));
+		},
+	}),
 
 	getMaterialOptions(conf,side){
 		const options={};
@@ -51,24 +72,29 @@ Object.assign(mv3d,{
 		return animData;
 	},
 
-	getTileConfig(tileId,x,y,l){
-		const conf = {};
-		const ttag = this.getTerrainTag(tileId);
-		if(ttag && ttag in this.TTAG_DATA){
-			Object.assign(conf,this.TTAG_DATA[ttag]);
-		}
-		const ts_conf = this.tilesetConfigurations[this.normalizeAutotileId(tileId)];
-		if(ts_conf){
-			Object.assign(conf,ts_conf);
-		}
-		if(l===0){
-			const region = $gameMap.regionId(x,y);
-			if(region && region in mv3d.REGION_DATA){
-				Object.assign(conf,this.REGION_DATA[region]);
+	getTileConfig:overload({
+		3(x,y,l){ return this.getTileConfig(this.getTileData(x,y)[l],x,y,l); },
+		default(tileId,x,y,l){
+			const conf = {};
+			if(!this.isTileEmpty(tileId)){
+				const ttag = this.getTerrainTag(tileId);
+				if(ttag && ttag in this.TTAG_DATA){
+					Object.assign(conf,this.TTAG_DATA[ttag]);
+				}
+				const ts_conf = this.tilesetConfigurations[this.normalizeAutotileId(tileId)];
+				if(ts_conf){
+					Object.assign(conf,ts_conf);
+				}
 			}
-		}
-		return conf;
-	},
+			if(l===0){
+				const region = $gameMap.regionId(x,y);
+				if(region && region in mv3d.REGION_DATA){
+					Object.assign(conf,this.REGION_DATA[region]);
+				}
+			}
+			return conf;
+		},
+	}),
 
 	getTileTextureOffsets(tileId,x,y,l){
 		const conf = this.getTileConfig(tileId,x,y,l);
@@ -100,10 +126,12 @@ Object.assign(mv3d,{
 				conf.bottom_id=tileId+conf.bottom_offset.x*tileRange+conf.bottom_offset.y*tileRange*8;
 			}
 		}
+		/*
 		conf.fringeHeight=conf.height||0;
 		if(conf.fringe==null){
 			conf.fringe = !this.isTileEmpty(tileId)&&tilemap&&tilemap._isHigherTile(tileId)?this.FRINGE_HEIGHT:0;
 		}
+		*/
 		return conf;
 	},
 
@@ -137,7 +165,7 @@ Object.assign(mv3d,{
 		if(this.isTileEmpty(tileId)&&l>0){ return 0; }
 		// finge tiles don't stack normally. fringeHeight property should be used when drawing them.
 		const tilemap=this.getTilemap();
-		if(tilemap&&tilemap._isHigherTile(tileId)){ return 0; }
+		//if(tilemap&&tilemap._isHigherTile(tileId)){ return 0; }
 
 		const shapes=this.configurationShapes;
 		const conf =this.getTileConfig(tileId,x,y,l);
@@ -166,7 +194,8 @@ Object.assign(mv3d,{
 	getStackHeight(x,y,layerId=3){
 		let height=0;
 		for(let l=0; l<=layerId; ++l){
-			height+=this.getTileHeight(x,y,l);
+			height += this.getTileFringe(x,y,l);
+			height += this.getTileHeight(x,y,l);
 		}
 		return height;
 	},
@@ -174,20 +203,26 @@ Object.assign(mv3d,{
 	getSlopeDirection(x,y,l,fullData=false){
 		const slopeHeight = this.getTileHeight(x,y,l);
 		const stackHeight = this.getStackHeight(x,y,l);
+		const tileId = this.getTileData(x,y)[l];
+		const conf = this.getTileConfig(tileId,x,y,l);
 		const neighborPositions = MapCell.neighborPositions;
-		const flags = $gameMap.tilesetFlags();
-		const flag = flags[this.getTileData(x,y)[l]];
+		const flag = $gameMap.tilesetFlags()[tileId];
+		const shadowBits = this.getShadowBits(x,y);
+		const shadowBitDirections=[0,0b0011,0b1010,0b0101,0b1100];
+		//const shadowBitDirections=[0,0b1100,0b0101,0b1010,0b0011];
 		let direction;
 		for(let i=0;i<neighborPositions.length;++i){
 			const n=neighborPositions[i];
 			const d={neighbor: n,favor:0};
+			d.dir = 5-3*n.y+n.x;
 			const nHeight=this.getWalkHeight(x+n.x,y+n.y,true);
 			const oHeight=this.getWalkHeight(x-n.x,y-n.y,true);
 			if(Math.abs(stackHeight-oHeight)<=mv3d.STAIR_THRESH){ d.favor+=1; }
 			if(Math.abs(stackHeight-slopeHeight-nHeight)<=mv3d.STAIR_THRESH){ d.favor+=1; }
-			d.dir = 5-3*n.y+n.x;
-			if(flag&(1<<(d.dir/2-1))){ d.favor-=4; }
-			if(flag&(1<<((10-d.dir)/2-1))){ d.favor-=3; }
+			if((shadowBits&shadowBitDirections[d.dir/2])===shadowBitDirections[d.dir/2]){ d.favor+=3; }
+			if(flag&(1<<(d.dir/2-1))){ d.favor=-2; }
+			if(flag&(1<<((10-d.dir)/2-1))){ d.favor=-1; }
+			if(conf.slopeDirection===d.dir){ d.favor=100; }
 			if(!direction||d.favor>direction.favor){ direction=d; }
 		}
 		direction.rot=degtorad(180-this.dirToYaw(direction.dir));
@@ -212,19 +247,14 @@ Object.assign(mv3d,{
 					lastHeight=data.slopeHeight||1;
 					height+=this.getTileHeight(rx,ry,l) - lastHeight;
 				}else{
-					const rot=this.getSlopeDirection(rx,ry,l);
-					const xf=sin(rot), yf=-cos(rot);
-					let px=(x+0.5)%1, py=(y+0.5)%1;
-					if(Math.sign(xf<0)){ px=1-px; }
-					if(Math.sign(yf<0)){ py=1-py; }
-					const slopeHeight = data.slopeHeight||1;
-					const sf=Math.abs(xf)*px + Math.abs(yf)*py;
-					height+=this.getTileHeight(rx,ry,l)-slopeHeight+slopeHeight*sf;
+					const slopeHeight = this.getSlopeHeight(x,y,l,data);
+					height+=this.getTileHeight(rx,ry,l)-(data.slopeHeight||1)+slopeHeight;
 					lastHeight=0;
 				}
 			}else{
 				lastHeight = this.getTileHeight(rx,ry,l);
 			}
+			lastHeight += this.getTileFringe(rx,ry,l);
 			if(!this.isSpecialShape(shape)){
 				height+=lastHeight;
 				lastHeight=0;
@@ -234,10 +264,85 @@ Object.assign(mv3d,{
 		
 	},
 
-	getFloatHeight(x,y){
-		const tileData=this.getTileData(x,y);
-		let float=0;
+	getSlopeHeight(x,y,l,data=null){
+		const rx=Math.round(x), ry=Math.round(y);
+		if(data==null){ data = this.getTileConfig(this.getTileData(rx,ry)[l],rx,ry,l); }
+		const rot=this.getSlopeDirection(rx,ry,l);
+		const xf=sin(rot), yf=-cos(rot);
+		let px=(x+0.5)%1, py=(y+0.5)%1;
+		if(Math.sign(xf<0)){ px=1-px; }
+		if(Math.sign(yf<0)){ py=1-py; }
+		const sf=Math.abs(xf)*px + Math.abs(yf)*py;
+		return (data.slopeHeight||1)*sf;
+	},
+
+	getCollisionHeights(x,y){
+		const rx=Math.round(x),ry=Math.round(y);
+		let z = 0;
+		const collisions=[{z1:-Infinity,z2:0}];
 		for(let l=0; l<=3; ++l){
+			let h = this.getTileHeight(rx,ry,l);
+			const tileId=this.getTileData(rx,ry)[l];
+			const conf = this.getTileConfig(tileId,rx,ry,l);
+			const shape = conf.shape;
+			//const flag = $gameMap.tilesetFlags()[tileId];
+			const passage = this.getTilePassage(tileId,conf);
+			//if(flag&0x10){//star
+			if(passage===this.configurationPassage.THROUGH){
+				h=0;
+			//}else if(!this.isPlatformShape(shape) && flag&0x0f){//circle
+			//	h=0;
+			}else if(shape===this.configurationShapes.SLOPE){
+				h = h-conf.slopeHeight+this.getSlopeHeight(x,y,l,conf);
+			}
+			const fringe = this.getTileFringe(rx,ry,l);
+			z+=fringe;
+			if(h===0){ continue; }
+			if(h<0){
+				z+=h;
+				if(fringe+h>=0){ continue; }
+				collisions[collisions.length-1].z2+=fringe+h;
+				continue;
+			}
+			if(l===0){
+				collisions[0].z2=z+h;
+			}else{
+				collisions.push({z1:z,z2:z+h});
+			}
+			z+=h;
+		}
+		return collisions;
+	},
+
+	getTileLayers(x,y,z){
+		let closest_diff = Infinity;
+		let layers = [0];
+		let h=0;
+		//const tileData = this.getTileData(x,y);
+		for (let l=0; l<=3; ++l){
+			//if($gameMap.tilesetFlags()[tileData[l]]&0x10){ continue; }
+			if(this.getTilePassage(x,y,l)===this.configurationPassage.THROUGH){ continue; }
+			const fringe=this.getTileFringe(x,y,l);
+			const height=this.getTileHeight(x,y,l);
+			h+=fringe+height;
+			const diff = z-h;
+			if(z>=h){
+				if(diff<closest_diff){
+					layers=[l];
+					closest_diff=diff;
+				}else if(diff===closest_diff){
+					layers.push(l);
+				}
+			}
+		}
+		return layers;
+	},
+
+	getFloatHeight(x,y,z=null){
+		const tileData=this.getTileData(x,y);
+		const layers = z==null?[0,1,2,3]:this.getTileLayers(x,y,z);
+		let float=0;
+		for(const l of layers){
 			const tileId=tileData[l];
 			if(this.isTileEmpty(tileId)){ continue; }
 			const conf = this.getTileConfig(tileId,x,y,l);
@@ -248,12 +353,17 @@ Object.assign(mv3d,{
 		return float;
 	},
 
-	getFringeHeight(x,y,l=3){
-		let height = this.getStackHeight(x,y,l-1);
+	getStackFringeHeight(x,y,l=3){
+		return this.getStackHeight(x,y,l);
+	},
+
+	getTileFringe(x,y,l){
 		const tileId=this.getTileData(x,y)[l];
+		if(this.isTileEmpty(tileId)){ return 0; }
 		const conf = this.getTileConfig(tileId,x,y,l);
-		if(conf && this.getTilemap()._isHigherTile(tileId)){
-			return height + (conf.fringe||this.FRINGE_HEIGHT) + (conf.height||0);
+		if(conf && 'fringe' in conf){ return conf.fringe; }
+		if(this.getTilemap()._isHigherTile(tileId)){
+			return this.FRINGE_HEIGHT;
 		}
 		return 0;
 	},
@@ -262,6 +372,7 @@ Object.assign(mv3d,{
 		const tileData=this.getTileData(x,y);
 		let height=0;
 		for(let l=0; l<=layerId; ++l){
+			if(this.getTileFringe(x,y,l)){ return height; }
 			const tileId=tileData[l];
 			const data = this.getTileConfig(tileId,x,y,l);
 			const shape = data.shape;
@@ -340,6 +451,10 @@ Object.assign(mv3d,{
 	isSpecialShape(shape){
 		const shapes = mv3d.configurationShapes;
 		return shape===shapes.FENCE||shape===shapes.CROSS||shape===shapes.XCROSS||shape===shapes.SLOPE;
+	},
+	isPlatformShape(shape){
+		const shapes = mv3d.configurationShapes;
+		return shape==null||shape===shapes.FLAT||shape===shapes.SLOPE;
 	},
 
 	constructTileId(img,x,y){

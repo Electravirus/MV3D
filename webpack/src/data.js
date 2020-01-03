@@ -24,6 +24,14 @@ const ensureDirectory=(dirName)=>new Promise((resolve,reject)=>{
 	});
 });
 
+const _loadDataFile = DataManager.loadDataFile;
+DataManager.loadDataFile = function(name, src) {
+	if(src.startsWith('Test_mv3d_')){
+		src=src.replace('Test_mv3d_','mv3d_')
+	}
+	_loadDataFile.call(this,name,src);
+};
+
 class DataProxy{
 	constructor(varName,fileName,defaultData={}){
 		this.varName=varName;

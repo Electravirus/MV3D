@@ -59,9 +59,9 @@ Object.assign(mv3d,{
 		if(this.blendCameraTransition.update() && this.cameraTargets.length>=2){
 			const t = this.blendCameraTransition.currentValue();
 			let char1=this.cameraTargets[0];
-			if(char1===$gamePlayer&&$gamePlayer.isInVehicle()){ char1=$gamePlayer.vehicle(); }
+			//if(char1===$gamePlayer&&$gamePlayer.isInVehicle()){ char1=$gamePlayer.vehicle(); }
 			let char2=this.cameraTargets[1];
-			if(char2===$gamePlayer&&$gamePlayer.isInVehicle()){ char2=$gamePlayer.vehicle(); }
+			//if(char2===$gamePlayer&&$gamePlayer.isInVehicle()){ char2=$gamePlayer.vehicle(); }
 			this.cameraStick.x = char1._realX*(1-t) + char2._realX*t;
 			this.cameraStick.y = char1._realY*(1-t) + char2._realY*t;
 			if(char1.mv3d_sprite&&char2.mv3d_sprite){
@@ -71,7 +71,7 @@ Object.assign(mv3d,{
 			}
 		}else if(this.cameraTargets.length){
 			let char = this.getCameraTarget();
-			if(char===$gamePlayer&&$gamePlayer.isInVehicle()){ char=$gamePlayer.vehicle(); }
+			//if(char===$gamePlayer&&$gamePlayer.isInVehicle()){ char=$gamePlayer.vehicle(); }
 			this.cameraStick.x=char._realX;
 			this.cameraStick.y=char._realY;
 			if(char.mv3d_sprite){

@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2 } from './mod_babylon.js';
-import { makeColor, relativeNumber, booleanString, falseString } from './util.js';
+import { makeColor, relativeNumber, booleanString, falseString, booleanNumber } from './util.js';
 
 class ConfigurationFunction{
 	constructor(parameters,func){
@@ -223,10 +223,16 @@ Object.assign(mv3d,{
 		TREE:2,
 		SPRITE:3,
 		FENCE:4,
+		WALL:4,
 		CROSS:5,
 		XCROSS:6,
 		SLOPE:7,
-    },
+	},
+	configurationPassage:{
+		WALL:0,
+		FLOOR:1,
+		THROUGH:2,
+	},
     
 
 	tilesetConfigurationFunctions:{
@@ -234,9 +240,10 @@ Object.assign(mv3d,{
 		depth(conf,n){ conf.depth=Number(n); },
 		fringe(conf,n){ conf.fringe=Number(n); },
 		float(conf,n){ conf.float=Number(n); },
-		slope(conf,n=1){
+		slope(conf,n=1,d=null){
 			conf.shape=mv3d.configurationShapes.SLOPE;
 			conf.slopeHeight=Number(n);
+			if(d){ conf.slopeDirection=({n:2, s:8, e:4, w:6})[d.toLowerCase()[0]]; }
 		},
 		top:TextureConfigurator('top'),
 		side:TextureConfigurator('side'),
@@ -256,6 +263,16 @@ Object.assign(mv3d,{
 			conf.alpha=Number(n);
 		},
 		glow(conf,n){ conf.glow=Number(n); },
+		pass(conf,s=''){
+			s=falseString(s.toLowerCase());
+			if(!s || s[0]==='x'){
+				conf.pass=mv3d.configurationPassage.WALL;
+			}else if(s[0]==='o'){
+				conf.pass=mv3d.configurationPassage.FLOOR;
+			}else{
+				conf.pass=mv3d.configurationPassage.THROUGH;
+			}
+		},
 	},
 	eventConfigurationFunctions:{
 		height(conf,n){ conf.height=Number(n); },
@@ -264,9 +281,11 @@ Object.assign(mv3d,{
 		y(conf,n){ conf.y=Number(n); },
 		scale(conf,x,y=x){ conf.scale = new Vector2(Number(x),Number(y)); },
 		rot(conf,n){ conf.rot=Number(n); },
+		yaw(conf,n){ conf.yaw=Number(n); },
+		pitch(conf,n){ conf.pitch=Number(n); },
 		bush(conf,bool){ conf.bush = booleanString(bool); },
 		shadow(conf,n,dist){
-			conf.shadow = Number(falseString(n));
+			conf.shadow = booleanNumber(n);
 			if(dist!=null){ conf.shadowDist=Number(dist); }
 		},
 		shape(conf,name){
@@ -295,7 +314,13 @@ Object.assign(mv3d,{
 		glow(conf,n){ conf.glow=Number(n); },
 		dirfix(conf,b){
 			conf.dirfix=booleanString(b);
-		}
+		},
+		gravity(conf,b){
+			conf.gravity=booleanNumber(b);
+		},
+		platform(conf,b){
+			conf.platform=booleanString(b);
+		},
 	},
 	mapConfigurationFunctions:{
 		get ambient(){ return this.light; },
@@ -323,8 +348,11 @@ Object.assign(mv3d,{
 		edge(conf,b){
 			conf.edge=booleanString(b);
 		},
-		disable(conf){
-			conf.disabled=true;
+		disable(conf,b=true){
+			conf.disabled=booleanString(b);
+		},
+		enable(conf,b=true){
+			conf.disabled=!booleanString(b);
 		},
 	},
 

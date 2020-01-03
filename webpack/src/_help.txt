@@ -166,9 +166,14 @@ Examples: shape(fence), shape(xcross)
 ### Slope Tiles
 
 Slope tiles can be used to make hills or stairs to move between elevations.
-The slope tiles will automatically try to choose their direction. Directional
-passage can be used to prevent the slope tile from facing certain directions.  
-Example: slope(1)
+The slope tiles will automatically try to choose their direction.  
+Directional passage will prevent the slope tile from facing certain
+directions.  
+Second parameter forces slope to face certain direction.
+Directions are n, s, e, and w.
+Shadow pen can be used to force slope to face a certain direction.
+Draw a shadow on the side you want the slope to face.
+Example: slope(1), slope(0.45,n), slope(2,e)
 
 ---
 
@@ -215,15 +220,30 @@ Examples: pos(1,2), pos(+0,+-1)
 ### Change event shape
 
 Use the shape function to set what shape the event should use. Valid event
-shapes are FLAT, SPRITE, TREE, FENCE, CROSS, and XCROSS.  
+shapes are FLAT, SPRITE, TREE, WALL, FENCE, CROSS, and XCROSS.  
+FLAT will make the event lie flat on the ground like a tile.  
+SPRITE will make the event rotate to always face the camera.  
+TREE will make the event stand up, but rotate horizontally toward camera.  
+WALL and FENCE will make the tile stand up without rotating. FENCE is an
+alias of WALL.  
+CROSS and XCROSS will make the event use a cross mesh. XCROSS is rotated
+45 degrees.  
 Example: shape(tree)
 
 The scale function can change the size of the event.  
 Examples: scale(2,2), scale(1.5,3)
 
-The rot function will rotate the event's mesh. Doesn't work with Sprite or
-Tree shapes.  
+The yaw function will rotate the event's mesh horizontally. Rotation applies
+before pitch. Doesn't work with Sprite or Tree shapes.  
 0 is south, 90 is east, 180 is north, and 270 is west.  
+Example: yaw(45)
+
+The pitch function will tilt the event's mesh vertically. Doesn't worth with
+Sprite shapes.  
+Example: pitch(20)
+
+The rot function will rotate the event's mesh horizontally. Rotation applies
+after pitch. Doesn't work with Sprite or Tree shapes.  
 Example: rot(45)
 
 
@@ -263,6 +283,11 @@ Examples: alpha(0.5), alpha(1)
 The dirfix function will set whether the event rotates depending on the camera
 angle.  
 Examples: dirfix(true), dirfix(false)
+
+The platform function will set whether the event can be walked on.  
+Example: platform(true)
+
+The gravity function will set the fall speed of the event.
 
 ---
 
@@ -449,18 +474,18 @@ Turns 3D rendering on or off.
 
 ---
 
+    mv3d ＠t elevation <n> <t>
+
+Sets the elevation of the target character.
+
+---
+
 ### Vehicle Commands
 
-    mv3d <vehicle> big <true/false>
-    mv3d <vehicle> scale <n>
     mv3d <vehicle> speed <n>
-    mv3d airship ascentspeed <n>
-    mv3d airship descentspeed <n>
     mv3d airship height <n>
 
 The vehicles are boat, ship, and airship.  
-"Big" vehicles can't be piloted too close to walls. This can be useful to
-avoid clipping with vehicles with large scales.   
 Speed of the vehicle should be 1-6. It works the same as event speed.   
 A higher airship can fly over higher mountains. Perhaps you could let the
 player upgrade their airship's height and speed.
@@ -483,3 +508,6 @@ player upgrade their airship's height and speed.
 - GamesOfShadows
 - 中华国哥
 - 冬空 橙
+- FREELANDLOL (LvUp) 
+- J. Dewar
+- zxc

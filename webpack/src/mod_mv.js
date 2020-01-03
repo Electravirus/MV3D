@@ -55,6 +55,7 @@ const _performTransfer=Game_Player.prototype.performTransfer;
 Game_Player.prototype.performTransfer = function() {
 	const newmap = this._newMapId !== $gameMap.mapId();
 	if(newmap){
+		if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
 		mv3d.clearMap();
 	}
 	_performTransfer.apply(this,arguments);

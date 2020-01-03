@@ -23,6 +23,8 @@ Object.assign(mv3d,{
 	CEILING_HEIGHT:Number(parameters.ceilingHeight),
 	LAYER_DIST:Number(parameters.layerDist),
 
+	ENABLED_DEFAULT: booleanString(parameters.enabledDefault),
+
 	UNLOAD_CELLS: booleanString(parameters.unloadCells),
 	CELL_SIZE: Number(parameters.cellSize),
 	RENDER_DIST: Number(parameters.renderDist),
@@ -30,6 +32,9 @@ Object.assign(mv3d,{
 	MIPMAP_OPTION:booleanString(parameters.mipmapOption),
 
 	STAIR_THRESH: Number(parameters.stairThresh),
+	WALK_OFF_EDGE:booleanString(parameters.walkOffEdge),
+	WALK_ON_EVENTS:booleanString(parameters.walkOnEvents),
+	GRAVITY:Number(parameters.gravity),
 
 	FOG_COLOR: makeColor(parameters.fogColor).toNumber(),
 	FOG_NEAR: Number(parameters.fogNear),

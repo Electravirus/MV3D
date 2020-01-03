@@ -1,3 +1,4 @@
+import mv3d from "./mv3d";
 
 const {Vector2,Vector3,Color3,Color4} = window.BABYLON;
 
@@ -45,9 +46,13 @@ export const relativeNumber=(current,n)=>{
 	}
 };
 
+export const booleanNumber=s=>{
+	if(!isNaN(s)){return Number(s);}
+	return booleanString(s);
+};
 export const booleanString=s=>{
 	return Boolean(falseString(s));
-}
+};
 export const falseString=s=>{
 	if(!s){ return false; }
 	if(typeof s !=='string'){ s=String(s); }
@@ -56,16 +61,9 @@ export const falseString=s=>{
 		return false;
 	}
 	return s;
-}
+};
 falseString.values=['OFF','FALSE','UNDEFINED','NULL','DISABLE','DISABLED'];
 
-let lastSnooze=0;
-export const snooze=async()=>{
-	if(performance.now()-lastSnooze>16){
-		await sleep(0);
-		lastSnooze=performance.now();
-	}
-}
 export const sleep=(ms=0)=>new Promise(resolve=>setTimeout(resolve,ms));
 export const degtorad=deg=>deg*Math.PI/180;
 export const radtodeg=rad=>rad*180/Math.PI;
@@ -90,9 +88,40 @@ export const v3origin = new Vector3(0,0,0);
 export const PI = Math.PI;
 export const PI2 = Math.PI*2;
 
+// overloading
+
+export const overload=funcs=>{
+	const overloaded = function(){
+		const l=arguments.length;
+		if(typeof funcs[l] === 'function'){
+			return funcs[l].apply(this,arguments);
+		}else if(typeof funcs.default === 'function'){
+			return funcs.default.apply(this,arguments);
+		}else{ console.warn("Unsupported number of arguments."); }
+	}
+	for(const key in funcs){
+		overloaded[key]=funcs[key].bind
+	}
+	return overloaded;
+};
+
+// override
+const _override_default_condition=()=>!mv3d.isDisabled();
+export const override=(obj,methodName,getNewMethod,condition=_override_default_condition)=>{
+	const oldMethod = obj[methodName];
+	const newMethod = getNewMethod(oldMethod);
+	return obj[methodName] = function(){
+		if(!condition){ return oldMethod.apply(this,arguments); }
+		return newMethod.apply(this,arguments);
+	};
+}
+
+
+//
 const util = {
-	makeColor,hexNumber,relativeNumber,booleanString,falseString,
-	snooze,sleep,degtorad,radtodeg,sin,cos,unround,tileSize,tileWidth,tileHeight,
+	makeColor,hexNumber,relativeNumber,booleanString,falseString,booleanNumber,
+	sleep,degtorad,radtodeg,sin,cos,unround,tileSize,tileWidth,tileHeight,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
+	overload, override
 };
 export default util;

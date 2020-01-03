@@ -23,7 +23,7 @@
 @text Configuration Functions
 @desc See tileset configuration for list of functions
 @type Text
-@default height(0),shape(flat)
+@default shape(flat),height(0)
 */
 
 /*~struct~BoatStruct:
@@ -31,12 +31,6 @@
 @text Settings
 @type Text
 @default shadow(0.8,4),shape(sprite),scale(1),bush(false)
-
-@param big
-@text Big
-@desc If true, vehicle requires a 3x3 space to move through. good for vehicles with large scales.
-@type Boolean
-@default false
 
 */
 
@@ -51,12 +45,6 @@
 @type Number
 @decimals 1
 @default 2.0
-
-@param big
-@text Big
-@desc If true, vehicle requires a 3x3 space to move through. good for vehicles with large scales.
-@type Boolean
-@default false
 
 @param bushLanding
 @text Land on Bush Tiles

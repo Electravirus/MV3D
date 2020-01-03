@@ -12,7 +12,6 @@ import './loadMap.js';
 import './assets.js';
 import './characters.js';
 import './animations.js';
-import './movement.js';
 import './parallax.js';
 import './data.js';
 import './features.js';

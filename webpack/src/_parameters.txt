@@ -63,6 +63,13 @@
 @param map
 @text Map Settings
 
+@param enabledDefault
+@text Enabled by Default
+@desc Whether 3D map rendering is enabled by default.
+@parent map
+@type Boolean
+@default true
+
 @param cellSize
 @text Cell Size
 @desc The size of the chunks the map is divided into.
@@ -104,7 +111,7 @@
 @default 25.0
 
 @param input
-@text Input & Movement
+@text Input & Gameplay
 
 @param keyboardPitch
 @text Control pitch with keyboard
@@ -134,6 +141,26 @@
 @type Number
 @decimals 2
 @default 0.1
+
+@param walkOffEdge
+@text Walk off Edge
+@parent input
+@type Boolean
+@default false
+
+@param walkOnEvents
+@text Walk on Events
+@parent input
+@type Boolean
+@default true
+
+@param gravity
+@text Gravity
+@desc The speed characters will fall, in tiles per second.
+@parent input
+@type Number
+@decimals 2
+@default 8
 
 @param tileconfig
 @text Tile Config
@@ -201,7 +228,7 @@ there may be z-fighting issues. (default: 0.0100)
 @desc use terrain tags to determine tile height.
 @parent tileconfig
 @type struct<TTagHeight>[]
-@default ["{\"terrainTag\":\"1\",\"conf\":\"height(1),shape(xcross)\"}","{\"terrainTag\":\"2\",\"conf\":\"height(1),shape(fence)\"}"]
+@default ["{\"terrainTag\":\"1\",\"conf\":\"shape(xcross),height(1),fringe(0)\"}","{\"terrainTag\":\"2\",\"conf\":\"shape(fence),height(1)\"}"]
 
 @param characters
 @text Characters
@@ -235,16 +262,16 @@ there may be z-fighting issues. (default: 0.0100)
 @text Boat Settings
 @parent characters
 @type struct<BoatStruct>
-@default {"conf":"shadow(0.8,4),shape(sprite),scale(1),bush(false)","big":"false"}
+@default {"conf":"shadow(0.8,4),shape(sprite),scale(1),bush(false)"}
 
 @param shipSettings
 @text Ship Settings
 @parent characters
 @type struct<BoatStruct>
-@default {"conf":"shadow(0.8,4),shape(sprite),scale(1),bush(false)","big":"false"}
+@default {"conf":"shadow(0.8,4),shape(sprite),scale(1),bush(false)"}
 
 @param airshipSettings
 @text Airship Settings
 @parent characters
 @type struct<AirshipStruct>
-@default {"conf":"shadow(1,6),shape(sprite),scale(1),bush(false)","height":"2.0","big":"false","bushLanding":"false"}
+@default {"conf":"shadow(1,6),shape(sprite),scale(1),bush(false)","height":"2.0","bushLanding":"false"}
