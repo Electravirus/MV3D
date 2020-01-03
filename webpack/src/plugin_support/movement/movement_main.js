@@ -28,7 +28,7 @@ Object.assign(mv3d,{
 		const cc2 = char2.getCollisionHeight(c2z);
 		if(useStairThresh==2){ cc1.z1+=mv3d.STAIR_THRESH; cc1.z2+=mv3d.STAIR_THRESH; }
 		if(cc1.z1<cc2.z2&&cc1.z2>cc2.z1){
-			if(useStairThresh==1&&mv3d.STAIR_THRESH){ return this.charCollision(char1,char2,2,useTargetZ); }
+			if(useStairThresh==1&&mv3d.STAIR_THRESH){ return this.charCollision(char1,char2,2,useTargetZ1,useTargetZ2); }
 			return true;
 		}
 		return false;
