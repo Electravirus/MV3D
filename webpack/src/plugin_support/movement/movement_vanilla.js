@@ -1,5 +1,5 @@
 import mv3d from '../../mv3d.js';
-import { override } from '../../util.js';
+import { override, unround } from '../../util.js';
 
 const _characterBase_canPass = Game_CharacterBase.prototype.canPass
 Game_CharacterBase.prototype.canPass = function(x, y, d) {
@@ -64,7 +64,7 @@ const _isMapPassable=o=>function(x,y,d){
 	if(slope=mv3d.isRampAt(x2,y2,sprite.z)){
 		if(mv3d.canPassRamp(10-d,slope)){ return true; }
 	}
-
+	
 	if(this._mv3d_isFlying()){
 		if(mv3d.tileCollision(this,x2,y2,true,true)||mv3d.tileCollision(this,x2,y2,true,false)){ return false; }
 	}else{
@@ -76,7 +76,7 @@ const _isMapPassable=o=>function(x,y,d){
 			if(sprite.hasFloat){
 				platform += mv3d.getFloatHeight(x2,y2,sprite.z+sprite.spriteHeight);
 			}
-			if(Math.abs(platform-sprite.targetElevation)>mv3d.STAIR_THRESH){
+			if(unround(Math.abs(platform-sprite.targetElevation))>mv3d.STAIR_THRESH){
 				return false; 
 			}
 		}
@@ -91,7 +91,7 @@ override(Game_Vehicle.prototype,'isMapPassable',_isMapPassable);
 Game_Player.prototype.startMapEvent = function(x,y,triggers,normal){
 	if ($gameMap.isEventRunning()) { return; }
 	$gameMap.eventsXy(x,y)
-	.filter(event=>mv3d.charCollision(this,event,false,false))
+	.filter(event=>mv3d.charCollision(this,event,false,false,false,true))
 	.forEach(event=>{
 		if (event.isTriggerIn(triggers) && event.isNormalPriority() === normal) {
 			event.start();

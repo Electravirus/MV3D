@@ -321,6 +321,13 @@ Object.assign(mv3d,{
 		platform(conf,b){
 			conf.platform=booleanString(b);
 		},
+		collide(conf,n){ conf.collide=Number(n); },
+		trigger(conf,up,down=0){
+			conf.trigger={
+				up:Number(up),
+				down:Number(down),
+			}
+		},
 	},
 	mapConfigurationFunctions:{
 		get ambient(){ return this.light; },

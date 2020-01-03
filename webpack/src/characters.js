@@ -209,7 +209,7 @@ class Character extends Sprite{
 		}else{
 			this.setEnabled(false);
 			this.spriteWidth=1;
-			this.spriteHeight=1;
+			this.spriteHeight=0;
 		}
 	}
 	updateCharacterFrame(){
@@ -254,7 +254,7 @@ class Character extends Sprite{
 		if(this.isVehicle){
 			return mv3d[`${this.char._type.toUpperCase()}_SETTINGS`].conf;
 		}
-		if(this.char.isTile()){
+		if(this.char.isTile()||this.char._priorityType===0){
 			return mv3d.EVENT_TILE_SETTINGS;
 		}else if(this.isEvent && this.char.isObjectCharacter()){
 			return mv3d.EVENT_OBJ_SETTINGS;
@@ -320,9 +320,7 @@ class Character extends Sprite{
 	}
 
 	initialConfigure(){
-		if(this.hasConfig('height')){
-			this.configureHeight();
-		}
+		this.configureHeight();
 	}
 
 	pageConfigure(){
@@ -364,7 +362,9 @@ class Character extends Sprite{
 	}
 
 	configureHeight(){
-		this.blendElevation.setValue(Math.max(0,this.getConfig('height')),0);
+		let height = Math.max(0, this.getConfig('height',this.char._priorityType===2&&!this.hasConfig('z')?mv3d.EVENT_HEIGHT:0) );
+		this.blendElevation.setValue(height,0);
+		this.z = this.platformHeight + height;
 	}
 
 	setupMesh(){
@@ -721,7 +721,11 @@ class Character extends Sprite{
 		}else if(gravity){
 			const gap = Math.abs(this.targetElevation-this.z);
 			if(gap<gravity){ gravity=gap; }
-			if(this.z>this.targetElevation||this.z<this.platformHeight){
+			//if(this.z>this.targetElevation||this.z<this.platformHeight){
+			if(this.z<this.platformHeight){
+				this.z=this.platformHeight;
+			}
+			if(this.z>this.targetElevation){
 				this.z-=gravity;
 				if(mv3d.tileCollision(this,this.char._realX,this.char._realY,false,false)){
 					this.z=this.platformHeight;
@@ -734,15 +738,9 @@ class Character extends Sprite{
 			}
 			this.falling=this.z>this.targetElevation;
 		}
-
-
-
-
-
-		
 		return;
 		
-
+		/*
 		let newElevation = this.platformHeight;
 		if(this.isVehicle || (this.isPlayer||this.isFollower)&&$gamePlayer.vehicle()){
 			newElevation += mv3d.getFloatHeight(Math.round(this.char._realX),Math.round(this.char._realY));
@@ -789,6 +787,7 @@ class Character extends Sprite{
 			//this.z += this.blendElevation.currentValue();
 			return;
 		}
+		*/
 	}
 
 	updateShadow(){
