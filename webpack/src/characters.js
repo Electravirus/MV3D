@@ -254,7 +254,7 @@ class Character extends Sprite{
 		if(this.isVehicle){
 			return mv3d[`${this.char._type.toUpperCase()}_SETTINGS`].conf;
 		}
-		if(this.char.isTile()||this.char._priorityType===0){
+		if(this.char.isTile()){
 			return mv3d.EVENT_TILE_SETTINGS;
 		}else if(this.isEvent && this.char.isObjectCharacter()){
 			return mv3d.EVENT_OBJ_SETTINGS;
@@ -844,7 +844,7 @@ class Character extends Sprite{
 	}
 
 	getCollisionHeight(z=this.z){
-		const cHeight=this.getConfig('collide',this.shape===mv3d.configurationShapes.FLAT?0:this.spriteHeight);
+		const cHeight=this.getConfig('collide',this.shape===mv3d.configurationShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
 		return {z1:z, z2:z+cHeight};
 	}
 

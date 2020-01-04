@@ -35,7 +35,7 @@ Object.assign(mv3d,{
 	},
 	getPlatformForCharacter(char,x,y){
 		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
-		return this.getPlatformAtLocation(x,y,char.z+char.spriteHeight,char);
+		return this.getPlatformAtLocation(x,y,char.z+Math.max(char.spriteHeight,mv3d.STAIR_THRESH),char);
 	},
 	getPlatformAtLocation(x,y,z,char=null){
 		const cs = this.getCollisionHeights(x,y);
