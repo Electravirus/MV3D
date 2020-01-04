@@ -147,7 +147,7 @@ Game_Player.prototype.getOnVehicle = function(){
     var x2 = $gameMap.roundXWithDirection(x1,d);
 	var y2 = $gameMap.roundYWithDirection(y1,d);
 	
-	if($gameMap.airship().pos(x1,y1) && mv3d.charCollision(this,$gameMap.airship())){
+	if($gameMap.airship().pos(x1,y1) && mv3d.charCollision(this,$gameMap.airship(),false,false,false,true)){
 		this._vehicleType = 'airship';
 	}else if($gameMap.ship().pos(x2,y2) && mv3d.charCollision(this,$gameMap.ship())) {
 		this._vehicleType = 'ship';
