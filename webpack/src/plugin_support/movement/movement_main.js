@@ -45,7 +45,7 @@ Object.assign(mv3d,{
 		);
 		let closest = cs[0];
 		for (const c of cs){
-			if(c.z2>closest.z2&&c.z2<z){
+			if(c.z2>closest.z2&&c.z2<=z){
 				closest=c;
 			}
 		}
