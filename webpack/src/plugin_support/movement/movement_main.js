@@ -19,15 +19,16 @@ Object.assign(mv3d,{
 		}
 		return false;
 	},
-	charCollision(char1,char2,useStairThresh=false,useTargetZ1=false,useTargetZ2=useTargetZ1,orEqualTo=false){
+	charCollision(char1,char2,useStairThresh=false,useTargetZ1=false,useTargetZ2=useTargetZ1,triggerMode=false){
 		if(!(char1 instanceof mv3d.Character)){if(!char1.mv3d_sprite){return false;}char1=char1.mv3d_sprite;}
 		if(!(char2 instanceof mv3d.Character)){if(!char2.mv3d_sprite){return false;}char2=char2.mv3d_sprite;}
+		if(!triggerMode&&(!char1.char._mv3d_hasCollide()||!char2.char._mv3d_hasCollide())){ return false; } 
 		const c1z = typeof useTargetZ1==='number'? useTargetZ1 : useTargetZ1?char1.targetElevation:char1.z;
 		const c2z = typeof useTargetZ2==='number'? useTargetZ2 : useTargetZ2?char2.targetElevation:char2.z;
 		const cc1 = char1.getCollisionHeight(c1z);
-		const cc2 = char2.getCollisionHeight(c2z);
+		const cc2 = triggerMode ? char2.getTriggerHeight(c2z) : char2.getCollisionHeight(c2z);
 		if(useStairThresh==2){ cc1.z1+=mv3d.STAIR_THRESH; cc1.z2+=mv3d.STAIR_THRESH; }
-		if(!orEqualTo&&cc1.z1<cc2.z2&&cc1.z2>cc2.z1 || orEqualTo&&cc1.z1<=cc2.z2&&cc1.z2>=cc2.z1){
+		if(!triggerMode&&cc1.z1<cc2.z2&&cc1.z2>cc2.z1 || triggerMode&&cc1.z1<=cc2.z2&&cc1.z2>=cc2.z1){
 			if(useStairThresh==1&&mv3d.STAIR_THRESH){ return this.charCollision(char1,char2,2,useTargetZ1,useTargetZ2); }
 			return true;
 		}
@@ -40,7 +41,7 @@ Object.assign(mv3d,{
 	getPlatformAtLocation(x,y,z,char=null){
 		const cs = this.getCollisionHeights(x,y);
 		cs.push(...$gameMap.eventsXyNt(Math.round(x),Math.round(y))
-			.filter(event=>event.mv3d_sprite&&event._mv3d_isPlatform()&&event.mv3d_sprite.visible&&(!char||char.char!==event))
+			.filter(event=>event.mv3d_sprite&&event._mv3d_isPlatform()&&event._mv3d_hasCollide()&&event.mv3d_sprite.visible&&(!char||char.char!==event))
 			.map(event=>event.mv3d_sprite.getCollisionHeight())
 		);
 		let closest = cs[0];
@@ -100,6 +101,12 @@ Game_Player.prototype._mv3d_isFlying=function(){
 
 Game_CharacterBase.prototype._mv3d_isPlatform=function(){
 	return this.mv3d_sprite&&this.mv3d_sprite.getConfig('platform',mv3d.WALK_ON_EVENTS);
+};
+
+Game_CharacterBase.prototype._mv3d_hasCollide=function(){
+	const sprite = this.mv3d_sprite;
+	if(!sprite || sprite.getConfig('collide')===false){ return false; }
+	return this._mv3d_isPlatform() || Boolean(sprite.getCHeight());
 };
 
 

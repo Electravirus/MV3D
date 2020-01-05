@@ -533,3 +533,6 @@ player upgrade their airship's height and speed.
 - FREELANDLOL (LvUp) 
 - J. Dewar
 - zxc
+- Raudiney Frankilin
+- omegamer
+

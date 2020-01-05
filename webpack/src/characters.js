@@ -157,7 +157,8 @@ class Character extends Sprite{
 		//if(mv3d.CHARACTER_SHADOWS){
 			//this.shadow = Sprite.Meshes.SHADOW.createInstance();
 			this.shadow = Sprite.Meshes.SHADOW.clone();
-			this.shadow.parent=this.spriteOrigin;
+			//this.shadow.parent=this.spriteOrigin;
+			this.shadow.parent = this;
 		//}
 
 		this.blendElevation = this.makeBlender('elevation',0);
@@ -349,7 +350,7 @@ class Character extends Sprite{
 			this.blendFlashlightPitch.setValue(this.getConfig('flashlightPitch',90),0.25);
 			this.flashlightTargetYaw=this.getConfig('flashlightYaw','+0');
 		}
-		if('height' in this.settings_event_page){
+		if('height' in this.settings_event_page || this.isAbove!==(this.char._priorityType===2)){
 			this.configureHeight();
 		}
 	}
@@ -362,7 +363,8 @@ class Character extends Sprite{
 	}
 
 	configureHeight(){
-		let height = Math.max(0, this.getConfig('height',this.char._priorityType===2&&!this.hasConfig('z')?mv3d.EVENT_HEIGHT:0) );
+		this.isAbove = this.char._priorityType===2;
+		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('z')?mv3d.EVENT_HEIGHT:0) );
 		this.blendElevation.setValue(height,0);
 		this.z = this.platformHeight + height;
 	}
@@ -652,7 +654,13 @@ class Character extends Sprite{
 
 		this.spriteOrigin.position.set(0,0,0);
 		this.lightOrigin.position.set(0,0,0);
-		this.spriteOrigin.z = mv3d.LAYER_DIST*4;
+		if(this.shape===mv3d.configurationShapes.FLAT){
+			this.spriteOrigin.z = mv3d.LAYER_DIST*4;
+		}else if(this.shape===mv3d.configurationShapes.SPRITE){
+			this.spriteOrigin.z = mv3d.LAYER_DIST*4 * (1-Math.max(0,Math.min(90,mv3d.blendCameraPitch.currentValue()))/90);
+		}else{
+			this.spriteOrigin.z = 0;
+		}
 		this.lightOrigin.z = this.getConfig('lightHeight',mv3d.LIGHT_HEIGHT);
 
 		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y)).multiplyByFloats(0.45,0.45);
@@ -816,7 +824,8 @@ class Character extends Sprite{
 		const shadowDist = Math.max(this.z - this.platformHeight, shadowBase);
 		const shadowFadeDist = this.getConfig('shadowDist',4);
 		const shadowStrength = Math.max(0,1-Math.abs(shadowDist)/shadowFadeDist);
-		this.shadow.z = -shadowDist;
+		this.shadow.z = -shadowDist + mv3d.LAYER_DIST*3.5;
+		this.shadow.x=this.spriteOrigin.x;this.shadow.y=this.spriteOrigin.y;
 		const shadowScale = this.getConfig('shadow',1);
 		this.shadow.scaling.setAll(shadowScale*shadowStrength);
 		if(!this.shadow.isAnInstance){
@@ -843,12 +852,16 @@ class Character extends Sprite{
 		delete this.char.mv3d_sprite;
 	}
 
+	getCHeight(){
+		return this.getConfig('collide',this.shape===mv3d.configurationShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+	}
+
 	getCollisionHeight(z=this.z){
 		if(this.hasConfig('height')){
 			const height = this.getConfig('height')
 			if(height<0){ z += height; }
 		}
-		const cHeight=this.getConfig('collide',this.shape===mv3d.configurationShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+		const cHeight=this.getCHeight();
 		return {z1:z, z2:z+cHeight};
 	}
 

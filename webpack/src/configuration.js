@@ -321,7 +321,7 @@ Object.assign(mv3d,{
 		platform(conf,b){
 			conf.platform=booleanString(b);
 		},
-		collide(conf,n){ conf.collide=Number(n); },
+		collide(conf,n){ conf.collide=booleanNumber(n); },
 		trigger(conf,up,down=0){
 			conf.trigger={
 				up:Number(up),
