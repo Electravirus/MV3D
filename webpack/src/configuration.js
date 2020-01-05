@@ -206,7 +206,9 @@ Object.assign(mv3d,{
 				if(functionset[key] instanceof ConfigurationFunction){
 					functionset[key].run(conf,match[2]);
 				}else{
-					functionset[key](conf, ...match[2].split(','));
+					const args = match[2].split(',');
+					if(args.length===1 && args[0]===''){ args.length=0; }
+					functionset[key](conf, ...args);
 				}
 			}
 		}
