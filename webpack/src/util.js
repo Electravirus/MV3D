@@ -111,7 +111,7 @@ export const override=(obj,methodName,getNewMethod,condition=_override_default_c
 	const oldMethod = obj[methodName];
 	const newMethod = getNewMethod(oldMethod);
 	return obj[methodName] = function(){
-		if(!condition){ return oldMethod.apply(this,arguments); }
+		if(!condition()){ return oldMethod.apply(this,arguments); }
 		return newMethod.apply(this,arguments);
 	};
 }

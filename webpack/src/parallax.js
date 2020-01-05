@@ -1,4 +1,5 @@
 import mv3d from './mv3d.js';
+import { override } from './util.js';
 
 const gameMap_parallaxOx = Game_Map.prototype.parallaxOx;
 Game_Map.prototype.parallaxOx = function() {
@@ -36,3 +37,8 @@ Game_CharacterBase.prototype.isNearTheScreen = function() {
 	return Math.abs(this.x - mv3d.cameraStick.x)<=mv3d.RENDER_DIST
 	&& Math.abs(this.y - mv3d.cameraStick.y)<=mv3d.RENDER_DIST;
 };
+
+
+override(Game_Screen.prototype,'shake',o=>function(){
+	return 0;
+});

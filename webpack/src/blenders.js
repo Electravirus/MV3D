@@ -84,6 +84,7 @@ Object.assign(mv3d,{
 		this.cameraStick.y+=this.blendPanY.currentValue();
 
 		// camera yaw, pitch, dist & height
+		this.cameraNode.x = -$gameScreen._shake/48;
 		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()
 		|this.blendCameraDist.update()|this.blendCameraHeight.update()){
 			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
