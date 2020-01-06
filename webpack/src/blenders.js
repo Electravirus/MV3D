@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { hexNumber, ZAxis } from "./util.js";
+import { hexNumber, ZAxis, XAxis } from "./util.js";
 import parameters from './parameters.js';
 import { ORTHOGRAPHIC_CAMERA, LOCALSPACE } from './mod_babylon.js';
 
@@ -84,9 +84,8 @@ Object.assign(mv3d,{
 		this.cameraStick.y+=this.blendPanY.currentValue();
 
 		// camera yaw, pitch, dist & height
-		this.cameraNode.x = -$gameScreen._shake/48;
 		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()
-		|this.blendCameraDist.update()|this.blendCameraHeight.update()){
+		|this.blendCameraDist.update()|this.blendCameraHeight.update()|$gameScreen._shake!==0){
 			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
 			this.cameraNode.yaw = this.blendCameraYaw.currentValue();
 			this.cameraNode.position.set(0,0,0);
@@ -107,6 +106,7 @@ Object.assign(mv3d,{
 				//this.camera.minZ=0.1;
 			}
 			this.cameraNode.z += this.blendCameraHeight.currentValue();
+			this.cameraNode.translate(XAxis,-$gameScreen._shake/48,LOCALSPACE);
 		}
 
 		//fog
