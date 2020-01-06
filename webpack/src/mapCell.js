@@ -40,7 +40,6 @@ export class MapCell extends TransformNode{
 			for (let l=3; l>=0; --l){
 				if(mv3d.isTileEmpty(tileData[l])){ continue; }
 				let z = mv3d.getStackHeight(this.ox+x,this.oy+y,l);
-				if(lastZ<z){ continue; } lastZ=z;
 				const tileConf = mv3d.getTileTextureOffsets(tileData[l],this.ox+x,this.oy+y,l);
 				const shape = tileConf.shape;
 				if(mv3d.isSpecialShape(shape)){ hasSpecialShape = true; }
@@ -49,12 +48,17 @@ export class MapCell extends TransformNode{
 				//tileConf.isFringe = mv3d.isFringeTile(tileData[l]);
 				//tileConf.isTable = mv3d.isTableTile(tileData[l]);
 				let wallHeight = mv3d.getTileHeight(this.ox+x,this.oy+y,l)||tileConf.height||0;
+				let pitCull = false;
+				if(lastZ<z){ pitCull=true; wallHeight-=z-lastZ; }
+				lastZ=z;
 				//z+=tileConf.fringe;
 				//if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
 				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
 					const hasWall=wallHeight||l===0;
 					if(!shape||shape===shapes.FLAT){
-						await this.loadTile(tileConf,x,y,z+l*mv3d.LAYER_DIST*!hasWall,l);
+						if(!pitCull){
+							await this.loadTile(tileConf,x,y,z+l*mv3d.LAYER_DIST*!hasWall,l);
+						}
 						if(wallHeight||l===0){
 							await this.loadWalls(tileConf,x,y,z,l,wallHeight);
 						}
