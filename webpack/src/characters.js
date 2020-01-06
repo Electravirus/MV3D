@@ -707,6 +707,7 @@ class Character extends Sprite{
 		
 		const platform = mv3d.getPlatformForCharacter(this,this.char._realX,this.char._realY);
 		this.platformHeight = platform.z2;
+		this.platformChar = platform.char;
 		this.targetElevation = this.platformHeight+this.blendElevation.currentValue();
 		let gravity = this.getConfig('gravity',mv3d.GRAVITY)/60;
 
@@ -862,7 +863,7 @@ class Character extends Sprite{
 			if(height<0){ z += height; }
 		}
 		const cHeight=this.getCHeight();
-		return {z1:z, z2:z+cHeight};
+		return {z1:z, z2:z+cHeight, char:this};
 	}
 
 	getTriggerHeight(z=this.z){

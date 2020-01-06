@@ -41,7 +41,17 @@ Object.assign(mv3d,{
 	getPlatformAtLocation(x,y,z,char=null){
 		const cs = this.getCollisionHeights(x,y);
 		cs.push(...$gameMap.eventsXyNt(Math.round(x),Math.round(y))
-			.filter(event=>event.mv3d_sprite&&event._mv3d_isPlatform()&&event._mv3d_hasCollide()&&event.mv3d_sprite.visible&&(!char||char.char!==event))
+			.filter(event=>{
+				if(!(event.mv3d_sprite&&event._mv3d_isPlatform()&&event._mv3d_hasCollide()&&event.mv3d_sprite.visible)){ return false; }
+				if(char){
+					if(char.char===event){ return false; }
+					let pc=event.mv3d_sprite;
+					while(pc=pc.platformChar){
+						if(pc===char||pc===event.mv3d_sprite){ return false; }
+					}
+				}
+				return true;
+			})
 			.map(event=>event.mv3d_sprite.getCollisionHeight())
 		);
 		let closest = cs[0];
