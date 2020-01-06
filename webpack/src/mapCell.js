@@ -49,8 +49,10 @@ export class MapCell extends TransformNode{
 				//tileConf.isTable = mv3d.isTableTile(tileData[l]);
 				let wallHeight = mv3d.getTileHeight(this.ox+x,this.oy+y,l)||tileConf.height||0;
 				let pitCull = false;
-				if(lastZ<z){ pitCull=true; wallHeight-=z-lastZ; }
-				lastZ=z;
+				if(lastZ<z){ pitCull=true; }
+				if(!mv3d.getTileFringe(this.ox+x,this.oy+y,l)){
+					lastZ=z;
+				}
 				//z+=tileConf.fringe;
 				//if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
 				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
