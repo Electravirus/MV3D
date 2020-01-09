@@ -275,3 +275,11 @@ there may be z-fighting issues. (default: 0.0100)
 @parent characters
 @type struct<AirshipStruct>
 @default {"conf":"shadow(1,6),shape(sprite),scale(1),bush(false)","height":"2.0","bushLanding":"false"}
+
+@param spriteOffset
+@text Sprite Offset
+@parent characters
+@type Number
+@min 0 @max 1
+@decimals 2
+@default 0.9

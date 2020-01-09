@@ -72,6 +72,7 @@ Object.assign(mv3d,{
 	SHIP_SETTINGS:JSON.parse(parameters.shipSettings),
 	AIRSHIP_SETTINGS:JSON.parse(parameters.airshipSettings),
 
+	SPRITE_OFFSET:Number(parameters.spriteOffset)/2,
 
 	setupParameters(){
 		for (let entry of JSON.parse(parameters.regions)){

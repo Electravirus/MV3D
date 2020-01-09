@@ -663,7 +663,7 @@ class Character extends Sprite{
 		}
 		this.lightOrigin.z = this.getConfig('lightHeight',mv3d.LIGHT_HEIGHT);
 
-		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y)).multiplyByFloats(0.45,0.45);
+		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y)).multiplyByFloats(mv3d.SPRITE_OFFSET,mv3d.SPRITE_OFFSET);
 		const lightOffset = this.getConfig('lightOffset',null);
 		if(this.shape===mv3d.configurationShapes.SPRITE){
 			this.spriteOrigin.x=billboardOffset.x;
