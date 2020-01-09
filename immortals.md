@@ -1,0 +1,24 @@
+The following patrons have pledged to the campaign on or before 1/8/2020.
+
+- Whitely
+- Yorae Rasante
+- Izybelle
+- A Memory of Eternity
+- Pumpkin Boss
+- JosephSeraph
+- HuskyTrooper
+- rpgmakerunion.ru
+- CrysHistory
+- Fyoha
+- GamesOfShadows
+- 中华国哥
+- 冬空 橙
+- FREELANDLOL (LvUp) 
+- J. Dewar
+- zxc
+- Goomy
+- omegamer
+- Mercylessly
+- 르붐바 차
+- Anger & Rage Interactive
+- CoopNinjask
