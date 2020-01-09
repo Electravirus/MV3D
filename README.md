@@ -515,24 +515,33 @@ player upgrade their airship's height and speed.
 
 ---
 
-## Patrons:
+## Patron Supporters:
 
-- Whitely
 - Yorae Rasante
-- Izybelle
-- A Memory of Eternity
-- Pumpkin Boss
 - JosephSeraph
 - HuskyTrooper
 - rpgmakerunion.ru
 - CrysHistory
-- Fyoha
 - GamesOfShadows
 - 中华国哥
-- 冬空 橙
 - FREELANDLOL (LvUp) 
 - J. Dewar
-- zxc
-- Raudiney Frankilin
+- Goomy
 - omegamer
+- Mercylessly
+- 르붐바 차
+- Anger & Rage Interactive
+- CoopNinjask
 
+## Patron Knights:
+
+- Whitely
+- Izybelle
+- Pumpkin Boss
+- 冬空 橙
+
+## Patron Heroes:
+
+- A Memory of Eternity
+- zxc
+- Fyoha

@@ -7,6 +7,7 @@ const glob = require('glob');
 
 const sound=(()=>{const player=require('play-sound')({});return sound=>{
 	const cp=player.play(sound,err=>{});
+	if(!cp){ return; }
 	setTimeout(()=>cp.kill(),1000);
 }})();
 

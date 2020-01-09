@@ -36,7 +36,7 @@ Object.assign(mv3d,{
 	},
 	getPlatformForCharacter(char,x,y){
 		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
-		return this.getPlatformAtLocation(x,y,char.z+Math.max(char.spriteHeight,mv3d.STAIR_THRESH),char);
+		return this.getPlatformAtLocation(x,y,char.z+Math.max(0,mv3d.STAIR_THRESH),char);
 	},
 	getPlatformAtLocation(x,y,z,char=null){
 		const cs = this.getCollisionHeights(x,y);
@@ -56,7 +56,7 @@ Object.assign(mv3d,{
 		);
 		let closest = cs[0];
 		for (const c of cs){
-			if(c.z2>closest.z2&&c.z2<=z){
+			if(c.z2>closest.z2&&c.z1<=z){
 				closest=c;
 			}
 		}
