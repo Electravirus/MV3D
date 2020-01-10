@@ -161,6 +161,7 @@ const mv3d = {
 		mv3d.saveData('disabled',false);
 		//SceneManager.goto(Scene_Map);
 		$gamePlayer.reserveTransfer($gameMap.mapId(),$gamePlayer.x,$gamePlayer.y,$gamePlayer.direction(),fadeType);
+		mv3d.createCharacters();
 	},
 
 	loopCoords(x,y){

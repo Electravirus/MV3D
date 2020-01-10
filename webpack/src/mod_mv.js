@@ -22,7 +22,9 @@ Graphics.render=function(){
 const _sceneMap_update=Scene_Map.prototype.update;
 Scene_Map.prototype.update = function(){
 	_sceneMap_update.apply(this,arguments);
-	mv3d.update();
+	if(!mv3d.isDisabled()){
+		mv3d.update();
+	}
 }
 
 const _renderWebGL = ShaderTilemap.prototype.renderWebGL;
@@ -79,9 +81,13 @@ Scene_Map.prototype.onMapLoaded=function(){
 	if(!mv3d.mapLoaded){
 		mv3d.applyMapSettings()
 		mv3d.loadTilesetSettings();
-		mv3d.mapReady=false;
-		//mv3d.mapReady=true;
-		mv3d.loadMap();
+		if(mv3d.isDisabled()){
+			mv3d.mapReady=true;
+		}else{
+			mv3d.mapReady=false;
+			//mv3d.mapReady=true;
+			mv3d.loadMap();
+		}
 	}
 	mv3d.updateBlenders(true);
 };
