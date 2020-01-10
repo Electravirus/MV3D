@@ -149,6 +149,7 @@ class Character extends Sprite{
 		this.z=this.z;
 		this.platformHeight = this.z;
 		this.targetElevation = this.z;
+		this.needsPositionUpdate=true;
 		//this.elevation = 0;
 
 		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
@@ -313,6 +314,7 @@ class Character extends Sprite{
 
 		if(this.char.mv3d_needsConfigure){
 			this.char.mv3d_needsConfigure=false;
+			this.needsPositionUpdate=true;
 		}else{ return; }
 
 		this.pageConfigure();
@@ -552,6 +554,7 @@ class Character extends Sprite{
 	}
 
 	update(){
+		this.needsPositionUpdate=false;
 		if(this.char._erased){
 			this.dispose();
 		}
@@ -566,7 +569,7 @@ class Character extends Sprite{
 			this.visible=false;
 		}
 		if(!this._isEnabled){
-			if(this.visible){ this.setEnabled(true); }
+			if(this.visible){ this.setEnabled(true); this.needsPositionUpdate=true; }
 		}else{
 			if(!this.visible){ this.setEnabled(false); }
 		}
@@ -574,9 +577,16 @@ class Character extends Sprite{
 
 		if(this.isImageChanged()){
 			this.updateCharacter();
+			this.needsPositionUpdate=true;
 		}
 		if(this.patternChanged()){
 			this.updateFrame();
+		}
+
+		if(this.blendElevation.update()){
+			this.needsPositionUpdate=true;
+		}else if(this.x!==this.char._realX || this.y!==this.char._realY || this.falling || this.platformChar&&this.platformChar.needsPositionUpdate){
+			this.needsPositionUpdate=true;
 		}
 
 		if(this.material){
@@ -587,7 +597,6 @@ class Character extends Sprite{
 		this.updateAnimations();
 		//this.mesh.renderOutline=true;
 		//this.mesh.outlineWidth=1;
-
 	}
 
 	updateNormal(){
@@ -648,6 +657,8 @@ class Character extends Sprite{
 	}
 
 	updatePosition(){
+		if(!this.needsPositionUpdate) { return; }
+
 		const loopPos = mv3d.loopCoords(this.char._realX,this.char._realY);
 		this.x = loopPos.x;
 		this.y = loopPos.y;
@@ -684,7 +695,7 @@ class Character extends Sprite{
 	}
 
 	updateElevation(){
-		this.blendElevation.update();
+		if(!this.needsPositionUpdate) { return; }
 		this.falling=false;
 
 		if(this.isPlayer){
@@ -748,55 +759,6 @@ class Character extends Sprite{
 			this.falling=this.z>this.targetElevation;
 		}
 		return;
-		
-		/*
-		let newElevation = this.platformHeight;
-		if(this.isVehicle || (this.isPlayer||this.isFollower)&&$gamePlayer.vehicle()){
-			newElevation += mv3d.getFloatHeight(Math.round(this.char._realX),Math.round(this.char._realY));
-		}
-
-		if(this.isAirship && $gamePlayer.vehicle()===this.char){
-			if(!this.char._driving){
-				this.elevation += (newElevation-this.elevation)/10;
-			}if(newElevation>=this.elevation){
-				const ascentSpeed = 100/Math.pow(1.5,mv3d.loadData('airship_ascentspeed',4));
-				this.elevation += (newElevation-this.elevation)/ascentSpeed;
-			}else{
-				if(!mv3d.vehicleObstructed(this.char,this.char.x,this.char.y,true)){
-					const descentSpeed = 100/Math.pow(1.5,mv3d.loadData('airship_descentspeed',2));
-					this.elevation += (newElevation-this.elevation)/descentSpeed;
-				}
-			}
-			this.z = this.elevation;
-			this.z += mv3d.loadData('airship_height',mv3d.AIRSHIP_SETTINGS.height)*this.char._altitude/this.char.maxAltitude();
-		}else{
-			if(this.char.isJumping()){
-				let jumpProgress = 1-(this.char._jumpCount/(this.char._jumpPeak*2));
-				let jumpHeight = Math.pow(jumpProgress-0.5,2)*-4+1;
-				let jumpDiff = Math.abs(this.char.mv3d_jumpHeightEnd - this.char.mv3d_jumpHeightStart);
-				this.z = this.char.mv3d_jumpHeightStart*(1-jumpProgress)
-				+ this.char.mv3d_jumpHeightEnd*jumpProgress + jumpHeight*jumpDiff/2
-				+this.char.jumpHeight()/tileSize();
-			}else{
-				this.elevation=newElevation;
-				this.z=this.elevation;
-			}
-			const height = this.getConfig('height',this.char._priorityType===2?mv3d.EVENT_HEIGHT:0);
-			if(height>0){
-				this.z += height;
-			}else{
-				this.spriteOrigin.z += height;
-			}
-			
-		}
-
-		if(this.hasConfig('z')){
-			this.spriteOrigin.z=0;
-			this.z=this.getConfig('z',0);
-			//this.z += this.blendElevation.currentValue();
-			return;
-		}
-		*/
 	}
 
 	updateShadow(){
@@ -851,6 +813,8 @@ class Character extends Sprite{
 	dispose(...args){
 		super.dispose(...args);
 		delete this.char.mv3d_sprite;
+		const index = mv3d.characters.indexOf(this);
+		mv3d.characters.splice(index,1);
 	}
 
 	getCHeight(){
