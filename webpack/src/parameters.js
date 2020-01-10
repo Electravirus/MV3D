@@ -74,6 +74,8 @@ Object.assign(mv3d,{
 
 	SPRITE_OFFSET:Number(parameters.spriteOffset)/2,
 
+	ENABLE_3D_OPTIONS:{disable:0,enable:1,submenu:2}[parameters['3dMenu'].toLowerCase()],
+
 	setupParameters(){
 		for (let entry of JSON.parse(parameters.regions)){
 			entry=JSON.parse(entry);

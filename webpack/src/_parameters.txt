@@ -1,6 +1,15 @@
 @param options
 @text Option Settings
 
+@param 3dMenu
+@text 3D Options Menu
+@desc Whether 3D options will be in a submenu, regular options menu, or disabled.
+@type combo
+@option SUBMENU
+@option ENABLE
+@option DISABLE
+@default SUBMENU
+
 @param renderDist
 @text Default Render Distance
 @desc The maximum distance that can be rendered by the camera.
