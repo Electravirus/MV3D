@@ -285,19 +285,16 @@ Object.assign(mv3d,{
 			const tileId=this.getTileData(rx,ry)[l];
 			const conf = this.getTileConfig(tileId,rx,ry,l);
 			const shape = conf.shape;
-			//const flag = $gameMap.tilesetFlags()[tileId];
-			const passage = this.getTilePassage(tileId,conf);
-			//if(flag&0x10){//star
+			const passage = this.getTilePassage(tileId,conf)
+			let skip = false;
 			if(passage===this.configurationPassage.THROUGH){
-				h=0;
-			//}else if(!this.isPlatformShape(shape) && flag&0x0f){//circle
-			//	h=0;
+				h=0; skip=true;
 			}else if(shape===this.configurationShapes.SLOPE){
 				h = h-(conf.slopeHeight||1)+this.getSlopeHeight(x,y,l,conf);
 			}
 			const fringe = this.getTileFringe(rx,ry,l);
 			z+=fringe;
-			if(h===0){ continue; }
+			if(skip||!h&&!fringe){ continue; }
 			if(h<0){
 				if(fringe+h>=0){ continue; }
 				collisions[collisions.length-1].z2+=fringe+h;

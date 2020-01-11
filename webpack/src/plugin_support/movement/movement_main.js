@@ -36,9 +36,11 @@ Object.assign(mv3d,{
 	},
 	getPlatformForCharacter(char,x,y){
 		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
-		return this.getPlatformAtLocation(x,y,char.z+Math.max(0,mv3d.STAIR_THRESH),char);
+		const useStairThresh = mv3d.STAIR_THRESH>=char.spriteHeight;
+		return this.getPlatformAtLocation(x,y,char.z+Math.max(char.spriteHeight,mv3d.STAIR_THRESH),{char:char,gte:useStairThresh});
 	},
-	getPlatformAtLocation(x,y,z,char=null){
+	getPlatformAtLocation(x,y,z,opts={}){
+		const char = opts.char;
 		const cs = this.getCollisionHeights(x,y);
 		cs.push(...$gameMap.eventsXyNt(Math.round(x),Math.round(y))
 			.filter(event=>{
@@ -56,7 +58,7 @@ Object.assign(mv3d,{
 		);
 		let closest = cs[0];
 		for (const c of cs){
-			if(c.z2>closest.z2 && (c.char?c.z2:c.z1) <=z ){
+			if(c.z2>closest.z2 && (opts.gte?c.z2<=z:c.z2<z) ){
 				closest=c;
 			}
 		}
@@ -188,8 +190,10 @@ Game_Vehicle.prototype.isLandOk = function(x, y, d) {
 	if (!this.isAirship()) {
 		var x2 = $gameMap.roundXWithDirection(x, d);
 		var y2 = $gameMap.roundYWithDirection(y, d);
-		const platform = mv3d.getPlatformAtLocation(x2,y2,this.z+this.mv3d_sprite.spriteHeight);
-		return Math.abs(platform.z2-this.z)<this.mv3d_sprite.spriteHeight;
+		//const platform = mv3d.getPlatformAtLocation(x2,y2,this.z+this.mv3d_sprite.spriteHeight);
+		const platform = mv3d.getPlatformForCharacter($gamePlayer,x2,y2);
+		//return Math.abs(platform.z2-this.z)<this.mv3d_sprite.spriteHeight;
+		return Math.abs(platform.z2-this.z)<$gamePlayer.mv3d_sprite.spriteHeight;
 	}
 	return true;
 };

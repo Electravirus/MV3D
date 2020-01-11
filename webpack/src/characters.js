@@ -149,6 +149,7 @@ class Character extends Sprite{
 		this.z=this.z;
 		this.platformHeight = this.z;
 		this.targetElevation = this.z;
+		this.prevZ = this.z;
 		this.needsPositionUpdate=true;
 		//this.elevation = 0;
 
@@ -585,8 +586,11 @@ class Character extends Sprite{
 
 		if(this.blendElevation.update()){
 			this.needsPositionUpdate=true;
-		}else if(this.x!==this.char._realX || this.y!==this.char._realY || this.falling || this.platformChar&&this.platformChar.needsPositionUpdate){
+		}else if(this.x!==this.char._realX || this.y!==this.char._realY
+		|| this.falling || this.prevZ !== this.z
+		|| this.platformChar&&this.platformChar.needsPositionUpdate){
 			this.needsPositionUpdate=true;
+			this.prevZ = this.z;
 		}
 
 		if(this.material){
