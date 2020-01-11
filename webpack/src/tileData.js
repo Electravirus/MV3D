@@ -293,18 +293,15 @@ Object.assign(mv3d,{
 			//}else if(!this.isPlatformShape(shape) && flag&0x0f){//circle
 			//	h=0;
 			}else if(shape===this.configurationShapes.SLOPE){
-				h = h-conf.slopeHeight+this.getSlopeHeight(x,y,l,conf);
+				h = h-(conf.slopeHeight||1)+this.getSlopeHeight(x,y,l,conf);
 			}
 			const fringe = this.getTileFringe(rx,ry,l);
 			z+=fringe;
 			if(h===0){ continue; }
 			if(h<0){
-				z+=h;
 				if(fringe+h>=0){ continue; }
 				collisions[collisions.length-1].z2+=fringe+h;
-				continue;
-			}
-			if(l===0){
+			}else if(l===0){
 				collisions[0].z2=z+h;
 			}else{
 				collisions.push({z1:z,z2:z+h});
