@@ -10,8 +10,8 @@ Object.assign(mv3d,{
 	clearMap(){
 		this.mapLoaded=false;
 		this.clearMapCells();
-		for (const char of this.characters){
-			char.dispose(false,true);
+		for (let i=this.characters.length-1; i>=0; --i){
+			this.characters[i].dispose(false,true);
 		}
 		this.characters.length=0;
 		this.resetCameraTarget();

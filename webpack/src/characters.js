@@ -34,8 +34,8 @@ Object.assign(mv3d,{
 	},
 
 	updateCharacters(){
-		for(const char of this.characters){
-			char.update();
+		for (let i=this.characters.length-1; i>=0; --i){
+			this.characters[i].update();
 		}
 	},
 
