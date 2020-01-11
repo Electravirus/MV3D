@@ -656,13 +656,7 @@ class Character extends Sprite{
 		}
 	}
 
-	updatePosition(){
-		if(!this.needsPositionUpdate) { return; }
-
-		const loopPos = mv3d.loopCoords(this.char._realX,this.char._realY);
-		this.x = loopPos.x;
-		this.y = loopPos.y;
-
+	updatePositionOffsets(){
 		this.spriteOrigin.position.set(0,0,0);
 		this.lightOrigin.position.set(0,0,0);
 		if(this.shape===mv3d.configurationShapes.FLAT){
@@ -692,6 +686,19 @@ class Character extends Sprite{
 
 		this.spriteOrigin.x += this.getConfig('x',0);
 		this.spriteOrigin.y += this.getConfig('y',0);
+
+		const height = this.getConfig('height',0);
+		if(height<0){ this.spriteOrigin.z+=height; }
+	}
+
+	updatePosition(){
+		this.updatePositionOffsets();
+
+		if(!this.needsPositionUpdate) { return; }
+
+		const loopPos = mv3d.loopCoords(this.char._realX,this.char._realY);
+		this.x = loopPos.x;
+		this.y = loopPos.y;
 	}
 
 	updateElevation(){
@@ -707,14 +714,10 @@ class Character extends Sprite{
 		}
 
 		if(this.hasConfig('z')){
-			this.spriteOrigin.z=0;
 			this.z=this.getConfig('z',0);
 			this.z += this.blendElevation.currentValue();
 			return;
 		}
-
-		const height = this.getConfig('height',0);
-		if(height<0){ this.spriteOrigin.z+=height; }
 		
 		const platform = mv3d.getPlatformForCharacter(this,this.char._realX,this.char._realY);
 		this.platformHeight = platform.z2;
