@@ -716,6 +716,10 @@ class Character extends Sprite{
 			if(vehicle){
 			//if(vehicle&&vehicle._driving){
 				this.z = vehicle.z;
+				this.targetElevation = vehicle.targetElevation;
+				this.platformChar = vehicle.platformChar;
+				this.platformHeight = vehicle.platformHeight;
+				if(vehicle._driving){ return; }
 			}
 		}
 
@@ -732,7 +736,7 @@ class Character extends Sprite{
 		let gravity = this.getConfig('gravity',mv3d.GRAVITY)/60;
 
 		this.hasFloat = this.isVehicle || (this.isPlayer||this.isFollower)&&$gamePlayer.vehicle();
-		if(this.hasFloat){
+		if(this.hasFloat && !this.platformChar){
 			this.targetElevation += mv3d.getFloatHeight(Math.round(this.char._realX),Math.round(this.char._realY),this.z+this.spriteHeight);
 		}
 

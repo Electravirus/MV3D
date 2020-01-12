@@ -1,4 +1,5 @@
 import mv3d from '../../mv3d.js';
+import { override } from '../../util.js';
 
 Object.assign(mv3d,{
 	vehicleObstructed(vehicle,...args){
@@ -183,17 +184,13 @@ Game_Player.prototype.getOnVehicle = function(){
 	return this._vehicleGettingOn;
 };
 
-const _isLandOk = Game_Vehicle.prototype.isLandOk;
-Game_Vehicle.prototype.isLandOk = function(x, y, d) {
-	if(!_isLandOk.apply(this,arguments)){ return false; }
-	if(mv3d.isDisabled()||!this.mv3d_sprite){ return true; }
-	if (!this.isAirship()) {
-		var x2 = $gameMap.roundXWithDirection(x, d);
-		var y2 = $gameMap.roundYWithDirection(y, d);
-		//const platform = mv3d.getPlatformAtLocation(x2,y2,this.z+this.mv3d_sprite.spriteHeight);
-		const platform = mv3d.getPlatformForCharacter($gamePlayer,x2,y2);
-		//return Math.abs(platform.z2-this.z)<this.mv3d_sprite.spriteHeight;
-		return Math.abs(platform.z2-this.z)<$gamePlayer.mv3d_sprite.spriteHeight;
-	}
-	return true;
-};
+
+override(Game_Vehicle.prototype,'isLandOk',o=>function(x,y,d){
+	let landOk = o.apply(this,arguments);
+	if (this.isAirship()) { return landOk; }
+	var x2 = $gameMap.roundXWithDirection(x, d);
+	var y2 = $gameMap.roundYWithDirection(y, d);
+	const platform = mv3d.getPlatformForCharacter($gamePlayer,x2,y2);
+	if(platform.char){ landOk=true; }
+	return landOk && Math.abs(platform.z2-this.z)<$gamePlayer.mv3d_sprite.spriteHeight;
+});
