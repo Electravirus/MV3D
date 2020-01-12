@@ -37,8 +37,9 @@ Object.assign(mv3d,{
 	},
 	getPlatformForCharacter(char,x,y){
 		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
-		const useStairThresh = mv3d.STAIR_THRESH>=char.spriteHeight;
-		return this.getPlatformAtLocation(x,y,char.z+Math.max(char.spriteHeight,mv3d.STAIR_THRESH),{char:char,gte:useStairThresh});
+		const cHeight = char.getCHeight();
+		const useStairThresh = mv3d.STAIR_THRESH>=cHeight;
+		return this.getPlatformAtLocation(x,y,char.z+Math.max(cHeight,mv3d.STAIR_THRESH),{char:char,gte:useStairThresh});
 	},
 	getPlatformAtLocation(x,y,z,opts={}){
 		const char = opts.char;
@@ -186,11 +187,14 @@ Game_Player.prototype.getOnVehicle = function(){
 
 
 override(Game_Vehicle.prototype,'isLandOk',o=>function(x,y,d){
+	$gameTemp._mv3d_collision_char = $gamePlayer.mv3d_sprite;
 	let landOk = o.apply(this,arguments);
+	delete $gameTemp._mv3d_collision_char;
 	if (this.isAirship()) { return landOk; }
 	var x2 = $gameMap.roundXWithDirection(x, d);
 	var y2 = $gameMap.roundYWithDirection(y, d);
 	const platform = mv3d.getPlatformForCharacter($gamePlayer,x2,y2);
 	if(platform.char){ landOk=true; }
-	return landOk && Math.abs(platform.z2-this.z)<$gamePlayer.mv3d_sprite.spriteHeight;
+	const diff = Math.abs(platform.z2-this.z);
+	return landOk && diff<Math.max($gamePlayer.mv3d_sprite.getCHeight(),this.mv3d_sprite.getCHeight());
 });

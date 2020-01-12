@@ -870,7 +870,7 @@ Game_CharacterBase.prototype.isOnBush = function() {
 	if(mv3d.isDisabled()||!this.mv3d_sprite){ return _isOnBush.apply(this,arguments); }
 	const rx=Math.round(this._realX), ry=Math.round(this._realY);
 	const tileData=mv3d.getTileData(rx,ry);
-	const layers = mv3d.getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.spriteHeight);
+	const layers = mv3d.getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight());
 	const flags = $gameMap.tilesetFlags();
 	for( const l of layers ){
 		if( (flags[tileData[l]] & 0x40) !== 0 ){ return true; }
