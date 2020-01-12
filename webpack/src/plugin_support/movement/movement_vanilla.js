@@ -47,9 +47,9 @@ const _isMapPassable=o=>function(x,y,d){
 	const sprite = this.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
 
-	$gameTemp._mv3d_collision_z = sprite.z+sprite.spriteHeight;
+	$gameTemp._mv3d_collision_char = sprite;
 	let collided = !o.apply(this,arguments);
-	delete $gameTemp._mv3d_collision_z;
+	delete $gameTemp._mv3d_collision_char;
 	if(collided){ return false; }
 
 
@@ -101,12 +101,16 @@ Game_Player.prototype.startMapEvent = function(x,y,triggers,normal){
 
 const _checkPassage = Game_Map.prototype.checkPassage;
 Game_Map.prototype.checkPassage = function(x, y, bit) {
-	if(!('_mv3d_collision_z' in $gameTemp)){
+	if(!('_mv3d_collision_char' in $gameTemp)){
 		return _checkPassage.apply(this,arguments);
 	}
+	const char = $gameTemp._mv3d_collision_char;
+	const z = char.z+Math.max(char.spriteHeight,mv3d.STAIR_THRESH);
+	const platform = mv3d.getPlatformForCharacter(char,x,y);
+	if(platform.char){ return true; }
 	var flags = this.tilesetFlags();
 	//var tiles = this.allTiles(x, y);
-	const layers = mv3d.getTileLayers(x,y,$gameTemp._mv3d_collision_z);
+	const layers = mv3d.getTileLayers(x,y,z);
 	const tiles = mv3d.getTileData(x,y);
 	for (var i = layers.length-1; i>=0; --i) {
 		const l=layers[i];

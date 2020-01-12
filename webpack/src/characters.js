@@ -513,6 +513,7 @@ class Character extends Sprite{
 	}
 
 	hasBush(){
+		if(this.platformChar){ return false; }
 		return this.getConfig('bush',!(
 			this.char.isTile() || this.isVehicle
 			|| this.isEvent && this.char.isObjectCharacter()
