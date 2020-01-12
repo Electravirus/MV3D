@@ -831,7 +831,8 @@ class Character extends Sprite{
 	}
 
 	getCHeight(){
-		return this.getConfig('collide',this.shape===mv3d.configurationShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+		let collide = this.getConfig('collide',this.shape===mv3d.configurationShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+		return collide===true ? this.spriteHeight : Number(collide);
 	}
 
 	getCollisionHeight(z=this.z){

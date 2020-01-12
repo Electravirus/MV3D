@@ -330,6 +330,18 @@ Object.assign(mv3d,{
 				down:Number(down),
 			}
 		},
+		pass(conf,s=''){
+			s=falseString(s.toLowerCase());
+			if(!s || s[0]==='x'){
+				conf.platform=false;
+				conf.collide=true;
+			}else if(s[0]==='o'){
+				conf.platform=true;
+			}else{
+				conf.platform=false;
+				conf.collide=false;
+			}
+		},
 	},
 	mapConfigurationFunctions:{
 		get ambient(){ return this.light; },

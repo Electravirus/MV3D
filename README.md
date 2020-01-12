@@ -304,12 +304,19 @@ The gravity function will set the fall speed of the event.
 Example: gravity(10)
 
 The collide will set the event's collision height.  
+collide(false) acts as a shorthand for collide(0),platform(false)  
 Examples: collide(0), collide(1), collide(1.5)
 
 The trigger event will set the height range the event can be triggered from.
 The first parameter is the height above the event, and the second is the
 height below the event.
 Examples: trigger(Infinity,Infinity), trigger(0), trigger(2,1)
+
+The pass function when used on events acts as a shorthand for platform and
+collide.  
+pass(o) turns on platform
+pass(x) turns off platform and turns on collision.
+pass(*) turns off platform and collision.
 
 ---
 
