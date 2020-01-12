@@ -588,7 +588,8 @@ class Character extends Sprite{
 			this.needsPositionUpdate=true;
 		}else if(this.x!==this.char._realX || this.y!==this.char._realY
 		|| this.falling || this.prevZ !== this.z
-		|| this.platformChar&&this.platformChar.needsPositionUpdate){
+		|| this.platformChar&&this.platformChar.needsPositionUpdate
+		|| this.isPlayer || this.char===$gamePlayer.vehicle()){
 			this.needsPositionUpdate=true;
 			this.prevZ = this.z;
 		}
