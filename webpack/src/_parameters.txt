@@ -285,6 +285,13 @@ there may be z-fighting issues. (default: 0.0100)
 @type struct<AirshipStruct>
 @default {"conf":"shadow(1,6),shape(sprite),scale(1),bush(false)","height":"2.0","bushLanding":"false"}
 
+@param allowGlide
+@text Allow Glide
+@desc If true, collision detection for flying characters will use only current elevation and not target elevation.
+@parent characters
+@type Boolean
+@default true
+
 @param spriteOffset
 @text Sprite Offset
 @parent characters

@@ -72,6 +72,8 @@ Object.assign(mv3d,{
 	SHIP_SETTINGS:JSON.parse(parameters.shipSettings),
 	AIRSHIP_SETTINGS:JSON.parse(parameters.airshipSettings),
 
+	ALLOW_GLIDE: booleanString(parameters.allowGlide),
+
 	SPRITE_OFFSET:Number(parameters.spriteOffset)/2,
 
 	ENABLE_3D_OPTIONS:{disable:0,enable:1,submenu:2}[parameters['3dMenu'].toLowerCase()],
