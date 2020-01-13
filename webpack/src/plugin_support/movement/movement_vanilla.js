@@ -88,7 +88,7 @@ override(Game_CharacterBase.prototype,'isMapPassable',_isMapPassable);
 
 override(Game_Vehicle.prototype,'isMapPassable',_isMapPassable);
 
-Game_Player.prototype.startMapEvent = function(x,y,triggers,normal){
+override(Game_Player.prototype,'startMapEvent',o=>function(x,y,triggers,normal){
 	if ($gameMap.isEventRunning()) { return; }
 	$gameMap.eventsXy(x,y)
 	.filter(event=>mv3d.charCollision(this,event,false,false,false,true))
@@ -97,7 +97,7 @@ Game_Player.prototype.startMapEvent = function(x,y,triggers,normal){
 			event.start();
 		}
 	});
-};
+});
 
 const _checkPassage = Game_Map.prototype.checkPassage;
 Game_Map.prototype.checkPassage = function(x, y, bit) {
