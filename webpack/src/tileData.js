@@ -11,6 +11,14 @@ Object.assign(mv3d,{
 		}
 		return this._tilemap;
 	},
+	getDataMap(){
+		if($dataMap){ this._dataMap=$dataMap }
+		return this._dataMap;
+	},
+
+	getRegion(x,y){
+		return this.getTileId(x,y,5);
+	},
 
 	getSetNumber(id){
 		if(Tilemap.isAutotile(id)){
@@ -87,7 +95,7 @@ Object.assign(mv3d,{
 				}
 			}
 			if(l===0){
-				const region = $gameMap.regionId(x,y);
+				const region = this.getRegion(x,y);
 				if(region && region in mv3d.REGION_DATA){
 					Object.assign(conf,this.REGION_DATA[region]);
 				}
@@ -133,6 +141,11 @@ Object.assign(mv3d,{
 		}
 		*/
 		return conf;
+	},
+
+	getTileId(x,y,l=0){
+		const dataMap = this.getDataMap();
+		return dataMap.data[(l * dataMap.height + y) * dataMap.width + x] || 0
 	},
 
 	getTileData(x,y){
