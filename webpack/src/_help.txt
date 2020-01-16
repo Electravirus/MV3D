@@ -419,22 +419,15 @@ Set camera mode to PERSPECTIVE or ORTHOGRAPHIC
 
 ---
 
-    mv3d rotationMode <mode>
+    mv3d allowRotation <true/false>
+    mv3d allowPitch <true/false>
 
-Set the keyboard control mode for rotating the camera.
+Sets whether keyboard control for rotation / pitch is enabled.  
+allowRotation is ignored in 1st person mode.
 
-Modes:
+    mv3d lockCamera <true/false>
 
-- OFF - Can't rotate camera with keyboard.
-- AUTO - A&D while in 1st person mode. Otherwise Q&E.
-- Q&E - Rotate camera with Q&E keys.
-- A&D - Rotate camera with left & right or A&D. Move with Q&E.
-
----
-
-    mv3d pitchMode <true/false>
-
-Allow player to control camera pitch with pageup and pagedown.
+Locks the camera, preventing keyboard control of rotation & pitch.  
 
 ---
 

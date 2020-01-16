@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { makeColor, relativeNumber } from './util.js';
+import { makeColor, relativeNumber, booleanString } from './util.js';
 
 const _pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -56,8 +56,12 @@ mv3d.PluginCommand=class{
 		this._RELATIVE_BLEND(mv3d.blendPanY,y,time);
 	}
 
-	rotationmode(mode){ mv3d.rotationMode=mode; }
-	pitchmode(mode){ mv3d.pitchMode=mode; }
+	get rotationmode(){ return this.allowrotation; }
+	get pitchmode(){ return this.allowpitch; }
+
+	allowrotation(b){ mv3d.saveData('allowRotation',booleanString(b)); }
+	allowpitch(b){ mv3d.saveData('allowPitch',booleanString(b)); }
+	lockcamera(b){ mv3d.saveData('cameraLocked',booleanString(b)); }
 
 	_VEHICLE(vehicle,data,value){
 		data=data.toLowerCase();

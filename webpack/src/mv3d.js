@@ -79,8 +79,8 @@ const mv3d = {
 		this.updateBlenders();
 
 		// input
-		if(!mv3d.isDisabled()){
-			if( mv3d.KEYBOARD_TURN || this.is1stPerson() ){
+		if(!this.isDisabled()&&!this.loadData('cameraLocked')){
+			if( this.loadData('allowRotation',mv3d.KEYBOARD_TURN) || this.is1stPerson() ){
 				if(Input.isTriggered('rotleft')){
 					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+90,0.5);
 				}else if(Input.isTriggered('rotright')){
@@ -90,7 +90,7 @@ const mv3d = {
 					this.playerFaceYaw();
 				}
 			}
-			if( mv3d.KEYBOARD_PITCH ){
+			if( this.loadData('allowPitch',mv3d.KEYBOARD_PITCH) ){
 				if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
 					// do nothing
 				}else if(Input.isPressed('pageup')){
