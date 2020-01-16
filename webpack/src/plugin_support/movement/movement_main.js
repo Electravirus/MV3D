@@ -123,8 +123,11 @@ Game_CharacterBase.prototype._mv3d_hasCollide=function(){
 	return this._mv3d_isPlatform() || Boolean(sprite.getCHeight());
 };
 
-
-require('./movement_vanilla.js');
+if(window.Imported&&Imported.QMovement){
+	require('./movement_Q.js');
+}else{
+	require('./movement_vanilla.js');
+}
 
 const _airship_land_ok = Game_Map.prototype.isAirshipLandOk;
 Game_Map.prototype.isAirshipLandOk = function(x, y) {
