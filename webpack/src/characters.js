@@ -49,7 +49,7 @@ Object.assign(mv3d,{
 		]);
 
 		Sprite.Meshes.SHADOW=Sprite.Meshes.FLAT.clone('shadow mesh');
-		const shadowTexture = new Texture(`${mv3d.MV3D_FOLDER}/shadow.png`);
+		const shadowTexture = mv3d.createTexture(`${mv3d.MV3D_FOLDER}/shadow.png`);
 		const shadowMaterial = new StandardMaterial('shadow material', mv3d.scene);
 		shadowMaterial.diffuseTexture=shadowTexture;
 		shadowMaterial.opacityTexture=shadowTexture;
@@ -73,7 +73,7 @@ class Sprite extends TransformNode{
 	}
 	setMaterial(src){
 		this.disposeMaterial();
-		this.texture = new Texture(src,mv3d.scene);
+		this.texture = mv3d.createTexture(src);
 		this.bitmap = this.texture._texture;
 		this.texture.hasAlpha=true;
 		this.texture.onLoadObservable.addOnce(()=>this.onTextureLoaded());
@@ -87,6 +87,7 @@ class Sprite extends TransformNode{
 	}
 	onTextureLoaded(){
 		this.texture.updateSamplingMode(1);
+		this.bitmap = this.texture._texture;
 	}
 	disposeMaterial(){
 		if(this.material){

@@ -8,6 +8,15 @@ Object.assign(mv3d,{
 	textureCache:{},
 	materialCache:{},
 
+	createTexture(url){
+		if(Decrypter.hasEncryptedImages){
+			const bitmap = ImageManager.loadNormalBitmap(url);
+			const texture = new BABYLON.Texture(null,mv3d.scene,!mv3d.MIPMAP,false,BABYLON.Texture.NEAREST_SAMPLINGMODE,null,null,bitmap._image);
+			return texture;
+		}
+		return new Texture(url,this.scene,!mv3d.MIPMAP);
+	},
+
 	getCachedTilesetTexture(setN,animX=0,animY=0){
 		const key = `TS:${setN}|${animX},${animY}`;
 		if(key in this.textureCache){
@@ -18,7 +27,7 @@ Object.assign(mv3d,{
 			return this.getErrorTexture();
 		}
 		const textureSrc=`img/tilesets/${tsName}.png`;
-		const texture = new Texture(textureSrc,this.scene,!mv3d.MIPMAP);
+		const texture = this.createTexture(textureSrc);
 		texture.hasAlpha=true;
 		texture.onLoadObservable.addOnce(()=>{
 			if(this.textureCache[key]!==texture){ return; }
@@ -46,14 +55,14 @@ Object.assign(mv3d,{
 
 	getErrorTexture(){
 		if(this.errorTexture){ return this.errorTexture; }
-		this.errorTexture = new Texture(`${mv3d.MV3D_FOLDER}/errorTexture.png`,this.scene);
+		this.errorTexture = this.createTexture(`${mv3d.MV3D_FOLDER}/errorTexture.png`);
 		this.errorTexture.isError=true;
 		return this.errorTexture;
 	},
 
 	getBushAlphaTexture(){
 		if(this.bushAlphaTexture){ return this.bushAlphaTexture; }
-		this.bushAlphaTexture = new Texture(`${mv3d.MV3D_FOLDER}/bushAlpha.png`,this.scene);
+		this.bushAlphaTexture = this.createTexture(`${mv3d.MV3D_FOLDER}/bushAlpha.png`);
 		this.bushAlphaTexture.getAlphaFromRGB=true;
 		return this.bushAlphaTexture;
 	},
