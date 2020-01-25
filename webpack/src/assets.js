@@ -35,7 +35,7 @@ Object.assign(mv3d,{
 		return texture;
 	},
 	getCachedTilesetTextureAsync(setN,animX=0,animY=0){return new Promise((resolve,reject)=>{
-		const texture = this.getCachedTileTexture(setN,animX,animY);
+		const texture = this.getCachedTilesetTexture(setN,animX,animY);
 		//if(texture.isError){ return void reject(); }
 		if(texture.isReady()){
 			resolve(texture);
