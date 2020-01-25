@@ -74,7 +74,7 @@ Object.assign(mv3d,{
 			height += this.getTileFringe(x,y,l);
 			height += this.getTileHeight(x,y,l);
 			const conf = this.getTileConfig(tileData[l],x,y,l);
-			if(conf.shape!==this.configurationShapes.SLOPE){ continue; }
+			if(conf.shape!==this.enumShapes.SLOPE){ continue; }
 			const slopeHeight = conf.slopeHeight||1;
 			if(z>=height-slopeHeight && z<=height){
 				return { id:tileData[l], x,y,l,conf, z1:height-slopeHeight, z2:height };

@@ -25,7 +25,7 @@ export class MapCell extends TransformNode{
 		this.y=loopPos.y-mv3d.CELL_SIZE/2;
 	}
 	async load(){
-		const shapes = mv3d.configurationShapes;
+		const shapes = mv3d.enumShapes;
 		this.builder = new CellMeshBuilder();
 		// load all tiles in mesh
 		const cellWidth = Math.min(mv3d.CELL_SIZE,$gameMap.width()-this.cx*mv3d.CELL_SIZE);
@@ -44,7 +44,7 @@ export class MapCell extends TransformNode{
 				const shape = tileConf.shape;
 				tileConf.realId = tileData[l];
 				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
-				//tileConf.isFringe = mv3d.isFringeTile(tileData[l]);
+				//tileConf.isFringe = mv3d.isStarTile(tileData[l]);
 				//tileConf.isTable = mv3d.isTableTile(tileData[l]);
 				let wallHeight = mv3d.getTileHeight(this.ox+x,this.oy+y,l)||tileConf.height||0;
 				let pitCull = false;
@@ -53,7 +53,7 @@ export class MapCell extends TransformNode{
 					lastZ=z;
 				}
 				//z+=tileConf.fringe;
-				//if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
+				//if(mv3d.isStarTile(tileData[l])){ z+=tileConf.fringeHeight; }
 				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
 					const hasWall=wallHeight||l===0;
 					if(!shape||shape===shapes.FLAT){
@@ -132,7 +132,7 @@ export class MapCell extends TransformNode{
 		}
 	}
 	async loadWall(tileConf,x,y,z,l,wallHeight,np){
-		const isFringe = mv3d.isFringeTile(tileConf.realId)||tileConf.fringe>0;
+		const isFringe = mv3d.isStarTile(tileConf.realId)||tileConf.fringe>0;
 		// don't render walls on edge of map (unless it loops)
 		if( !mv3d.getMapConfig('edge',true) )
 		if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
@@ -293,7 +293,7 @@ export class MapCell extends TransformNode{
 		}else{
 			rects = mv3d.getTileRects(tileId);
 		}
-		const rot = tileConf.shape===mv3d.configurationShapes.XCROSS ? Math.PI/4 : 0;
+		const rot = tileConf.shape===mv3d.enumShapes.XCROSS ? Math.PI/4 : 0;
 		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
 		for (let i=0; i<=1; ++i){
 			for (const rect of rects){

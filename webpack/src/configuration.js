@@ -215,12 +215,12 @@ Object.assign(mv3d,{
 		return conf;
 	},
 
-	configurationSides:{
+	enumSides:{
 		front:FRONTSIDE,
 		back:BACKSIDE,
 		double:DOUBLESIDE,
 	},
-	configurationShapes:{
+	enumShapes:{
 		FLAT:1,
 		TREE:2,
 		SPRITE:3,
@@ -230,7 +230,7 @@ Object.assign(mv3d,{
 		XCROSS:6,
 		SLOPE:7,
 	},
-	configurationPassage:{
+	enumPassage:{
 		WALL:0,
 		FLOOR:1,
 		THROUGH:2,
@@ -243,7 +243,7 @@ Object.assign(mv3d,{
 		fringe(conf,n){ conf.fringe=Number(n); },
 		float(conf,n){ conf.float=Number(n); },
 		slope(conf,n=1,d=null){
-			conf.shape=mv3d.configurationShapes.SLOPE;
+			conf.shape=mv3d.enumShapes.SLOPE;
 			conf.slopeHeight=Number(n);
 			if(d){ conf.slopeDirection=({n:2, s:8, e:4, w:6})[d.toLowerCase()[0]]; }
 		},
@@ -258,7 +258,7 @@ Object.assign(mv3d,{
 			}
 		}),
 		shape(conf,name){
-			conf.shape=mv3d.configurationShapes[name.toUpperCase()];
+			conf.shape=mv3d.enumShapes[name.toUpperCase()];
 		},
 		alpha(conf,n){
 			conf.transparent=true;
@@ -268,11 +268,11 @@ Object.assign(mv3d,{
 		pass(conf,s=''){
 			s=falseString(s.toLowerCase());
 			if(!s || s[0]==='x'){
-				conf.pass=mv3d.configurationPassage.WALL;
+				conf.pass=mv3d.enumPassage.WALL;
 			}else if(s[0]==='o'){
-				conf.pass=mv3d.configurationPassage.FLOOR;
+				conf.pass=mv3d.enumPassage.FLOOR;
 			}else{
-				conf.pass=mv3d.configurationPassage.THROUGH;
+				conf.pass=mv3d.enumPassage.THROUGH;
 			}
 		},
 	},
@@ -291,7 +291,7 @@ Object.assign(mv3d,{
 			if(dist!=null){ conf.shadowDist=Number(dist); }
 		},
 		shape(conf,name){
-			conf.shape=mv3d.configurationShapes[name.toUpperCase()];
+			conf.shape=mv3d.enumShapes[name.toUpperCase()];
 		},
 		pos(conf,x,y){
 			conf.pos={x:x,y:y};

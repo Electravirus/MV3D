@@ -521,7 +521,7 @@ class Character extends Sprite{
 	}
 
 	getShape(){
-		return this.getConfig('shape', mv3d.configurationShapes.SPRITE );
+		return this.getConfig('shape', mv3d.enumShapes.SPRITE );
 	}
 	updateShape(){
 		const newshape = this.getShape();
@@ -529,7 +529,7 @@ class Character extends Sprite{
 		this.shape=newshape;
 		//let backfaceCulling=true;
 		let geometry = Sprite.Meshes.SPRITE;
-		const shapes = mv3d.configurationShapes;
+		const shapes = mv3d.enumShapes;
 		switch(this.shape){
 		case shapes.FLAT:
 			geometry = Sprite.Meshes.FLAT;
@@ -606,7 +606,7 @@ class Character extends Sprite{
 	}
 
 	updateNormal(){
-		const shapes = mv3d.configurationShapes;
+		const shapes = mv3d.enumShapes;
 		if(this.shape===shapes.SPRITE){
 			this.mesh.pitch = mv3d.blendCameraPitch.currentValue()-90;
 			this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
@@ -665,9 +665,9 @@ class Character extends Sprite{
 	updatePositionOffsets(){
 		this.spriteOrigin.position.set(0,0,0);
 		this.lightOrigin.position.set(0,0,0);
-		if(this.shape===mv3d.configurationShapes.FLAT){
+		if(this.shape===mv3d.enumShapes.FLAT){
 			this.spriteOrigin.z = mv3d.LAYER_DIST*4;
-		}else if(this.shape===mv3d.configurationShapes.SPRITE){
+		}else if(this.shape===mv3d.enumShapes.SPRITE){
 			this.spriteOrigin.z = mv3d.LAYER_DIST*4 * (1-Math.max(0,Math.min(90,mv3d.blendCameraPitch.currentValue()))/90);
 		}else{
 			this.spriteOrigin.z = 0;
@@ -676,7 +676,7 @@ class Character extends Sprite{
 
 		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y)).multiplyByFloats(mv3d.SPRITE_OFFSET,mv3d.SPRITE_OFFSET);
 		const lightOffset = this.getConfig('lightOffset',null);
-		if(this.shape===mv3d.configurationShapes.SPRITE){
+		if(this.shape===mv3d.enumShapes.SPRITE){
 			this.spriteOrigin.x=billboardOffset.x;
 			this.spriteOrigin.y=billboardOffset.y;
 			this.lightOrigin.x=billboardOffset.x;
@@ -775,7 +775,7 @@ class Character extends Sprite{
 	}
 
 	updateShadow(){
-		let shadowVisible = Boolean(this.getConfig('shadow', this.shape!=mv3d.configurationShapes.FLAT ));
+		let shadowVisible = Boolean(this.getConfig('shadow', this.shape!=mv3d.enumShapes.FLAT ));
 
 		if(shadowVisible&&(this.isPlayer||this.isFollower)){
 			const myIndex = mv3d.characters.indexOf(this);
@@ -836,7 +836,7 @@ class Character extends Sprite{
 	}
 
 	getCHeight(){
-		let collide = this.getConfig('collide',this.shape===mv3d.configurationShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+		let collide = this.getConfig('collide',this.shape===mv3d.enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
 		return collide===true ? this.spriteHeight : Number(collide);
 	}
 

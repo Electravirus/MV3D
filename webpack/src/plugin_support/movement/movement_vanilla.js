@@ -118,9 +118,9 @@ Game_Map.prototype.checkPassage = function(x, y, bit) {
 			const conf = mv3d.getTileConfig(x,y,l);
 			if('pass' in conf){
 				//const passage = mv3d.getTilePassage(x,y,l);
-				if(conf.pass===mv3d.configurationPassage.THROUGH){ continue; }
-				if(conf.pass===mv3d.configurationPassage.FLOOR){ return true; }
-				if(conf.pass===mv3d.configurationPassage.WALL){ return false; }
+				if(conf.pass===mv3d.enumPassage.THROUGH){ continue; }
+				if(conf.pass===mv3d.enumPassage.FLOOR){ return true; }
+				if(conf.pass===mv3d.enumPassage.WALL){ return false; }
 			}
 		}
 		const flag = flags[tiles[l]];

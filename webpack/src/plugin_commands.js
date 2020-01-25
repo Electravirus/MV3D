@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { makeColor, relativeNumber, booleanString } from './util.js';
+import { makeColor, relativeNumber, booleanString, sleep } from './util.js';
 
 const _pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
