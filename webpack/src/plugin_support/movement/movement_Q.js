@@ -13,7 +13,7 @@ let _tileColliders={};
 
 override(Game_Map.prototype,'setupMapColliders',o=>function(){
 	this._tileCounter = 0;
-	tileColliders={};
+	_tileColliders={};
 	for (let x = 0; x < this.width(); x++)
 	for (let y = 0; y < this.height(); y++) {
 		const flags = this.tilesetFlags();
@@ -104,7 +104,6 @@ override(Game_CharacterBase.prototype,'collisionCheck',o=>function(x, y, dir, di
 	const y1 = (bounds.y+bounds._yMin)/$gameMap.tileHeight();
 	const x2 = (bounds.x+bounds._xMax)/$gameMap.tileWidth();
 	const y2 = (bounds.y+bounds._yMax)/$gameMap.tileHeight();
-	if(this===$gamePlayer){ console.log(x1,y1,x2,y2); }
 	if(!tileCollider){ tileCollider = new Box_Collider($gameMap.tileWidth(),$gameMap.tileHeight()); }
 	for (let tx = Math.floor(x1); tx < Math.ceil(x2); ++tx)
 	for (let ty = Math.floor(y1); ty < Math.ceil(y2); ++ty){
