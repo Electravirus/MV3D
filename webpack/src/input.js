@@ -1,5 +1,17 @@
 import mv3d from './mv3d.js';
 import { override } from './util.js';
+import { Feature } from './features.js';
+
+new Feature('input',{
+	_is1stPerson:false,
+	update(){
+		const is1stPerson = mv3d.is1stPerson();
+		if(this._is1stPerson !== is1stPerson){
+			Input.clear();
+			this._is1stPerson = is1stPerson;
+		}
+	}
+});
 
 Object.assign(Input.keyMapper,{
 	81:'rotleft',  // Q

@@ -69,6 +69,7 @@ Game_Player.prototype.performTransfer = function() {
 // On Map Load
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
+	Input.clear();
 	if(mv3d.needClearMap){
 		mv3d.clearMap();
 		mv3d.needClearMap=false;
