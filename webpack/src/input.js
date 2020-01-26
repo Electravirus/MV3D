@@ -1,4 +1,5 @@
 import mv3d from './mv3d.js';
+import { override } from './util.js';
 
 Object.assign(Input.keyMapper,{
 	81:'rotleft',  // Q
@@ -110,3 +111,11 @@ Game_Player.prototype.findDirectionTo=function(){
 	}
 	return dir;
 }
+
+override(Game_Player.prototype,'direction',o=>function isDirectionFixed(){
+	if(mv3d.is1stPerson()){
+		return mv3d.yawToDir();
+	}else{
+		return o.apply(this,arguments);
+	}
+});

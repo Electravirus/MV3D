@@ -179,10 +179,15 @@ const mv3d = {
 	},
 	
 	playerFaceYaw(){
-		let dir = Math.floor((-mv3d.blendCameraYaw.targetValue()+45)/90).mod(4);
+		let dir = this.yawToDir();
+		$gamePlayer.setDirection(dir);
+	},
+
+	yawToDir(yaw=mv3d.blendCameraYaw.targetValue()){
+		let dir = Math.floor((-yaw+45)/90).mod(4);
 		if(dir>1){ dir+=(dir+1)%2*2-1; }
 		dir=10-(dir*2+2);
-		$gamePlayer.setDirection(dir);
+		return dir;
 	},
 
 	dirToYaw(dir){
