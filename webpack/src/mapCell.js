@@ -34,15 +34,14 @@ export class MapCell extends TransformNode{
 		for (let y=0; y<cellHeight; ++y)
 		for (let x=0; x<cellWidth; ++x){
 			ceiling.cull=false;
-			let hasSpecialShape=false;
 			const tileData = mv3d.getTileData(this.ox+x,this.oy+y);
 			let lastZ=Infinity;
+			const cullHeight = mv3d.getCullingHeight(this.ox+x,this.oy+y);
 			for (let l=3; l>=0; --l){
 				if(mv3d.isTileEmpty(tileData[l])){ continue; }
 				let z = mv3d.getStackHeight(this.ox+x,this.oy+y,l);
 				const tileConf = mv3d.getTileTextureOffsets(tileData[l],this.ox+x,this.oy+y,l);
 				const shape = tileConf.shape;
-				if(mv3d.isSpecialShape(shape)){ hasSpecialShape = true; }
 				tileConf.realId = tileData[l];
 				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
 				//tileConf.isFringe = mv3d.isFringeTile(tileData[l]);
@@ -73,7 +72,7 @@ export class MapCell extends TransformNode{
 						}
 					}
 					//decide if we need to draw bottom of tile
-					if(wallHeight>0&&hasSpecialShape||tileConf.fringe>0){
+					if(wallHeight>0&&z-wallHeight>cullHeight||tileConf.fringe>0){
 						await this.loadTile(tileConf,x,y,z-wallHeight,l,true);
 					}
 					if(z>=ceiling.height){ ceiling.cull=true; }
