@@ -48,7 +48,7 @@ Object.assign(mv3d,{
 			.filter(event=>{
 				if(!(event.mv3d_sprite&&event._mv3d_isPlatform()&&event._mv3d_hasCollide()&&event.mv3d_sprite.visible)){ return false; }
 				if(char){
-					if(char.char===event || char.char.isMoving()){ return false; }
+					if(char.char===event || event.isMoving()){ return false; }
 					let pc=event.mv3d_sprite;
 					while(pc=pc.platformChar){
 						if(pc===char||pc===event.mv3d_sprite){ return false; }
