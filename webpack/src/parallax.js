@@ -42,3 +42,15 @@ Game_CharacterBase.prototype.isNearTheScreen = function() {
 override(Game_Screen.prototype,'shake',o=>function(){
 	return 0;
 });
+
+override(Game_CharacterBase.prototype,'screenX',o=>function screenX(){
+	const sprite = this.mv3d_sprite;
+	if(!sprite){ return o.apply(this,arguments); }
+	return mv3d.getScreenPosition(sprite).x;
+});
+
+override(Game_CharacterBase.prototype,'screenY',o=>function screenY(){
+	const sprite = this.mv3d_sprite;
+	if(!sprite){ return o.apply(this,arguments); }
+	return mv3d.getScreenPosition(sprite).y;
+});
