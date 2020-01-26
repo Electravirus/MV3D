@@ -113,7 +113,7 @@ Game_Player.prototype.findDirectionTo=function(){
 }
 
 override(Game_Player.prototype,'direction',o=>function isDirectionFixed(){
-	if(mv3d.is1stPerson()){
+	if(mv3d.is1stPerson() && this.isMoving() && !this.isDirectionFixed()){
 		return mv3d.yawToDir();
 	}else{
 		return o.apply(this,arguments);
