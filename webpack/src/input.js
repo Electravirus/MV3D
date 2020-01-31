@@ -131,3 +131,24 @@ override(Game_Player.prototype,'direction',o=>function isDirectionFixed(){
 		return o.apply(this,arguments);
 	}
 });
+
+override(Game_Player.prototype,'processMoveCommand',o=>function processMoveCommand(command){
+	o.apply(this,arguments);
+	const  gc = Game_Character;
+	switch(command.code){
+		case gc.ROUTE_TURN_DOWN:
+		case gc.ROUTE_TURN_LEFT:
+		case gc.ROUTE_TURN_RIGHT:
+		case gc.ROUTE_TURN_UP:
+		case gc.ROUTE_TURN_90D_R:
+		case gc.ROUTE_TURN_90D_L:
+		case gc.ROUTE_TURN_180D:
+		case gc.ROUTE_TURN_90D_R_L:
+		case gc.ROUTE_TURN_RANDOM:
+		case gc.ROUTE_TURN_TOWARD:
+		case gc.ROUTE_TURN_AWAY:
+			let yaw = mv3d.dirToYaw(this._direction);
+			mv3d.blendCameraYaw.setValue(yaw,0.25);
+	}
+},()=>!mv3d.isDisabled()&&mv3d.is1stPerson());
+
