@@ -816,10 +816,14 @@ class Character extends Sprite{
 			}
 			this._balloon.update();
 		}else{
-			if(this._balloon){
-				this._balloon.dispose();
-				this._balloon=null;
-			}
+			this.disposeBalloon();
+		}
+	}
+
+	disposeBalloon(){
+		if(this._balloon){
+			this._balloon.dispose();
+			this._balloon=null;
 		}
 	}
 
@@ -828,6 +832,7 @@ class Character extends Sprite{
 		delete this.char.mv3d_sprite;
 		const index = mv3d.characters.indexOf(this);
 		mv3d.characters.splice(index,1);
+		this.disposeBalloon();
 	}
 
 	getCHeight(){
