@@ -539,6 +539,7 @@ player upgrade their airship's height and speed.
 - Izybelle
 - Pumpkin Boss
 - L
+- hsumi
 
 
 ## Patron Heroes:

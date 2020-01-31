@@ -1,6 +1,6 @@
 /*:
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
-version 0.4.5
+version 0.4.5.1
 @author Dread/Nyanak
 @help
 
@@ -538,6 +538,7 @@ player upgrade their airship's height and speed.
 - Izybelle
 - Pumpkin Boss
 - L
+- hsumi
 
 
 ## Patron Heroes:
