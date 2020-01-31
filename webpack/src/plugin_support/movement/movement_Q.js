@@ -100,10 +100,10 @@ override(Game_CharacterBase.prototype,'collisionCheck',o=>function(x, y, dir, di
 	if(!noCollision){ return false; }
 	const collider = this.collider(type);
 	const bounds = this._colliders.bounds;
-	const x1 = (bounds.x+bounds._xMin)/$gameMap.tileWidth();
-	const y1 = (bounds.y+bounds._yMin)/$gameMap.tileHeight();
-	const x2 = (bounds.x+bounds._xMax)/$gameMap.tileWidth();
-	const y2 = (bounds.y+bounds._yMax)/$gameMap.tileHeight();
+	const x1 = (bounds.center.x+bounds._xMin-1)/$gameMap.tileWidth();
+	const y1 = (bounds.center.y+bounds._yMin-1)/$gameMap.tileHeight();
+	const x2 = (bounds.center.x+bounds._xMax+1)/$gameMap.tileWidth();
+	const y2 = (bounds.center.y+bounds._yMax+1)/$gameMap.tileHeight();
 	if(!tileCollider){ tileCollider = new Box_Collider($gameMap.tileWidth(),$gameMap.tileHeight()); }
 	for (let tx = Math.floor(x1); tx < Math.ceil(x2); ++tx)
 	for (let ty = Math.floor(y1); ty < Math.ceil(y2); ++ty){
@@ -114,4 +114,11 @@ override(Game_CharacterBase.prototype,'collisionCheck',o=>function(x, y, dir, di
 		}
 	}
 	return true;
+});
+
+override(Game_CharacterBase.prototype,'makeCollider',o=>function makeCollider(type, settings){
+	o.apply(this,arguments);
+	if(!this.mv3d_sprite){ return; }
+	this._colliders[type].mv3d_collider=this.mv3d_sprite.getCollider();
+	this._colliders[type].mv3d_triggerCollider=this.mv3d_sprite.getTriggerCollider();
 });

@@ -840,6 +840,48 @@ class Character extends Sprite{
 		return collide===true ? this.spriteHeight : Number(collide);
 	}
 
+	getCollider(){
+		if(this._collider){ return this._collider; }
+		const collider = {char:this};
+		this._collider=collider;
+		Object.defineProperties(collider,{
+			z1:{get:()=>this.z },
+			z2:{get:()=>{
+				let z = this.z;
+				if(this.hasConfig('height')){
+					const height = this.getConfig('height')
+					if(height<0){ z += height; }
+				}
+				return Math.max(this.z,this.z+this.getCHeight());
+			}}
+		});
+		return collider;
+	}
+	getTriggerCollider(){
+		if(this._triggerCollider){ return this._triggerCollider; }
+		const collider = {};
+		this._triggerCollider=collider;
+		Object.defineProperties(collider,{
+			z1:{get:()=>{
+				const trigger = this.getConfig('trigger');
+				if(trigger){
+					return this.z-trigger.down;
+				}else{
+					return this.getCollider().z1;
+				}
+			}},
+			z2:{get:()=>{
+				const trigger = this.getConfig('trigger');
+				if(trigger){
+					return this.z-trigger.up;
+				}else{
+					return this.getCollider().z2;
+				}
+			}}
+		});
+		return collider;
+	}
+
 	getCollisionHeight(z=this.z){
 		if(this.hasConfig('height')){
 			const height = this.getConfig('height')
