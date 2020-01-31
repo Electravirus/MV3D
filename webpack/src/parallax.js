@@ -46,11 +46,17 @@ override(Game_Screen.prototype,'shake',o=>function(){
 override(Game_CharacterBase.prototype,'screenX',o=>function screenX(){
 	const sprite = this.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
+	if(SceneManager.isNextScene(Scene_Battle)){
+		return Graphics.width/2;
+	}
 	return mv3d.getScreenPosition(sprite).x;
 });
 
 override(Game_CharacterBase.prototype,'screenY',o=>function screenY(){
 	const sprite = this.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
+	if(SceneManager.isNextScene(Scene_Battle)){
+		return Graphics.height/2;
+	}
 	return mv3d.getScreenPosition(sprite).y;
 });
