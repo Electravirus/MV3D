@@ -56,24 +56,27 @@ export class MapCell extends TransformNode{
 				//if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
 				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
 					const hasWall=wallHeight||l===0;
+					const hasBottom=wallHeight>0&&z-wallHeight>cullHeight||tileConf.fringe>0;
 					if(!shape||shape===shapes.FLAT){
 						if(!pitCull){
 							await this.loadTile(tileConf,x,y,z+l*mv3d.LAYER_DIST*!hasWall,l);
 						}
-						if(wallHeight||l===0){
+						if(hasWall){
 							await this.loadWalls(tileConf,x,y,z,l,wallHeight);
+						}
+						if(hasBottom){
+							await this.loadTile(tileConf,x,y,z-wallHeight,l,true);
 						}
 					}else if(shape===shapes.SLOPE){
 						const slopeHeight = tileConf.slopeHeight||1;
 						wallHeight -= slopeHeight;
 						await this.loadSlope(tileConf,x,y,z,l,slopeHeight);
-						if(wallHeight||l===0){
+						if(hasWall){
 							await this.loadWalls(tileConf,x,y,z-slopeHeight,l,wallHeight);
 						}
-					}
-					//decide if we need to draw bottom of tile
-					if(wallHeight>0&&z-wallHeight>cullHeight||tileConf.fringe>0){
-						await this.loadTile(tileConf,x,y,z-wallHeight,l,true);
+						if(hasBottom){
+							await this.loadTile(tileConf,x,y,z-slopeHeight-Math.max(0,wallHeight),l,true);
+						}
 					}
 					if(z>=ceiling.height){ ceiling.cull=true; }
 				}
