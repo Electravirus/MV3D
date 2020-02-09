@@ -34,7 +34,7 @@ Object.assign(mv3d,{
 				resolve(texture);
 			});
 		}else{
-			const texture = new BABYLON.Texture(bitmap._image.src,mv3d.scene,!mv3d.MIPMAP,false,BABYLON.Texture.NEAREST_SAMPLINGMODE);
+			const texture = new BABYLON.Texture(bitmap._image.src,mv3d.scene,!mv3d.MIPMAP,true,BABYLON.Texture.NEAREST_SAMPLINGMODE);
 			resolve(texture);
 		}
 
