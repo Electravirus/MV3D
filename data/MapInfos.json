@@ -9,11 +9,12 @@ null,
 {"id":7,"expanded":false,"name":"big island","order":6,"parentId":0,"scrollX":2460,"scrollY":2737.5},
 {"id":8,"expanded":true,"name":"MAP008","order":13,"parentId":0,"scrollX":819,"scrollY":445.5},
 {"id":9,"expanded":true,"name":"Crawler Dungeon","order":8,"parentId":0,"scrollX":699,"scrollY":448},
-{"id":10,"expanded":false,"name":"forest","order":9,"parentId":0,"scrollX":749,"scrollY":520},
-{"id":11,"expanded":true,"name":"Cave","order":10,"parentId":0,"scrollX":811,"scrollY":445.5},
-{"id":12,"expanded":false,"name":"castle yard","order":12,"parentId":0,"scrollX":1319,"scrollY":747.5},
+{"id":10,"expanded":false,"name":"forest","order":9,"parentId":0,"scrollX":811,"scrollY":514.5},
+{"id":11,"expanded":true,"name":"Cave","order":10,"parentId":0,"scrollX":811,"scrollY":474.5},
+{"id":12,"expanded":false,"name":"light test","order":17,"parentId":0,"scrollX":811,"scrollY":526.5},
 {"id":13,"expanded":false,"name":"weapons shop","order":7,"parentId":7,"scrollX":1080,"scrollY":597.3333333333334},
-{"id":14,"expanded":false,"name":"MAP014","order":14,"parentId":0,"scrollX":1090.6666666666667,"scrollY":596},
-{"id":15,"expanded":false,"name":"slope test","order":15,"parentId":0,"scrollX":819,"scrollY":445.5},
-{"id":16,"expanded":false,"name":"test","order":16,"parentId":0,"scrollX":819,"scrollY":445.5}
+{"id":14,"expanded":false,"name":"MAP014","order":13,"parentId":0,"scrollX":819,"scrollY":445.5},
+{"id":15,"expanded":true,"name":"slope test","order":14,"parentId":0,"scrollX":819,"scrollY":445.5},
+{"id":16,"expanded":false,"name":"test","order":16,"parentId":0,"scrollX":819,"scrollY":445.5},
+{"id":17,"expanded":false,"name":"slope test 2","order":15,"parentId":15,"scrollX":819,"scrollY":445.5}
 ]

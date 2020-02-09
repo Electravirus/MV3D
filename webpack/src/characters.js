@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { TransformNode, MeshBuilder, FRONTSIDE, Texture, StandardMaterial, Color3, Mesh, WORLDSPACE, Vector2, SpotLight, Vector3, PointLight, LOCALSPACE, DOUBLESIDE, Plane } from "./mod_babylon.js";
-import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis } from './util.js';
+import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
 
 Object.assign(mv3d,{
@@ -47,21 +47,36 @@ Object.assign(mv3d,{
 			Sprite.Meshes.SPRITE.clone(),
 			Sprite.Meshes.SPRITE.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
 		]);
-
-		Sprite.Meshes.SHADOW=Sprite.Meshes.FLAT.clone('shadow mesh');
-		const shadowTexture = new Texture(`${mv3d.MV3D_FOLDER}/shadow.png`);
-		const shadowMaterial = new StandardMaterial('shadow material', mv3d.scene);
-		shadowMaterial.diffuseTexture=shadowTexture;
-		shadowMaterial.opacityTexture=shadowTexture;
-		shadowMaterial.specularColor.set(0,0,0);
-		Sprite.Meshes.SHADOW.material=shadowMaterial;
-		
 		for (const key in Sprite.Meshes){
 			mv3d.scene.removeMesh(Sprite.Meshes[key]);
 		}
 	},
-});
 
+	async getShadowMaterial(){
+		if(this._shadowMaterial){ return this._shadowMaterial; }
+		const shadowTexture = await mv3d.createTexture(`${mv3d.MV3D_FOLDER}/shadow.png`);
+		const shadowMaterial = new StandardMaterial('shadow material', mv3d.scene);
+		this._shadowMaterial=shadowMaterial;
+		shadowMaterial.diffuseTexture=shadowTexture;
+		shadowMaterial.opacityTexture=shadowTexture;
+		shadowMaterial.specularColor.set(0,0,0);
+		return shadowMaterial;
+	},
+	async getShadowMesh(){
+		let shadowMesh;
+		while(this.getShadowMesh.getting){ await sleep(100); }
+		if(this._shadowMesh){ shadowMesh=this._shadowMesh}
+		else{
+			this.getShadowMesh.getting=true;
+			shadowMesh=Sprite.Meshes.FLAT.clone('shadow mesh');
+			shadowMesh.material=await this.getShadowMaterial();
+			this._shadowMesh=shadowMesh;
+			mv3d.scene.removeMesh(shadowMesh);
+			this.getShadowMesh.getting=false;
+		}
+		return shadowMesh.clone();
+	}
+});
 
 class Sprite extends TransformNode{
 	constructor(){
@@ -71,12 +86,13 @@ class Sprite extends TransformNode{
 		this.mesh = Sprite.Meshes.FLAT.clone();
 		this.mesh.parent = this.spriteOrigin;
 	}
-	setMaterial(src){
+	async setMaterial(src){
+		const newTexture = await mv3d.createTexture(src);
 		this.disposeMaterial();
-		this.texture = new Texture(src,mv3d.scene);
+		this.texture = newTexture;
 		this.bitmap = this.texture._texture;
 		this.texture.hasAlpha=true;
-		this.texture.onLoadObservable.addOnce(()=>this.onTextureLoaded());
+		mv3d.waitTextureLoaded(this.texture).then(()=>this.onTextureLoaded());
 		this.material = new StandardMaterial('sprite material',mv3d.scene);
 		this.material.diffuseTexture=this.texture;
 		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
@@ -87,6 +103,7 @@ class Sprite extends TransformNode{
 	}
 	onTextureLoaded(){
 		this.texture.updateSamplingMode(1);
+		this.bitmap = this.texture._texture;
 	}
 	disposeMaterial(){
 		if(this.material){
@@ -156,12 +173,10 @@ class Character extends Sprite{
 		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
 		//if(!this.char.mv3d_attr){ this.char.mv3d_attr={}; }
 
-		//if(mv3d.CHARACTER_SHADOWS){
-			//this.shadow = Sprite.Meshes.SHADOW.createInstance();
-			this.shadow = Sprite.Meshes.SHADOW.clone();
-			//this.shadow.parent=this.spriteOrigin;
+		mv3d.getShadowMesh().then(shadow=>{
+			this.shadow = shadow;
 			this.shadow.parent = this;
-		//}
+		});
 
 		this.blendElevation = this.makeBlender('elevation',0);
 
@@ -644,7 +659,7 @@ class Character extends Sprite{
 		if(this.bush && this.hasBush()){
 			hasAlpha=true;
 			if(!this.material.opacityTexture){
-				this.material.opacityTexture=mv3d.getBushAlphaTexture();
+				this.material.opacityTexture=mv3d.getBushAlphaTextureSync();
 				this.material.useAlphaFromDiffuseTexture=true;
 			}
 		}else{

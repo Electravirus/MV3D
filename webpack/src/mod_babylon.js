@@ -55,7 +55,7 @@ import { radtodeg, degtorad } from './util.js';
 import { hackShaders } from './shaders.js';
 
 Texture.prototype.crop=function(x=0,y=0,w=0,h=0){
-	const { width, height } = this.getBaseSize();
+	const { width, height } = this.getSize();
 	if(!w)w=width-x;
 	if(!h)h=height-y;
 	if(mv3d.EDGE_FIX){ x+=mv3d.EDGE_FIX;y+=mv3d.EDGE_FIX;w-=mv3d.EDGE_FIX*2;h-=mv3d.EDGE_FIX*2; }
