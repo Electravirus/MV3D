@@ -515,24 +515,6 @@ player upgrade their airship's height and speed.
 
 ---
 
-## Patron Supporters:
-
-- Yorae Rasante
-- JosephSeraph
-- HuskyTrooper
-- rpgmakerunion.ru
-- CrysHistory
-- GamesOfShadows
-- 中华国哥
-- FREELANDLOL (LvUp) 
-- J. Dewar
-- Goomy
-- omegamer
-- Mercylessly
-- 르붐바 차
-- Anger & Rage Interactive
-- CoopNinjask
-
 ## Patron Knights:
 
 - Whitely
@@ -540,6 +522,8 @@ player upgrade their airship's height and speed.
 - Pumpkin Boss
 - L
 - hsumi
+- nemoma
+- AmalgamAsh
 
 
 ## Patron Heroes:
@@ -548,3 +532,5 @@ player upgrade their airship's height and speed.
 - zxc
 - Fyoha
 - 冬空 橙
+- EblyssRaines
+- 中华国哥
