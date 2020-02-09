@@ -30,7 +30,8 @@ Object.assign(mv3d,{
 	},
 
 	getShadowBits(x,y){
-		return this.getTilemap()._readMapData(x,y,4);
+		const dataMap = this.getDataMap();
+		return dataMap.data[(4 * dataMap.height + y) * dataMap.width + x] || 0;
 	},
 
 	getTerrainTag(tileId){
@@ -210,10 +211,10 @@ Object.assign(mv3d,{
 	},
 
 	getSlopeDirection(x,y,l,fullData=false){
-		const slopeHeight = this.getTileHeight(x,y,l);
 		const stackHeight = this.getStackHeight(x,y,l);
 		const tileId = this.getTileData(x,y)[l];
 		const conf = this.getTileConfig(tileId,x,y,l);
+		const slopeHeight = conf.slopeHeight||1;
 		const neighborPositions = MapCell.neighborPositions;
 		const flag = $gameMap.tilesetFlags()[tileId];
 		const shadowBits = this.getShadowBits(x,y);
@@ -224,13 +225,13 @@ Object.assign(mv3d,{
 			const n=neighborPositions[i];
 			const d={neighbor: n,favor:0};
 			d.dir = 5-3*n.y+n.x;
-			const nHeight=this.getWalkHeight(x+n.x,y+n.y,true);
-			const oHeight=this.getWalkHeight(x-n.x,y-n.y,true);
-			if(Math.abs(stackHeight-oHeight)<=mv3d.STAIR_THRESH){ d.favor+=1; }
-			if(Math.abs(stackHeight-slopeHeight-nHeight)<=mv3d.STAIR_THRESH){ d.favor+=1; }
-			if((shadowBits&shadowBitDirections[d.dir/2])===shadowBitDirections[d.dir/2]){ d.favor+=3; }
+			const nHeights = this.getCollisionHeights(x+n.x,y+n.y,{slopeMax:true});
+			const oHeights = this.getCollisionHeights(x-n.x,y-n.y,{slopeMin:true});
+			if(nHeights.some(c=>Math.abs(stackHeight-slopeHeight-c.z2)<=mv3d.STAIR_THRESH)){ d.favor+=1; }
+			if(oHeights.some(c=>Math.abs(stackHeight-c.z2)<=mv3d.STAIR_THRESH)){ d.favor+=1; }
 			if(flag&(1<<(d.dir/2-1))){ d.favor=-2; }
 			if(flag&(1<<((10-d.dir)/2-1))){ d.favor=-1; }
+			if((shadowBits&shadowBitDirections[d.dir/2])===shadowBitDirections[d.dir/2]){ d.favor=30; }
 			if(conf.slopeDirection===d.dir){ d.favor=100; }
 			if(!direction||d.favor>direction.favor){ direction=d; }
 		}
@@ -285,22 +286,29 @@ Object.assign(mv3d,{
 		return (data.slopeHeight||1)*sf;
 	},
 
-	getCollisionHeights(x,y){
+	getCollisionHeights(x,y,opts={}){
 		const rx=Math.round(x),ry=Math.round(y);
 		let z = 0;
 		const collisions=[{z1:-Infinity,z2:0}];
-		collisions.layers=[];
+		if(opts.layers){ collisions.layers=[]; }
+		const tileData=this.getTileData(rx,ry);
 		for(let l=0; l<=3; ++l){
 			let h = this.getTileHeight(rx,ry,l);
-			const tileId=this.getTileData(rx,ry)[l];
+			const tileId=tileData[l];
 			const conf = this.getTileConfig(tileId,rx,ry,l);
 			const shape = conf.shape;
-			const passage = this.getTilePassage(tileId,conf)
+			const passage = this.getTilePassage(tileId,conf);
 			let skip = false;
 			if(passage===this.enumPassage.THROUGH){
 				h=0; skip=true;
 			}else if(shape===this.enumShapes.SLOPE){
-				h = h-(conf.slopeHeight||1)+this.getSlopeHeight(x,y,l,conf);
+				if(opts.slopeMax){
+					h = h;
+				}else if(opts.slopeMin){
+					h = h-(conf.slopeHeight||1);
+				}else{
+					h = h-(conf.slopeHeight||1)+this.getSlopeHeight(x,y,l,conf);
+				}
 			}
 			const fringe = this.getTileFringe(rx,ry,l);
 			z+=fringe;
@@ -314,12 +322,12 @@ Object.assign(mv3d,{
 				collisions.push({z1:z,z2:z+h});
 			}
 			z+=h;
-			collisions.layers[l]=collisions[collisions.length-1];
+			if(opts.layers){ collisions.layers[l]=collisions[collisions.length-1]; }
 		}
 		return collisions;
 	},
 
-	getTileLayers(x,y,z){
+	getTileLayers(x,y,z,gte=true){
 		let closest_diff = Infinity;
 		let layers = [0];
 		let h=0;
@@ -331,7 +339,7 @@ Object.assign(mv3d,{
 			const height=this.getTileHeight(x,y,l);
 			h+=fringe+height;
 			const diff = z-h;
-			if(z>=h){
+			if( gte ? z>=h : z>h ){
 				if(diff<closest_diff){
 					layers=[l];
 					closest_diff=diff;
@@ -343,9 +351,9 @@ Object.assign(mv3d,{
 		return layers;
 	},
 
-	getFloatHeight(x,y,z=null){
+	getFloatHeight(x,y,z=null,gte=true){
 		const tileData=this.getTileData(x,y);
-		const layers = z==null?[0,1,2,3]:this.getTileLayers(x,y,z);
+		const layers = z==null?[0,1,2,3]:this.getTileLayers(x,y,z,gte);
 		let float=0;
 		for(const l of layers){
 			const tileId=tileData[l];
@@ -373,7 +381,7 @@ Object.assign(mv3d,{
 		return 0;
 	},
 
-	getCullingHeight(x,y,layerId=3,ignorePits=false){
+	getCullingHeight(x,y,layerId=3,opts={}){
 		const tileData=this.getTileData(x,y);
 		let height=0;
 		for(let l=0; l<=layerId; ++l){
@@ -384,11 +392,13 @@ Object.assign(mv3d,{
 			if(this.isSpecialShape(shape)){
 				if(shape===this.enumShapes.SLOPE){
 					height+=this.getTileHeight(x,y,l);
-					height-=data.slopeHeight||1;
+					if(!opts.dir||opts.dir!==this.getSlopeDirection(x,y,l,true).dir){
+						height-=data.slopeHeight||1;
+					}
 				}
 				return height;
 			}
-			if(ignorePits&&data.depth>0){
+			if(opts.ignorePits&&data.depth>0){
 				height+=data.depth;
 			}
 			height+=this.getTileHeight(x,y,l);

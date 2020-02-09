@@ -729,7 +729,7 @@ class Character extends Sprite{
 			return;
 		}
 		
-		const platform = mv3d.getPlatformForCharacter(this,this.char._realX,this.char._realY);
+		const platform = this.getPlatform(this.char._realX,this.char._realY);
 		this.platformHeight = platform.z2;
 		this.platformChar = platform.char;
 		this.targetElevation = this.platformHeight+this.blendElevation.currentValue();
@@ -772,6 +772,11 @@ class Character extends Sprite{
 			this.falling=this.z>this.targetElevation;
 		}
 		return;
+	}
+
+	getPlatform(x=this.char._realX,y=this.char._realY){
+		this.platform = mv3d.getPlatformForCharacter(this,x,y);
+		return this.platform;
 	}
 
 	updateShadow(){
@@ -918,7 +923,7 @@ Game_CharacterBase.prototype.isOnBush = function() {
 	if(mv3d.isDisabled()||!this.mv3d_sprite){ return _isOnBush.apply(this,arguments); }
 	const rx=Math.round(this._realX), ry=Math.round(this._realY);
 	const tileData=mv3d.getTileData(rx,ry);
-	const layers = mv3d.getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight());
+	const layers = mv3d.getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight(),false);
 	const flags = $gameMap.tilesetFlags();
 	for( const l of layers ){
 		if( (flags[tileData[l]] & 0x40) !== 0 ){ return true; }

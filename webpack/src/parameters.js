@@ -64,6 +64,8 @@ Object.assign(mv3d,{
 	KEYBOARD_STRAFE: booleanString(parameters.keyboardStrafe),
 
 	REGION_DATA:{},
+	_REGION_DATA:{},
+	_REGION_DATA_MAP:{},
 	TTAG_DATA:{},
 
 	EVENT_HEIGHT:Number(parameters.eventHeight),
@@ -79,20 +81,22 @@ Object.assign(mv3d,{
 	ENABLE_3D_OPTIONS:{disable:0,enable:1,submenu:2}[parameters['3dMenu'].toLowerCase()],
 
 	setupParameters(){
+		this.REGION_DATA=new Proxy(this._REGION_DATA,{
+			get:(target,key)=>{
+				if(key in this._REGION_DATA_MAP){ return this._REGION_DATA_MAP[key]; }
+				if(key in this._REGION_DATA){ return this._REGION_DATA[key]; }
+			},
+			set:(target,key,value)=>{
+				target[key]=value;
+			},
+			has:(target,key)=>{
+				return key in this._REGION_DATA_MAP || key in this._REGION_DATA;
+			},
+		});
 		for (let entry of JSON.parse(parameters.regions)){
 			entry=JSON.parse(entry);
 			const regionData = this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions)
-			this.REGION_DATA[entry.regionId]=regionData;
-			/*
-			if ('height' in regionData){
-				regionData.region_height = regionData.height;
-				delete regionData.height;
-			}
-			if ('depth' in regionData){
-				regionData.region_depth = regionData.depth;
-				delete regionData.depth;
-			}
-			*/
+			this._REGION_DATA[entry.regionId]=regionData;
 			
 		}
 		for (let entry of JSON.parse(parameters.ttags)){

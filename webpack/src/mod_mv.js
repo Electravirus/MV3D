@@ -1,4 +1,5 @@
 import mv3d from './mv3d.js';
+import { override } from './util.js';
 
 const _graphics_createCanvas=Graphics._createCanvas;
 Graphics._createCanvas = function() {
@@ -80,8 +81,7 @@ Scene_Map.prototype.onMapLoaded=function(){
 	mv3d.loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
 	if(!mv3d.mapLoaded){
-		mv3d.applyMapSettings()
-		mv3d.loadTilesetSettings();
+		mv3d.applyMapSettings();
 		if(mv3d.isDisabled()){
 			mv3d.mapReady=true;
 		}else{
@@ -91,6 +91,12 @@ Scene_Map.prototype.onMapLoaded=function(){
 		}
 	}
 	mv3d.updateBlenders(true);
+};
+
+const _map_battleback_Setup = Game_Map.prototype.setupBattleback;
+Game_Map.prototype.setupBattleback=function(){
+	_map_battleback_Setup.apply(this,arguments);
+	mv3d.loadTilesetSettings();
 };
 
 const _onLoadSuccess = Scene_Load.prototype.onLoadSuccess;
@@ -112,4 +118,12 @@ Scene_Title.prototype.start = function() {
 	_title_start.apply(this,arguments);
 	mv3d.clearMap();
 	mv3d.clearCameraTarget();
+};
+
+const _initGraphics = SceneManager.initGraphics;
+SceneManager.initGraphics = function() {
+	_initGraphics.apply(this,arguments);
+	if(!Graphics.isWebGL()){
+		throw new Error("MV3D requires WebGL");
+	}
 };

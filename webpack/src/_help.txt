@@ -1,10 +1,13 @@
 
+Requires version 1.6 of RPG Maker MV.  
+
 If you are making a game with this plugin, please consider supporting my
 patreon.  
 https://www.patreon.com/cutievirus  
 You can also unlock some patron-only features by becoming a patron, such as
 Dynamic Shadows.  
-A list of patrons can be found at the bottom of this file.
+
+Discord: http://cutievirus.com/discord
 
 ## Getting started
 
@@ -509,24 +512,6 @@ player upgrade their airship's height and speed.
 
 ---
 
-## Patron Supporters:
-
-- Yorae Rasante
-- JosephSeraph
-- HuskyTrooper
-- rpgmakerunion.ru
-- CrysHistory
-- GamesOfShadows
-- 中华国哥
-- FREELANDLOL (LvUp) 
-- J. Dewar
-- Goomy
-- omegamer
-- Mercylessly
-- 르붐바 차
-- Anger & Rage Interactive
-- CoopNinjask
-
 ## Patron Knights:
 
 - Whitely
@@ -534,6 +519,8 @@ player upgrade their airship's height and speed.
 - Pumpkin Boss
 - L
 - hsumi
+- nemoma
+- AmalgamAsh
 
 
 ## Patron Heroes:
@@ -542,3 +529,4 @@ player upgrade their airship's height and speed.
 - zxc
 - Fyoha
 - 冬空 橙
+- EblyssRaines

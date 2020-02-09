@@ -117,7 +117,27 @@ Object.assign(mv3d,{
 			this.readConfigurationBlocks($dataMap.note),
 			this.mapConfigurationFunctions,
 			mapconf,
-        );
+		);
+		this._REGION_DATA_MAP={};
+		const regionBlocks=this.readConfigurationBlocks($dataMap.note,'mv3d-regions');
+		if(regionBlocks){
+			const readLines = /^\s*(\d+)\s*:(.*)$/gm;
+			let match;
+			while(match = readLines.exec(regionBlocks)){
+				if(!(match[1] in this._REGION_DATA_MAP)){
+					if(match[1] in this._REGION_DATA){
+						this._REGION_DATA_MAP[match[1]]=JSON.parse(JSON.stringify(this._REGION_DATA[match[1]]));
+					}else{
+						this._REGION_DATA_MAP[match[1]]={};
+					}
+				}
+				this.readConfigurationFunctions(
+					match[2],
+					mv3d.tilesetConfigurationFunctions,
+					this._REGION_DATA_MAP[match[1]],
+				);
+			}
+		}
 	},
 	applyMapSettings(){
 		const mapconf = this.mapConfigurations;
@@ -176,8 +196,8 @@ Object.assign(mv3d,{
 		return conf;
 	},
 
-	readConfigurationBlocks(note){
-		const findBlocks = /<MV3D>([\s\S]*?)<\/MV3D>/gi;
+	readConfigurationBlocks(note,tag='mv3d'){
+		const findBlocks = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`,'gi');
 		let contents = '';
 		let match;
 		while(match = findBlocks.exec(note)){
@@ -186,8 +206,8 @@ Object.assign(mv3d,{
 		return contents;
 	},
 
-	readConfigurationTags(note){
-		const findTags = /<MV3D:([\s\S]*?)>/gi;
+	readConfigurationTags(note,tag='mv3d'){
+		const findTags = new RegExp(`<${tag}:([\\s\\S]*?)>`,'gi');
 		let contents='';
 		let match;
 		while(match = findTags.exec(note)){
@@ -196,7 +216,7 @@ Object.assign(mv3d,{
 		return contents;
 	},
 
-	readConfigurationFunctions(line,functionset=mv3d.configurationFunctions,conf={}){
+	readConfigurationFunctions(line,functionset=mv3d.tilesetConfigurationFunctions,conf={}){
 		const readConfigurations = /(\w+)\((.*?)\)/g
 		let match;
 		while(match = readConfigurations.exec(line)){

@@ -35,6 +35,15 @@ Object.assign(mv3d,{
 		}
 		return false;
 	},
+	getPlatformFloatForCharacter(char,x,y){
+		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return 0;}char=char.mv3d_sprite;}
+		let z = mv3d.getPlatformForCharacter(char,x,y).z2;
+		if(char.hasFloat){
+			const cHeight = char.getCHeight();
+			z += mv3d.getFloatHeight(x,y,char.z+Math.max(cHeight,mv3d.STAIR_THRESH),mv3d.STAIR_THRESH>=cHeight);
+		}
+		return z;
+	},
 	getPlatformForCharacter(char,x,y){
 		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
 		const cHeight = char.getCHeight();

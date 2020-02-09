@@ -72,11 +72,8 @@ const _isMapPassable=o=>function(x,y,d){
 		
 		if(sprite.falling){ return false; }
 		if(!mv3d.WALK_OFF_EDGE){
-			let platform = mv3d.getPlatformForCharacter(this,x2,y2).z2;
-			if(sprite.hasFloat){
-				platform += mv3d.getFloatHeight(x2,y2,sprite.z+sprite.getCHeight());
-			}
-			if(unround(Math.abs(platform-sprite.targetElevation))>mv3d.STAIR_THRESH){
+			const platformz = mv3d.getPlatformFloatForCharacter(this,x2,y2);
+			if(unround(Math.abs(platformz-sprite.targetElevation))>mv3d.STAIR_THRESH){
 				return false; 
 			}
 		}
@@ -105,12 +102,13 @@ Game_Map.prototype.checkPassage = function(x, y, bit) {
 		return _checkPassage.apply(this,arguments);
 	}
 	const char = $gameTemp._mv3d_collision_char;
-	const z = char.z+Math.max(char.getCHeight(),mv3d.STAIR_THRESH);
+	const cHeight = char.getCHeight();
+	const z = char.z+Math.max(cHeight,mv3d.STAIR_THRESH);
 	const platform = mv3d.getPlatformForCharacter(char,x,y);
 	if(platform.char){ return true; }
 	var flags = this.tilesetFlags();
 	//var tiles = this.allTiles(x, y);
-	const layers = mv3d.getTileLayers(x,y,z);
+	const layers = mv3d.getTileLayers(x,y,z,mv3d.STAIR_THRESH>=cHeight);
 	const tiles = mv3d.getTileData(x,y);
 	for (var i = layers.length-1; i>=0; --i) {
 		const l=layers[i];

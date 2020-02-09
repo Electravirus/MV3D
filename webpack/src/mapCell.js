@@ -56,24 +56,27 @@ export class MapCell extends TransformNode{
 				//if(mv3d.isStarTile(tileData[l])){ z+=tileConf.fringeHeight; }
 				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
 					const hasWall=wallHeight||l===0;
+					const hasBottom=wallHeight>0&&z-wallHeight>cullHeight||tileConf.fringe>0;
 					if(!shape||shape===shapes.FLAT){
 						if(!pitCull){
 							await this.loadTile(tileConf,x,y,z+l*mv3d.LAYER_DIST*!hasWall,l);
 						}
-						if(wallHeight||l===0){
+						if(hasWall){
 							await this.loadWalls(tileConf,x,y,z,l,wallHeight);
+						}
+						if(hasBottom){
+							await this.loadTile(tileConf,x,y,z-wallHeight,l,true);
 						}
 					}else if(shape===shapes.SLOPE){
 						const slopeHeight = tileConf.slopeHeight||1;
 						wallHeight -= slopeHeight;
 						await this.loadSlope(tileConf,x,y,z,l,slopeHeight);
-						if(wallHeight||l===0){
+						if(hasWall){
 							await this.loadWalls(tileConf,x,y,z-slopeHeight,l,wallHeight);
 						}
-					}
-					//decide if we need to draw bottom of tile
-					if(wallHeight>0&&z-wallHeight>cullHeight||tileConf.fringe>0){
-						await this.loadTile(tileConf,x,y,z-wallHeight,l,true);
+						if(hasBottom){
+							await this.loadTile(tileConf,x,y,z-slopeHeight-wallHeight,l,true);
+						}
 					}
 					if(z>=ceiling.height){ ceiling.cull=true; }
 				}
@@ -144,7 +147,9 @@ export class MapCell extends TransformNode{
 		let tileId=tileConf.side_id,configRect,texture_side='side';
 		if(mv3d.isTileEmpty(tileId)){ return; }
 		
-		const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,!(tileConf.depth>0));
+		const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,{
+			ignorePits:!(tileConf.depth>0),
+		});
 		neededHeight = z-neighborHeight;
 		if(neededHeight>0&&(l>0||isFringe)){ neededHeight=Math.min(wallHeight,neededHeight); }
 
@@ -184,8 +189,8 @@ export class MapCell extends TransformNode{
 			//const npr=MapCell.neighborPositions[(+ni+1).mod(4)];
 			const npl=new Vector2(-np.y,np.x);
 			const npr=new Vector2(np.y,-np.x);
-			const leftHeight = mv3d.getStackHeight(this.ox+x+npl.x,this.oy+y+npl.y,l);
-			const rightHeight = mv3d.getStackHeight(this.ox+x+npr.x,this.oy+y+npr.y,l);
+			const leftHeight = mv3d.getCullingHeight(this.ox+x+npl.x,this.oy+y+npl.y,l,{dir:Input._makeNumpadDirection(npl.x,npl.y)});
+			const rightHeight = mv3d.getCullingHeight(this.ox+x+npr.x,this.oy+y+npr.y,l,{dir:Input._makeNumpadDirection(npr.x,npr.y)});
 			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
 			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
 			let partHeight=Math.abs(neededHeight/wallParts);
