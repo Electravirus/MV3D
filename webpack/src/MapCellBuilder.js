@@ -168,7 +168,7 @@ class SubMeshBuilder{
 		this.uvs.push(...uvs);
 	}
 	static getUvRect(tsTexture,x,y,w,h){
-		const { width, height } = tsTexture.getSize();
+		const { width, height } = tsTexture.getBaseSize();
 		if(mv3d.EDGE_FIX){ x+=mv3d.EDGE_FIX;y+=mv3d.EDGE_FIX;w-=mv3d.EDGE_FIX*2;h-=mv3d.EDGE_FIX*2; }
 		return {
 			x1:x/width,
