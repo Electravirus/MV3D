@@ -92,6 +92,15 @@ Object.assign(mv3d,{
 		return false;
 	},
 
+	getRampData(x,y,l,conf=conf){
+		const tileId = mv3d.getTileId(x,y,l);
+		if(!conf){ conf = this.getTileConfig(tileId,x,y,l); }
+		if(conf.shape!==this.enumShapes.SLOPE){ return false; }
+		const height = mv3d.getStackHeight(x,y,l);
+		const slopeHeight = conf.slopeHeight||1;
+		return { id:tileId, x,y,l,conf, z1:height-slopeHeight, z2:height };
+	},
+
 	canPassRamp(d,slope){
 		const {dir:sd} = mv3d.getSlopeDirection(slope.x,slope.y,slope.l,true);
 		const x2 = $gameMap.roundXWithDirection(slope.x,d);

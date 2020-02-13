@@ -33,7 +33,7 @@ override(Game_Event.prototype,'isCollidedWithEvents',_isCollidedWithEvents);
 
 override(Game_Event.prototype,'isCollidedWithPlayerCharacters',o=>function(x,y){
 	if($gamePlayer.isThrough()){ return false; }
-	const chars = [$gamePlayer,...$gamePlayer.followers()._data.filter(f=>f.isVisible()&&f.mv3d_sprite.visible)]
+	const chars = [$gamePlayer,...$gamePlayer.followers()._data.filter(f=>f.isVisible()&&f.mv3d_sprite&&f.mv3d_sprite.visible)]
 	.filter(char=>char.pos(x,y));
 	return charCollidesWithChars(this,chars,x,y);
 });

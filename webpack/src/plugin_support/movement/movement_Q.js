@@ -13,11 +13,12 @@ override(ColliderManager.container,'update',o=>function(){
 let _tileColliders={};
 mv3d.getQTileColliders=()=>_tileColliders;
 
-function mv3d_makeTileCollider(x,y,zcollider){
+function mv3d_makeTileCollider(x,y,zcollider,extra){
 	const tc=new Box_Collider($gameMap.tileWidth(),$gameMap.tileHeight());
 	tc.x=x*$gameMap.tileWidth();
 	tc.y=y*$gameMap.tileHeight();
 	tc.mv3d_collider=zcollider;
+	tc.mv3d_collider_type=extra;
 	return tc;
 }
 
@@ -31,9 +32,9 @@ override(Game_Map.prototype,'setupMapColliders',o=>function(){
 		const zColliders = mv3d.getCollisionHeights(x,y,{layers:true});
 		const tileCollider_list = _tileColliders[[x,y]]=[];
 		for (let i=0; i<zColliders.length; ++i) {
-			tileCollider_list[i]=mv3d_makeTileCollider(x,y,zColliders[i]);
+			tileCollider_list[i]=mv3d_makeTileCollider(x,y,zColliders[i],'mv3d');
 		}
-		_tileColliders[[x,y,'x']]=mv3d_makeTileCollider(x,y,{z1:-Infinity,z2:Infinity});
+		_tileColliders[[x,y,'x']]=mv3d_makeTileCollider(x,y,{z1:-Infinity,z2:Infinity},'mv3d_x');
 		for (let l = 0; l < tiles.length; ++l) {
 			const flag = flags[tiles[l]];
 			const passage = mv3d.getTilePassage(tiles[l],x,y,l);
@@ -84,8 +85,12 @@ override(Game_CharacterBase.prototype,'collider',o=>function collider(){
 	const collider = o.apply(this,arguments);
 	if(!this.mv3d_sprite){ return collider; }
 	if(!collider.mv3d_collider){
-		collider.mv3d_collider=this.mv3d_sprite.getCollider();
-		collider.mv3d_triggerCollider=this.mv3d_sprite.getTriggerCollider();
+		Object.defineProperty(collider,'mv3d_collider',{
+			configurable:true, value: this.mv3d_sprite.getCollider(),
+		});
+		Object.defineProperty(collider,'mv3d_triggerCollider',{
+			configurable:true, value: this.mv3d_sprite.getTriggerCollider(),
+		});
 	}
 	return collider;
 });
@@ -115,41 +120,66 @@ override(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collide
 	const y1 = (collider.y+collider._offset.y-1)/QMovement.tileSize;
 	const x2 = (collider.x+collider._offset.x+collider.width+1)/QMovement.tileSize;
 	const y2 = (collider.y+collider._offset.y+collider.height+1)/QMovement.tileSize;
+	const cx = Math.round(collider.x/QMovement.tileSize);
+	const cy = Math.round(collider.y/QMovement.tileSize);
+
 	for (let tx = Math.floor(x1); tx < Math.ceil(x2); ++tx)
 	for (let ty = Math.floor(y1); ty < Math.ceil(y2); ++ty){
+
+		let char,d;
+		if(collider.mv3d_collider&&collider.mv3d_collider.char){
+			char = collider.mv3d_collider.char;
+			d = Input._makeNumpadDirection(+!!(tx-Math.round(char.x)),+!!(ty-Math.round(char.y)));
+		}
+
 		if(collider.mv3d_collider){
+			let shouldCollide=false;
 			let skip=false;
-			const char = collider.mv3d_collider.char;
 			if(char){
 				const platform = char.getPlatform(tx,ty);
-				if(platform.char){ skip=true; }
-			}
-			const tileLayers = mv3d.getTileLayers(tx,ty,collider.mv3d_collider.z1+mv3d.STAIR_THRESH);
-			const tileCollider = _tileColliders[[tx,ty,'x']];
-			if(tileCollider&&!skip)for(const l of tileLayers){
-				const passage = mv3d.getTilePassage(tx,ty,l);
-				let shouldCollide=false;
-				if(passage===mv3d.enumPassage.WALL){
-					shouldCollide=true;
-				}else if(char && !mv3d.WALK_OFF_EDGE && !char.char._mv3d_isFlying()){
-					const floatz = mv3d.getPlatformFloatForCharacter(char,tx,ty);
-					if(unround(Math.abs(floatz-char.targetElevation))>mv3d.STAIR_THRESH){
+				if(platform.char){
+					skip=true;
+					if(!mv3d.WALK_OFF_EDGE && !char.char._mv3d_isFlying()
+					&& unround(Math.abs(platform.z2-char.targetElevation))>mv3d.STAIR_THRESH){
 						shouldCollide=true;
 					}
 				}
-				if(shouldCollide){
-					let value=true;
-					if(only){ value = only(tileCollider); }
-					if(value!==false){
-						near.push(tileCollider);
-						if(value==='break'){ return near; }
+				if(char.falling&&!char.char._mv3d_isFlying()){ shouldCollide=true; }
+			}
+			const tileCollider = _tileColliders[[tx,ty,'x']];
+			if(tileCollider&&!skip&&!shouldCollide){
+				const tileLayers = mv3d.getTileLayers(tx,ty,collider.mv3d_collider.z1+mv3d.STAIR_THRESH);
+				for(const l of tileLayers){
+					const passage = mv3d.getTilePassage(tx,ty,l);
+					const conf = mv3d.getTileConfig(tx,ty,l);
+					if(passage===mv3d.enumPassage.WALL){
+						shouldCollide=true; break;
+					}else if(conf.shape===mv3d.enumShapes.SLOPE && mv3d.canPassRamp(d,mv3d.getRampData(x,y,l,conf))){
 						continue;
+					}else if(char && !mv3d.WALK_OFF_EDGE && !char.char._mv3d_isFlying()){
+						const floatz = mv3d.getPlatformFloatForCharacter(char,tx,ty);
+						if(unround(Math.abs(floatz-char.targetElevation))>mv3d.STAIR_THRESH){
+							shouldCollide=true; break;
+						}
 					}
 				}
 			}
+			if(tileCollider&&shouldCollide){
+				let value=true;
+				if(only){ value = only(tileCollider); }
+				if(value!==false){
+					near.push(tileCollider);
+					if(value==='break'){ return near; }
+					continue;
+				}
+			}
+		}
+		let hasRamp=false;
+		if(collider.mv3d_collider){
+			hasRamp = mv3d.isRampAt(tx,ty,collider.mv3d_collider.z2);
 		}
 		const colliderList=_tileColliders[[tx,ty]];
-		if(colliderList) for(let i = 0; i<colliderList.length; ++i){
+		if(colliderList&&!hasRamp) for(let i = 0; i<colliderList.length; ++i){
 			if(zCollidersOverlap(collider,colliderList[i])){
 				if(only){
 					const value = only(colliderList[i]);
@@ -173,7 +203,21 @@ override(ColliderManager,'getCharactersNear',o=>function getCharactersNear(colli
 });
 
 mv3d.Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._realY){
+	const px = (x-0.5)*QMovement.tileSize;
+	const py = (y-0.5)*QMovement.tileSize;
 	const collider = this.char.collider();
-	this.platform = mv3d.getPlatformForCharacter(this,x,y);
+
+	const x1 = (px+collider._offset.x+1)/QMovement.tileSize;
+	const y1 = (py+collider._offset.y+1)/QMovement.tileSize;
+	const x2 = (px+collider._offset.x+collider.width-1)/QMovement.tileSize;
+	const y2 = (py+collider._offset.y+collider.height-1)/QMovement.tileSize;
+	
+	this.platform = [
+		mv3d.getPlatformForCharacter(this,x1,y1),
+		mv3d.getPlatformForCharacter(this,x2,y1),
+		mv3d.getPlatformForCharacter(this,x2,y2),
+		mv3d.getPlatformForCharacter(this,x1,y2),
+	].reduce((a,b)=>a.z2>=b.z2?a:b);
 	return this.platform;
 }
+
