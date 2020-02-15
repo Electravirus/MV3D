@@ -92,7 +92,7 @@ Object.assign(mv3d,{
 		return false;
 	},
 
-	getRampData(x,y,l,conf=conf){
+	getRampData(x,y,l,conf=null){
 		const tileId = mv3d.getTileId(x,y,l);
 		if(!conf){ conf = this.getTileConfig(tileId,x,y,l); }
 		if(conf.shape!==this.enumShapes.SLOPE){ return false; }
@@ -102,6 +102,7 @@ Object.assign(mv3d,{
 	},
 
 	canPassRamp(d,slope){
+		if(d===5||d<=0||d>=10){ return true; }
 		const {dir:sd} = mv3d.getSlopeDirection(slope.x,slope.y,slope.l,true);
 		const x2 = $gameMap.roundXWithDirection(slope.x,d);
 		const y2 = $gameMap.roundYWithDirection(slope.y,d);

@@ -146,6 +146,7 @@ Object.assign(mv3d,{
 			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
 			if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
 			if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
+			this.blendFogColor.update();
 		}
 		if('light' in mapconf){
 			this.blendAmbientColor.setValue(mapconf.light.color,0);

@@ -337,10 +337,15 @@ Object.assign(mv3d,{
 			if(this.getTilePassage(x,y,l)===this.enumPassage.THROUGH){ continue; }
 			const fringe=this.getTileFringe(x,y,l);
 			const height=this.getTileHeight(x,y,l);
+			const conf = this.getTileConfig(x,y,l);
 			h+=fringe+height;
+			const isSlope=conf.shape===this.enumShapes.SLOPE;
+			if(isSlope){
+				h-=conf.slopeHeight||1;
+			}
 			const diff = z-h;
 			if( gte ? z>=h : z>h ){
-				if(diff<closest_diff){
+				if(diff<closest_diff||isSlope&&diff<=closest_diff){
 					layers=[l];
 					closest_diff=diff;
 				}else if(diff===closest_diff){
