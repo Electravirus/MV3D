@@ -254,7 +254,7 @@ class Character extends Sprite{
 
 	setFrame(x,y,w,h){
 		if(!this.isTextureReady()){ return; }
-		this.texture.crop(x,y,w,h);
+		this.texture.crop(x,y,w,h,this._tileId>0);
 	}
 
 	updateScale(){
@@ -262,6 +262,11 @@ class Character extends Sprite{
 		const configScale = this.getConfig('scale',new Vector2(1,1));
 		this.spriteWidth=this.patternWidth()/tileSize() * configScale.x;
 		this.spriteHeight=this.patternHeight()/tileSize() * configScale.y;
+		if(!(this._tileId>0)){
+			const size = this.texture.getSize(), baseSize = this.texture.getBaseSize();
+			this.spriteWidth*=baseSize.width/size.width;
+			this.spriteHeight*=baseSize.height/size.height;
+		}
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
 

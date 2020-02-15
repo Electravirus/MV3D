@@ -8,23 +8,8 @@ Object.assign(mv3d,{
 	textureCache:{},
 	materialCache:{},
 
-	createTextureSync(url){
-		if(Decrypter.hasEncryptedImages){
-			const bitmap = ImageManager.loadNormalBitmap(url);
-			//const texture = new BABYLON.Texture(null,mv3d.scene,!mv3d.MIPMAP,false,BABYLON.Texture.NEAREST_SAMPLINGMODE,null,null,bitmap._image);
-			const texture = new BABYLON.DynamicTexture('dt',bitmap.canvas,!mv3d.MIPMAP,BABYLON.Texture.NEAREST_SAMPLINGMODE);
-			bitmap.addLoadListener(()=>{
-				texture._texture.baseWidth=texture._texture.width=texture._canvas.width;
-				texture._texture.baseHeight=texture._texture.height=texture._canvas.height;
-				texture.update();
-			});
-			return texture;
-		}
-		return new Texture(url,this.scene,!mv3d.MIPMAP);
-	},
-
 	createTexture(url){return new Promise((resolve,reject)=>{
-		const bitmap = ImageManager.loadNormalBitmap(url);
+		const bitmap = ImageManager.loadNormalBitmap(encodeURI(url));
 		if(Decrypter.hasEncryptedImages){
 			bitmap.addLoadListener(()=>{
 				const texture = new BABYLON.DynamicTexture('dt',{width:bitmap.width,height:bitmap.height},!mv3d.MIPMAP,BABYLON.Texture.NEAREST_SAMPLINGMODE);
@@ -172,6 +157,7 @@ Object.assign(mv3d,{
 				texture.frameData.y+texture.animY*this.animYFrame*tileHeight(),
 				texture.frameData.w,
 				texture.frameData.h,
+				true
 			);
 		}
 	},
