@@ -149,7 +149,7 @@ Game_CharacterBase.prototype._mv3d_hasCollide=function(){
 
 if(window.Imported&&Imported.QMovement){
 	require('./movement_Q.js');
-}else if(Game_Map.prototype.canWalk){// detect Altimit movement
+}else if(PluginManager._scripts.includes("AltimitMovement")){
 	require('./movement_Altimit.js');
 }else{
 	require('./movement_vanilla.js');
