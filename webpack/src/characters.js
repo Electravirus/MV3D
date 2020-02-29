@@ -687,18 +687,18 @@ class Character extends Sprite{
 		let hasAlpha=this.hasConfig('alpha')||this.char.opacity()<255;
 		this.bush = Boolean(this.char.bushDepth());
 		if(this.bush && this.hasBush()){
-			hasAlpha=true;
 			if(!this.material.opacityTexture){
-				this.material.opacityTexture=mv3d.getBushAlphaTextureSync();
-				this.material.useAlphaFromDiffuseTexture=true;
+				const bushAlpha = mv3d.getBushAlphaTextureSync();
+				if(bushAlpha&&bushAlpha.isReady()){
+					this.material.opacityTexture=bushAlpha;
+				}
 			}
 		}else{
 			if(this.material.opacityTexture){
 				this.material.opacityTexture=null;
-				this.material.useAlphaFromDiffuseTexture=false;
 			}
 		}
-		if(hasAlpha){
+		if(hasAlpha||this.material.opacityTexture){
 			this.material.useAlphaFromDiffuseTexture=true;
 			this.material.alpha=this.getConfig('alpha',1)*this.char.opacity()/255;
 		}else{

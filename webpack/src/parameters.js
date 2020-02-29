@@ -2,7 +2,7 @@ import mv3d from './mv3d.js';
 import { hexNumber,booleanString,falseString, makeColor } from './util.js';
 import { Vector2, Texture, ORTHOGRAPHIC_CAMERA } from './mod_babylon.js';
 
-const parameters = PluginManager.parameters('mv3d-babylon');
+const parameters = PluginManager.parameters('mv3d');
 export default parameters;
 
 Object.assign(mv3d,{

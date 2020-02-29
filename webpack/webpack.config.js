@@ -31,7 +31,7 @@ module.exports = {
 	target:'node-webkit',
 	entry:'./src/index.js',
 	output:{
-		filename:'mv3d-babylon.js',
+		filename:'mv3d.js',
 		path: path.resolve('../project/js/plugins'),
 	},
 	watch: true,
@@ -76,7 +76,7 @@ module.exports = {
 			const mv3d_files = glob.sync("../project/img/MV3D/**/*",{nodir:true});
 			const zipfile = new yazl.ZipFile();
 			zipfile.addFile('../project/js/plugins/babylon.js','js/plugins/babylon.js');
-			zipfile.addFile('../project/js/plugins/mv3d-babylon.js','js/plugins/mv3d-babylon.js');
+			zipfile.addFile('../project/js/plugins/mv3d.js','js/plugins/mv3d.js');
 			for (const file of mv3d_files){
 				zipfile.addFile(file,path.relative('../',file));
 			}
