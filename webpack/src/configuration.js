@@ -197,6 +197,10 @@ Object.assign(mv3d,{
 		return conf;
 	},
 
+	readConfigurationBlocksAndTags(note,tag='mv3d'){
+		return this.readConfigurationBlocks(note,tag)+this.readConfigurationTags(note,tag);
+	},
+
 	readConfigurationBlocks(note,tag='mv3d'){
 		const findBlocks = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`,'gi');
 		let contents = '';
@@ -235,7 +239,9 @@ Object.assign(mv3d,{
 		}
 		return conf;
 	},
-
+	get configurationSides(){ return this.enumSides; },
+	get configurationShapes(){ return this.enumShapes; },
+	get configurationPassage(){ return this.enumPassage; },
 	enumSides:{
 		front:FRONTSIDE,
 		back:BACKSIDE,

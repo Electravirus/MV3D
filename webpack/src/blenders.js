@@ -107,6 +107,7 @@ Object.assign(mv3d,{
 			}
 			this.cameraNode.z += this.blendCameraHeight.currentValue();
 			this.cameraNode.translate(XAxis,-$gameScreen._shake/48,LOCALSPACE);
+			this.updateDirection();
 		}
 
 		//fog

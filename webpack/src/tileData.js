@@ -312,10 +312,11 @@ Object.assign(mv3d,{
 			}
 			const fringe = this.getTileFringe(rx,ry,l);
 			z+=fringe;
-			if(skip||!h&&!fringe){ continue; }
+			if(skip){ continue; }
 			if(h<0){
-				if(fringe+h>=0){ continue; }
-				collisions[collisions.length-1].z2+=fringe+h;
+				if(fringe+h<0){
+					collisions[collisions.length-1].z2+=fringe+h;
+				}
 			}else if(l===0){
 				collisions[0].z2=z+h;
 			}else{
@@ -323,6 +324,7 @@ Object.assign(mv3d,{
 			}
 			z+=h;
 			if(opts.layers){ collisions.layers[l]=collisions[collisions.length-1]; }
+			if(shape===this.enumShapes.SLOPE){ collisions[collisions.length-1].isSlope=true; }
 		}
 		return collisions;
 	},

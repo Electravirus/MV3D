@@ -537,3 +537,5 @@ player upgrade their airship's height and speed.
 - 冬空 橙
 - EblyssRaines
 - 中华国哥
+- nyrion
+- Vaan Auroris

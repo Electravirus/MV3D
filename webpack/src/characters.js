@@ -49,7 +49,7 @@ Object.assign(mv3d,{
 		]);
 
 		Sprite.Meshes.SHADOW=Sprite.Meshes.FLAT.clone('shadow mesh');
-		const shadowTexture = new Texture(`${mv3d.MV3D_FOLDER}/shadow.png`);
+		const shadowTexture = new Texture(`${mv3d.MV3D_FOLDER}/${mv3d.TEXTURE_SHADOW}.png`);
 		const shadowMaterial = new StandardMaterial('shadow material', mv3d.scene);
 		shadowMaterial.diffuseTexture=shadowTexture;
 		shadowMaterial.opacityTexture=shadowTexture;
@@ -60,6 +60,8 @@ Object.assign(mv3d,{
 			mv3d.scene.removeMesh(Sprite.Meshes[key]);
 		}
 	},
+
+	ACTOR_SETTINGS: [],
 });
 
 
@@ -205,14 +207,16 @@ class Character extends Sprite{
 		this._characterName = this._character.characterName();
 		this._characterIndex = this._character.characterIndex();
 		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
+		this.isEmpty=false;
 		if(this._tileId>0){
 			this.setTileMaterial(this._tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
 		}else{
+			this.isEmpty=true;
 			this.setEnabled(false);
 			this.spriteWidth=1;
-			this.spriteHeight=0;
+			this.spriteHeight=1;
 		}
 	}
 	updateCharacterFrame(){
@@ -233,7 +237,7 @@ class Character extends Sprite{
 		if(dirfix){
 			return this.char.direction()/2-1;
 		}
-		let dir = mv3d.transformDirectionYaw(this.char.direction());
+		let dir = mv3d.transformFacing(this.char.mv3d_direction());
 		return dir/2-1;
 	}
 
@@ -266,11 +270,30 @@ class Character extends Sprite{
 		}
 	}
 
+	getActorConfigObject(){
+		const id = $gameParty._actors[ this.isFollower ? this.char._memberIndex : 0 ];
+		if(!(id in mv3d.ACTOR_SETTINGS)){
+			const data = $dataActors[id];
+			mv3d.ACTOR_SETTINGS[id]=mv3d.readConfigurationFunctions(
+				mv3d.readConfigurationBlocksAndTags(data.note),
+				mv3d.eventConfigurationFunctions
+			);
+		}
+		return mv3d.ACTOR_SETTINGS[id];
+	}
+
 	getConfig(key,dfault=undefined){
-		if(this.settings_event_page && key in this.settings_event_page){
-			return this.settings_event_page[key];
-		}else if(this.settings_event && key in this.settings_event){
-			return this.settings_event[key];
+		if(this.isEvent){
+			if(this.settings_event_page && key in this.settings_event_page){
+				return this.settings_event_page[key];
+			}else if(this.settings_event && key in this.settings_event){
+				return this.settings_event[key];
+			}
+		}else if(this.isPlayer||this.isFollower){
+			const ACTOR_SETTINGS = this.getActorConfigObject();
+			if(key in ACTOR_SETTINGS){
+				return ACTOR_SETTINGS[key];
+			}
 		}
 		const EVENT_SETTINGS = this.getDefaultConfigObject();
 		if(key in EVENT_SETTINGS){
@@ -279,8 +302,10 @@ class Character extends Sprite{
 		return dfault;
 	}
 	hasConfig(key){
-		return this.settings_event_page && key in this.settings_event_page
-		|| this.settings_event && key in this.settings_event
+		return this.isEvent &&
+			(this.settings_event_page && key in this.settings_event_page
+			|| this.settings_event && key in this.settings_event)
+		|| (this.isPlayer||this.isFollower) && key in this.getActorConfigObject()
 		|| key in this.getDefaultConfigObject();
 	}
 
@@ -567,7 +592,7 @@ class Character extends Sprite{
 			this.visible=this.visible&&this.char.isVisible();
 		}
 		this.disabled=!this.visible;
-		if(this.char.isTransparent() || !this._characterName&&!this._tileId){
+		if(this.char.isTransparent() || !this._characterName&&!this._tileId || !this.char.mv3d_inRenderDist()){
 			this.visible=false;
 		}
 		if(!this._isEnabled){
@@ -709,6 +734,10 @@ class Character extends Sprite{
 
 	updateElevation(){
 		if(!this.needsPositionUpdate) { return; }
+
+		//don't update when moving on tile corners
+		if(this.char.isMoving() && !((this.x-0.5)%1)&&!((this.y-0.5)%1)){ return; }
+
 		this.falling=false;
 
 		if(this.isPlayer){
@@ -730,6 +759,7 @@ class Character extends Sprite{
 		}
 		
 		const platform = this.getPlatform(this.char._realX,this.char._realY);
+		this.platform = platform;
 		this.platformHeight = platform.z2;
 		this.platformChar = platform.char;
 		this.targetElevation = this.platformHeight+this.blendElevation.currentValue();
@@ -774,9 +804,19 @@ class Character extends Sprite{
 		return;
 	}
 
-	getPlatform(x=this.char._realX,y=this.char._realY){
-		this.platform = mv3d.getPlatformForCharacter(this,x,y);
-		return this.platform;
+	getPlatform(x=this.char._realX,y=this.char._realY,opts={}){
+		return mv3d.getPlatformForCharacter(this,x,y,opts);
+	}
+
+	getPlatformFloat(x=this.char._realX,y=this.char._realY,opts={}){
+		if(!opts.platform){ opts.platform = this.getPlatform(x,y,opts); }
+		const platform = opts.platform;
+		let z = platform.z2;
+		if(this.hasFloat&&!platform.char){
+			const cHeight = this.getCHeight();
+			z += mv3d.getFloatHeight(Math.round(x),Math.round(y),this.z+Math.max(cHeight,mv3d.STAIR_THRESH),mv3d.STAIR_THRESH>=cHeight);
+		}
+		return z;
 	}
 
 	updateShadow(){
@@ -871,6 +911,8 @@ class Character extends Sprite{
 				const trigger = this.getConfig('trigger');
 				if(trigger){
 					return this.z-trigger.down;
+				}else if(mv3d.TRIGGER_INFINITE || this.isEmpty){
+					return -Infinity;
 				}else{
 					return this.getCollider().z1;
 				}
@@ -879,6 +921,8 @@ class Character extends Sprite{
 				const trigger = this.getConfig('trigger');
 				if(trigger){
 					return this.z-trigger.up;
+				}else if(mv3d.TRIGGER_INFINITE || this.isEmpty){
+					return Infinity;
 				}else{
 					return this.getCollider().z2;
 				}
@@ -900,6 +944,8 @@ class Character extends Sprite{
 		const trigger = this.getConfig('trigger');
 		if(trigger){
 			return {z1:z-trigger.down, z2:z+trigger.up};
+		}else if(mv3d.TRIGGER_INFINITE || this.isEmpty){
+			return {z1:-Infinity, z2: Infinity};
 		}else{
 			return this.getCollisionHeight();
 		}

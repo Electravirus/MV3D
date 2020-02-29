@@ -46,14 +46,14 @@ Object.assign(mv3d,{
 
 	getErrorTexture(){
 		if(this.errorTexture){ return this.errorTexture; }
-		this.errorTexture = new Texture(`${mv3d.MV3D_FOLDER}/errorTexture.png`,this.scene);
+		this.errorTexture = new Texture(`${mv3d.MV3D_FOLDER}/${mv3d.TEXTURE_ERROR}.png`,this.scene);
 		this.errorTexture.isError=true;
 		return this.errorTexture;
 	},
 
 	getBushAlphaTexture(){
 		if(this.bushAlphaTexture){ return this.bushAlphaTexture; }
-		this.bushAlphaTexture = new Texture(`${mv3d.MV3D_FOLDER}/bushAlpha.png`,this.scene);
+		this.bushAlphaTexture = new Texture(`${mv3d.MV3D_FOLDER}/${mv3d.TEXTURE_BUSHALPHA}.png`,this.scene);
 		this.bushAlphaTexture.getAlphaFromRGB=true;
 		return this.bushAlphaTexture;
 	},

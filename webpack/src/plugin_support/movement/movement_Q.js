@@ -1,4 +1,4 @@
-import { override, unround } from "../../util";
+import { override, unround, minmax, radtodeg, degtorad } from "../../util";
 import mv3d from "../../mv3d";
 import { Feature } from "../../features";
 
@@ -32,7 +32,7 @@ override(Game_Map.prototype,'setupMapColliders',o=>function(){
 		const px = x * this.tileWidth(), py = y * this.tileHeight();
 		const flags = this.tilesetFlags();
 		const tiles = mv3d.getTileData(x, y);
-		const zColliders = mv3d.getCollisionHeights(x,y,{layers:true});
+		const zColliders = mv3d.getCollisionHeights(x,y,{layers:true,slopeMin:true});
 		const tileCollider_list = _tileColliders[[x,y]]=[];
 		for (let i=0; i<zColliders.length; ++i) {
 			tileCollider_list[i]=mv3d_makeTileCollider(x,y,zColliders[i],'mv3d');
@@ -51,6 +51,8 @@ override(Game_Map.prototype,'setupMapColliders',o=>function(){
 				if(!mv3d.canPassRamp(6,rampData)){ dcol|=0b0100; }
 				if(!mv3d.canPassRamp(8,rampData)){ dcol|=0b1000; }
 				dcol+=1536;
+				const slopeZ2 = mv3d.getStackHeight(x,y,l);
+				const slopeZ1 = slopeZ2-(conf.slopeHeight||1);
 				//const data = Array.from(QMovement.tileBoxes[flag]);
 				let data = QMovement.tileBoxes[dcol];
 				const key = [x,y,l,'slope'].toString();
@@ -59,6 +61,7 @@ override(Game_Map.prototype,'setupMapColliders',o=>function(){
 					if(data[0].constructor!==Array){ data=[data]; }
 					for(const box of data){
 						const c = new Box_Collider(box[0]||0,box[1]||0,box[2],box[3]);
+						c.slopeZ1=slopeZ1; c.slopeZ2=slopeZ2;
 						c.moveTo(px,py);
 						c.mv3d_collider=infiniteHeightCollider;
 						_tileColliders[key].push(c);
@@ -134,51 +137,26 @@ function zCollidersOverlap(c1,c2){
 	}
 	return false;
 }
-/*
+
 override(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collider, only, debug){
 	// Q colliders
 	let isBreak=false;
-	const cx = Math.round(collider.x/QMovement.tileSize);
-	const cy = Math.round(collider.y/QMovement.tileSize);
 	const near = o.call(this,collider,c=>{
 		if(zCollidersOverlap(collider,c)===false){ return false; }
 		if(collider.mv3d_collider){
+			const cx = Math.round(c.x/QMovement.tileSize);
+			const cy = Math.round(c.y/QMovement.tileSize);
 			if(collider.mv3d_collider.char){
 				// if we're standing on a character, ignore Q colliders.
+				//const platform = collider.mv3d_collider.char.getPlatform();
 				const platform = collider.mv3d_collider.char.getPlatform(cx,cy);
 				if(platform.char){ return false; }
 			}
 			if(c.mv3d_collider){
 				// ignore Q colliders not on current layer
-				const cx2 = Math.round(c.x/QMovement.tileSize);
-				const cy2 = Math.round(c.y/QMovement.tileSize);
-				const tileLayers = mv3d.getTileLayers(cx2,cy2,collider.mv3d_collider.z1+mv3d.STAIR_THRESH);
+				const tileLayers = mv3d.getTileLayers(cx,cy,collider.mv3d_collider.z1+mv3d.STAIR_THRESH);
 				if(!tileLayers.includes(c.mv3d_collider.l)){ return false; }
 			}
-		}
-		if(only){
-			const value = only(c);
-			if(value==='break'){isBreak=true;}
-			return value;
-		}
-		return true;
-	},debug);
-	if(isBreak){ return near; }
-});
-*/
-override(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collider, only, debug){
-	let isBreak=false;
-	const near = o.call(this,collider,c=>{
-		if(zCollidersOverlap(collider,c)===false){ return false; }
-		if(collider.mv3d_collider&&c.mv3d_collider){
-			const cx = Math.round(c.x/QMovement.tileSize);
-			const cy = Math.round(c.y/QMovement.tileSize);
-			if(collider.mv3d_collider.char){
-				const platform = collider.mv3d_collider.char.getPlatform(cx,cy);
-				if(platform.char){ return false; }
-			}
-			const tileLayers = mv3d.getTileLayers(cx,cy,collider.mv3d_collider.z1+mv3d.STAIR_THRESH);
-			if(!tileLayers.includes(c.mv3d_collider.l)){ return false; }
 		}
 		if(only){
 			const value = only(c);
@@ -192,98 +170,67 @@ override(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collide
 	const y1 = (collider.y+collider._offset.y-1)/QMovement.tileSize;
 	const x2 = (collider.x+collider._offset.x+collider.width+1)/QMovement.tileSize;
 	const y2 = (collider.y+collider._offset.y+collider.height+1)/QMovement.tileSize;
-	const cx = Math.round(collider.x/QMovement.tileSize);
-	const cy = Math.round(collider.y/QMovement.tileSize);
-	let isSlope = false, hadSlope = false, onChar = false;
-	if(collider.mv3d_collider){
-		isSlope = mv3d.isRampAt(cx,cy,collider.mv3d_collider.z1);
-		if(collider.mv3d_collider.char){
-			const char = collider.mv3d_collider.char;
-			const platform = char.getPlatform(cx,cy);
-			if(platform.char){ onChar=true; }
-		}
-	}
-
+	if (collider.mv3d_collider)
 	for (let tx = Math.floor(x1); tx < Math.ceil(x2); ++tx)
 	for (let ty = Math.floor(y1); ty < Math.ceil(y2); ++ty){
-
-		let char,d;
-		if(collider.mv3d_collider&&collider.mv3d_collider.char){
-			char = collider.mv3d_collider.char;
-			d = 10-Input._makeNumpadDirection(Math.sign(tx-Math.round(char.x)),Math.sign(ty-Math.round(char.y)));
+		const colliderList=_tileColliders[[tx,ty]];
+		const xCollider = _tileColliders[[tx,ty,'x']];
+		let slopeColliders = null;
+		let isWall=false;
+		const tileLayers = mv3d.getTileLayers(tx,ty,collider.mv3d_collider.z1+mv3d.STAIR_THRESH);
+		for(const l of tileLayers){
+			if( mv3d.getTilePassage(tx,ty,l)===mv3d.enumPassage.WALL ){ isWall=true; }
+			const slopeKey = [tx,ty,l,'slope'].toString();
+			if(slopeKey in _tileColliders){ slopeColliders = _tileColliders[slopeKey]; }
 		}
-		let hasSlope;
-
-		if(collider.mv3d_collider){
-
-			const tileLayers = mv3d.getTileLayers(tx,ty,collider.mv3d_collider.z1+mv3d.STAIR_THRESH);
-			if(!onChar)for(const l of tileLayers){
-				if([tx,ty,l,'slope'] in _tileColliders){ hasSlope=true; hadSlope=true; break; }
+		let shouldCollide=false;
+		if(xCollider&&collider.mv3d_collider.char){
+			const char = collider.mv3d_collider.char;
+			const opts = {slopeMin:true};
+			const platform = char.getPlatform(tx,ty,opts);
+			opts.platform=platform;
+			// collide if falling
+			if(char.falling&&!char.char._mv3d_isFlying()){ shouldCollide=true; }
+			// x passage
+			else if(isWall && !platform.char){
+				shouldCollide=true;
 			}
-
-			let shouldCollide=false;
-			let skip=false;
-			if(char){
-				const platform = char.getPlatform(tx,ty);
-				if(platform.char){
-					skip=true;
-					if(!mv3d.WALK_OFF_EDGE && !char.char._mv3d_isFlying()
-					&& unround(Math.abs(platform.z2-char.targetElevation))>mv3d.STAIR_THRESH){
-						shouldCollide=true;
-					}
-				}
-				if(char.falling&&!char.char._mv3d_isFlying()){ shouldCollide=true; }
-			}
-			const tileCollider = _tileColliders[[tx,ty,'x']];
-			if(tileCollider&&!skip&&!shouldCollide){
-				
-				for(const l of tileLayers){
-					const passage = mv3d.getTilePassage(tx,ty,l);
-					let slopeColliders;
-					// x passage
-					if(passage===mv3d.enumPassage.WALL){
-						shouldCollide=true; break;
-					// slope walls
-					}else if(!mv3d.WALK_OFF_EDGE && (slopeColliders = _tileColliders[[tx,ty,l,'slope']])){
-						for (const c of slopeColliders){
-							let value=true;
-							if(only){ value = only(c); }
-							if(value!==false){
-								near.push(c);
-								if(value==='break'){ return near; }
-								continue;
-							}
-						}
-					}else if(!onChar&&(isSlope||hadSlope)){
+			// collide slopes
+			else if (slopeColliders && !char.platform.char && !platform.char){
+				for (const c of slopeColliders){
+					if(mv3d.WALK_OFF_EDGE && char.z>c.slopeZ1){ continue; }
+					let value=true;
+					if(only){ value = only(c); }
+					if(value!==false){
+						near.push(c);
+						if(value==='break'){ return near; }
 						continue;
-					// don't walk off edges
-					}else if(char && !mv3d.WALK_OFF_EDGE && !char.char._mv3d_isFlying()){
-						const floatz = mv3d.getPlatformFloatForCharacter(char,tx,ty);
-						if(unround(Math.abs(floatz-char.targetElevation))>mv3d.STAIR_THRESH){
-							shouldCollide=true; break;
-						}
 					}
 				}
 			}
-			// add tileCollider if shouldCollide
-			if(tileCollider&&shouldCollide){
+			// collide ledges
+			else if(!mv3d.WALK_OFF_EDGE && !char.char._mv3d_isFlying() && (!char.platform||!char.platform.isSlope)
+			&& unround(Math.abs(char.getPlatformFloat(tx,ty,opts)-char.targetElevation))>mv3d.STAIR_THRESH){
+				shouldCollide=true;
+			}
+			
+			if(shouldCollide){
 				let value=true;
-				if(only){ value = only(tileCollider); }
+				if(only){ value = only(xCollider); }
 				if(value!==false){
-					near.push(tileCollider);
+					near.push(xCollider);
 					if(value==='break'){ return near; }
 					continue;
 				}
 			}
 		}
-		// collide with walls
-		const colliderList=_tileColliders[[tx,ty]];
-		if(colliderList&&!hasSlope&&!isSlope) for(let i = 0; i<colliderList.length; ++i){
+		// collide with wall
+		if(colliderList) for(let i = 0; i<colliderList.length; ++i){
 			if(zCollidersOverlap(collider,colliderList[i])){
 				if(only){
 					const value = only(colliderList[i]);
 					if(value!==false){ near.push(colliderList[i]); }
-					if(value==='break'){ break; }
+					if(value==='break'){ return near; }
 				}else{
 					near.push(colliderList[i]);
 				}
@@ -301,7 +248,7 @@ override(ColliderManager,'getCharactersNear',o=>function getCharactersNear(colli
 	});
 });
 
-mv3d.Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._realY){
+mv3d.Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._realY,opts={}){
 	const px = (x-0.5)*QMovement.tileSize;
 	const py = (y-0.5)*QMovement.tileSize;
 	const collider = this.char.collider();
@@ -311,12 +258,86 @@ mv3d.Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._re
 	const x2 = (px+collider._offset.x+collider.width-1)/QMovement.tileSize;
 	const y2 = (py+collider._offset.y+collider.height-1)/QMovement.tileSize;
 	
-	this.platform = [
-		mv3d.getPlatformForCharacter(this,x1,y1),
-		mv3d.getPlatformForCharacter(this,x2,y1),
-		mv3d.getPlatformForCharacter(this,x2,y2),
-		mv3d.getPlatformForCharacter(this,x1,y2),
+	const platform = [
+		//mv3d.getPlatformForCharacter(this,x,y),
+		mv3d.getPlatformForCharacter(this,x1,y1,opts),
+		mv3d.getPlatformForCharacter(this,x2,y1,opts),
+		mv3d.getPlatformForCharacter(this,x2,y2,opts),
+		mv3d.getPlatformForCharacter(this,x1,y2,opts),
 	].reduce((a,b)=>a.z2>=b.z2?a:b);
-	return this.platform;
+	return platform;
+};
+
+mv3d.getEventsAt=function(x,y){
+	let events;
+	try{
+		events = ColliderManager._characterGrid[Math.round(x)][Math.round(y)];
+	}catch(err){
+		return [];
+	}
+	if(!events){ return []; }
+	return events.filter(event=>{
+		if(!(event instanceof Game_Event) || event.isThrough()){ return false; }
+		return true;
+	});
+};
+
+mv3d.setDestination=function(x,y){
+	$gameTemp.setPixelDestination(Math.round(x*$gameMap.tileWidth()), Math.round(y*$gameMap.tileHeight()));
+};
+
+const _clearMouseMove = Game_Player.prototype.clearMouseMove;
+Game_Player.prototype.clearMouseMove=function(){
+	_clearMouseMove.apply(this,arguments);
+	if(this._pathfind){
+		this.clearPathfind();
+	}
 }
 
+
+const _QdiagMap={
+	1: [4, 2], 3: [6, 2],
+	7: [4, 8], 9: [6, 8]
+};
+const _QMoveVH=o=>function(dir) {
+	if($gameMap.offGrid()){
+		this.mv3d_QMoveRadian(dir);
+		return;
+	}
+	dir=mv3d.transformDirection(dir);
+	if(dir%2){
+		const diag = _QdiagMap[dir];
+		this.moveDiagonally(diag[0], diag[1]);
+	}else{
+		this.moveStraight(dir);
+	}
+	
+};
+override(Game_Player.prototype,'moveInputHorizontal',_QMoveVH);
+override(Game_Player.prototype,'moveInputVertical',_QMoveVH);
+override(Game_Player.prototype,'moveInputDiagonal',_QMoveVH);
+
+Game_Player.prototype.mv3d_QMoveRadian=function(dir,dist=this.moveTiles()){
+	this.moveRadian(-degtorad(mv3d.blendCameraYaw.currentValue()+90+mv3d.dirToYaw(dir)),dist);
+	//this.mv3d_setDirection(mv3d.transformDirection(dir));
+};
+
+override(Game_Character.prototype,'moveRadian',o=>function(radian, dist){
+	o.apply(this,arguments);
+	const d = mv3d.yawToDir(radtodeg(-radian)-90,true);
+	this.mv3d_setDirection(d);
+});
+
+override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
+	o.apply(this,arguments);
+	const d = 5 + (Math.floor((v-1)/3)-1)*3 + ((h-1)%3-1);
+	this.mv3d_setDirection(d);
+});
+
+if(Game_Follower.prototype.updateMoveList)
+override(Game_Follower.prototype,'updateMoveList',o=>function(){
+	const move = this._moveList[0];
+	o.apply(this,arguments);
+	if(!move){ return; }
+	this.mv3d_setDirection(move[3]);
+});

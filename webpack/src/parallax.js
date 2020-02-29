@@ -56,15 +56,21 @@ Game_Map.prototype.updateScroll = function() {
 	this._displayY = -mv3d.blendCameraPitch.currentValue()*816/3600;
 };
 */
-Game_CharacterBase.prototype.isNearTheScreen = function() {
+
+Game_CharacterBase.prototype.mv3d_inRenderDist=function(){
 	return Math.abs(this.x - mv3d.cameraStick.x)<=mv3d.RENDER_DIST
 	&& Math.abs(this.y - mv3d.cameraStick.y)<=mv3d.RENDER_DIST;
 };
 
+override(Game_CharacterBase.prototype,'isNearTheScreen',o=>function(){
+	if(!mv3d.EVENTS_UPDATE_NEAR){ return o.apply(this,arguments); }
+	return this.mv3d_inRenderDist();
+});
+
 
 override(Game_Screen.prototype,'shake',o=>function(){
 	return 0;
-});
+},()=> !mv3d.isDisabled() && SceneManager._scene instanceof Scene_Map );
 
 override(Game_CharacterBase.prototype,'screenX',o=>function screenX(){
 	const sprite = this.mv3d_sprite;

@@ -60,6 +60,7 @@ Game_Player.prototype.performTransfer = function() {
 	if(newmap){
 		if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
 		mv3d.clearMap();
+		delete $gamePlayer._mv3d_z;
 	}
 	_performTransfer.apply(this,arguments);
 	if(mv3d.is1stPerson()){

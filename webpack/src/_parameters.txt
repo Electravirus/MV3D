@@ -4,7 +4,7 @@
 @param 3dMenu
 @text 3D Options Menu
 @desc Whether 3D options will be in a submenu, regular options menu, or disabled.
-@type combo
+@type Select
 @option SUBMENU
 @option ENABLE
 @option DISABLE
@@ -93,6 +93,12 @@
 @type Boolean
 @default false
 
+@param eventsUpdateNear
+@text Update All Events in Render Distance
+@parent map
+@type Boolean
+@default true
+
 @param fog
 @text Fog
 
@@ -122,26 +128,76 @@
 @param input
 @text Input & Gameplay
 
+@param WASD
+@text WASD
+@parent input
+@type Boolean
+@default true
+
+@param dir8Movement
+@text Diagonal Movement
+@parent input
+@type Boolean
+@default true
+
+@param dir8Smart
+@test Smart Move Diagonal
+@desc When diagonal movement fails, try moving straight.
+@parent input
+@type Boolean
+@default true
+
 @param keyboardPitch
-@text Control pitch with keyboard
+@text Control Pitch
 @parent input
 @desc Allow player to change pitch with pageup & pagedown.
 @type Boolean
 @default true
 
 @param keyboardTurn
-@text Rotate camera with keyboard
+@text Allow Turning
 @parent input
-@desc In 3rd person mode, Q&E will rotate camera.
-@type Boolean
-@default true
+@desc Allows rotating camera with keyboard in 3rd person. Rotating is always allowed in 1st person.
+@type Select
+@option Turn with Q+E (requires WASD) @value QE
+@option Turn with A+D and left+right @value AD
+@option disabled
+@default QE
 
 @param keyboardStrafe
-@text Enable Strafing
+@text Allow Strafing
 @parent input
-@desc In 1st person mode, Q&E will strafe left and right.
-@type Boolean
-@default true
+@desc Allows strafing in 1st person mode.
+@type Select
+@option Strafe with Q+E (requires WASD) @value QE
+@option Strafe with A+D and left+right @value AD
+@option disabled
+@default QE
+
+@param turnIncrement
+@text Turn Increment
+@parent input
+@description How many degrees the camera will turn when you press the turn button. Other numbers may also be entered.
+@type Combo
+@option 90
+@option 45
+@option SMOOTH
+@default 90
+
+@param yawSpeed
+@text Turn Speed
+@parent input
+@description Speed when turning with keyboard (in degrees per second).
+@type Number
+@default 180
+
+@param pitchSpeed
+@text Pitch Speed
+@parent input
+@description Speed when changing pitch with keyboard (in degrees per second).
+@type Number
+@default 90
+
 
 @param stairThresh
 @text Stair Threshold
@@ -242,6 +298,13 @@ there may be z-fighting issues. (default: 0.0100)
 @param characters
 @text Characters
 
+@param heightTrigger
+@text Event Trigger Height
+@desc If true, events will need to be at the same elevation as the player to be triggered.
+@parent characters
+@type Boolean
+@default true
+
 @param eventCharDefaults
 @text Character Event Settings
 @parent characters
@@ -299,3 +362,38 @@ there may be z-fighting issues. (default: 0.0100)
 @min 0 @max 1
 @decimals 2
 @default 0.9
+
+@param assets
+@text Assets
+
+@param shadowTexture
+@text Shadow Texture
+@parent assets
+@type file
+@dir img/MV3D
+@require 1
+@default shadow
+
+@param alphaMask
+@text Bush Alpha Texture
+@parent assets
+@type file
+@dir img/MV3D
+@require 1
+@default bushAlpha
+
+@param errorTexture
+@text Error Texture
+@parent assets
+@type file
+@dir img/MV3D
+@require 1
+@default errorTexture
+
+@param requiredImages
+@text Other Required Images
+@desc Specify additional images here to prevent them from being excluded during deployment.
+@parent assets
+@type file[]
+@dir img/MV3D
+@require 1
