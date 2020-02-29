@@ -24,6 +24,7 @@ Object.assign(mv3d,{
 	LAYER_DIST:Number(parameters.layerDist),
 
 	ENABLED_DEFAULT: booleanString(parameters.enabledDefault),
+	EVENTS_UPDATE_NEAR: booleanString(parameters.eventsUpdateNear),
 
 	UNLOAD_CELLS: booleanString(parameters.unloadCells),
 	CELL_SIZE: Number(parameters.cellSize),
@@ -47,23 +48,10 @@ Object.assign(mv3d,{
 	LIGHT_DIST: 3,
 	LIGHT_ANGLE: 45,
 	FLASHLIGHT_EXTRA_ANGLE: 10,
-	/*
-	DYNAMIC_SHADOWS:booleanString(parameters.dynShadowEnabled),
-	DYNAMIC_SHADOW_DIST:Number(parameters.dynShadowDist),
-	DYNAMIC_SHADOW_RES:Number(parameters.dynShadowRes),
-	DYNAMIC_SHADOW_FALLOFF:Number(parameters.dynShadowFalloff),
-	*/
-	/*
-	CHARACTER_SHADOWS:booleanString(parameters.characterShadows),
-	SHADOW_SCALE:Number(parameters.shadowScale),
-	SHADOW_DIST:Number(parameters.shadowDist),
-	*/
-
-	KEYBOARD_PITCH: booleanString(parameters.keyboardPitch),
-	KEYBOARD_TURN: booleanString(parameters.keyboardTurn),
-	KEYBOARD_STRAFE: booleanString(parameters.keyboardStrafe),
 
 	REGION_DATA:{},
+	_REGION_DATA:{},
+	_REGION_DATA_MAP:{},
 	TTAG_DATA:{},
 
 	EVENT_HEIGHT:Number(parameters.eventHeight),
@@ -78,21 +66,41 @@ Object.assign(mv3d,{
 
 	ENABLE_3D_OPTIONS:{disable:0,enable:1,submenu:2}[parameters['3dMenu'].toLowerCase()],
 
+	TEXTURE_SHADOW: parameters.shadowTexture||'shadow',
+	TEXTURE_BUSHALPHA: parameters.alphaMask||'bushAlpha',
+	TEXTURE_ERROR: parameters.errorTexture||'errorTexture',
+
+	DIR8MOVE: booleanString(parameters.dir8Movement),
+	DIR8SMART: booleanString(parameters.dir8Smart),
+	TURN_INCREMENT: Number(parameters.turnIncrement),
+	WASD: booleanString(parameters.WASD),
+
+	KEYBOARD_PITCH: booleanString(parameters.keyboardPitch),
+	KEYBOARD_TURN: falseString(parameters.keyboardTurn),
+	KEYBOARD_STRAFE: falseString(parameters.keyboardStrafe),
+
+	YAW_SPEED: Number(parameters.yawSpeed)||90,
+	PITCH_SPEED: Number(parameters.pitchSpeed)||90,
+
+	TRIGGER_INFINITE: !booleanString(parameters.heightTrigger),
+
 	setupParameters(){
+		this.REGION_DATA=new Proxy(this._REGION_DATA,{
+			get:(target,key)=>{
+				if(key in this._REGION_DATA_MAP){ return this._REGION_DATA_MAP[key]; }
+				if(key in this._REGION_DATA){ return this._REGION_DATA[key]; }
+			},
+			set:(target,key,value)=>{
+				target[key]=value;
+			},
+			has:(target,key)=>{
+				return key in this._REGION_DATA_MAP || key in this._REGION_DATA;
+			},
+		});
 		for (let entry of JSON.parse(parameters.regions)){
 			entry=JSON.parse(entry);
 			const regionData = this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions)
-			this.REGION_DATA[entry.regionId]=regionData;
-			/*
-			if ('height' in regionData){
-				regionData.region_height = regionData.height;
-				delete regionData.height;
-			}
-			if ('depth' in regionData){
-				regionData.region_depth = regionData.depth;
-				delete regionData.depth;
-			}
-			*/
+			this._REGION_DATA[entry.regionId]=regionData;
 			
 		}
 		for (let entry of JSON.parse(parameters.ttags)){

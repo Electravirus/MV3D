@@ -2,40 +2,113 @@ import mv3d from './mv3d.js';
 import { override } from './util.js';
 import { Feature } from './features.js';
 
-new Feature('input',{
-	_is1stPerson:false,
-	update(){
+let _is1stPerson = false;
+
+Object.assign(mv3d,{
+	updateInput(){
 		const is1stPerson = mv3d.is1stPerson();
-		if(this._is1stPerson !== is1stPerson){
+		if(_is1stPerson !== is1stPerson){
 			Input.clear();
-			this._is1stPerson = is1stPerson;
+			_is1stPerson = is1stPerson;
 		}
-	}
+		mv3d.updateInputCamera();
+	},
+
+	updateInputCamera(){
+		if(this.isDisabled()||this.loadData('cameraLocked')){ return; }
+		const is1stPerson = this.is1stPerson();
+		if( this.loadData('allowRotation',mv3d.KEYBOARD_TURN) || is1stPerson ){
+			const leftKey=mv3d.getTurnKey('left'), rightKey=mv3d.getTurnKey('right');
+			if(mv3d.TURN_INCREMENT>1){
+				const yawSpeed = mv3d.TURN_INCREMENT / mv3d.YAW_SPEED;
+				if(Input.isTriggered(leftKey)){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d.TURN_INCREMENT,yawSpeed);
+				}else if(Input.isTriggered(rightKey)){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-mv3d.TURN_INCREMENT,yawSpeed);
+				}
+			}else{
+				const increment = mv3d.YAW_SPEED / 60;
+				if(Input.isPressed(leftKey)&&Input.isPressed(rightKey)){
+					// do nothing
+				}else if(Input.isPressed(leftKey)){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+increment,0.1);
+				}else if(Input.isPressed(rightKey)){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-increment,0.1);
+				}
+			}
+		}
+		if( this.loadData('allowPitch',mv3d.KEYBOARD_PITCH) ){
+			const increment = mv3d.PITCH_SPEED / 60;
+			if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
+				// do nothing
+			}else if(Input.isPressed('pageup')){
+				this.blendCameraPitch.setValue(Math.min(180,this.blendCameraPitch.targetValue()+increment),0.1);
+			}else if(Input.isPressed('pagedown')){
+				this.blendCameraPitch.setValue(Math.max(0,this.blendCameraPitch.targetValue()-increment),0.1);
+			}
+		}
+	},
+
+	getStrafeKey(keyname){
+		if(mv3d.is1stPerson()){
+			switch(mv3d.KEYBOARD_STRAFE){
+				case 'QE': return 'rot'+keyname;
+				case 'AD': return keyname;
+				default: return false;
+			}
+		}else{
+			switch(mv3d.KEYBOARD_TURN){
+				case 'QE': return keyname;
+				case 'AD': return 'rot'+keyname;
+				default: return keyname;
+			}
+		}
+	},
+
+	getTurnKey(keyname){
+		if(mv3d.is1stPerson()){
+			switch(mv3d.KEYBOARD_STRAFE){
+				case 'QE': return keyname;
+				case 'AD': return 'rot'+keyname;
+				default: return keyname;
+			}
+		}else{
+			switch(mv3d.KEYBOARD_TURN){
+				case 'QE': return 'rot'+keyname;
+				case 'AD': return keyname;
+				default: return 'rot'+keyname;
+			}
+		}
+	},
 });
 
-Object.assign(Input.keyMapper,{
-	81:'rotleft',  // Q
-	69:'rotright', // E
-	87:'up',       // W
-	65:'left',     // A
-	83:'down',     // S
-	68:'right',    // D
+override(Input,'_signX',o=>function _signX(){
+	if(!mv3d.KEYBOARD_STRAFE && mv3d.is1stPerson()){ return 0; }
+	const leftKey=mv3d.getStrafeKey('left'), rightKey=mv3d.getStrafeKey('right');
+
+	let x = 0;
+	if (this.isPressed(leftKey)) { --x; }
+	if (this.isPressed(rightKey)) { ++x; }
+	return x;
 });
 
 mv3d.setupInput=function(){
+	if(!mv3d.WASD){ return; }
+	Object.assign(Input.keyMapper,{
+		81:'rotleft',  // Q
+		69:'rotright', // E
+		87:'up',       // W
+		65:'left',     // A
+		83:'down',     // S
+		68:'right',    // D
+	});
 	const descriptors={
-		left:getInputDescriptor('left','left','rotleft'),
-		rotleft:getInputDescriptor('pageup','rotleft', mv3d.KEYBOARD_STRAFE?'left':undefined),
-		right:getInputDescriptor('right','right','rotright'),
-		rotright:getInputDescriptor('pagedown','rotright', mv3d.KEYBOARD_STRAFE?'right':undefined),
+		rotleft:getInputDescriptor('pageup','rotleft', 'rotleft'),
+		rotright:getInputDescriptor('pagedown','rotright', 'rotright'),
 	}
 	Object.defineProperties(Input.keyMapper,{
-		37:descriptors.left, // left arrow
-		39:descriptors.right,// right arrow
 		81:descriptors.rotleft, //Q
 		69:descriptors.rotright,//E
-		65:descriptors.left, //A
-		68:descriptors.right,//D
 	});
 }
 
@@ -57,26 +130,13 @@ function getInputDescriptor(menumode,p3mode,p1mode){
 const _getInputDirection = Game_Player.prototype.getInputDirection;
 Game_Player.prototype.getInputDirection = function() {
 	if (mv3d.isDisabled()){ return _getInputDirection.apply(this,arguments); }
-	let dir = Input.dir4;
-	return mv3d.transformDirectionYaw(dir,mv3d.blendCameraYaw.currentValue(),true);
+	return mv3d.getInputDirection();
 };
 
-const _player_updateMove = Game_Player.prototype.updateMove;
-Game_Player.prototype.updateMove = function() {
-	_player_updateMove.apply(this,arguments);
-	if (mv3d.isDisabled()){ return; }
-	if ( !this.isMoving() && mv3d.is1stPerson() ) {
-		mv3d.playerFaceYaw();
-	}
-};
-const _player_move_straight=Game_Player.prototype.moveStraight;
-Game_Player.prototype.moveStraight = function(d) {
-	_player_move_straight.apply(this,arguments);
-	if (mv3d.isDisabled()){ return; }
-	if(!this.isMovementSucceeded()&&mv3d.is1stPerson()){
-		mv3d.playerFaceYaw();
-	}
-};
+mv3d.getInputDirection=function(){
+	let dir = mv3d.DIR8MOVE ? Input.dir8 : Input.dir4;
+	return mv3d.transformDirection(dir,mv3d.blendCameraYaw.currentValue());
+}
 
 const raycastPredicate=mesh=>{
 	if(!mesh.isEnabled() || !mesh.isVisible || !mesh.isPickable){ return false; }
@@ -95,13 +155,7 @@ Scene_Map.prototype.processMapTouch = function() {
 				
 				const intersection = mv3d.scene.pick(TouchInput.x,TouchInput.y,raycastPredicate);
 				if(intersection.hit){
-					const point = {x:intersection.pickedPoint.x, y:-intersection.pickedPoint.z};
-					const mesh = intersection.pickedMesh;
-					if(mesh.character){
-						point.x=mesh.character.x;
-						point.y=mesh.character.y;
-					}
-					$gameTemp.setDestination(Math.round(point.x), Math.round(point.y));
+					mv3d.processMapTouch(intersection);
 				}
 
 			}
@@ -110,6 +164,20 @@ Scene_Map.prototype.processMapTouch = function() {
 			this._touchCount = 0;
 		}
 	}
+};
+
+mv3d.processMapTouch=function(intersection){
+	const point = {x:intersection.pickedPoint.x, y:-intersection.pickedPoint.z};
+	const mesh = intersection.pickedMesh;
+	if(mesh.character){
+		point.x=mesh.character.x;
+		point.y=mesh.character.y;
+	}
+	mv3d.setDestination(point.x,point.y);
+};
+
+mv3d.setDestination=function(x,y){
+	$gameTemp.setDestination(Math.round(x), Math.round(y));
 };
 
 const _player_findDirectionTo=Game_Player.prototype.findDirectionTo;
@@ -124,10 +192,7 @@ Game_Player.prototype.findDirectionTo=function(){
 	return dir;
 }
 
-override(Game_Player.prototype,'direction',o=>function isDirectionFixed(){
-	if(mv3d.is1stPerson() && this.isMoving() && !this.isDirectionFixed()){
-		return mv3d.yawToDir();
-	}else{
-		return o.apply(this,arguments);
-	}
-});
+
+
+
+

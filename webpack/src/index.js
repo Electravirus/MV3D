@@ -5,6 +5,7 @@ import './parameters.js';
 import './blenders.js';
 import './blendModes.js';
 import './input.js';
+import './input_directions.js';
 import './configuration.js';
 import './plugin_commands.js';
 import './tileData.js'

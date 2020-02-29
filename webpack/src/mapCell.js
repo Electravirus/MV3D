@@ -25,7 +25,7 @@ export class MapCell extends TransformNode{
 		this.y=loopPos.y-mv3d.CELL_SIZE/2;
 	}
 	async load(){
-		const shapes = mv3d.configurationShapes;
+		const shapes = mv3d.enumShapes;
 		this.builder = new CellMeshBuilder();
 		// load all tiles in mesh
 		const cellWidth = Math.min(mv3d.CELL_SIZE,$gameMap.width()-this.cx*mv3d.CELL_SIZE);
@@ -44,7 +44,7 @@ export class MapCell extends TransformNode{
 				const shape = tileConf.shape;
 				tileConf.realId = tileData[l];
 				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
-				//tileConf.isFringe = mv3d.isFringeTile(tileData[l]);
+				//tileConf.isFringe = mv3d.isStarTile(tileData[l]);
 				//tileConf.isTable = mv3d.isTableTile(tileData[l]);
 				let wallHeight = mv3d.getTileHeight(this.ox+x,this.oy+y,l)||tileConf.height||0;
 				let pitCull = false;
@@ -53,7 +53,7 @@ export class MapCell extends TransformNode{
 					lastZ=z;
 				}
 				//z+=tileConf.fringe;
-				//if(mv3d.isFringeTile(tileData[l])){ z+=tileConf.fringeHeight; }
+				//if(mv3d.isStarTile(tileData[l])){ z+=tileConf.fringeHeight; }
 				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
 					const hasWall=wallHeight||l===0;
 					const hasBottom=wallHeight>0&&z-wallHeight>cullHeight||tileConf.fringe>0;
@@ -135,7 +135,7 @@ export class MapCell extends TransformNode{
 		}
 	}
 	async loadWall(tileConf,x,y,z,l,wallHeight,np){
-		const isFringe = mv3d.isFringeTile(tileConf.realId)||tileConf.fringe>0;
+		const isFringe = mv3d.isStarTile(tileConf.realId)||tileConf.fringe>0;
 		// don't render walls on edge of map (unless it loops)
 		if( !mv3d.getMapConfig('edge',true) )
 		if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
@@ -147,7 +147,9 @@ export class MapCell extends TransformNode{
 		let tileId=tileConf.side_id,configRect,texture_side='side';
 		if(mv3d.isTileEmpty(tileId)){ return; }
 		
-		const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,!(tileConf.depth>0));
+		const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,{
+			ignorePits:!(tileConf.depth>0),
+		});
 		neededHeight = z-neighborHeight;
 		if(neededHeight>0&&(l>0||isFringe)){ neededHeight=Math.min(wallHeight,neededHeight); }
 
@@ -187,8 +189,8 @@ export class MapCell extends TransformNode{
 			//const npr=MapCell.neighborPositions[(+ni+1).mod(4)];
 			const npl=new Vector2(-np.y,np.x);
 			const npr=new Vector2(np.y,-np.x);
-			const leftHeight = mv3d.getStackHeight(this.ox+x+npl.x,this.oy+y+npl.y,l);
-			const rightHeight = mv3d.getStackHeight(this.ox+x+npr.x,this.oy+y+npr.y,l);
+			const leftHeight = mv3d.getCullingHeight(this.ox+x+npl.x,this.oy+y+npl.y,l,{dir:Input._makeNumpadDirection(npl.x,npl.y)});
+			const rightHeight = mv3d.getCullingHeight(this.ox+x+npr.x,this.oy+y+npr.y,l,{dir:Input._makeNumpadDirection(npr.x,npr.y)});
 			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
 			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
 			let partHeight=Math.abs(neededHeight/wallParts);
@@ -296,7 +298,7 @@ export class MapCell extends TransformNode{
 		}else{
 			rects = mv3d.getTileRects(tileId);
 		}
-		const rot = tileConf.shape===mv3d.configurationShapes.XCROSS ? Math.PI/4 : 0;
+		const rot = tileConf.shape===mv3d.enumShapes.XCROSS ? Math.PI/4 : 0;
 		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
 		for (let i=0; i<=1; ++i){
 			for (const rect of rects){

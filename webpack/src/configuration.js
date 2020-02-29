@@ -117,7 +117,27 @@ Object.assign(mv3d,{
 			this.readConfigurationBlocks($dataMap.note),
 			this.mapConfigurationFunctions,
 			mapconf,
-        );
+		);
+		this._REGION_DATA_MAP={};
+		const regionBlocks=this.readConfigurationBlocks($dataMap.note,'mv3d-regions');
+		if(regionBlocks){
+			const readLines = /^\s*(\d+)\s*:(.*)$/gm;
+			let match;
+			while(match = readLines.exec(regionBlocks)){
+				if(!(match[1] in this._REGION_DATA_MAP)){
+					if(match[1] in this._REGION_DATA){
+						this._REGION_DATA_MAP[match[1]]=JSON.parse(JSON.stringify(this._REGION_DATA[match[1]]));
+					}else{
+						this._REGION_DATA_MAP[match[1]]={};
+					}
+				}
+				this.readConfigurationFunctions(
+					match[2],
+					mv3d.tilesetConfigurationFunctions,
+					this._REGION_DATA_MAP[match[1]],
+				);
+			}
+		}
 	},
 	applyMapSettings(){
 		const mapconf = this.mapConfigurations;
@@ -126,6 +146,7 @@ Object.assign(mv3d,{
 			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
 			if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
 			if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
+			this.blendFogColor.update();
 		}
 		if('light' in mapconf){
 			this.blendAmbientColor.setValue(mapconf.light.color,0);
@@ -176,8 +197,12 @@ Object.assign(mv3d,{
 		return conf;
 	},
 
-	readConfigurationBlocks(note){
-		const findBlocks = /<MV3D>([\s\S]*?)<\/MV3D>/gi;
+	readConfigurationBlocksAndTags(note,tag='mv3d'){
+		return this.readConfigurationBlocks(note,tag)+this.readConfigurationTags(note,tag);
+	},
+
+	readConfigurationBlocks(note,tag='mv3d'){
+		const findBlocks = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`,'gi');
 		let contents = '';
 		let match;
 		while(match = findBlocks.exec(note)){
@@ -186,8 +211,8 @@ Object.assign(mv3d,{
 		return contents;
 	},
 
-	readConfigurationTags(note){
-		const findTags = /<MV3D:([\s\S]*?)>/gi;
+	readConfigurationTags(note,tag='mv3d'){
+		const findTags = new RegExp(`<${tag}:([\\s\\S]*?)>`,'gi');
 		let contents='';
 		let match;
 		while(match = findTags.exec(note)){
@@ -196,7 +221,7 @@ Object.assign(mv3d,{
 		return contents;
 	},
 
-	readConfigurationFunctions(line,functionset=mv3d.configurationFunctions,conf={}){
+	readConfigurationFunctions(line,functionset=mv3d.tilesetConfigurationFunctions,conf={}){
 		const readConfigurations = /(\w+)\((.*?)\)/g
 		let match;
 		while(match = readConfigurations.exec(line)){
@@ -214,13 +239,15 @@ Object.assign(mv3d,{
 		}
 		return conf;
 	},
-
-	configurationSides:{
+	get configurationSides(){ return this.enumSides; },
+	get configurationShapes(){ return this.enumShapes; },
+	get configurationPassage(){ return this.enumPassage; },
+	enumSides:{
 		front:FRONTSIDE,
 		back:BACKSIDE,
 		double:DOUBLESIDE,
 	},
-	configurationShapes:{
+	enumShapes:{
 		FLAT:1,
 		TREE:2,
 		SPRITE:3,
@@ -230,7 +257,7 @@ Object.assign(mv3d,{
 		XCROSS:6,
 		SLOPE:7,
 	},
-	configurationPassage:{
+	enumPassage:{
 		WALL:0,
 		FLOOR:1,
 		THROUGH:2,
@@ -243,7 +270,7 @@ Object.assign(mv3d,{
 		fringe(conf,n){ conf.fringe=Number(n); },
 		float(conf,n){ conf.float=Number(n); },
 		slope(conf,n=1,d=null){
-			conf.shape=mv3d.configurationShapes.SLOPE;
+			conf.shape=mv3d.enumShapes.SLOPE;
 			conf.slopeHeight=Number(n);
 			if(d){ conf.slopeDirection=({n:2, s:8, e:4, w:6})[d.toLowerCase()[0]]; }
 		},
@@ -258,7 +285,7 @@ Object.assign(mv3d,{
 			}
 		}),
 		shape(conf,name){
-			conf.shape=mv3d.configurationShapes[name.toUpperCase()];
+			conf.shape=mv3d.enumShapes[name.toUpperCase()];
 		},
 		alpha(conf,n){
 			conf.transparent=true;
@@ -268,11 +295,11 @@ Object.assign(mv3d,{
 		pass(conf,s=''){
 			s=falseString(s.toLowerCase());
 			if(!s || s[0]==='x'){
-				conf.pass=mv3d.configurationPassage.WALL;
+				conf.pass=mv3d.enumPassage.WALL;
 			}else if(s[0]==='o'){
-				conf.pass=mv3d.configurationPassage.FLOOR;
+				conf.pass=mv3d.enumPassage.FLOOR;
 			}else{
-				conf.pass=mv3d.configurationPassage.THROUGH;
+				conf.pass=mv3d.enumPassage.THROUGH;
 			}
 		},
 	},
@@ -291,7 +318,7 @@ Object.assign(mv3d,{
 			if(dist!=null){ conf.shadowDist=Number(dist); }
 		},
 		shape(conf,name){
-			conf.shape=mv3d.configurationShapes[name.toUpperCase()];
+			conf.shape=mv3d.enumShapes[name.toUpperCase()];
 		},
 		pos(conf,x,y){
 			conf.pos={x:x,y:y};

@@ -32,7 +32,7 @@ module.exports = {
 	entry:'./src/index.js',
 	output:{
 		filename:'mv3d-babylon.js',
-		path: path.resolve('../js/plugins'),
+		path: path.resolve('../project/js/plugins'),
 	},
 	watch: true,
 	watchOptions: {
@@ -65,7 +65,7 @@ module.exports = {
 		}),
 		{apply:compiler=>compiler.hooks.done.tap('myDonePlugin',stats=>{
 			if(stats.compilation.errors.length){
-				sound('../audio/se/Buzzer1.ogg');
+				sound('../project/audio/se/Buzzer1.ogg');
 				return;
 			}
 			fs.writeFile('../README.md',getReadme(),err=>{
@@ -73,10 +73,10 @@ module.exports = {
 				else{ console.log("Created README.md"); }
 			});
 
-			const mv3d_files = glob.sync("../img/MV3D/**/*",{nodir:true});
+			const mv3d_files = glob.sync("../project/img/MV3D/**/*",{nodir:true});
 			const zipfile = new yazl.ZipFile();
-			zipfile.addFile('../js/plugins/babylon.js','js/plugins/babylon.js');
-			zipfile.addFile('../js/plugins/mv3d-babylon.js','js/plugins/mv3d-babylon.js');
+			zipfile.addFile('../project/js/plugins/babylon.js','js/plugins/babylon.js');
+			zipfile.addFile('../project/js/plugins/mv3d-babylon.js','js/plugins/mv3d-babylon.js');
 			for (const file of mv3d_files){
 				zipfile.addFile(file,path.relative('../',file));
 			}
@@ -84,7 +84,7 @@ module.exports = {
 				console.log(`Created plugin.zip`);
 			});
 			zipfile.end();
-			sound('../audio/se/Computer.ogg');
+			sound('../project/audio/se/Computer.ogg');
 		})},
 	],
 

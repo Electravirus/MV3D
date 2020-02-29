@@ -81,27 +81,7 @@ const mv3d = {
 		this.updateBlenders();
 
 		// input
-		if(!this.isDisabled()&&!this.loadData('cameraLocked')){
-			if( this.loadData('allowRotation',mv3d.KEYBOARD_TURN) || this.is1stPerson() ){
-				if(Input.isTriggered('rotleft')){
-					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+90,0.5);
-				}else if(Input.isTriggered('rotright')){
-					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-90,0.5);
-				}
-				if(this.is1stPerson()&&(Input.isTriggered('rotleft')||Input.isTriggered('rotright'))){
-					this.playerFaceYaw();
-				}
-			}
-			if( this.loadData('allowPitch',mv3d.KEYBOARD_PITCH) ){
-				if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
-					// do nothing
-				}else if(Input.isPressed('pageup')){
-					this.blendCameraPitch.setValue(Math.min(180,this.blendCameraPitch.targetValue()+1.5),0.1);
-				}else if(Input.isPressed('pagedown')){
-					this.blendCameraPitch.setValue(Math.max(0,this.blendCameraPitch.targetValue()-1.5),0.1);
-				}
-			}
-		}
+		this.updateInput();
 
 		for (const key in this.cells){
 			this.cells[key].update();
@@ -178,39 +158,6 @@ const mv3d = {
 			y=(y-oy).mod(mapHeight)+oy;
 		}
 		return new Vector2(x,y);
-	},
-	
-	playerFaceYaw(){
-		let dir = this.yawToDir();
-		$gamePlayer.setDirection(dir);
-	},
-
-	yawToDir(yaw=mv3d.blendCameraYaw.targetValue()){
-		let dir = Math.floor((-yaw+45)/90).mod(4);
-		if(dir>1){ dir+=(dir+1)%2*2-1; }
-		dir=10-(dir*2+2);
-		return dir;
-	},
-
-	dirToYaw(dir){
-		let yaw = dir/2-1;
-		if(yaw>1){ yaw+=(yaw+1)%2*2-1; }
-		yaw=yaw*-90+180;
-		return yaw;
-	},
-	
-	transformDirectionYaw(dir,yaw=this.blendCameraYaw.currentValue(),reverse=false){
-		if(dir==0){ return 0; }
-		dir = dir/2-1;
-		if(dir>1){ dir+=(dir+1)%2*2-1; }
-		const c = Math.floor((yaw+45)/90);
-		if(reverse){
-			dir=(dir-c).mod(4);
-		}else{
-			dir=(dir+c).mod(4);
-		}
-		if(dir>1){ dir+=(dir+1)%2*2-1; }
-		return dir*2+2;
 	},
 
 	autoLightLimit(lightLimit){

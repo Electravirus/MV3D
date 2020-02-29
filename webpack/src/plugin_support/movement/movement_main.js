@@ -35,16 +35,26 @@ Object.assign(mv3d,{
 		}
 		return false;
 	},
-	getPlatformForCharacter(char,x,y){
+	getPlatformFloatForCharacter(char,x,y,opts={}){
+		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return 0;}char=char.mv3d_sprite;}
+		let z = mv3d.getPlatformForCharacter(char,x,y,opts).z2;
+		if(char.hasFloat){
+			const cHeight = char.getCHeight();
+			z += mv3d.getFloatHeight(x,y,char.z+Math.max(cHeight,mv3d.STAIR_THRESH),mv3d.STAIR_THRESH>=cHeight);
+		}
+		return z;
+	},
+	getPlatformForCharacter(char,x,y,opts={}){
 		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
 		const cHeight = char.getCHeight();
 		const useStairThresh = mv3d.STAIR_THRESH>=cHeight;
-		return this.getPlatformAtLocation(x,y,char.z+Math.max(cHeight,mv3d.STAIR_THRESH),{char:char,gte:useStairThresh});
+		Object.assign(opts,{char:char,gte:useStairThresh});
+		return this.getPlatformAtLocation(x,y,char.z+Math.max(cHeight,mv3d.STAIR_THRESH),opts);
 	},
 	getPlatformAtLocation(x,y,z,opts={}){
 		const char = opts.char;
-		const cs = this.getCollisionHeights(x,y);
-		cs.push(...$gameMap.eventsXyNt(Math.round(x),Math.round(y))
+		const cs = this.getCollisionHeights(x,y,opts);
+		cs.push(...mv3d.getEventsAt(x,y)
 			.filter(event=>{
 				if(!(event.mv3d_sprite&&event._mv3d_isPlatform()&&event._mv3d_hasCollide()&&event.mv3d_sprite.visible)){ return false; }
 				if(char){
@@ -67,6 +77,10 @@ Object.assign(mv3d,{
 		return closest;
 	},
 
+	getEventsAt(x,y){
+		return $gameMap.eventsXyNt(Math.round(x),Math.round(y));
+	},
+
 	isRampAt(x,y,z){
 		const tileData = this.getTileData(x,y);
 		let height = 0;
@@ -74,7 +88,7 @@ Object.assign(mv3d,{
 			height += this.getTileFringe(x,y,l);
 			height += this.getTileHeight(x,y,l);
 			const conf = this.getTileConfig(tileData[l],x,y,l);
-			if(conf.shape!==this.configurationShapes.SLOPE){ continue; }
+			if(conf.shape!==this.enumShapes.SLOPE){ continue; }
 			const slopeHeight = conf.slopeHeight||1;
 			if(z>=height-slopeHeight && z<=height){
 				return { id:tileData[l], x,y,l,conf, z1:height-slopeHeight, z2:height };
@@ -83,7 +97,17 @@ Object.assign(mv3d,{
 		return false;
 	},
 
+	getRampData(x,y,l,conf=null){
+		const tileId = mv3d.getTileId(x,y,l);
+		if(!conf){ conf = this.getTileConfig(tileId,x,y,l); }
+		if(conf.shape!==this.enumShapes.SLOPE){ return false; }
+		const height = mv3d.getStackHeight(x,y,l);
+		const slopeHeight = conf.slopeHeight||1;
+		return { id:tileId, x,y,l,conf, z1:height-slopeHeight, z2:height };
+	},
+
 	canPassRamp(d,slope){
+		if(d===5||d<=0||d>=10){ return true; }
 		const {dir:sd} = mv3d.getSlopeDirection(slope.x,slope.y,slope.l,true);
 		const x2 = $gameMap.roundXWithDirection(slope.x,d);
 		const y2 = $gameMap.roundYWithDirection(slope.y,d);
@@ -123,29 +147,13 @@ Game_CharacterBase.prototype._mv3d_hasCollide=function(){
 	return this._mv3d_isPlatform() || Boolean(sprite.getCHeight());
 };
 
-
-require('./movement_vanilla.js');
-
-const _airship_land_ok = Game_Map.prototype.isAirshipLandOk;
-Game_Map.prototype.isAirshipLandOk = function(x, y) {
-	if (mv3d.isDisabled()){ return _airship_land_ok.apply(this,arguments); }
-	if(mv3d.AIRSHIP_SETTINGS.bushLanding){
-		return this.checkPassage(x, y, 0x0f);
-	}else{
-		return _airship_land_ok.apply(this,arguments);
-	}
-
-};
-
-const _player_updateVehicleGetOn = Game_Player.prototype.updateVehicleGetOn;
-Game_Player.prototype.updateVehicleGetOn = function() {
-	if (mv3d.isDisabled()){ return _player_updateVehicleGetOn.apply(this,arguments); }
-	const vehicle = this.vehicle();
-	const speed = mv3d.loadData(`${vehicle._type}_speed`,vehicle._moveSpeed);
-	vehicle.setMoveSpeed(speed);
-	_player_updateVehicleGetOn.apply(this,arguments);
-	this.setThrough(false);
-};
+if(window.Imported&&Imported.QMovement){
+	require('./movement_Q.js');
+}else if(Game_Map.prototype.canWalk){// detect Altimit movement
+	require('./movement_Altimit.js');
+}else{
+	require('./movement_vanilla.js');
+}
 
 // jump
 const _charBase_jump = Game_CharacterBase.prototype.jump;
@@ -156,45 +164,6 @@ Game_CharacterBase.prototype.jump = function(xPlus, yPlus) {
 	_charBase_jump.apply(this,arguments);
 };
 
-
-// get on off vehicle
-
-const _getOnVehicle = Game_Player.prototype.getOnVehicle;
-Game_Player.prototype.getOnVehicle = function(){
-	if(mv3d.isDisabled()){ return _getOnVehicle.apply(this,arguments); }
-	var d = this.direction();
-	var x1 = this.x;
-    var y1 = this.y;
-    var x2 = $gameMap.roundXWithDirection(x1,d);
-	var y2 = $gameMap.roundYWithDirection(y1,d);
-	
-	if($gameMap.airship().pos(x1,y1) && mv3d.charCollision(this,$gameMap.airship(),false,false,false,true)){
-		this._vehicleType = 'airship';
-	}else if($gameMap.ship().pos(x2,y2) && mv3d.charCollision(this,$gameMap.ship())) {
-		this._vehicleType = 'ship';
-	}else if($gameMap.boat().pos(x2,y2) && mv3d.charCollision(this,$gameMap.boat())) {
-		this._vehicleType = 'boat';
-	}
-	if (this.isInVehicle()) {
-		this._vehicleGettingOn = true;
-		if (!this.isInAirship()) {
-			this.forceMoveForward();
-		}
-		this.gatherFollowers();
-	}
-	return this._vehicleGettingOn;
-};
-
-
-override(Game_Vehicle.prototype,'isLandOk',o=>function(x,y,d){
-	$gameTemp._mv3d_collision_char = $gamePlayer.mv3d_sprite;
-	let landOk = o.apply(this,arguments);
-	delete $gameTemp._mv3d_collision_char;
-	if (this.isAirship()) { return landOk; }
-	var x2 = $gameMap.roundXWithDirection(x, d);
-	var y2 = $gameMap.roundYWithDirection(y, d);
-	const platform = mv3d.getPlatformForCharacter($gamePlayer,x2,y2);
-	if(platform.char){ landOk=true; }
-	const diff = Math.abs(platform.z2-this.z);
-	return landOk && diff<Math.max($gamePlayer.mv3d_sprite.getCHeight(),this.mv3d_sprite.getCHeight());
+override(Game_Map.prototype,'allTiles',o=>function(x,y){
+	return this.layeredTiles(x, y);
 });

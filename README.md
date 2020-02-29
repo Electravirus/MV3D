@@ -5,12 +5,15 @@
 A 3D rendering plugin for RPG Maker MV.
 
 
+Requires version 1.6 of RPG Maker MV.  
+
 If you are making a game with this plugin, please consider supporting my
 patreon.  
 https://www.patreon.com/cutievirus  
 You can also unlock some patron-only features by becoming a patron, such as
 Dynamic Shadows.  
-A list of patrons can be found at the bottom of this file.
+
+Discord: http://cutievirus.com/discord
 
 ## Getting started
 
@@ -534,3 +537,5 @@ player upgrade their airship's height and speed.
 - 冬空 橙
 - EblyssRaines
 - 中华国哥
+- nyrion
+- Vaan Auroris

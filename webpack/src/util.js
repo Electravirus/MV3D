@@ -68,10 +68,15 @@ export const sleep=(ms=0)=>new Promise(resolve=>setTimeout(resolve,ms));
 export const degtorad=deg=>deg*Math.PI/180;
 export const radtodeg=rad=>rad*180/Math.PI;
 
-export const sin=r=>unround(Math.sin(r));
-export const cos=r=>unround(Math.cos(r));
+export const pointtorad=(x,y)=>Math.atan2(-y,x)-Math.PI/2;
+export const pointtodeg=(x,y)=>radtodeg(pointtorad(x,y));
 
-export const unround=n=>Math.round(n*1000)/1000;
+export const sin=r=>unround(Math.sin(r),1e15);
+export const cos=r=>unround(Math.cos(r),1e15);
+
+export const unround=(n,m=1e15)=>Math.round(n*m)/m;
+
+export const minmax=(min,max,v)=>Math.min(max,Math.max(min,v));
 
 export const tileSize=()=>tileWidth();
 export const tileWidth=()=>Game_Map.prototype.tileWidth();
@@ -110,10 +115,14 @@ const _override_default_condition=()=>!mv3d.isDisabled();
 export const override=(obj,methodName,getNewMethod,condition=_override_default_condition)=>{
 	const oldMethod = obj[methodName];
 	const newMethod = getNewMethod(oldMethod);
-	return obj[methodName] = function(){
+	const overrider = function(){
 		if(!(typeof condition==='function'?condition():condition)){ return oldMethod.apply(this,arguments); }
 		return newMethod.apply(this,arguments);
 	};
+	Object.defineProperty(overrider,'name',{value:`${methodName}<mv3d_override>`});
+	Object.defineProperty(newMethod,'name',{value:`${methodName}<mv3d>`});
+	overrider.oldMethod=oldMethod; overrider.newMethod=newMethod;
+	return obj[methodName] = overrider;
 }
 
 
@@ -121,6 +130,7 @@ export const override=(obj,methodName,getNewMethod,condition=_override_default_c
 const util = {
 	makeColor,hexNumber,relativeNumber,booleanString,falseString,booleanNumber,
 	sleep,degtorad,radtodeg,sin,cos,unround,tileSize,tileWidth,tileHeight,
+	pointtorad,pointtodeg,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
 	overload, override
 };

@@ -107,6 +107,7 @@ Object.assign(mv3d,{
 			}
 			this.cameraNode.z += this.blendCameraHeight.currentValue();
 			this.cameraNode.translate(XAxis,-$gameScreen._shake/48,LOCALSPACE);
+			this.updateDirection();
 		}
 
 		//fog
@@ -123,6 +124,9 @@ Object.assign(mv3d,{
 				this.blendFogColor.g.currentValue()/255,
 				this.blendFogColor.b.currentValue()/255,
 			);
+			if(!$gameMap.parallaxName()){
+				mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),1);
+			}
 		}
 
 		//light
@@ -138,6 +142,16 @@ Object.assign(mv3d,{
 	},
 
 });
+
+const _changeParallax = Game_Map.prototype.changeParallax;
+Game_Map.prototype.changeParallax = function() {
+	_changeParallax.apply(this,arguments);
+	if($gameMap.parallaxName()){
+		mv3d.scene.clearColor.set(0,0,0,0);
+	}else{
+		mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),1);
+	}
+};
 
 
 export class Blender{

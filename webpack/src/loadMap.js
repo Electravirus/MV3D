@@ -37,6 +37,7 @@ Object.assign(mv3d,{
 	},
 	reloadMap(){
 		this.clearMapCells();
+		if(mv3d.mapReady) { this.updateMap(); }
 		this.callFeatures('reloadMap');
 	},
 

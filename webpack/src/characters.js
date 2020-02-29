@@ -75,7 +75,9 @@ Object.assign(mv3d,{
 			this.getShadowMesh.getting=false;
 		}
 		return shadowMesh.clone();
-	}
+	},
+
+	ACTOR_SETTINGS: [],
 });
 
 class Sprite extends TransformNode{
@@ -220,14 +222,16 @@ class Character extends Sprite{
 		this._characterName = this._character.characterName();
 		this._characterIndex = this._character.characterIndex();
 		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
+		this.isEmpty=false;
 		if(this._tileId>0){
 			this.setTileMaterial(this._tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
 		}else{
+			this.isEmpty=true;
 			this.setEnabled(false);
 			this.spriteWidth=1;
-			this.spriteHeight=0;
+			this.spriteHeight=1;
 		}
 	}
 	updateCharacterFrame(){
@@ -248,7 +252,7 @@ class Character extends Sprite{
 		if(dirfix){
 			return this.char.direction()/2-1;
 		}
-		let dir = mv3d.transformDirectionYaw(this.char.direction());
+		let dir = mv3d.transformFacing(this.char.mv3d_direction());
 		return dir/2-1;
 	}
 
@@ -286,11 +290,30 @@ class Character extends Sprite{
 		}
 	}
 
+	getActorConfigObject(){
+		const id = $gameParty._actors[ this.isFollower ? this.char._memberIndex : 0 ];
+		if(!(id in mv3d.ACTOR_SETTINGS)){
+			const data = $dataActors[id];
+			mv3d.ACTOR_SETTINGS[id]=mv3d.readConfigurationFunctions(
+				mv3d.readConfigurationBlocksAndTags(data.note),
+				mv3d.eventConfigurationFunctions
+			);
+		}
+		return mv3d.ACTOR_SETTINGS[id];
+	}
+
 	getConfig(key,dfault=undefined){
-		if(this.settings_event_page && key in this.settings_event_page){
-			return this.settings_event_page[key];
-		}else if(this.settings_event && key in this.settings_event){
-			return this.settings_event[key];
+		if(this.isEvent){
+			if(this.settings_event_page && key in this.settings_event_page){
+				return this.settings_event_page[key];
+			}else if(this.settings_event && key in this.settings_event){
+				return this.settings_event[key];
+			}
+		}else if(this.isPlayer||this.isFollower){
+			const ACTOR_SETTINGS = this.getActorConfigObject();
+			if(key in ACTOR_SETTINGS){
+				return ACTOR_SETTINGS[key];
+			}
 		}
 		const EVENT_SETTINGS = this.getDefaultConfigObject();
 		if(key in EVENT_SETTINGS){
@@ -299,8 +322,10 @@ class Character extends Sprite{
 		return dfault;
 	}
 	hasConfig(key){
-		return this.settings_event_page && key in this.settings_event_page
-		|| this.settings_event && key in this.settings_event
+		return this.isEvent &&
+			(this.settings_event_page && key in this.settings_event_page
+			|| this.settings_event && key in this.settings_event)
+		|| (this.isPlayer||this.isFollower) && key in this.getActorConfigObject()
 		|| key in this.getDefaultConfigObject();
 	}
 
@@ -541,7 +566,7 @@ class Character extends Sprite{
 	}
 
 	getShape(){
-		return this.getConfig('shape', mv3d.configurationShapes.SPRITE );
+		return this.getConfig('shape', mv3d.enumShapes.SPRITE );
 	}
 	updateShape(){
 		const newshape = this.getShape();
@@ -549,7 +574,7 @@ class Character extends Sprite{
 		this.shape=newshape;
 		//let backfaceCulling=true;
 		let geometry = Sprite.Meshes.SPRITE;
-		const shapes = mv3d.configurationShapes;
+		const shapes = mv3d.enumShapes;
 		switch(this.shape){
 		case shapes.FLAT:
 			geometry = Sprite.Meshes.FLAT;
@@ -587,7 +612,7 @@ class Character extends Sprite{
 			this.visible=this.visible&&this.char.isVisible();
 		}
 		this.disabled=!this.visible;
-		if(this.char.isTransparent() || !this._characterName&&!this._tileId){
+		if(this.char.isTransparent() || !this._characterName&&!this._tileId || !this.char.mv3d_inRenderDist()){
 			this.visible=false;
 		}
 		if(!this._isEnabled){
@@ -626,7 +651,7 @@ class Character extends Sprite{
 	}
 
 	updateNormal(){
-		const shapes = mv3d.configurationShapes;
+		const shapes = mv3d.enumShapes;
 		if(this.shape===shapes.SPRITE){
 			this.mesh.pitch = mv3d.blendCameraPitch.currentValue()-90;
 			this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
@@ -685,9 +710,9 @@ class Character extends Sprite{
 	updatePositionOffsets(){
 		this.spriteOrigin.position.set(0,0,0);
 		this.lightOrigin.position.set(0,0,0);
-		if(this.shape===mv3d.configurationShapes.FLAT){
+		if(this.shape===mv3d.enumShapes.FLAT){
 			this.spriteOrigin.z = mv3d.LAYER_DIST*4;
-		}else if(this.shape===mv3d.configurationShapes.SPRITE){
+		}else if(this.shape===mv3d.enumShapes.SPRITE){
 			this.spriteOrigin.z = mv3d.LAYER_DIST*4 * (1-Math.max(0,Math.min(90,mv3d.blendCameraPitch.currentValue()))/90);
 		}else{
 			this.spriteOrigin.z = 0;
@@ -696,7 +721,7 @@ class Character extends Sprite{
 
 		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y)).multiplyByFloats(mv3d.SPRITE_OFFSET,mv3d.SPRITE_OFFSET);
 		const lightOffset = this.getConfig('lightOffset',null);
-		if(this.shape===mv3d.configurationShapes.SPRITE){
+		if(this.shape===mv3d.enumShapes.SPRITE){
 			this.spriteOrigin.x=billboardOffset.x;
 			this.spriteOrigin.y=billboardOffset.y;
 			this.lightOrigin.x=billboardOffset.x;
@@ -729,6 +754,10 @@ class Character extends Sprite{
 
 	updateElevation(){
 		if(!this.needsPositionUpdate) { return; }
+
+		//don't update when moving on tile corners
+		if(this.char.isMoving() && !((this.x-0.5)%1)&&!((this.y-0.5)%1)){ return; }
+
 		this.falling=false;
 
 		if(this.isPlayer){
@@ -749,7 +778,8 @@ class Character extends Sprite{
 			return;
 		}
 		
-		const platform = mv3d.getPlatformForCharacter(this,this.char._realX,this.char._realY);
+		const platform = this.getPlatform(this.char._realX,this.char._realY);
+		this.platform = platform;
 		this.platformHeight = platform.z2;
 		this.platformChar = platform.char;
 		this.targetElevation = this.platformHeight+this.blendElevation.currentValue();
@@ -794,8 +824,23 @@ class Character extends Sprite{
 		return;
 	}
 
+	getPlatform(x=this.char._realX,y=this.char._realY,opts={}){
+		return mv3d.getPlatformForCharacter(this,x,y,opts);
+	}
+
+	getPlatformFloat(x=this.char._realX,y=this.char._realY,opts={}){
+		if(!opts.platform){ opts.platform = this.getPlatform(x,y,opts); }
+		const platform = opts.platform;
+		let z = platform.z2;
+		if(this.hasFloat&&!platform.char){
+			const cHeight = this.getCHeight();
+			z += mv3d.getFloatHeight(Math.round(x),Math.round(y),this.z+Math.max(cHeight,mv3d.STAIR_THRESH),mv3d.STAIR_THRESH>=cHeight);
+		}
+		return z;
+	}
+
 	updateShadow(){
-		let shadowVisible = Boolean(this.getConfig('shadow', this.shape!=mv3d.configurationShapes.FLAT ));
+		let shadowVisible = Boolean(this.getConfig('shadow', this.shape!=mv3d.enumShapes.FLAT ));
 
 		if(shadowVisible&&(this.isPlayer||this.isFollower)){
 			const myIndex = mv3d.characters.indexOf(this);
@@ -856,8 +901,54 @@ class Character extends Sprite{
 	}
 
 	getCHeight(){
-		let collide = this.getConfig('collide',this.shape===mv3d.configurationShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+		let collide = this.getConfig('collide',this.shape===mv3d.enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
 		return collide===true ? this.spriteHeight : Number(collide);
+	}
+
+	getCollider(){
+		if(this._collider){ return this._collider; }
+		const collider = {char:this};
+		this._collider=collider;
+		Object.defineProperties(collider,{
+			z1:{get:()=>this.z },
+			z2:{get:()=>{
+				let z = this.z;
+				if(this.hasConfig('height')){
+					const height = this.getConfig('height')
+					if(height<0){ z += height; }
+				}
+				return Math.max(this.z,this.z+this.getCHeight());
+			}}
+		});
+		return collider;
+	}
+	getTriggerCollider(){
+		if(this._triggerCollider){ return this._triggerCollider; }
+		const collider = {};
+		this._triggerCollider=collider;
+		Object.defineProperties(collider,{
+			z1:{get:()=>{
+				const trigger = this.getConfig('trigger');
+				if(trigger){
+					return this.z-trigger.down;
+				}else if(mv3d.TRIGGER_INFINITE || this.isEmpty){
+					return -Infinity;
+				}else{
+					return this.getCollider().z1;
+				}
+			}},
+			z2:{get:()=>{
+				const trigger = this.getConfig('trigger');
+				if(trigger){
+					return this.z-trigger.up;
+				}else if(mv3d.TRIGGER_INFINITE || this.isEmpty){
+					return Infinity;
+				}else{
+					return this.getCollider().z2;
+				}
+			}}
+		});
+		return collider;
 	}
 
 	getCollisionHeight(z=this.z){
@@ -873,6 +964,8 @@ class Character extends Sprite{
 		const trigger = this.getConfig('trigger');
 		if(trigger){
 			return {z1:z-trigger.down, z2:z+trigger.up};
+		}else if(mv3d.TRIGGER_INFINITE || this.isEmpty){
+			return {z1:-Infinity, z2: Infinity};
 		}else{
 			return this.getCollisionHeight();
 		}
@@ -896,7 +989,7 @@ Game_CharacterBase.prototype.isOnBush = function() {
 	if(mv3d.isDisabled()||!this.mv3d_sprite){ return _isOnBush.apply(this,arguments); }
 	const rx=Math.round(this._realX), ry=Math.round(this._realY);
 	const tileData=mv3d.getTileData(rx,ry);
-	const layers = mv3d.getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight());
+	const layers = mv3d.getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight(),false);
 	const flags = $gameMap.tilesetFlags();
 	for( const l of layers ){
 		if( (flags[tileData[l]] & 0x40) !== 0 ){ return true; }
