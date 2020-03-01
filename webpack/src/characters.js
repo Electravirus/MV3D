@@ -149,6 +149,9 @@ class Character extends Sprite{
 		this.charName='';
 		this.charIndex=0;
 
+		if(!this.char.mv3d_settings){ this.char.mv3d_settings={}; }
+		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
+
 		this.updateCharacter();
 		this.updateShape();
 
@@ -172,9 +175,6 @@ class Character extends Sprite{
 		this.needsPositionUpdate=true;
 		//this.elevation = 0;
 
-		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
-		//if(!this.char.mv3d_attr){ this.char.mv3d_attr={}; }
-
 		mv3d.getShadowMesh().then(shadow=>{
 			this.shadow = shadow;
 			this.shadow.parent = this;
@@ -195,6 +195,8 @@ class Character extends Sprite{
 
 		this.intensiveUpdate();
 	}
+
+	get settings(){ return this.char.mv3d_settings; }
 
 	isTextureReady(){
 		return Boolean(this.texture && this.texture.isReady());
@@ -305,6 +307,7 @@ class Character extends Sprite{
 	}
 
 	getConfig(key,dfault=undefined){
+		if(key in this.settings){ return this.settings[key]; }
 		if(this.isEvent){
 			if(this.settings_event_page && key in this.settings_event_page){
 				return this.settings_event_page[key];
@@ -324,7 +327,8 @@ class Character extends Sprite{
 		return dfault;
 	}
 	hasConfig(key){
-		return this.isEvent &&
+		return key in this.settings
+		||this.isEvent &&
 			(this.settings_event_page && key in this.settings_event_page
 			|| this.settings_event && key in this.settings_event)
 		|| (this.isPlayer||this.isFollower) && key in this.getActorConfigObject()
@@ -367,8 +371,6 @@ class Character extends Sprite{
 
 		this.pageConfigure();
 
-		this.updateEmissive();
-		this.updateLightOffsets();
 	}
 
 	initialConfigure(){
@@ -409,6 +411,11 @@ class Character extends Sprite{
 		if('height' in settings || this.isAbove!==(this.char._priorityType===2)){
 			this.configureHeight();
 		}
+
+		this.updateScale();
+		this.updateShape();
+		this.updateEmissive();
+		this.updateLightOffsets();
 	}
 
 	updateEmissive(){

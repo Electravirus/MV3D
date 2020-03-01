@@ -270,9 +270,11 @@ Parameter list: color,intensity,range,angle|yaw,pitch
 Examples: flashlight(#ffffff,2,6,30), flashlight(red,2,6,45|90)
 
 
-The height and offset of the lights can be set with lightHeight() and
-lightOffset().  
-Examples: lightHeight(0.5), lightOffset(0,1.01)
+The height and offset of the lights can be set with lampHeight(),
+flashlightHeight(), lampOffset(), and flashlightOffset().  
+The height and offset of both the lamp and flashlight can be moved
+together with lightHeight() and lightOffset().  
+Examples: lampHeight(0.5), flashlightHeight(0.25), lightOffset(0,1.01)
 
 
 
@@ -496,6 +498,13 @@ Turns 3D rendering on or off.
     mv3d ＠t elevation <n> <t>
 
 Sets the elevation of the target character.
+
+---
+
+    mv3d ＠t configure <functions>
+
+Configure the target with a list of configuration functions.
+Example: mv3d ＠p configure scale(2)
 
 ---
 

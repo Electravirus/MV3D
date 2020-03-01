@@ -135,7 +135,7 @@ mv3d.PluginCommand=class{
 			case 'dist'     :
 			case 'distance' : this._flashlightDistance (char,a[1],time); return;
 			case 'angle'    : this._flashlightAngle    (char,a[1],time); return;
-			case 'yaw'      : this._flashlightYaw      (char,a[1],time); return;
+			case 'yaw'      : this._flashlightYaw      (char,a[1]); return;
 			case 'pitch'    : this._flashlightPitch    (char,a[1],time); return;
 		}
 		time=this._TIME(a[4]);
@@ -149,11 +149,20 @@ mv3d.PluginCommand=class{
 	_flashlightDistance(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightDistance,n,time); }
 	_flashlightAngle(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightAngle,n,time); }
 	_flashlightPitch(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightPitch,n,time); }
-	_flashlightYaw(char,yaw,time){ char.flashlightTargetYaw=yaw; } // TODO: change to mv3d set flashlightYaw(yaw)
+	_flashlightYaw(char,yaw){ this.configure(`flashlightYaw(${yaw})`); }
 	async elevation(...a){
 		const char = await this.AWAIT_CHAR(this.CHAR);
 		let time=this._TIME(a[1]);
 		this._RELATIVE_BLEND(char.blendElevation,a[0],time);
+	}
+	async configure(...a){
+		const char = await this.AWAIT_CHAR(this.CHAR);
+		mv3d.readConfigurationFunctions(
+			a.join(' '),
+			mv3d.eventConfigurationFunctions,
+			char.settings,
+		);
+		char.pageConfigure(char.settings);
 	}
 	disable(fadeType){ mv3d.disable(fadeType); }
 	enable(fadeType){ mv3d.enable(fadeType); }
