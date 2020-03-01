@@ -94,6 +94,8 @@ Scene_Map.prototype.onMapLoaded=function(){
 	mv3d.updateBlenders(true);
 };
 
+// onMapLoaded > performTransfer > map setup
+// hook into map setup before Qmovement's setup.
 const _map_battleback_Setup = Game_Map.prototype.setupBattleback;
 Game_Map.prototype.setupBattleback=function(){
 	_map_battleback_Setup.apply(this,arguments);

@@ -239,17 +239,17 @@ class Character extends Sprite{
 		}
 	}
 	updateCharacterFrame(){
-		this.px=this.characterPatternX();
-		this.py=this.characterPatternY();
+		this._patternX=this.characterPatternX();
+		this._patternY=this.characterPatternY();
 		if(!this.isTextureReady()){ return; }
 		const pw = this.patternWidth();
 		const ph = this.patternHeight();
-		const sx = (this.characterBlockX() + this.px) * pw;
-		const sy = (this.characterBlockY() + this.py) * ph;
+		const sx = (this.characterBlockX() + this._patternX) * pw;
+		const sy = (this.characterBlockY() + this._patternY) * ph;
 		this.setFrame(sx,sy,pw,ph);
 	}
 	patternChanged(){
-		return this.px!==this.characterPatternX() || this.py!==this.characterPatternY();
+		return this._patternX!==this.characterPatternX() || this._patternY!==this.characterPatternY();
 	}
 	characterPatternY(){
 		const dirfix = this.getConfig('dirfix', this.isEvent && this.char.isObjectCharacter());

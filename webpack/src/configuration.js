@@ -89,7 +89,8 @@ Object.assign(mv3d,{
 	loadTilesetSettings(){
 		//tileset
 		this.tilesetConfigurations={};
-		const lines = this.readConfigurationBlocks($gameMap.tileset().note);
+		const lines = this.readConfigurationBlocks($gameMap.tileset().note)
+		+'\n'+this.readConfigurationBlocks($dataMap.note,'mv3d-tiles');
 		//const readLines = /^\s*([abcde]\d?\s*,\s*\d+\s*,\s*\d+)\s*:(.*)$/gmi;
 		const readLines = /^\s*([abcde]\d?)\s*,\s*(\d+(?:-\d+)?)\s*,\s*(\d+(?:-\d+)?)\s*:(.*)$/gmi;
 		let match;

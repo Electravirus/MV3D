@@ -46,7 +46,8 @@ In order for the plugin to recognize configurations, they need to be wrapped
 properly.  
 Tileset and map configurations need to be wrapped in a <mv3d> </mv3d> block,
 while event configurations need to be inside a <mv3d:  > tag.  
-Region and terrain tag configurations don't need to wrapped at all.
+Region and terrain tag configurations (defined in plugin parameters)
+don't need to wrapped at all.
 
 ### Using configuration functions
 
@@ -371,6 +372,20 @@ The disable function will turn off the 3D rendering for the map.
 Example: disable()
 
 
+
+### Regions and tiles
+
+You can define region and tileset configurations in the map note by using
+<mv3d-regions> and <mv3d-tiles> blocks.  
+Example:  
+
+    <mv3d-regions>
+        12:slope(1)
+    </mv3d-regions>
+    <mv3d-tiles>
+        A2,4,0:top(1,1)
+    </mv3d-tiles>
+
 ---
 
 
@@ -538,7 +553,6 @@ player upgrade their airship's height and speed.
 - zxc
 - Fyoha
 - 冬空 橙
-- EblyssRaines
 - 中华国哥
 - nyrion
 - Vaan Auroris
