@@ -42,9 +42,9 @@ Object.assign(mv3d,{
 			if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
 				// do nothing
 			}else if(Input.isPressed('pageup')){
-				this.blendCameraPitch.setValue(Math.min(180,this.blendCameraPitch.targetValue()+increment),0.1);
+				this.blendCameraPitch.setValue(Math.min(179,this.blendCameraPitch.targetValue()+increment),0.1);
 			}else if(Input.isPressed('pagedown')){
-				this.blendCameraPitch.setValue(Math.max(0,this.blendCameraPitch.targetValue()-increment),0.1);
+				this.blendCameraPitch.setValue(Math.max(1,this.blendCameraPitch.targetValue()-increment),0.1);
 			}
 		}
 	},

@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { TransformNode, MeshBuilder, FRONTSIDE, Texture, StandardMaterial, Color3, Mesh, WORLDSPACE, Vector2, SpotLight, Vector3, PointLight, LOCALSPACE, DOUBLESIDE, Plane } from "./mod_babylon.js";
-import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep } from './util.js';
+import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
 
 Object.assign(mv3d,{
@@ -190,7 +190,7 @@ class Character extends Sprite{
 			this.eventConfigure();
 		}else{
 			this.initialConfigure();
-			this.configureTexture();
+			this.updateEmissive();
 		}
 
 		this.intensiveUpdate();
@@ -215,7 +215,7 @@ class Character extends Sprite{
 		super.onTextureLoaded();
 		this.updateFrame();
 		this.updateScale();
-		this.configureTexture();
+		this.updateEmissive();
 	}
 
 	updateCharacter(){
@@ -367,7 +367,7 @@ class Character extends Sprite{
 
 		this.pageConfigure();
 
-		this.configureTexture();
+		this.updateEmissive();
 	}
 
 	initialConfigure(){
@@ -405,10 +405,20 @@ class Character extends Sprite{
 		}
 	}
 
-	configureTexture(){
+	updateEmissive(){
 		if(this.material){
 			const glow = this.getConfig('glow',0);
-			this.material.emissiveColor.set(glow,glow,glow);
+			if(this.lamp){
+				const lampColor=this.lamp.diffuse;
+				const intensity = minmax(0,1,this.lamp.intensity);
+				this.material.emissiveColor.set(
+					Math.max(glow,lampColor.r*intensity),
+					Math.max(glow,lampColor.g*intensity),
+					Math.max(glow,lampColor.b*intensity)
+				);
+			}else{
+				this.material.emissiveColor.set(glow,glow,glow);
+			}
 		}
 	}
 
@@ -519,6 +529,8 @@ class Character extends Sprite{
 		this.blendFlashlightColor = this.makeColorBlender('flashlightColor',config.color);
 		this.blendFlashlightIntensity = this.makeBlender('flashlightIntensity',config.intensity);
 		this.blendFlashlightDistance = this.makeBlender('flashlightDistance',config.distance);
+		const lightDist = this.blendFlashlightDistance.targetValue();
+		this.blendFlashlightDistance.setValue(0,0); this.blendFlashlightDistance.setValue(lightDist,0.25);
 		this.blendFlashlightAngle = this.makeBlender('flashlightAngle',config.angle);
 		this.flashlight = new SpotLight('flashlight',Vector3.Zero(),Vector3.Zero(),
 			degtorad(this.blendFlashlightAngle.targetValue()+mv3d.FLASHLIGHT_EXTRA_ANGLE),0,mv3d.scene);
@@ -554,6 +566,8 @@ class Character extends Sprite{
 		this.blendLampColor = this.makeColorBlender('lampColor',config.color);
 		this.blendLampIntensity = this.makeBlender('lampIntensity',config.intensity);
 		this.blendLampDistance = this.makeBlender('lampDistance',config.distance);
+		const lightDist = this.blendLampDistance.targetValue();
+		this.blendLampDistance.setValue(0,0); this.blendLampDistance.setValue(lightDist,0.25);
 		this.lamp = new PointLight('lamp',Vector3.Zero(),mv3d.scene);
 		this.lamp.renderPriority=1;
 		this.lamp.diffuse.set(...this.blendLampColor.targetComponents());
@@ -594,6 +608,7 @@ class Character extends Sprite{
 				this.lamp.diffuse.set(...this.blendLampColor.currentComponents());
 				this.lamp.intensity=this.blendLampIntensity.currentValue();
 				this.lamp.range=this.blendLampDistance.currentValue();
+				this.updateEmissive();
 			}
 		}
 	}

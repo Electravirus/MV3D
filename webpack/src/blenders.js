@@ -169,6 +169,7 @@ export class Blender{
 		let diff = target - this.value;
 		if(!diff){ return; }
 		this.saveValue(this.key,target);
+		if(!time){ this.value=target; }
 		if(this.cycle){
 			while ( Math.abs(diff)>this.cycle/2 ){
 				this.value += Math.sign(diff)*this.cycle;
