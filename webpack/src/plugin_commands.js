@@ -149,7 +149,7 @@ mv3d.PluginCommand=class{
 	_flashlightDistance(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightDistance,n,time); }
 	_flashlightAngle(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightAngle,n,time); }
 	_flashlightPitch(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightPitch,n,time); }
-	_flashlightYaw(char,yaw,time){ char.flashlightTargetYaw=yaw; }
+	_flashlightYaw(char,yaw,time){ char.flashlightTargetYaw=yaw; } // TODO: change to mv3d set flashlightYaw(yaw)
 	async elevation(...a){
 		const char = await this.AWAIT_CHAR(this.CHAR);
 		let time=this._TIME(a[1]);

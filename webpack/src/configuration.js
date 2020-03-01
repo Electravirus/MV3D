@@ -335,8 +335,12 @@ Object.assign(mv3d,{
 		}),
 		flashlightpitch(conf,deg='90'){ conf.flashlightPitch=Number(deg); },
 		flashlightyaw(conf,deg='+0'){ conf.flashlightYaw=deg; },
-		lightheight(conf,n=1){ conf.lightHeight = Number(n); },
-		lightoffset(conf,x=0,y=0){ conf.lightOffset = {x:+x,y:+y}; },
+		lightheight(conf,n=1){ this.lampheight(conf,n); this.flashlightheight(conf,n); },
+		lightoffset(conf,x=0,y=0){ this.lampoffset(conf,x,y); this.flashlightoffset(conf,x,y); },
+		lampheight(conf,n=1){ conf.lampHeight = Number(n); },
+		lampoffset(conf,x=0,y=0){ conf.lampOffset = {x:+x,y:+y}; },
+		flashlightheight(conf,n=1){ conf.flashlightHeight = Number(n); },
+		flashlightoffset(conf,x=0,y=0){ conf.flashlightOffset = {x:+x,y:+y}; },
 		alpha(conf,n){
 			conf.alpha=Number(n);
 		},

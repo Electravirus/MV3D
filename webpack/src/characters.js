@@ -368,16 +368,17 @@ class Character extends Sprite{
 		this.pageConfigure();
 
 		this.updateEmissive();
+		this.updateLightOffsets();
 	}
 
 	initialConfigure(){
 		this.configureHeight();
 	}
 
-	pageConfigure(){
-		if('pos' in this.settings_event_page){
+	pageConfigure(settings=this.settings_event_page){
+		if('pos' in settings){
 			const event=this.char.event();
-			const pos = this.settings_event_page.pos;
+			const pos = settings;
 			this.char.locate(
 				relativeNumber(event.x,pos.x),
 				relativeNumber(event.y,pos.y),
@@ -385,22 +386,27 @@ class Character extends Sprite{
 		}
 		this.setupEventLights();
 
-		if('lamp' in this.settings_event_page){
-			const lampConfig = this.getConfig('lamp');
-			this.blendLampColor.setValue(lampConfig.color,0.5);
-			this.blendLampIntensity.setValue(lampConfig.intensity,0.5);
-			this.blendLampDistance.setValue(lampConfig.distance,0.5);
+		if(this.lamp){
+			if('lamp' in settings){
+				const lampConfig = this.getConfig('lamp');
+				this.blendLampColor.setValue(lampConfig.color,0.5);
+				this.blendLampIntensity.setValue(lampConfig.intensity,0.5);
+				this.blendLampDistance.setValue(lampConfig.distance,0.5);
+			}
 		}
-		if('flashlight' in this.settings_event_page){
-			const flashlightConfig = this.getConfig('flashlight');
-			this.blendFlashlightColor.setValue(flashlightConfig.color,0.5);
-			this.blendFlashlightIntensity.setValue(flashlightConfig.intensity,0.5);
-			this.blendFlashlightDistance.setValue(flashlightConfig.distance,0.5);
-			this.blendFlashlightAngle.setValue(flashlightConfig.angle,0.5);
-			this.blendFlashlightPitch.setValue(this.getConfig('flashlightPitch',90),0.25);
-			this.flashlightTargetYaw=this.getConfig('flashlightYaw','+0');
+		if(this.flashlight){
+			if('flashlight' in settings){
+				const flashlightConfig = this.getConfig('flashlight');
+				this.blendFlashlightColor.setValue(flashlightConfig.color,0.5);
+				this.blendFlashlightIntensity.setValue(flashlightConfig.intensity,0.5);
+				this.blendFlashlightDistance.setValue(flashlightConfig.distance,0.5);
+				this.blendFlashlightAngle.setValue(flashlightConfig.angle,0.5);
+			}
+			if('flashlightPitch' in settings){
+				this.blendFlashlightPitch.setValue(this.getConfig('flashlightPitch',90),0.25);
+			}
 		}
-		if('height' in this.settings_event_page || this.isAbove!==(this.char._priorityType===2)){
+		if('height' in settings || this.isAbove!==(this.char._priorityType===2)){
 			this.configureHeight();
 		}
 	}
@@ -537,23 +543,23 @@ class Character extends Sprite{
 		this.flashlight.renderPriority=2;
 		this.updateFlashlightExp();
 		this.flashlight.range = this.blendFlashlightDistance.targetValue();
-		this.flashlight.intensity=this.blendFlashlightIntensity.targetValue();
+		this.flashlight.intensity=this.blendFlashlightIntensity.targetValue()*mv3d.FLASHLIGHT_INTENSITY_MULTIPLIER;
 		this.flashlight.diffuse.set(...this.blendFlashlightColor.targetComponents());
 		//this.flashlight.projectionTexture = mv3d.getFlashlightTexture();
 		this.flashlight.direction.y=-1;
 		this.flashlightOrigin=new TransformNode('flashlight origin',mv3d.scene);
 		this.flashlightOrigin.parent=this.lightOrigin;
 		this.flashlight.parent=this.flashlightOrigin;
-		this.blendFlashlightPitch = this.makeBlender('flashlightPitch',70);
+		this.blendFlashlightPitch = this.makeBlender('flashlightPitch',90);
 		this.blendFlashlightYaw = this.makeBlender('flashlightYaw', 0);
 		this.blendFlashlightYaw.cycle=360;
-		this.flashlightTargetYaw=this.getConfig('flashlightYaw','+0');
 		this.updateFlashlightDirection();
 		this.setupMesh();
+		this.updateLightOffsets();
 	}
 
 	updateFlashlightExp(){
-		this.flashlight.exponent = 64800*Math.pow(this.blendFlashlightAngle.targetValue(),-2);
+		this.flashlight.exponent = 64800*Math.pow(this.blendFlashlightAngle.currentValue(),-2);
 	}
 
 	setupLamp(){
@@ -573,22 +579,25 @@ class Character extends Sprite{
 		this.lamp.diffuse.set(...this.blendLampColor.targetComponents());
 		this.lamp.intensity=this.blendLampIntensity.targetValue();
 		this.lamp.range=this.blendLampDistance.targetValue();
-		this.lamp.parent=this.lightOrigin;
+		this.lampOrigin=new TransformNode('lamp origin',mv3d.scene);
+		this.lampOrigin.parent = this.lightOrigin;
+		this.lamp.parent=this.lampOrigin;
+		this.updateLightOffsets();
 	}
 
 	updateFlashlightDirection(){
 		this.flashlightOrigin.yaw=this.blendFlashlightYaw.currentValue();
 		this.flashlightOrigin.pitch=-this.blendFlashlightPitch.currentValue();
-		this.flashlightOrigin.position.set(0,0,0);
-		let flashlightOffset = Math.tan(degtorad(90-this.blendFlashlightAngle.currentValue()-Math.max(90,this.blendFlashlightPitch.currentValue())+90))*mv3d.LIGHT_HEIGHT;
-		flashlightOffset = Math.max(0,Math.min(1,flashlightOffset));
-		this.flashlight.range+=flashlightOffset;
-		this.flashlightOrigin.translate(YAxis,flashlightOffset,LOCALSPACE);
+		//this.flashlightOrigin.position.set(0,0,0);
+		//let flashlightOffset = Math.tan(degtorad(90-this.blendFlashlightAngle.currentValue()-Math.max(90,this.blendFlashlightPitch.currentValue())+90))*mv3d.LIGHT_HEIGHT;
+		//flashlightOffset = Math.max(0,Math.min(1,flashlightOffset));
+		//this.flashlight.range+=flashlightOffset;
+		//this.flashlightOrigin.translate(YAxis,flashlightOffset,LOCALSPACE);
 	}
 
 	updateLights(){
 		if(this.flashlight){
-			const flashlightYaw = 180+relativeNumber( mv3d.dirToYaw( this.char.mv3d_direction(),mv3d.DIR8MOVE ), this.flashlightTargetYaw);
+			const flashlightYaw = 180+relativeNumber( mv3d.dirToYaw( this.char.mv3d_direction(),mv3d.DIR8MOVE ), this.getConfig('flashlightYaw','+0'));
 			if(flashlightYaw !== this.blendFlashlightYaw.targetValue()){
 				this.blendFlashlightYaw.setValue(flashlightYaw,0.25);
 			}
@@ -596,7 +605,7 @@ class Character extends Sprite{
 			|this.blendFlashlightDistance.update()|this.blendFlashlightAngle.update()
 			|this.blendFlashlightYaw.update()|this.blendFlashlightPitch.update()){
 				this.flashlight.diffuse.set(...this.blendFlashlightColor.currentComponents());
-				this.flashlight.intensity=this.blendFlashlightIntensity.currentValue();
+				this.flashlight.intensity=this.blendFlashlightIntensity.currentValue()*mv3d.FLASHLIGHT_INTENSITY_MULTIPLIER;
 				this.flashlight.range=this.blendFlashlightDistance.currentValue();
 				this.flashlight.angle=degtorad(this.blendFlashlightAngle.currentValue()+mv3d.FLASHLIGHT_EXTRA_ANGLE);
 				this.updateFlashlightExp();
@@ -781,9 +790,31 @@ class Character extends Sprite{
 		}
 	}
 
+	updateLightOffsets(){
+		if(this.lamp){
+			const height = this.getConfig('lampHeight',mv3d.LAMP_HEIGHT);
+			const offset = this.getConfig('lampOffset',null);
+			this.lampOrigin.position.set(0,0,0);
+			this.lampOrigin.z=height;
+			if(offset){
+				this.lampOrigin.x=offset.x;
+				this.lampOrigin.y=offset.y;
+			}
+		}
+		if(this.flashlight){
+			const height = this.getConfig('flashlightHeight',mv3d.FLASHLIGHT_HEIGHT);
+			const offset = this.getConfig('flashlightOffset',null);
+			this.flashlightOrigin.position.set(0,0,0);
+			this.flashlightOrigin.z=height;
+			if(offset){
+				this.flashlightOrigin.x=offset.x;
+				this.flashlightOrigin.y=offset.y;
+			}
+		}
+	}
+
 	updatePositionOffsets(){
 		this.spriteOrigin.position.set(0,0,0);
-		this.lightOrigin.position.set(0,0,0);
 		if(this.shape===mv3d.enumShapes.FLAT){
 			this.spriteOrigin.z = mv3d.LAYER_DIST*4;
 		}else if(this.shape===mv3d.enumShapes.SPRITE){
@@ -791,22 +822,17 @@ class Character extends Sprite{
 		}else{
 			this.spriteOrigin.z = 0;
 		}
-		this.lightOrigin.z = this.getConfig('lightHeight',mv3d.LIGHT_HEIGHT);
 
 		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y)).multiplyByFloats(mv3d.SPRITE_OFFSET,mv3d.SPRITE_OFFSET);
-		const lightOffset = this.getConfig('lightOffset',null);
+		
 		if(this.shape===mv3d.enumShapes.SPRITE){
 			this.spriteOrigin.x=billboardOffset.x;
 			this.spriteOrigin.y=billboardOffset.y;
 			this.lightOrigin.x=billboardOffset.x;
 			this.lightOrigin.y=billboardOffset.y;
-		}else if(!lightOffset){
-			this.lightOrigin.x=billboardOffset.x/2;
-			this.lightOrigin.y=billboardOffset.y/2;
-		}
-		if(lightOffset){
-			this.lightOrigin.x+=lightOffset.x;
-			this.lightOrigin.y+=lightOffset.y;
+		}else{
+			this.lightOrigin.x=0;
+			this.lightOrigin.y=0;
 		}
 
 		this.spriteOrigin.x += this.getConfig('x',0);
