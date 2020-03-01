@@ -122,4 +122,24 @@ Object.assign(mv3d,{
 		await cell.load();
 	},
 
+	_cellsNeedingIntensiveUpdate:[],
+	intensiveUpdate(){
+		if(this._cellsNeedingIntensiveUpdate.length===0){ return; }
+		const now = performance.now();
+		let cell,index=null;
+		for (cell of this._cellsNeedingIntensiveUpdate){
+			if(now-cell._lastIntensiveUpdate<=500){ continue; }
+			index=this._cellsNeedingIntensiveUpdate.indexOf(cell);
+			break;
+		}
+		if(index==null||index<0){ return; }
+		this._cellsNeedingIntensiveUpdate.splice(index,1);
+		cell._lastIntensiveUpdate=now;
+		cell._needsIntensiveUpdate=false;
+		for(let character of cell.characters){
+			character.intensiveUpdate();
+		}
+		mv3d.scene.sortLightsByPriority();
+	}
+
 });

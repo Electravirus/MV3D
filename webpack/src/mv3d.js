@@ -78,6 +78,8 @@ const mv3d = {
 
 		this.updateCharacters();
 
+		this.intensiveUpdate();
+
 		this.updateBlenders();
 
 		// input

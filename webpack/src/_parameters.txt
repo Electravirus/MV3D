@@ -67,7 +67,7 @@
 @parent graphics
 @type Number
 @min 4
-@default auto
+@default 8
 
 @param map
 @text Map Settings

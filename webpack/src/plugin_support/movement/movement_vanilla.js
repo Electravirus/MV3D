@@ -144,7 +144,7 @@ override(Game_Player.prototype,'moveStraight',o=>function(d){
 	
 });
 
-override(Game_Character.prototype,'moveDiagonally',o=>function moveDiagonally(h,v){
+override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 	o.apply(this,arguments);
 
 	let adjustDirection=false;
@@ -168,7 +168,15 @@ override(Game_Character.prototype,'moveDiagonally',o=>function moveDiagonally(h,
 
 });
 
-override(Game_Player.prototype,'distancePerFrame',o=>function(){
+const _dontSnapRealXY=o=>function(){
+	const realX=this._realX, realY=this._realY;
+	o.apply(this,arguments);
+	this._realX=realX; this._realY=realY;
+};
+override(Game_Follower.prototype,'moveDiagonally',_dontSnapRealXY);
+override(Game_Follower.prototype,'moveStraight',_dontSnapRealXY);
+
+override(Game_CharacterBase.prototype,'distancePerFrame',o=>function(){
 	const dist = o.apply(this,arguments);
 	if(this._mv3d_direction%2){
 		return dist * Math.SQRT1_2;

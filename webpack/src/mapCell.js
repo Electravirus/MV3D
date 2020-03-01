@@ -16,6 +16,7 @@ export class MapCell extends TransformNode{
 		this.ox=cx*mv3d.CELL_SIZE; this.oy=cy*mv3d.CELL_SIZE;
 		this.x=this.ox; this.y=this.oy;
 		this.key=key;
+		this.characters=[];
 
 		//this.load();
 	}

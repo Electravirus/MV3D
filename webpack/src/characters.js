@@ -192,6 +192,8 @@ class Character extends Sprite{
 			this.initialConfigure();
 			this.configureTexture();
 		}
+
+		this.intensiveUpdate();
 	}
 
 	isTextureReady(){
@@ -434,6 +436,59 @@ class Character extends Sprite{
 		}
 	}
 
+	dirtyNearbyCells(){
+		if(!this.cell){ return; }
+		Character.dirtyNearbyCells(this.cell.cx,this.cell.cy);
+	}
+	static dirtyNearbyCells(cx,cy){
+		for(let x=cx-1; x<=cx+1; ++x)
+		for(let y=cy-1; y<=cy+1; ++y){
+			const cell = mv3d.cells[[x,y]];
+			if(!cell){ continue; }
+			if(!cell._needsIntensiveUpdate){
+				cell._needsIntensiveUpdate=true;
+				mv3d._cellsNeedingIntensiveUpdate.push(cell);
+			}
+		}
+	}
+
+	intensiveUpdate(){
+		this.setupLightInclusionLists();
+	}
+
+	setupLightInclusionLists(){
+		if(this.flashlight){
+			this.flashlight.includedOnlyMeshes.splice(0,Infinity);
+			this.flashlight.includedOnlyMeshes.push(...this.getMeshesInRangeOfLight(this.flashlight));
+		}
+		if(this.lamp){
+			this.lamp.includedOnlyMeshes.splice(0,Infinity);
+			this.lamp.includedOnlyMeshes.push(...this.getMeshesInRangeOfLight(this.lamp));
+		}
+	}
+
+	getMeshesInRangeOfLight(light){
+		if(!this.cell){ return []; }
+		const pos = Vector3.TransformCoordinates(light.position,light.getWorldMatrix());
+		const meshes=[];
+		for(let cx=this.cell.cx-1; cx<=this.cell.cx+1; ++cx)
+		for(let cy=this.cell.cy-1; cy<=this.cell.cy+1; ++cy){
+			const cell = mv3d.cells[[cx,cy]];
+			if(!cell||!cell.mesh){ continue; }
+			const sphere = cell.mesh.getBoundingInfo().boundingSphere;
+			const dist = Vector3.Distance(pos,sphere.centerWorld);
+			if(dist>=sphere.radiusWorld+light.range){ continue; }
+			meshes.push(cell.mesh);
+			for(let character of cell.characters){
+				const sphere = character.mesh.getBoundingInfo().boundingSphere;
+				const dist = Vector3.Distance(pos,sphere.centerWorld);
+				if(dist>=sphere.radiusWorld+light.range){ continue; }
+				meshes.push(character.mesh);
+			}
+		}
+		return meshes;
+	}
+
 	setupEventLights(){
 		const flashlightConfig = this.getConfig('flashlight');
 		const lampConfig = this.getConfig('lamp');
@@ -519,7 +574,7 @@ class Character extends Sprite{
 
 	updateLights(){
 		if(this.flashlight){
-			const flashlightYaw = 180+relativeNumber( mv3d.dirToYaw( this.char.direction() ), this.flashlightTargetYaw);
+			const flashlightYaw = 180+relativeNumber( mv3d.dirToYaw( this.char.mv3d_direction(),mv3d.DIR8MOVE ), this.flashlightTargetYaw);
 			if(flashlightYaw !== this.blendFlashlightYaw.targetValue()){
 				this.blendFlashlightYaw.setValue(flashlightYaw,0.25);
 			}
@@ -598,6 +653,7 @@ class Character extends Sprite{
 		//this.material.backfaceCulling=backfaceCulling;
 		this.setupMesh();
 		this.spriteOrigin.rotation.set(0,0,0);
+		this.dirtyNearbyCells();
 	}
 
 	update(){
@@ -621,6 +677,9 @@ class Character extends Sprite{
 			if(!this.visible){ this.setEnabled(false); }
 		}
 
+		if(!this._isEnabled){
+			return;
+		}
 
 		if(this.isImageChanged()){
 			this.updateCharacter();
@@ -750,6 +809,18 @@ class Character extends Sprite{
 		const loopPos = mv3d.loopCoords(this.char._realX,this.char._realY);
 		this.x = loopPos.x;
 		this.y = loopPos.y;
+
+		const cellX=Math.floor(Math.round(this.char._realX)/mv3d.CELL_SIZE);
+		const cellY=Math.floor(Math.round(this.char._realY)/mv3d.CELL_SIZE);
+		const cell = mv3d.cells[[cellX,cellY]];
+		if(this.cell&&this.cell!==cell){
+			this.removeFromCell();
+		}
+		if(cell&&!this.cell){
+			this.cell=cell;
+			cell.characters.push(this);
+		}
+		this.dirtyNearbyCells();
 	}
 
 	updateElevation(){
@@ -898,6 +969,15 @@ class Character extends Sprite{
 		const index = mv3d.characters.indexOf(this);
 		mv3d.characters.splice(index,1);
 		this.disposeBalloon();
+		this.removeFromCell();
+	}
+
+	removeFromCell(){
+		if(this.cell){
+			const index = this.cell.characters.indexOf(this);
+			if(index>=0){ this.cell.characters.splice(index,1); }
+			this.cell=null;
+		}
 	}
 
 	getCHeight(){

@@ -45,7 +45,7 @@ Object.assign(mv3d,{
 	},
 
 	transformFacing(dir,yaw=this.blendCameraYaw.currentValue()){
-		return mv3d.yawToDir(mv3d.dirToYaw(dir)-yaw);
+		return mv3d.yawToDir(mv3d.dirToYaw(dir)-yaw,false);
 	},
 
 	updateDirection(){
