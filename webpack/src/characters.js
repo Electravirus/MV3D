@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { TransformNode, MeshBuilder, FRONTSIDE, Texture, StandardMaterial, Color3, Mesh, WORLDSPACE, Vector2, SpotLight, Vector3, PointLight, LOCALSPACE, DOUBLESIDE, Plane } from "./mod_babylon.js";
-import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax } from './util.js';
+import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
 
 Object.assign(mv3d,{
@@ -215,11 +215,17 @@ class Character extends Sprite{
 
 	onTextureLoaded(){
 		super.onTextureLoaded();
-		this.updateFrame();
+		//this.updateFrame();
 		this.updateScale();
 		this.updateEmissive();
 	}
 
+	isImageChanged(){
+		return (this._tilesetId !== $gameMap.tilesetId() ||
+				this._tileId !== this._character.tileId() ||
+				this._characterName !== this._character.characterName() ||
+				this._characterIndex !== this._character.characterIndex());
+	}
 	updateCharacter(){
 		this._tilesetId = $gameMap.tilesetId();
 		this._tileId = this._character.tileId();
@@ -238,28 +244,6 @@ class Character extends Sprite{
 			this.spriteHeight=1;
 		}
 	}
-	updateCharacterFrame(){
-		this._patternX=this.characterPatternX();
-		this._patternY=this.characterPatternY();
-		if(!this.isTextureReady()){ return; }
-		const pw = this.patternWidth();
-		const ph = this.patternHeight();
-		const sx = (this.characterBlockX() + this._patternX) * pw;
-		const sy = (this.characterBlockY() + this._patternY) * ph;
-		this.setFrame(sx,sy,pw,ph);
-	}
-	patternChanged(){
-		return this._patternX!==this.characterPatternX() || this._patternY!==this.characterPatternY();
-	}
-	characterPatternY(){
-		const dirfix = this.getConfig('dirfix', this.isEvent && this.char.isObjectCharacter());
-		if(dirfix){
-			return this.char.direction()/2-1;
-		}
-		let dir = mv3d.transformFacing(this.char.mv3d_direction());
-		return dir/2-1;
-	}
-
 	setFrame(x,y,w,h){
 		if(!this.isTextureReady()){ return; }
 		this.texture.crop(x,y,w,h,this._tileId>0);
@@ -268,8 +252,8 @@ class Character extends Sprite{
 	updateScale(){
 		if(!this.isTextureReady()){ return; }
 		const configScale = this.getConfig('scale',new Vector2(1,1));
-		this.spriteWidth=this.patternWidth()/tileSize() * configScale.x;
-		this.spriteHeight=this.patternHeight()/tileSize() * configScale.y;
+		this.spriteWidth=this.char.mv_sprite.patternWidth()/tileSize() * configScale.x;
+		this.spriteHeight=this.char.mv_sprite.patternHeight()/tileSize() * configScale.y;
 		if(!(this._tileId>0)){
 			const size = this.texture.getSize(), baseSize = this.texture.getBaseSize();
 			this.spriteWidth*=baseSize.width/size.width;
@@ -699,7 +683,8 @@ class Character extends Sprite{
 			this.visible=this.visible&&this.char.isVisible();
 		}
 		this.disabled=!this.visible;
-		if(this.char.isTransparent() || !this._characterName&&!this._tileId || !this.char.mv3d_inRenderDist()){
+		if(this.char.isTransparent() || !this.char._characterName&&!this.char._tileId
+		|| !this.char.mv3d_inRenderDist()){
 			this.visible=false;
 		}
 		if(!this._isEnabled){
@@ -716,9 +701,9 @@ class Character extends Sprite{
 			this.updateCharacter();
 			this.needsPositionUpdate=true;
 		}
-		if(this.patternChanged()){
-			this.updateFrame();
-		}
+		//if(this.patternChanged()){
+		//	this.updateFrame();
+		//}
 
 		if(this.blendElevation.update()){
 			this.needsPositionUpdate=true;
@@ -1100,13 +1085,23 @@ class Character extends Sprite{
 	}
 }
 
-for (const methodName of [
-	'characterBlockX','characterBlockY','characterPatternX',
-	'isImageChanged','patternWidth','patternHeight',
-	'updateTileFrame','updateFrame',
-]){
-	Character.prototype[methodName]=Sprite_Character.prototype[methodName];
-}
+override(Sprite_Character.prototype,'characterPatternY',o=>function(){
+	const sprite = this._character.mv3d_sprite;
+	if(!sprite){ return o.apply(this,arguments); }
+	const dirfix = sprite.getConfig('dirfix', sprite.isEvent && sprite.char.isObjectCharacter());
+	if(dirfix){
+		return sprite.char.direction()/2-1;
+	}
+	let dir = mv3d.transformFacing(sprite.char.mv3d_direction());
+	return dir/2-1;
+});
+
+override(Sprite_Character.prototype,'setFrame',o=>function(x, y, width, height){
+	o.apply(this,arguments);
+	const sprite = this._character.mv3d_sprite;
+	if(!sprite){ return o.apply(this,arguments); }
+	sprite.setFrame(x,y,this.patternWidth(),this.patternHeight());
+});
 
 mv3d.Sprite = Sprite;
 mv3d.Character = Character;
