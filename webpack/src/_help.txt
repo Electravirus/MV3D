@@ -550,7 +550,6 @@ player upgrade their airship's height and speed.
 ## Patron Heroes:
 
 - A Memory of Eternity
-- zxc
 - Fyoha
 - 冬空 橙
 - 中华国哥

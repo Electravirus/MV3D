@@ -282,6 +282,7 @@ class Character extends Sprite{
 
 	getActorConfigObject(){
 		const id = $gameParty._actors[ this.isFollower ? this.char._memberIndex : 0 ];
+		if(!id){ return {}; }
 		if(!(id in mv3d.ACTOR_SETTINGS)){
 			const data = $dataActors[id];
 			mv3d.ACTOR_SETTINGS[id]=mv3d.readConfigurationFunctions(
