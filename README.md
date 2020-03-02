@@ -19,7 +19,7 @@ Discord: http://cutievirus.com/discord
 
 To use the plugin on a new or existing project, download [plugin.zip] and
 extract the files into your project directory.
-Then, load `babylon.js` and `mv3d-babylon.js` as plugins in that order.
+Then, load `babylon.js` and `mv3d.js` as plugins in that order.
 
 [plugin.zip]:
 https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
