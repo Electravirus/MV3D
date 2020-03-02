@@ -79,7 +79,8 @@ Object.assign(mv3d,{
 	TEXTURE_ERROR: parameters.errorTexture||'errorTexture',
 
 	DIR8MOVE: booleanString(parameters.dir8Movement),
-	DIR8SMART: booleanString(parameters.dir8Smart),
+	DIR8SMART: parameters.dir8Movement.includes("Smart"),
+	DIR8_2D: !parameters.dir8Movement.includes("3D"),
 	TURN_INCREMENT: Number(parameters.turnIncrement),
 	WASD: booleanString(parameters.WASD),
 

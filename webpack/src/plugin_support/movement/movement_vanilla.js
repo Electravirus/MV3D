@@ -132,6 +132,8 @@ Game_Map.prototype.checkPassage = function(x, y, bit) {
     return false;
 };
 
+const _dir8Condition=()=> !mv3d.isDisabled() || mv3d.DIR8MOVE&&mv3d.DIR8_2D;
+
 override(Game_Player.prototype,'moveStraight',o=>function(d){
 	if(!mv3d.DIR8MOVE){ return o.apply(this,arguments); }
 	switch(d){
@@ -142,7 +144,7 @@ override(Game_Player.prototype,'moveStraight',o=>function(d){
 		default: o.apply(this,arguments);
 	}
 	
-});
+},_dir8Condition);
 
 override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 	o.apply(this,arguments);
@@ -166,15 +168,15 @@ override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 		this.mv3d_setDirection(d);
 	}
 
-});
+},_dir8Condition);
 
 const _dontSnapRealXY=o=>function(){
 	const realX=this._realX, realY=this._realY;
 	o.apply(this,arguments);
 	this._realX=realX; this._realY=realY;
 };
-override(Game_Follower.prototype,'moveDiagonally',_dontSnapRealXY);
-override(Game_Follower.prototype,'moveStraight',_dontSnapRealXY);
+override(Game_Follower.prototype,'moveDiagonally',_dontSnapRealXY,_dir8Condition);
+override(Game_Follower.prototype,'moveStraight',_dontSnapRealXY,_dir8Condition);
 
 override(Game_CharacterBase.prototype,'distancePerFrame',o=>function(){
 	const dist = o.apply(this,arguments);
@@ -182,7 +184,7 @@ override(Game_CharacterBase.prototype,'distancePerFrame',o=>function(){
 		return dist * Math.SQRT1_2;
 	}
 	return dist;
-});
+},_dir8Condition);
 
 
 // VEHICLES

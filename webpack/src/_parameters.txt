@@ -136,16 +136,15 @@
 
 @param dir8Movement
 @text Diagonal Movement
+@desc In smart mode, when diagonal movement fails, try moving straight.
 @parent input
-@type Boolean
-@default true
-
-@param dir8Smart
-@test Smart Move Diagonal
-@desc When diagonal movement fails, try moving straight.
-@parent input
-@type Boolean
-@default true
+@type Combo
+@option Off
+@option Diagonal Basic
+@option Diagonal Basic 3D Only
+@option Diagonal Smart
+@option Diagonal Smart 3D Only
+@default Diagonal Smart
 
 @param keyboardPitch
 @text Control Pitch

@@ -129,7 +129,10 @@ function getInputDescriptor(menumode,p3mode,p1mode){
 
 const _getInputDirection = Game_Player.prototype.getInputDirection;
 Game_Player.prototype.getInputDirection = function() {
-	if (mv3d.isDisabled()){ return _getInputDirection.apply(this,arguments); }
+	if (mv3d.isDisabled()){ 
+		if(mv3d.DIR8MOVE && mv3d.DIR8_2D) { return Input.dir8; }
+		return _getInputDirection.apply(this,arguments);
+	 }
 	return mv3d.getInputDirection();
 };
 

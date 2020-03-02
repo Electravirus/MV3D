@@ -94,7 +94,9 @@ class Sprite extends TransformNode{
 		this.texture = newTexture;
 		this.bitmap = this.texture._texture;
 		this.texture.hasAlpha=true;
-		mv3d.waitTextureLoaded(this.texture).then(()=>this.onTextureLoaded());
+		this.char.mv_sprite.bitmap.addLoadListener(
+			()=>mv3d.waitTextureLoaded(this.texture).then(()=>this.onTextureLoaded())
+		);
 		this.material = new StandardMaterial('sprite material',mv3d.scene);
 		this.material.diffuseTexture=this.texture;
 		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
@@ -250,7 +252,7 @@ class Character extends Sprite{
 	}
 
 	updateScale(){
-		if(!this.isTextureReady()){ return; }
+		if(!this.isTextureReady()||!this.char.mv_sprite.bitmap.isReady()){ return; }
 		const configScale = this.getConfig('scale',new Vector2(1,1));
 		this.spriteWidth=this.char.mv_sprite.patternWidth()/tileSize() * configScale.x;
 		this.spriteHeight=this.char.mv_sprite.patternHeight()/tileSize() * configScale.y;
