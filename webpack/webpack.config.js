@@ -78,7 +78,7 @@ module.exports = {
 			zipfile.addFile('../project/js/plugins/babylon.js','js/plugins/babylon.js');
 			zipfile.addFile('../project/js/plugins/mv3d.js','js/plugins/mv3d.js');
 			for (const file of mv3d_files){
-				zipfile.addFile(file,path.relative('../',file));
+				zipfile.addFile(file,path.relative('../project',file));
 			}
 			zipfile.outputStream.pipe(fs.createWriteStream('../plugin.zip')).on('close',()=>{
 				console.log(`Created plugin.zip`);
