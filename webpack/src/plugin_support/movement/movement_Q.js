@@ -129,9 +129,12 @@ override(Game_CharacterBase.prototype,'collider',o=>function collider(){
 	return collider;
 });
 
-function zCollidersOverlap(c1,c2){
+function QzCollidersOverlap(c1,c2){
 	if(!c1.mv3d_collider||!c2.mv3d_collider){ return true; }
 	c1=c1.mv3d_collider; c2=c2.mv3d_collider;
+	return zCollidersOverlap(c1,c2);
+}
+function zCollidersOverlap(c1,c2){
 	if(c1.z1<c2.z2&&c1.z2>c2.z1 && c1.z1+mv3d.STAIR_THRESH<c2.z2&&c1.z2+mv3d.STAIR_THRESH>c2.z1){
 		return true;
 	}
@@ -142,7 +145,7 @@ override(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collide
 	// Q colliders
 	let isBreak=false;
 	const near = o.call(this,collider,c=>{
-		if(zCollidersOverlap(collider,c)===false){ return false; }
+		if(QzCollidersOverlap(collider,c)===false){ return false; }
 		if(collider.mv3d_collider){
 			const cx = Math.round(c.x/QMovement.tileSize);
 			const cy = Math.round(c.y/QMovement.tileSize);
@@ -226,7 +229,7 @@ override(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collide
 		}
 		// collide with wall
 		if(colliderList) for(let i = 0; i<colliderList.length; ++i){
-			if(zCollidersOverlap(collider,colliderList[i])){
+			if(QzCollidersOverlap(collider,colliderList[i])){
 				if(only){
 					const value = only(colliderList[i]);
 					if(value!==false){ near.push(colliderList[i]); }
@@ -240,12 +243,22 @@ override(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collide
 	return near;
 });
 
-override(ColliderManager,'getCharactersNear',o=>function getCharactersNear(collider, only){
+override(ColliderManager,'getCharactersNear',o=>function(collider, only){
 	return o.call(this,collider,char=>{
-		if(zCollidersOverlap(collider,char.collider())===false){ return false; }
+		const sprite = char.mv3d_sprite; if(!sprite){ return true; }
+		const c1 = collider.mv3d_collider;
+		const c2 = $gameTemp._mv3d_Q_getCharactersTriggerHeight?sprite.getTriggerHeight():sprite.getCollisionHeight();
+		if(!c1||!c2){ return true; }
+		if(zCollidersOverlap(c1,c2)===false){ return false; }
 		if(only){ return only(char); }
 		return true;
 	});
+});
+
+override(Game_Player.prototype,'startMapEvent',o=>function(x,y,triggers,normal){
+	$gameTemp._mv3d_Q_getCharactersTriggerHeight=true;
+	o.apply(this,arguments);
+	$gameTemp._mv3d_Q_getCharactersTriggerHeight=false;
 });
 
 mv3d.Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._realY,opts={}){
