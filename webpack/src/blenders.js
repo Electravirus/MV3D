@@ -35,12 +35,15 @@ Object.assign(mv3d,{
 		this.blendFogColor = new ColorBlender('fogColor',this.FOG_COLOR);
 		this.blendFogNear = new Blender('fogNear',this.FOG_NEAR);
 		this.blendFogFar = new Blender('fogFar',this.FOG_FAR);
+		this.blendCameraRoll = new Blender('cameraRoll',0);
+		this.blendCameraRoll.cycle=360;
 		this.blendCameraYaw = new Blender('cameraYaw',0);
 		this.blendCameraYaw.cycle=360;
 		this.blendCameraPitch = new Blender('cameraPitch',60);
 		this.blendCameraPitch.min=0;
 		this.blendCameraPitch.max=180;
 		this.blendCameraDist = new Blender('cameraDist',10);
+		this.blendCameraDist.min=0;
 		this.blendCameraHeight = new Blender('cameraHeight',0.7);
 		this.blendAmbientColor = new ColorBlender('ambientColor',this.AMBIENT_COLOR);
 		this.blendPanX = new Blender('panX',0);
@@ -84,10 +87,11 @@ Object.assign(mv3d,{
 		this.cameraStick.y+=this.blendPanY.currentValue();
 
 		// camera yaw, pitch, dist & height
-		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()
+		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()|this.blendCameraRoll.update()
 		|this.blendCameraDist.update()|this.blendCameraHeight.update()|$gameScreen._shake!==0){
 			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
 			this.cameraNode.yaw = this.blendCameraYaw.currentValue();
+			this.camera.roll = this.blendCameraRoll.currentValue();
 			this.cameraNode.position.set(0,0,0);
 			this.cameraNode.translate(ZAxis,-this.blendCameraDist.currentValue(),LOCALSPACE);
 			if(this.camera.mode===ORTHOGRAPHIC_CAMERA){

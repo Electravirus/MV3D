@@ -44,6 +44,7 @@ mv3d.PluginCommand=class{
 		if ( mv3d.is1stPerson() ) { mv3d.playerFaceYaw(); }
 	}
 	pitch(deg,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraPitch,deg,time); }
+	roll(deg,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraRoll,deg,time); }
 	dist(n,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraDist,n,time); }
 	height(n,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraHeight,n,time); }
 	_cameraTarget(target,time){
