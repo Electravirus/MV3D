@@ -253,6 +253,7 @@ class Character extends Sprite{
 
 	updateScale(){
 		if(!this.isTextureReady()||!this.char.mv_sprite.bitmap.isReady()){ return; }
+		this.char.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new Vector2(1,1));
 		this.spriteWidth=this.char.mv_sprite.patternWidth()/tileSize() * configScale.x;
 		this.spriteHeight=this.char.mv_sprite.patternHeight()/tileSize() * configScale.y;

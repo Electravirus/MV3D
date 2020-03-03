@@ -31,6 +31,7 @@ mv3d.PluginCommand=class{
 		switch(a[0].toLowerCase()){
 			case 'pitch'    : this.pitch (a[1],time); return;
 			case 'yaw'      : this.yaw   (a[1],time); return;
+			case 'roll'     : this.roll  (a[1],time); return;
 			case 'dist'     :
 			case 'distance' : this.dist  (a[1],time); return;
 			case 'height'   : this.height(a[1],time); return;
