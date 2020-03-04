@@ -813,7 +813,11 @@ class Character extends Sprite{
 	updateAlpha(){
 		let hasAlpha=this.hasConfig('alpha')||this.char.opacity()<255;
 		this.bush = Boolean(this.char.bushDepth());
-		if(this.bush && this.hasBush()){
+		const blendMode = mv3d.blendModes[this.char.blendMode()];
+		if(this.material.alphaMode!==blendMode){ this.material.alphaMode=blendMode; }
+		if(blendMode!==mv3d.blendModes.NORMAL){
+			hasAlpha=true;
+		}else if(this.bush && this.hasBush()){
 			if(!this.material.opacityTexture){
 				const bushAlpha = mv3d.getBushAlphaTextureSync();
 				if(bushAlpha&&bushAlpha.isReady()){
@@ -867,13 +871,13 @@ class Character extends Sprite{
 			this.spriteOrigin.z = 0;
 		}
 
-		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y)).multiplyByFloats(mv3d.SPRITE_OFFSET,mv3d.SPRITE_OFFSET);
-		
+		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y));
+		this.billboardOffset=billboardOffset;
 		if(this.shape===mv3d.enumShapes.SPRITE){
-			this.spriteOrigin.x=billboardOffset.x;
-			this.spriteOrigin.y=billboardOffset.y;
-			this.lightOrigin.x=billboardOffset.x;
-			this.lightOrigin.y=billboardOffset.y;
+			this.spriteOrigin.x=billboardOffset.x*mv3d.SPRITE_OFFSET;
+			this.spriteOrigin.y=billboardOffset.y*mv3d.SPRITE_OFFSET;
+			this.lightOrigin.x=this.spriteOrigin.x;
+			this.lightOrigin.y=this.spriteOrigin.y;
 		}else{
 			this.lightOrigin.x=0;
 			this.lightOrigin.y=0;
@@ -1038,6 +1042,11 @@ class Character extends Sprite{
 			this._balloon.update();
 		}else{
 			this.disposeBalloon();
+		}
+		for(const animation of this.char.mv_sprite._animationSprites){
+			if(animation.mv3d_animation){
+				animation.mv3d_animation.update();
+			}
 		}
 	}
 

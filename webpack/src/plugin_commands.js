@@ -26,6 +26,19 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 
 
 mv3d.PluginCommand=class{
+	async animation(id,...a){
+		const char = (await this.AWAIT_CHAR(this.CHAR)).char;
+		char.requestAnimation(id);
+		if(mv3d.isDisabled()){ return; }
+		let depth=true, scale=1;
+		for(let i=0;i<a.length;++i){
+			switch(a[i].toLowerCase()){
+				case 'depth': if(a[i+1]!=null)depth=booleanString(a[i+1]); break;
+				case 'scale': if(a[i+1]!=null)scale=Number(a[i+1]); break;
+			}
+		}
+		char._mv3d_animationSettings={depth,scale};
+	}
 	async camera(...a){
 		var time=this._TIME(a[2]);
 		switch(a[0].toLowerCase()){
