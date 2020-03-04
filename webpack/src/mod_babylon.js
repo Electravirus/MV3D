@@ -128,5 +128,7 @@ export function setupBabylonMods(){
 	hackShaders();
 };
 
-
+StandardMaterial.prototype._shouldTurnAlphaTestOn=function(mesh){
+	return this.needAlphaTesting();
+};
 

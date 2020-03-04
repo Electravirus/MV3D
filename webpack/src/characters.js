@@ -814,7 +814,9 @@ class Character extends Sprite{
 		let hasAlpha=this.hasConfig('alpha')||this.char.opacity()<255;
 		this.bush = Boolean(this.char.bushDepth());
 		const blendMode = mv3d.blendModes[this.char.blendMode()];
-		if(this.material.alphaMode!==blendMode){ this.material.alphaMode=blendMode; }
+		if(this.material.alphaMode!==blendMode){
+			this.material.alphaMode=blendMode;
+		}
 		if(blendMode!==mv3d.blendModes.NORMAL){
 			hasAlpha=true;
 		}else if(this.bush && this.hasBush()){
