@@ -60,7 +60,7 @@ function TextureConfigurator(name,extraParams=''){
 	return new ConfigurationFunction(paramlist,function(conf,params){
 		if(params.group1.length===5){
 			const [img,x,y,w,h] = params.group1;
-			conf[`${name}_id`] = mv3d.constructTileId(img,0,0);
+			conf[`${name}_id`] = mv3d.constructTileId(img,1,0);
 			conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
 		}else if(params.group1.length===3){
 			const [img,x,y] = params.group1;
