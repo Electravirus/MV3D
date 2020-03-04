@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2 } from './mod_babylon.js';
-import { makeColor, relativeNumber, booleanString, falseString, booleanNumber } from './util.js';
+import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep } from './util.js';
 
 class ConfigurationFunction{
 	constructor(parameters,func){
@@ -422,8 +422,9 @@ Game_Event.prototype.setupPage = function() {
 };
 
 const _event_init = Game_Event.prototype.initialize;
-Game_Event.prototype.initialize = function() {
+Game_Event.prototype.initialize = async function() {
 	_event_init.apply(this,arguments);
+	await sleep();
 	if(mv3d.mapLoaded){
 		mv3d.createCharacterFor(this);
 	}

@@ -87,6 +87,7 @@ class Sprite extends TransformNode{
 		this.spriteOrigin.parent=this;
 		this.mesh = Sprite.Meshes.FLAT.clone();
 		this.mesh.parent = this.spriteOrigin;
+		this.textureLoaded=false;
 	}
 	async setMaterial(src){
 		const newTexture = await mv3d.createTexture(src);
@@ -94,9 +95,7 @@ class Sprite extends TransformNode{
 		this.texture = newTexture;
 		this.bitmap = this.texture._texture;
 		this.texture.hasAlpha=true;
-		this.char.mv_sprite.bitmap.addLoadListener(
-			()=>mv3d.waitTextureLoaded(this.texture).then(()=>this.onTextureLoaded())
-		);
+		this.waitTextureLoaded();
 		this.material = new StandardMaterial('sprite material',mv3d.scene);
 		this.material.diffuseTexture=this.texture;
 		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
@@ -105,9 +104,14 @@ class Sprite extends TransformNode{
 		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
 		this.mesh.material=this.material;
 	}
+	async waitTextureLoaded(){
+		await mv3d.waitTextureLoaded(this.texture);
+		this.onTextureLoaded();
+	}
 	onTextureLoaded(){
 		this.texture.updateSamplingMode(1);
 		this.bitmap = this.texture._texture;
+		this.textureLoaded=true;
 	}
 	disposeMaterial(){
 		if(this.material){
@@ -150,6 +154,8 @@ class Character extends Sprite{
 		this._character=this.char=char;
 		this.charName='';
 		this.charIndex=0;
+
+		this.char.mv_sprite.updateBitmap();
 
 		if(!this.char.mv3d_settings){ this.char.mv3d_settings={}; }
 		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
@@ -213,6 +219,12 @@ class Character extends Sprite{
 		}else{
 			this.setMaterial("MV3D/errorTexture.png");
 		}
+	}
+
+	async waitTextureLoaded(){
+		this.char.mv_sprite.updateBitmap();
+		await new Promise(resolve=>this.char.mv_sprite.bitmap.addLoadListener(()=>resolve()));
+		await super.waitTextureLoaded();
 	}
 
 	onTextureLoaded(){
@@ -688,17 +700,13 @@ class Character extends Sprite{
 		}
 		this.disabled=!this.visible;
 		if(this.char.isTransparent() || !this.char._characterName&&!this.char._tileId
-		|| !this.char.mv3d_inRenderDist()){
+		|| !this.char.mv3d_inRenderDist() || !this.textureLoaded){
 			this.visible=false;
 		}
 		if(!this._isEnabled){
 			if(this.visible){ this.setEnabled(true); this.needsPositionUpdate=true; }
 		}else{
 			if(!this.visible){ this.setEnabled(false); }
-		}
-
-		if(!this._isEnabled){
-			return;
 		}
 
 		if(this.isImageChanged()){
@@ -708,6 +716,10 @@ class Character extends Sprite{
 		//if(this.patternChanged()){
 		//	this.updateFrame();
 		//}
+
+		if(!this._isEnabled){
+			return;
+		}
 
 		if(this.blendElevation.update()){
 			this.needsPositionUpdate=true;

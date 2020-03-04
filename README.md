@@ -429,6 +429,7 @@ For example:
 
     mv3d camera pitch <n> <t>
     mv3d camera yaw <n> <t>
+    mv3d camera roll <n> <t>
     mv3d camera dist <n> <t>
     mv3d camera height <n> <t>
 
