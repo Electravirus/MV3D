@@ -207,7 +207,7 @@ class Character extends Sprite{
 	get settings(){ return this.char.mv3d_settings; }
 
 	isTextureReady(){
-		return Boolean(this.texture && this.texture.isReady());
+		return Boolean(this.texture && this.texture.isReady() && this.char.mv_sprite.bitmap.isReady());
 	}
 
 	setTileMaterial(){
@@ -235,10 +235,11 @@ class Character extends Sprite{
 	}
 
 	isImageChanged(){
-		return (this._tilesetId !== $gameMap.tilesetId() ||
-				this._tileId !== this._character.tileId() ||
-				this._characterName !== this._character.characterName() ||
-				this._characterIndex !== this._character.characterIndex());
+		return (this._tilesetId !== $gameMap.tilesetId()
+		||this._tileId !== this._character.tileId()
+		||this._characterName !== this._character.characterName()
+		//||this._characterIndex !== this._character.characterIndex()
+		);
 	}
 	updateCharacter(){
 		this._tilesetId = $gameMap.tilesetId();
@@ -264,7 +265,7 @@ class Character extends Sprite{
 	}
 
 	updateScale(){
-		if(!this.isTextureReady()||!this.char.mv_sprite.bitmap.isReady()){ return; }
+		if(!this.isTextureReady()){ return; }
 		this.char.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new Vector2(1,1));
 		this.spriteWidth=this.char.mv_sprite.patternWidth()/tileSize() * configScale.x;
