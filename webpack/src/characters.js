@@ -450,20 +450,21 @@ class Character extends Sprite{
 	}
 
 	updateEmissive(){
-		if(this.material){
-			const glow = this.getConfig('glow',0);
-			if(this.lamp){
-				const lampColor=this.lamp.diffuse;
-				const intensity = minmax(0,1,this.lamp.intensity);
-				this.material.emissiveColor.set(
-					Math.max(glow,lampColor.r*intensity),
-					Math.max(glow,lampColor.g*intensity),
-					Math.max(glow,lampColor.b*intensity)
-				);
-			}else{
-				this.material.emissiveColor.set(glow,glow,glow);
-			}
+		if(!this.material){ return; }
+		const glow = this.getConfig('glow',0);
+		if(this.lamp){
+			const lampColor=this.lamp.diffuse;
+			const intensity = minmax(0,1,this.lamp.intensity);
+			this.material.emissiveColor.set(
+				Math.max(glow,lampColor.r*intensity),
+				Math.max(glow,lampColor.g*intensity),
+				Math.max(glow,lampColor.b*intensity)
+			);
+		}else{
+			this.material.emissiveColor.set(glow,glow,glow);
 		}
+
+		this.material.mv3d_noShadow=!this.getConfig('dynShadow',true);
 	}
 
 	configureHeight(){

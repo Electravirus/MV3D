@@ -303,6 +303,9 @@ Object.assign(mv3d,{
 				conf.pass=mv3d.enumPassage.THROUGH;
 			}
 		},
+		shadow(conf,b=true){
+			conf.shadow=booleanString(b);
+		},
 	},
 	eventConfigurationFunctions:{
 		height(conf,n){ conf.height=Number(n); },
@@ -314,10 +317,13 @@ Object.assign(mv3d,{
 		yaw(conf,n){ conf.yaw=Number(n); },
 		pitch(conf,n){ conf.pitch=Number(n); },
 		bush(conf,bool){ conf.bush = booleanString(bool); },
-		shadow(conf,n,dist){
-			conf.shadow = booleanNumber(n);
+		shadow:new ConfigurationFunction('size,dist|3d',function(conf,params){
+			let {size,dist,'3d':dyn} = params;
+			if(dyn==null&&size!=null){ dyn=size; }
+			conf.shadow = booleanNumber(size);
 			if(dist!=null){ conf.shadowDist=Number(dist); }
-		},
+			conf.dynShadow = booleanString(dyn);
+		}),
 		shape(conf,name){
 			conf.shape=mv3d.enumShapes[name.toUpperCase()];
 		},

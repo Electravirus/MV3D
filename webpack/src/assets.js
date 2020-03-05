@@ -99,6 +99,7 @@ Object.assign(mv3d,{
 			material.opacityTexture=texture;
 			material.alpha=options.alpha;
 		}
+		material.mv3d_noShadow==!options.shadow;
 		material.alphaCutOff = mv3d.ALPHA_CUTOFF;
 		material.ambientColor.set(1,1,1);
 		material.emissiveColor.set(options.glow,options.glow,options.glow);
@@ -126,13 +127,15 @@ Object.assign(mv3d,{
 		if('glow' in options){
 			options.glow = Math.round(options.glow*7)/7;
 		}else{ options.glow=0; }
+		if(!('shadow' in options)){options.shadow=true;}
 	},
 
 	getExtraBit(options){
 		let extra = 0;
 		extra|=Boolean(options.transparent)<<0;
 		extra|=7-options.alpha*7<<1;
-		extra|=options.glow*7<<1;
+		extra|=options.glow*7<<4;
+		extra|=(!options.shadow)<<7;
 		return extra.toString(36);
 	},
 
