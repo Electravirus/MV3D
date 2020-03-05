@@ -167,13 +167,14 @@ export class Blender{
 		this.max=Infinity;
 		this.min=-Infinity;
 		this.cycle=false;
+		this.changed=false;
 	}
 	setValue(target,time=0){
 		target = Math.min(this.max,Math.max(this.min,target));
 		let diff = target - this.value;
 		if(!diff){ return; }
 		this.saveValue(this.key,target);
-		if(!time){ this.value=target; }
+		if(!time){ this.changed=true; this.value=target; }
 		if(this.cycle){
 			while ( Math.abs(diff)>this.cycle/2 ){
 				this.value += Math.sign(diff)*this.cycle;
@@ -187,7 +188,14 @@ export class Blender{
 	defaultValue(){ return this.dfault; }
 	update(){
 		const target = this.targetValue();
-		if(this.value===target){ return false; }
+		if(this.value===target){ 
+			if(this.changed){
+				this.changed=false;
+				return true;
+			}else{
+				return false;
+			}
+		}
 		const diff = target - this.value;
 		if(this.speed > Math.abs(diff)){
 			this.value=target;
