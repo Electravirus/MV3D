@@ -150,6 +150,7 @@ export class MapCell extends TransformNode{
 		
 		const neighborHeight = mv3d.getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,{
 			ignorePits:!(tileConf.depth>0),
+			dir:Input._makeNumpadDirection(np.x,np.y),
 		});
 		neededHeight = z-neighborHeight;
 		if(neededHeight>0&&(l>0||isFringe)){ neededHeight=Math.min(wallHeight,neededHeight); }
@@ -325,11 +326,17 @@ export class MapCell extends TransformNode{
 		}
 		const n2=new Vector2(n1.y,-n1.x);
 		if(mv3d.getCullingHeight(this.ox+x+n2.x,this.oy+y+n2.y,l)<z){
-			await this.loadSlopeSide(tileConf,x+n2.x/2,y+n2.y/2,z,l,slopeHeight,rot+Math.PI/2);
+			let otherslope = mv3d.isRampAt(this.ox+x+n2.x,this.oy+y+n2.y,z);
+			if(!otherslope||otherslope.z2!==z||otherslope.z1!==z-slopeHeight){
+				await this.loadSlopeSide(tileConf,x+n2.x/2,y+n2.y/2,z,l,slopeHeight,rot+Math.PI/2);
+			}
 		}
 		const n3=new Vector2(-n1.y,n1.x);
 		if(mv3d.getCullingHeight(this.ox+x+n3.x,this.oy+y+n3.y,l)<z){
-			await this.loadSlopeSide(tileConf,x+n3.x/2,y+n3.y/2,z,l,slopeHeight,rot+Math.PI/2,{flip:true});
+			let otherslope = mv3d.isRampAt(this.ox+x+n3.x,this.oy+y+n3.y,z);
+			if(!otherslope||otherslope.z2!==z||otherslope.z1!==z-slopeHeight){
+				await this.loadSlopeSide(tileConf,x+n3.x/2,y+n3.y/2,z,l,slopeHeight,rot+Math.PI/2,{flip:true});
+			}
 		}
 		await this.loadSlopeTop(tileConf,x,y,z,l,slopeHeight,rot);
 	}
