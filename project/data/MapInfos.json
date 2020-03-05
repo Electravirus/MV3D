@@ -14,7 +14,7 @@ null,
 {"id":12,"expanded":false,"name":"light test","order":17,"parentId":0,"scrollX":1092,"scrollY":594},
 {"id":13,"expanded":false,"name":"weapons shop","order":7,"parentId":7,"scrollX":1080,"scrollY":597.3333333333334},
 {"id":14,"expanded":false,"name":"MAP014","order":13,"parentId":0,"scrollX":1092,"scrollY":594},
-{"id":15,"expanded":true,"name":"slope test","order":14,"parentId":0,"scrollX":1092,"scrollY":607.3333333333334},
+{"id":15,"expanded":true,"name":"slope test","order":14,"parentId":0,"scrollX":1092,"scrollY":594},
 {"id":16,"expanded":false,"name":"test","order":16,"parentId":0,"scrollX":819,"scrollY":445.5},
 {"id":17,"expanded":false,"name":"slope test 2","order":15,"parentId":15,"scrollX":1092,"scrollY":594}
 ]

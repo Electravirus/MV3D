@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { v2origin, tileSize, degtorad, sin, tileWidth, cos, tileHeight, overload } from './util.js';
+import { v2origin, tileSize, degtorad, sin, tileWidth, cos, tileHeight, overload, minmax } from './util.js';
 import { MapCell } from './mapCell.js';
 
 Object.assign(mv3d,{
@@ -143,6 +143,9 @@ Object.assign(mv3d,{
 
 	getTileId(x,y,l=0){
 		const dataMap = this.getDataMap();
+		if($gameMap.isLoopHorizontal()){ x=x.mod(dataMap.width); }
+		if($gameMap.isLoopVertical()){ y=y.mod(dataMap.height); }
+		if(x<0||x>=dataMap.width||y<0||y>=dataMap.height){ return 0; }
 		return dataMap.data[(l * dataMap.height + y) * dataMap.width + x] || 0
 	},
 
