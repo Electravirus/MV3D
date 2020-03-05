@@ -91,11 +91,11 @@ class Sprite extends TransformNode{
 	}
 	async setMaterial(src){
 		const newTexture = await mv3d.createTexture(src);
+		await this.waitTextureLoaded(newTexture);
 		this.disposeMaterial();
 		this.texture = newTexture;
-		this.bitmap = this.texture._texture;
 		this.texture.hasAlpha=true;
-		this.waitTextureLoaded();
+		this.onTextureLoaded();
 		this.material = new StandardMaterial('sprite material',mv3d.scene);
 		this.material.diffuseTexture=this.texture;
 		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
@@ -104,13 +104,11 @@ class Sprite extends TransformNode{
 		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
 		this.mesh.material=this.material;
 	}
-	async waitTextureLoaded(){
-		await mv3d.waitTextureLoaded(this.texture);
-		this.onTextureLoaded();
+	async waitTextureLoaded(texture=this.texture){
+		await mv3d.waitTextureLoaded(texture);
 	}
 	onTextureLoaded(){
 		this.texture.updateSamplingMode(1);
-		this.bitmap = this.texture._texture;
 		this.textureLoaded=true;
 	}
 	disposeMaterial(){
@@ -119,7 +117,6 @@ class Sprite extends TransformNode{
 			this.texture.dispose();
 			this.material=null;
 			this.texture=null;
-			this.bitmap=null;
 		}
 	}
 	dispose(...args){
@@ -154,8 +151,10 @@ class Character extends Sprite{
 		this._character=this.char=char;
 		this.charName='';
 		this.charIndex=0;
-
-		this.char.mv_sprite.updateBitmap();
+		
+		if(this.char.mv_sprite){
+			this.char.mv_sprite.updateBitmap();
+		}
 
 		if(!this.char.mv3d_settings){ this.char.mv3d_settings={}; }
 		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
@@ -206,8 +205,21 @@ class Character extends Sprite{
 
 	get settings(){ return this.char.mv3d_settings; }
 
+	isBitmapReady(){
+		return Boolean(this.bitmap && this.bitmap.isReady() && !this._waitingForBitmap);
+	}
+
 	isTextureReady(){
-		return Boolean(this.texture && this.texture.isReady() && this.char.mv_sprite.bitmap.isReady());
+		return Boolean(
+			this.texture && this.texture.isReady() && this.isBitmapReady()
+		);
+	}
+
+	get mv_sprite(){
+		return this.char.mv_sprite||{};
+	}
+	get bitmap(){
+		return this.mv_sprite.bitmap;
 	}
 
 	setTileMaterial(){
@@ -221,10 +233,23 @@ class Character extends Sprite{
 		}
 	}
 
-	async waitTextureLoaded(){
+	async waitBitmapLoaded(){
+		if(!this.char.mv_sprite){
+			await sleep();
+			if(!this.char.mv_sprite){
+				console.warn('mv_sprite is undefined');
+				return;
+			}
+		}
+		this._waitingForBitmap=true;
 		this.char.mv_sprite.updateBitmap();
-		await new Promise(resolve=>this.char.mv_sprite.bitmap.addLoadListener(()=>resolve()));
-		await super.waitTextureLoaded();
+		await new Promise(resolve=>this.char.mv_sprite.bitmap.addLoadListener(resolve));
+		this._waitingForBitmap=false;
+	}
+
+	async waitTextureLoaded(texture=this.texture){
+		await this.waitBitmapLoaded();
+		await super.waitTextureLoaded(texture);
 	}
 
 	onTextureLoaded(){
@@ -261,20 +286,23 @@ class Character extends Sprite{
 	}
 	setFrame(x,y,w,h){
 		if(!this.isTextureReady()){ return; }
+		if(!(this._tileId>0)){
+			const size = this.texture.getSize(), baseSize = this.texture.getBaseSize();
+			const scaleX=baseSize.width/size.width;
+			const scaleY=baseSize.height/size.height;
+			x/=scaleX; w/=scaleX; y/=scaleY; h/=scaleY;
+		}
 		this.texture.crop(x,y,w,h,this._tileId>0);
 	}
 
-	updateScale(){
-		if(!this.isTextureReady()){ return; }
-		this.char.mv_sprite.updateBitmap();
+	async updateScale(){
+		//if(!this.texture||!this.mv_sprite){ return; }
+		//await this.waitTextureLoaded();
+		if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
+		this.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new Vector2(1,1));
-		this.spriteWidth=this.char.mv_sprite.patternWidth()/tileSize() * configScale.x;
-		this.spriteHeight=this.char.mv_sprite.patternHeight()/tileSize() * configScale.y;
-		if(!(this._tileId>0)){
-			const size = this.texture.getSize(), baseSize = this.texture.getBaseSize();
-			this.spriteWidth*=baseSize.width/size.width;
-			this.spriteHeight*=baseSize.height/size.height;
-		}
+		this.spriteWidth=this.mv_sprite.patternWidth()/tileSize() * configScale.x;
+		this.spriteHeight=this.mv_sprite.patternHeight()/tileSize() * configScale.y;
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
 
@@ -695,7 +723,7 @@ class Character extends Sprite{
 		}
 
 
-		this.visible=this.char.mv_sprite.visible;
+		this.visible=this.mv_sprite.visible;
 		if(typeof this.char.isVisible === 'function'){
 			this.visible=this.visible&&this.char.isVisible();
 		}
