@@ -123,10 +123,10 @@ class SubMeshBuilder{
 		const zf=sin(rot);
 		const ww=w/2, hh=h/2;
 		const positions = options.autotile ? [
-			x-ww, y+hh+hh*Math.round(sin(-rot+PI*1/4)), z+hh,
-			x+ww, y+hh+hh*Math.round(sin(-rot+PI*3/4)), z+hh,
-			x-ww, y+hh+hh*Math.round(sin(-rot+PI*7/4)), z-hh,
-			x+ww, y+hh+hh*Math.round(sin(-rot+PI*5/4)), z-hh,
+			x-ww, y+hh+hh*Math.round(sin(-rot+PI*1/4)), z+ww,
+			x+ww, y+hh+hh*Math.round(sin(-rot+PI*3/4)), z+ww,
+			x-ww, y+hh+hh*Math.round(sin(-rot+PI*7/4)), z-ww,
+			x+ww, y+hh+hh*Math.round(sin(-rot+PI*5/4)), z-ww,
 		] : [
 			x-ww*xf+ww*zf, y+h, z+ww*zf+ww*xf,
 			x+ww*xf+ww*zf, y+h, z-ww*zf+ww*xf,
