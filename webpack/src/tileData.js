@@ -392,6 +392,11 @@ Object.assign(mv3d,{
 	},
 
 	getCullingHeight(x,y,layerId=3,opts={}){
+		const dataMap=this.getDataMap();
+		if( !this.getMapConfig('edge',true) &&
+			(!$gameMap.isLoopHorizontal()&&(x<0||x>=dataMap.width)
+			||!$gameMap.isLoopVertical()&&(y<0||y>=dataMap.height))
+			){ return Infinity; }
 		const tileData=this.getTileData(x,y);
 		let height=0;
 		for(let l=0; l<=layerId; ++l){
