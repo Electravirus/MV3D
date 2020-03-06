@@ -319,10 +319,10 @@ Object.assign(mv3d,{
 		bush(conf,bool){ conf.bush = booleanString(bool); },
 		shadow:new ConfigurationFunction('size,dist|3d',function(conf,params){
 			let {size,dist,'3d':dyn} = params;
-			if(dyn==null&&size!=null){ dyn=size; }
-			conf.shadow = booleanNumber(size);
+			if(dyn==null){ dyn=size!=null?size:true; }
+			conf.dynShadow = dyn = booleanString(dyn);
+			if(size!=null){ conf.shadow = booleanNumber(size); }
 			if(dist!=null){ conf.shadowDist=Number(dist); }
-			conf.dynShadow = booleanString(dyn);
 		}),
 		shape(conf,name){
 			conf.shape=mv3d.enumShapes[name.toUpperCase()];

@@ -99,7 +99,7 @@ Object.assign(mv3d,{
 			material.opacityTexture=texture;
 			material.alpha=options.alpha;
 		}
-		material.mv3d_noShadow==!options.shadow;
+		material.mv3d_noShadow=!options.shadow;
 		material.alphaCutOff = mv3d.ALPHA_CUTOFF;
 		material.ambientColor.set(1,1,1);
 		material.emissiveColor.set(options.glow,options.glow,options.glow);
