@@ -319,22 +319,26 @@ export class MapCell extends TransformNode{
 	async loadSlope(tileConf,x,y,z,l,slopeHeight){
 		//const rot = Math.random()*Math.PI*2;
 		//const rot = Math.round((Math.random()*Math.PI*2)/(Math.PI/2))*Math.PI/2;
-		const rot=mv3d.getSlopeDirection(this.ox+x,this.oy+y,l);
+		const {dir,rot} = mv3d.getSlopeDirection(this.ox+x,this.oy+y,l,true);
 		const n1=new Vector2(-sin(rot+Math.PI),cos(rot+Math.PI));
 		if(mv3d.getCullingHeight(this.ox+x+n1.x,this.oy+y+n1.y,l)<z){
 			await this.loadWall(tileConf,x,y,z,l+1,slopeHeight,n1);
 		}
 		const n2=new Vector2(n1.y,-n1.x);
-		if(mv3d.getCullingHeight(this.ox+x+n2.x,this.oy+y+n2.y,l)<z){
-			let otherslope = mv3d.isRampAt(this.ox+x+n2.x,this.oy+y+n2.y,z);
-			if(!otherslope||otherslope.z2!==z||otherslope.z1!==z-slopeHeight){
+		const n2x=this.ox+x+n2.x, n2y=this.oy+y+n2.y;
+		if(mv3d.getCullingHeight(n2x,n2y,l)<z){
+			let otherslope = mv3d.isRampAt(n2x,n2y,z);
+			if(!otherslope||otherslope.z2!==z||otherslope.z1!==z-slopeHeight
+			||dir!=mv3d.getSlopeDirection(n2x,n2y,otherslope.l,true).dir){
 				await this.loadSlopeSide(tileConf,x+n2.x/2,y+n2.y/2,z,l,slopeHeight,rot+Math.PI/2);
 			}
 		}
 		const n3=new Vector2(-n1.y,n1.x);
-		if(mv3d.getCullingHeight(this.ox+x+n3.x,this.oy+y+n3.y,l)<z){
-			let otherslope = mv3d.isRampAt(this.ox+x+n3.x,this.oy+y+n3.y,z);
-			if(!otherslope||otherslope.z2!==z||otherslope.z1!==z-slopeHeight){
+		const n3x=this.ox+x+n3.x, n3y=this.oy+y+n3.y;
+		if(mv3d.getCullingHeight(n3x,n3y,l)<z){
+			let otherslope = mv3d.isRampAt(n3x,n3y,z);
+			if(!otherslope||otherslope.z2!==z||otherslope.z1!==z-slopeHeight
+			||dir!=mv3d.getSlopeDirection(n3x,n3y,otherslope.l,true).dir){
 				await this.loadSlopeSide(tileConf,x+n3.x/2,y+n3.y/2,z,l,slopeHeight,rot+Math.PI/2,{flip:true});
 			}
 		}
