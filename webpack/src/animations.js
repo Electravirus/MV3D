@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { Sprite, SpriteManager, TransformNode, Vector3, ORTHOGRAPHIC_CAMERA } from './mod_babylon.js';
+import { Sprite, SpriteManager, TransformNode, Vector3, ORTHOGRAPHIC_CAMERA, StandardMaterial } from './mod_babylon.js';
 
 Object.assign(mv3d,{
 	showAnimation(char){
@@ -11,10 +11,53 @@ Object.assign(mv3d,{
 	}
 });
 
+class AnimSprite extends TransformNode{
+	constructor(src,w,h,smooth){
+		super('animSprite',mv3d.scene);
+		this.cellWidth=w; this.cellHeight=h;
+		this.cellIndex=0;
+		this.isSmooth=smooth;
+		this.mesh = mv3d.Meshes.BASIC.clone();
+		this.mesh.parent=this;
+		this.mesh.setEnabled(false);
+		this.material = new StandardMaterial('anim material',mv3d.scene);
+		this.mesh.material=this.material;
+		this.material.useAlphaFromDiffuseTexture=true;
+		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
+		this.material.emissiveColor.set(1,1,1);
+		this.material.specularColor.set(0,0,0);
+		this.loadTexture(src)
+	}
+	async loadTexture(src){
+		this.texture = await mv3d.createTexture(src);
+		this.texture.hasAlpha=true;
+		this.material.diffuseTexture=this.texture;
+		await mv3d.waitTextureLoaded(this.texture);
+		if(!this.isSmooth){ this.texture.updateSamplingMode(1); }
+		this.textureLoaded=true;
+		const size = this.texture.getBaseSize();
+		this.cellCols = Math.floor(size.width/this.cellWidth);
+	}
+	update(){
+		if(!this.textureLoaded){ return; }
+		if(!this.mesh.isEnabled()){ this.mesh.setEnabled(true); }
+		this.mesh.pitch = mv3d.blendCameraPitch.currentValue()-90;
+		this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
+		this.texture.crop(
+			this.cellIndex%this.cellCols*this.cellWidth,
+			Math.floor(this.cellIndex/this.cellCols)*this.cellHeight,
+			this.cellWidth, this.cellHeight, true
+		);
+	}
+	dispose(){
+		super.dispose(false,true);
+	}
+}
+
 // Balloons
-class Balloon extends Sprite{
+class Balloon extends AnimSprite{
 	constructor(char){
-		super('balloon',Balloon.Manager());
+		super('img/system/Balloon.png',48,48,false);
 		Balloon.list.push(this);
 		this.char=char;
 	}
@@ -25,15 +68,13 @@ class Balloon extends Sprite{
 		const bs = this.char.char.mv_sprite._balloonSprite;
 		if(!bs){ return; }
 		this.cellIndex = (bs._balloonId-1)*8 + Math.max(0,bs.frameIndex());
+		super.update();
 	}
 	dispose(){
 		super.dispose();
 		const index = Balloon.list.indexOf(this);
 		if(index>=0){
 			Balloon.list.splice(index,1);
-		}
-		if(this._manager.markedForDisposal&&!this._manager.sprites.length){
-			this._manager.dispose();
 		}
 	}
 }

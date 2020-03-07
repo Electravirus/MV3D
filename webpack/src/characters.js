@@ -40,9 +40,10 @@ Object.assign(mv3d,{
 	},
 
 	setupSpriteMeshes(){
-		Sprite.Meshes = {};
-		Sprite.Meshes.FLAT=Mesh.MergeMeshes([MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene).rotate(XAxis,Math.PI/2,WORLDSPACE)]);
-		Sprite.Meshes.SPRITE=Mesh.MergeMeshes([MeshBuilder.CreatePlane('sprite mesh',{sideOrientation: DOUBLESIDE},mv3d.scene).translate(YAxis,0.5,WORLDSPACE)]);
+		this.Meshes = Sprite.Meshes = {};
+		Sprite.Meshes.BASIC=MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene)
+		Sprite.Meshes.FLAT=Mesh.MergeMeshes([Sprite.Meshes.BASIC.clone().rotate(XAxis,Math.PI/2,WORLDSPACE)]);
+		Sprite.Meshes.SPRITE=Mesh.MergeMeshes([Sprite.Meshes.BASIC.clone().translate(YAxis,0.5,WORLDSPACE)]);
 		Sprite.Meshes.CROSS=Mesh.MergeMeshes([
 			Sprite.Meshes.SPRITE.clone(),
 			Sprite.Meshes.SPRITE.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
