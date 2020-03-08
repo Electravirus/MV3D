@@ -268,6 +268,7 @@ class Character extends Sprite{
 		);
 	}
 	updateCharacter(){
+		this.needsPositionUpdate=true;
 		this._tilesetId = $gameMap.tilesetId();
 		this._tileId = this._character.tileId();
 		this._characterName = this._character.characterName();
@@ -499,7 +500,6 @@ class Character extends Sprite{
 			let x=ix, y=iy;
 			if($gameMap.isLoopHorizontal()){ x=x.mod(Math.ceil($gameMap.width()/mv3d.CELL_SIZE)); }
 			if($gameMap.isLoopVertical()){ y=y.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
-			if(ix===4&&iy===0)console.log(ix,iy,x,y);
 			const cell = mv3d.cells[[x,y]];
 			if(!cell){ continue; }
 			if(!cell._needsIntensiveUpdate){
@@ -748,7 +748,6 @@ class Character extends Sprite{
 
 		if(this.isImageChanged()){
 			this.updateCharacter();
-			this.needsPositionUpdate=true;
 		}
 		//if(this.patternChanged()){
 		//	this.updateFrame();
@@ -1151,8 +1150,8 @@ override(Sprite_Character.prototype,'characterPatternY',o=>function(){
 
 override(Sprite_Character.prototype,'setFrame',o=>function(x, y, width, height){
 	o.apply(this,arguments);
-	const sprite = this._character.mv3d_sprite;
-	if(!sprite){ return o.apply(this,arguments); }
+	const sprite = this._character.mv3d_sprite; if(!sprite){ return; }
+	if(sprite.isImageChanged()){ return; }
 	sprite.setFrame(x,y,this.patternWidth(),this.patternHeight());
 });
 
