@@ -58,8 +58,9 @@ Game_Map.prototype.updateScroll = function() {
 */
 
 Game_CharacterBase.prototype.mv3d_inRenderDist=function(){
-	return Math.abs(this.x - mv3d.cameraStick.x)<=mv3d.RENDER_DIST
-	&& Math.abs(this.y - mv3d.cameraStick.y)<=mv3d.RENDER_DIST;
+	const loopPos = mv3d.loopCoords(this.x,this.y);
+	return Math.abs(loopPos.x - mv3d.cameraStick.x)<=mv3d.RENDER_DIST
+	&& Math.abs(loopPos.y - mv3d.cameraStick.y)<=mv3d.RENDER_DIST;
 };
 
 override(Game_CharacterBase.prototype,'isNearTheScreen',o=>function(){

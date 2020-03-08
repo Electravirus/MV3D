@@ -494,8 +494,12 @@ class Character extends Sprite{
 		Character.dirtyNearbyCells(this.cell.cx,this.cell.cy);
 	}
 	static dirtyNearbyCells(cx,cy){
-		for(let x=cx-1; x<=cx+1; ++x)
-		for(let y=cy-1; y<=cy+1; ++y){
+		for(let ix=cx-1; ix<=cx+1; ++ix)
+		for(let iy=cy-1; iy<=cy+1; ++iy){
+			let x=ix, y=iy;
+			if($gameMap.isLoopHorizontal()){ x=x.mod(Math.ceil($gameMap.width()/mv3d.CELL_SIZE)); }
+			if($gameMap.isLoopVertical()){ y=y.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
+			if(ix===4&&iy===0)console.log(ix,iy,x,y);
 			const cell = mv3d.cells[[x,y]];
 			if(!cell){ continue; }
 			if(!cell._needsIntensiveUpdate){
@@ -524,8 +528,11 @@ class Character extends Sprite{
 		if(!this.cell){ return []; }
 		const pos = Vector3.TransformCoordinates(light.position,light.getWorldMatrix());
 		const meshes=[];
-		for(let cx=this.cell.cx-1; cx<=this.cell.cx+1; ++cx)
-		for(let cy=this.cell.cy-1; cy<=this.cell.cy+1; ++cy){
+		for(let _cx=this.cell.cx-1; _cx<=this.cell.cx+1; ++_cx)
+		for(let _cy=this.cell.cy-1; _cy<=this.cell.cy+1; ++_cy){
+			let cx=_cx, cy=_cy;
+			if($gameMap.isLoopHorizontal()){ cx=cx.mod(Math.ceil($gameMap.width()/mv3d.CELL_SIZE)); }
+			if($gameMap.isLoopVertical()){ cy=cy.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
 			const cell = mv3d.cells[[cx,cy]];
 			if(!cell||!cell.mesh){ continue; }
 			const sphere = cell.mesh.getBoundingInfo().boundingSphere;
@@ -883,11 +890,11 @@ class Character extends Sprite{
 	updatePosition(){
 		this.updatePositionOffsets();
 
-		if(!this.needsPositionUpdate) { return; }
-
 		const loopPos = mv3d.loopCoords(this.char._realX,this.char._realY);
 		this.x = loopPos.x;
 		this.y = loopPos.y;
+
+		if(!this.needsPositionUpdate) { return; }
 
 		const cellX=Math.floor(Math.round(this.char._realX)/mv3d.CELL_SIZE);
 		const cellY=Math.floor(Math.round(this.char._realY)/mv3d.CELL_SIZE);

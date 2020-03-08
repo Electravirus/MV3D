@@ -173,6 +173,7 @@ override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 const _dontSnapRealXY=o=>function(){
 	const realX=this._realX, realY=this._realY;
 	o.apply(this,arguments);
+	if(Math.abs(realX-this._realX)>2||Math.abs(realY-this._realY)>2){ return;}
 	this._realX=realX; this._realY=realY;
 };
 override(Game_Follower.prototype,'moveDiagonally',_dontSnapRealXY,_dir8Condition);

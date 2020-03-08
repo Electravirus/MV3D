@@ -70,11 +70,11 @@ Object.assign(mv3d,{
 		//clamp cell range to map
 		if(!$gameMap.isLoopHorizontal()){
 			bounds.left=Math.max(0,bounds.left);
-			bounds.right=Math.min(bounds.right,Math.floor($gameMap.width()/mv3d.CELL_SIZE));
+			bounds.right=Math.min(bounds.right,Math.ceil($gameMap.width()/mv3d.CELL_SIZE)-1);
 		}
 		if(!$gameMap.isLoopVertical()){
 			bounds.top=Math.max(0,bounds.top);
-			bounds.bottom=Math.min(bounds.bottom,Math.floor($gameMap.height()/mv3d.CELL_SIZE));
+			bounds.bottom=Math.min(bounds.bottom,Math.ceil($gameMap.height()/mv3d.CELL_SIZE)-1);
 		}
 		const cellsToLoad=[];
 		for (let ix=bounds.left;ix<=bounds.right;++ix)
@@ -128,7 +128,7 @@ Object.assign(mv3d,{
 		const now = performance.now();
 		let cell,index=null;
 		for (cell of this._cellsNeedingIntensiveUpdate){
-			if(now-cell._lastIntensiveUpdate<=500){ continue; }
+			if(now-cell._lastIntensiveUpdate<=300){ continue; }
 			index=this._cellsNeedingIntensiveUpdate.indexOf(cell);
 			break;
 		}
