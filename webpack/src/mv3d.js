@@ -16,7 +16,7 @@ const mv3d = {
 		//this.scene.clearColor.a=0;
 		this.scene.clearColor.set(0,0,0,0);
 
-		//this.engine.forcePOTTextures=true;
+		this.engine.forcePOTTextures=true;
 
 		this.cameraStick = new TransformNode("cameraStick",this.scene);
 		this.cameraNode = new TransformNode("cameraNode",this.scene);

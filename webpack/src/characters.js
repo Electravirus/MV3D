@@ -289,12 +289,6 @@ class Character extends Sprite{
 	}
 	setFrame(x,y,w,h){
 		if(!this.isTextureReady()){ return; }
-		if(!(this._tileId>0)){
-			const size = this.texture.getSize(), baseSize = this.texture.getBaseSize();
-			const scaleX=baseSize.width/size.width;
-			const scaleY=baseSize.height/size.height;
-			x/=scaleX; w/=scaleX; y/=scaleY; h/=scaleY;
-		}
 		this.texture.crop(x,y,w,h,this._tileId>0);
 	}
 

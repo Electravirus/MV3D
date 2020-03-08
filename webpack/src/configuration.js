@@ -287,6 +287,7 @@ Object.assign(mv3d,{
 		}),
 		shape(conf,name){
 			conf.shape=mv3d.enumShapes[name.toUpperCase()];
+			if(conf.shape===mv3d.enumShapes.SLOPE && !('slopeHeight' in conf)){ conf.slopeHeight=1; }
 		},
 		alpha(conf,n){
 			conf.transparent=true;

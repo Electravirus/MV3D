@@ -1,5 +1,6 @@
 import mv3d from './mv3d.js';
-import { Sprite, SpriteManager, TransformNode, Vector3, ORTHOGRAPHIC_CAMERA, StandardMaterial } from './mod_babylon.js';
+import { Sprite, SpriteManager, TransformNode, Vector3, ORTHOGRAPHIC_CAMERA, StandardMaterial, Texture } from './mod_babylon.js';
+import { radtodeg } from './util.js';
 
 Object.assign(mv3d,{
 	showAnimation(char){
@@ -23,7 +24,8 @@ class AnimSprite extends TransformNode{
 		this.material = new StandardMaterial('anim material',mv3d.scene);
 		this.mesh.material=this.material;
 		this.material.useAlphaFromDiffuseTexture=true;
-		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
+		//this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
+		this.material.alphaCutOff = 0;
 		this.material.emissiveColor.set(1,1,1);
 		this.material.specularColor.set(0,0,0);
 		this.loadTexture(src)
@@ -33,7 +35,10 @@ class AnimSprite extends TransformNode{
 		this.texture.hasAlpha=true;
 		this.material.diffuseTexture=this.texture;
 		await mv3d.waitTextureLoaded(this.texture);
-		if(!this.isSmooth){ this.texture.updateSamplingMode(1); }
+		this.texture.updateSamplingMode( this.isSmooth
+			? Texture.BILINEAR_SAMPLINGMODE
+			: Texture.NEAREST_SAMPLINGMODE
+		);
 		this.textureLoaded=true;
 		const size = this.texture.getBaseSize();
 		this.cellCols = Math.floor(size.width/this.cellWidth);
@@ -41,8 +46,8 @@ class AnimSprite extends TransformNode{
 	update(){
 		if(!this.textureLoaded){ return; }
 		if(!this.mesh.isEnabled()){ this.mesh.setEnabled(true); }
-		this.mesh.pitch = mv3d.blendCameraPitch.currentValue()-90;
-		this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
+		this.pitch = mv3d.blendCameraPitch.currentValue()-90;
+		this.yaw = mv3d.blendCameraYaw.currentValue();
 		this.texture.crop(
 			this.cellIndex%this.cellCols*this.cellWidth,
 			Math.floor(this.cellIndex/this.cellCols)*this.cellHeight,
@@ -58,7 +63,6 @@ class AnimSprite extends TransformNode{
 class Balloon extends AnimSprite{
 	constructor(char){
 		super('img/system/Balloon.png',48,48,false);
-		Balloon.list.push(this);
 		this.char=char;
 	}
 	update(){
@@ -70,32 +74,6 @@ class Balloon extends AnimSprite{
 		this.cellIndex = (bs._balloonId-1)*8 + Math.max(0,bs.frameIndex());
 		super.update();
 	}
-	dispose(){
-		super.dispose();
-		const index = Balloon.list.indexOf(this);
-		if(index>=0){
-			Balloon.list.splice(index,1);
-		}
-	}
-}
-
-Balloon.list=[];
-Balloon.Manager=function(){
-	if(!Balloon.manager || Balloon.manager.mapId!=$gameMap.mapId() || Balloon.manager._capacity<$gameMap.events().length){
-		if(Balloon.manager){
-			if(Balloon.manager.sprites.length){
-				Balloon.manager.markedForDisposal=true;
-			}else{
-				Balloon.manager.dispose();
-			}
-		}
-		Balloon.manager = new SpriteManager('balloonManager', 'img/system/Balloon.png',$gameMap.events().length,48,mv3d.scene);
-		Balloon.manager.texture.onLoadObservable.addOnce(()=>{
-			Balloon.manager.texture.updateSamplingMode(1);
-		});
-		Balloon.manager.mapId=$gameMap.mapId();
-	}
-	return Balloon.manager;
 }
 
 // depth animations
@@ -104,7 +82,7 @@ class DepthAnimation{
 	constructor(animation){
 		this.animation=animation;
 		this.spriteList=[];
-		this.managers={};
+		this.char = this.animation._target._character.mv3d_sprite;
 	}
 	resetSpriteList(){
 		for(const animationSprite of this.spriteList ){
@@ -115,92 +93,77 @@ class DepthAnimation{
 		for(let i=this.spriteList.length-1;i>=0;--i){
 			const animationSprite = this.spriteList[i];
 			if(animationSprite.unused){
-				animationSprite.isVisible=false;
-				animationSprite.dispose();
-				this.spriteList.splice(i,1);
+				animationSprite.setEnabled(false);
 			}
 		}
 	}
 	update(){
-		const char = this.animation._target._character.mv3d_sprite;
+		const char = this.char;
 		if(!char){ return; }
+		const cameraDirection = mv3d.camera.getDirection(mv3d.camera.getTarget());
 		this.resetSpriteList();
 		const frameData = this.animation._animation.frames[this.animation.currentFrameIndex()];
 		if(frameData)
 		for(let i=0; i<Math.min(this.animation._cellSprites.length); ++i){
 			const cell = this.animation._cellSprites[i];
 			if(!cell.visible || !cell.bitmap){ continue; }
-			const anim = this.getAnimationSprite(cell.bitmap._url, mv3d.blendModes[cell.blendMode]);
+			const anim = this.getAnimationSprite(cell.bitmap._url);
+			anim.material.alphaMode = mv3d.blendModes[cell.blendMode];
 
-			anim.angle=-cell.rotation;
-			anim.invertU=cell.scale.x<0;
+			anim.mesh.roll=radtodeg(cell.rotation);
 			const scale = this.animation._mv3d_animationSettings.scale||1;
-			anim.width=4*Math.abs(cell.scale.x)*scale;
-			anim.height=4*Math.abs(cell.scale.y)*scale;
+			anim.mesh.scaling.x=4*cell.scale.x*scale;
+			anim.mesh.scaling.y=4*cell.scale.y*scale;
+			anim.material.alpha=cell.opacity/255;
 
-			const offsetVector = new Vector3(
+			anim.mesh.position.set(
 				cell.position.x/48*scale,
 				getAnimationOffset(this.animation)-cell.position.y/48*scale,
-				0);
-			const animationOrigin = Vector3.TransformCoordinates(offsetVector,char.mesh.getWorldMatrix());
-
+				0
+			);
+			const scale2=Math.pow(scale,2);
 			anim.position.set(
-				animationOrigin.x+char.billboardOffset.x*0.1,
-				animationOrigin.y,
-				animationOrigin.z-char.billboardOffset.y*0.1
+				-cameraDirection.x*0.1*(i+1)*scale2,
+				-cameraDirection.y*0.1*(i+1)*scale2,
+				-cameraDirection.z*0.1*(i+1)*scale2
 			);
 
 			const pattern = frameData[i][0];
 			anim.cellIndex=pattern;
+			anim.update();
+			//console.log(anim.isVisible);
 		}
 		//console.log(this.spriteList.length);
 		this.clearUnusedSprites();
 	}
-	getAnimationSprite(url,blendMode){
+	getAnimationSprite(url){
 		let sprite;
 		for(const animationSprite of this.spriteList ){
 			if(animationSprite._mv3d_sprite_url===url
-			&&animationSprite._mv3d_sprite_blendMode===blendMode
 			&&animationSprite.unused){
-				//console.log("Found reusable sprite!", animationSprite)
+				//console.log("Found reusable sprite!", animationSprite);
 				animationSprite.unused=false;
-				animationSprite.isVisible=true;
+				animationSprite.setEnabled(true);
 				sprite=animationSprite;
 				break;
 			}
 		}
 		if(!sprite){
-			const manager = this.getManager(url,blendMode);
-			sprite = new Sprite('animationSprite',manager);
+			sprite = new AnimSprite(url,192,192,true);
 			this.spriteList.push(sprite);
 			sprite._mv3d_sprite_url=url;
-			sprite._mv3d_sprite_blendMode=blendMode;
-			console.log(manager);
+			sprite.parent=this.char.spriteOrigin;
+			if(!this.animation._mv3d_animationSettings.depth){
+				sprite.mesh.renderingGroupId=1;
+			}
 		}
 		return sprite;
-	}
-	getManager(url,blendMode){
-		const key = `${blendMode}|${url}`;
-		if(!this.managers[key]){
-			this.managers[key] = new SpriteManager('animationManager',url,16,192,mv3d.scene);
-			//this.managers[key].texture.onLoadObservable.addOnce(()=>{
-			//	this.managers[key].texture.updateSamplingMode(1);
-			//});
-			if(!this.animation._mv3d_animationSettings.depth){
-				this.managers[key].renderingGroupId=1;
-			}
-			this.managers[key].blendMode=blendMode;
-		}
-		return this.managers[key];
 	}
 	remove(){
 		for(const animationSprite of this.spriteList ){
 			animationSprite.dispose();
 		}
 		this.spriteList.length=0;
-		for(const key in this.managers){
-			this.managers[key].dispose();
-		}
 	}
 }
 
