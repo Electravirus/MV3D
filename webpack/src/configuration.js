@@ -424,10 +424,6 @@ Game_Event.prototype.setupPage = function() {
 const _event_init = Game_Event.prototype.initialize;
 Game_Event.prototype.initialize = async function() {
 	_event_init.apply(this,arguments);
-	await sleep();
-	if(mv3d.mapLoaded){
-		mv3d.createCharacterFor(this);
-	}
 	const event = this.event();
 	let config = {};
 	mv3d.readConfigurationFunctions(
@@ -466,4 +462,9 @@ Game_Event.prototype.initialize = async function() {
 		this.mv3d_blenders.flashlightYaw=config.flashlightYaw;
 	}
 	this.mv3d_needsConfigure=true;
+
+	await sleep();
+	if(mv3d.mapLoaded){
+		mv3d.createCharacterFor(this);
+	}
 };
