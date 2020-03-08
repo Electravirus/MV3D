@@ -750,6 +750,7 @@ class Character extends Sprite{
 		//}
 
 		if(!this._isEnabled){
+			this.updateAnimations();
 			return;
 		}
 

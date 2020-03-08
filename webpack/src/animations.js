@@ -116,13 +116,14 @@ class DepthAnimation{
 			anim.mesh.scaling.y=4*cell.scale.y*scale;
 			anim.material.alpha=cell.opacity/255;
 
-			anim.mesh.position.set(
+			const offsetVector = new Vector3(
 				cell.position.x/48*scale,
 				getAnimationOffset(this.animation)-cell.position.y/48*scale,
-				0
-			);
+				0);
+			const animationOrigin = Vector3.TransformCoordinates(offsetVector,char.mesh.getWorldMatrix());
+			anim.position.copyFrom(animationOrigin);
 			const scale2=Math.pow(scale,2);
-			anim.position.set(
+			anim.mesh.position.set(
 				-cameraDirection.x*0.1*(i+1)*scale2,
 				-cameraDirection.y*0.1*(i+1)*scale2,
 				-cameraDirection.z*0.1*(i+1)*scale2
@@ -152,7 +153,7 @@ class DepthAnimation{
 			sprite = new AnimSprite(url,192,192,true);
 			this.spriteList.push(sprite);
 			sprite._mv3d_sprite_url=url;
-			sprite.parent=this.char.spriteOrigin;
+			//sprite.parent=this.char.spriteOrigin;
 			if(!this.animation._mv3d_animationSettings.depth){
 				sprite.mesh.renderingGroupId=1;
 			}
