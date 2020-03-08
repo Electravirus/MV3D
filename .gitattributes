@@ -1,0 +1,6 @@
+plugin.zip -merge -diff
+/project/js/plugins/babylon.js -merge
+/project/js/plugins/mv3d.js -merge
+/project/js/plugins/mv3d.js.map -merge -diff
+/project/data/** -merge
+/project/js/plugins.js -merge
