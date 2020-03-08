@@ -65,6 +65,7 @@ Object.assign(mv3d,{
 		if(this.errorTexture){ return this.errorTexture; }
 		this.errorTexture = await this.createTexture(`${mv3d.MV3D_FOLDER}/errorTexture.png`);
 		this.errorTexture.isError=true;
+		this.errorTexture.dispose=()=>{};
 		return this.errorTexture;
 	},
 
@@ -73,6 +74,7 @@ Object.assign(mv3d,{
 		this.getBushAlphaTexture.getting=true;
 		this.bushAlphaTexture = await this.createTexture(`${mv3d.MV3D_FOLDER}/bushAlpha.png`);
 		this.bushAlphaTexture.getAlphaFromRGB=true;
+		this.bushAlphaTexture.dispose=()=>{};
 		this.getBushAlphaTexture.getting=false;
 		return this.bushAlphaTexture;
 	},

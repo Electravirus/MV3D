@@ -60,6 +60,7 @@ Object.assign(mv3d,{
 		shadowMaterial.diffuseTexture=shadowTexture;
 		shadowMaterial.opacityTexture=shadowTexture;
 		shadowMaterial.specularColor.set(0,0,0);
+		shadowMaterial.dispose=()=>{};
 		return shadowMaterial;
 	},
 	async getShadowMesh(){
