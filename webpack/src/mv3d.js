@@ -1,4 +1,4 @@
-import { Engine, Scene, HemisphericLight, TransformNode, FreeCamera, Node, Vector2, Vector3, Color3, FOGMODE_LINEAR, DirectionalLight, ShadowGenerator, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods } from "./mod_babylon.js";
+import { Engine, Scene, HemisphericLight, TransformNode, FreeCamera, Node, Matrix, Vector2, Vector3, Color3, FOGMODE_LINEAR, DirectionalLight, ShadowGenerator, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods, Quaternion } from "./mod_babylon.js";
 import util, { v3origin, degtorad, tileSize } from "./util.js";
 
 
@@ -192,10 +192,24 @@ const mv3d = {
 		return Graphics.height/this.getFieldSize(dist).height/48;
 	},
 	getScreenPosition(node,offset=Vector3.Zero()){
-		const matrix = node.parent ? node.parent.getWorldMatrix() : BABYLON.Matrix.Identity();
+		const matrix = node.parent ? node.parent.getWorldMatrix() : Matrix.Identity();
 		const pos = node instanceof Vector3 ? node.add(offset) : node.position.add(offset);
 		const projected = Vector3.Project(pos,matrix,mv3d.scene.getTransformMatrix(),mv3d.camera.viewport);
 		return {x:projected.x*Graphics.width, y:projected.y*Graphics.height, behindCamera:projected.z>1};
+	},
+	getUnscaledMatrix(mesh){
+		const matrix = mesh.getWorldMatrix();
+		const qrot=new Quaternion(), vtrans=new Vector3();
+		matrix.decompose(null,qrot,vtrans);
+		return Matrix.Compose(Vector3.One(),qrot,vtrans);
+	},
+	getTranslationMatrix(mesh){
+		const matrix = mesh.getWorldMatrix();
+		const vrot=Vector3.Zero(), vtrans=new Vector3();
+		vrot.y=-degtorad(mv3d.blendCameraYaw.currentValue());
+		vrot.x=-degtorad(mv3d.blendCameraPitch.currentValue()-90);
+		matrix.decompose(null,null,vtrans);
+		return Matrix.Compose(Vector3.One(),vrot.toQuaternion(),vtrans);
 	},
 
 }

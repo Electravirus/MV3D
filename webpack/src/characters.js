@@ -816,6 +816,7 @@ class Character extends Sprite{
 		this.updatePosition();
 		this.updateElevation();
 		this.updateLights();
+		if(this.shadow&&this.shadow._isEnabled){ this.shadow.setEnabled(false); }
 	}
 
 	updateAlpha(){
@@ -1175,6 +1176,12 @@ override(Sprite_Character.prototype,'setFrame',o=>function(x, y, width, height){
 	const sprite = this._character.mv3d_sprite; if(!sprite){ return; }
 	if(sprite.isImageChanged()){ return; }
 	sprite.setFrame(x,y,this.patternWidth(),this.patternHeight());
+});
+
+override(Sprite_Character.prototype,'setBlendColor',o=>function(){
+	o.apply(this,arguments);
+	const sprite = this._character.mv3d_sprite; if(!sprite){ return; }
+	sprite.needsMaterialUpdate=true;
 });
 
 mv3d.Sprite = Sprite;

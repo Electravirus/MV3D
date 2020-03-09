@@ -69,7 +69,7 @@ class Balloon extends AnimSprite{
 	}
 	update(){
 		if(!this.char){ return; }
-		const pos = Vector3.TransformCoordinates(new Vector3(0,1+(0.5/this.char.mesh.scaling.y),0),this.char.mesh.getWorldMatrix());
+		const pos = transformVectorForCharacter(new Vector3(0,0.5+this.char.spriteHeight,0),this.char);
 		this.position.copyFrom(pos);
 		const bs = this.char.char.mv_sprite._balloonSprite;
 		if(!bs){ return; }
@@ -122,7 +122,7 @@ class DepthAnimation{
 				cell.position.x/48*scale,
 				getAnimationOffset(this.animation)-cell.position.y/48*scale,
 				0);
-			const animationOrigin = Vector3.TransformCoordinates(offsetVector,char.mesh.getWorldMatrix());
+			const animationOrigin = transformVectorForCharacter(offsetVector,char);
 			anim.position.copyFrom(animationOrigin);
 			const scale2=Math.pow(scale,2);
 			anim.mesh.position.set(
@@ -168,6 +168,14 @@ class DepthAnimation{
 			animationSprite.dispose();
 		}
 		this.spriteList.length=0;
+	}
+}
+
+function transformVectorForCharacter(vector,char){
+	if(!char.isEmpty&&char.shape===mv3d.enumShapes.SPRITE){
+		return Vector3.TransformCoordinates(vector,mv3d.getUnscaledMatrix(char.mesh));
+	}else{
+		return Vector3.TransformCoordinates(vector,mv3d.getTranslationMatrix(char.mesh));
 	}
 }
 
@@ -231,7 +239,7 @@ Sprite_Character.prototype.updateAnimationSprites = function() {
 		}
 
 		const offsetVector = new Vector3(0, getAnimationOffset(animationSprite), 0);
-		const animationOrigin = Vector3.TransformCoordinates(offsetVector,this._character.mv3d_sprite.mesh.getWorldMatrix());
+		const animationOrigin = transformVectorForCharacter(offsetVector,this._character.mv3d_sprite);
 		const pos = mv3d.getScreenPosition(animationOrigin);
 		const dist = Vector3.Distance(mv3d.camera.globalPosition,animationOrigin);
 		const scale = mv3d.camera.mode===ORTHOGRAPHIC_CAMERA ? mv3d.getScaleForDist() : mv3d.getScaleForDist(dist);

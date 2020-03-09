@@ -12,6 +12,8 @@ export const {
 	Vector2,
 	Vector3,
 	Vector4,
+	Quaternion,
+	Matrix,
 	Color3,
 	Color4,
 	Plane,
