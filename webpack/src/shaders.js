@@ -2,7 +2,7 @@
 export function hackShaders(){
 	hackShaderAlphaCutoff('shadowMapPixelShader');
 	hackShaderAlphaCutoff('depthPixelShader');
-	//hackDefaultShader();
+	hackDefaultShader();
 }
 
 function hackShaderAlphaCutoff(shader){
@@ -19,5 +19,9 @@ function hackShaderInsert(shader,find,insert){
 }
 
 function hackDefaultShader(){
-
+	hackShaderReplace('defaultPixelShader',
+		'vec4 color=vec4(finalDiffuse*baseAmbientColor+finalSpecular+reflectionColor+refractionColor,alpha);',
+		`vec3 mv3d_extra_emissiveColor = max(emissiveColor-1.,0.);
+		vec4 color=vec4(clamp(finalDiffuse*baseAmbientColor+finalSpecular+reflectionColor+mv3d_extra_emissiveColor+refractionColor,0.0,1.0),alpha);`,
+	);
 }

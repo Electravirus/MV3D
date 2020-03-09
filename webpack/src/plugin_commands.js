@@ -24,7 +24,6 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	}
 };
 
-
 mv3d.PluginCommand=class{
 	async animation(id,...a){
 		const char = (await this.AWAIT_CHAR(this.CHAR)).char;
@@ -239,3 +238,8 @@ mv3d.getTargetString=function(char){
 		return `@v${$gameMap._vehicles.indexOf(char)}`;
 	}
 }
+
+Game_CharacterBase.prototype.mv3d_requestAnimation = function(id,opts={}) {
+	this.requestAnimation(id);
+	this._mv3d_animationSettings=opts;
+};

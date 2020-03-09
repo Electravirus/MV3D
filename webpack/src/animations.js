@@ -26,7 +26,9 @@ class AnimSprite extends TransformNode{
 		this.material.useAlphaFromDiffuseTexture=true;
 		//this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
 		this.material.alphaCutOff = 0;
+		this.material.disableLighting=true;
 		this.material.emissiveColor.set(1,1,1);
+		this.material.ambientColor.set(1,1,1);
 		this.material.specularColor.set(0,0,0);
 		this.loadTexture(src)
 	}
@@ -154,7 +156,8 @@ class DepthAnimation{
 			this.spriteList.push(sprite);
 			sprite._mv3d_sprite_url=url;
 			//sprite.parent=this.char.spriteOrigin;
-			if(!this.animation._mv3d_animationSettings.depth){
+			const settings = this.animation._mv3d_animationSettings
+			if(settings.depth==false&&settings.depth!=null){
 				sprite.mesh.renderingGroupId=1;
 			}
 		}

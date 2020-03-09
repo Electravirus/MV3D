@@ -182,6 +182,7 @@ class Character extends Sprite{
 		this.targetElevation = this.z;
 		this.prevZ = this.z;
 		this.needsPositionUpdate=true;
+		this.needsMaterialUpdate=true;
 		//this.elevation = 0;
 
 		mv3d.getShadowMesh().then(shadow=>{
@@ -199,7 +200,7 @@ class Character extends Sprite{
 			this.eventConfigure();
 		}else{
 			this.initialConfigure();
-			this.updateEmissive();
+			this.needsMaterialUpdate=true;
 		}
 
 		this.intensiveUpdate();
@@ -258,7 +259,7 @@ class Character extends Sprite{
 		super.onTextureLoaded();
 		//this.updateFrame();
 		this.updateScale();
-		this.updateEmissive();
+		this.needsMaterialUpdate=true;
 	}
 
 	isImageChanged(){
@@ -440,24 +441,30 @@ class Character extends Sprite{
 
 		this.updateScale();
 		this.updateShape();
-		this.updateEmissive();
+		this.needsMaterialUpdate=true;
 		this.updateLightOffsets();
 	}
 
 	updateEmissive(){
 		if(!this.material){ return; }
+		const emissiveColor = this.material.emissiveColor;
+		const blendColor = this.mv_sprite._blendColor;
 		const glow = this.getConfig('glow',0);
 		if(this.lamp){
 			const lampColor=this.lamp.diffuse;
-			const intensity = minmax(0,1,this.lamp.intensity);
-			this.material.emissiveColor.set(
+			const intensity = Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));
+			emissiveColor.set(
 				Math.max(glow,lampColor.r*intensity),
 				Math.max(glow,lampColor.g*intensity),
 				Math.max(glow,lampColor.b*intensity)
 			);
 		}else{
-			this.material.emissiveColor.set(glow,glow,glow);
+			emissiveColor.set(glow,glow,glow);
 		}
+		const blendAlpha=blendColor[3]/255;
+		emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
+		emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
+		emissiveColor.b+=(2-emissiveColor.b)*Math.pow(blendColor[2]/255*blendAlpha,0.5);
 
 		this.material.mv3d_noShadow=!this.getConfig('dynShadow',true);
 	}
@@ -657,7 +664,7 @@ class Character extends Sprite{
 				this.lamp.diffuse.set(...this.blendLampColor.currentComponents());
 				this.lamp.intensity=this.blendLampIntensity.currentValue();
 				this.lamp.range=this.blendLampDistance.currentValue();
-				this.updateEmissive();
+				this.needsMaterialUpdate=true;
 			}
 		}
 	}
@@ -721,7 +728,6 @@ class Character extends Sprite{
 	}
 
 	update(){
-		this.needsPositionUpdate=false;
 		if(this.char._erased){
 			this.dispose();
 		}
@@ -770,6 +776,11 @@ class Character extends Sprite{
 			this.updateEmpty();
 		}
 		this.updateAnimations();
+		if(this.needsMaterialUpdate){
+			this.updateEmissive();
+			this.needsMaterialUpdate=false;
+		}
+		this.needsPositionUpdate=false;
 		//this.mesh.renderOutline=true;
 		//this.mesh.outlineWidth=1;
 	}
@@ -1046,6 +1057,9 @@ class Character extends Sprite{
 			if(animation.mv3d_animation){
 				animation.mv3d_animation.update();
 			}
+		}
+		if(this.char.mv_sprite._animationSprites.length){
+			this.needsMaterialUpdate=true;
 		}
 	}
 
