@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2 } from './mod_babylon.js';
+import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2, Color3 } from './mod_babylon.js';
 import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep } from './util.js';
 
 class ConfigurationFunction{
@@ -79,7 +79,11 @@ function TextureConfigurator(name,extraParams=''){
 			conf[`${name}_alpha`]=Number(params.alpha);
 		}
 		if(params.glow){
-			conf[`${name}_glow`]=Number(params.glow);
+			if(isNaN(params.glow)){
+				conf[`${name}_glow`] = makeColor(params.glow);
+			}else{
+				conf[`${name}_glow`] = new Color3(Number(params.glow),Number(params.glow),Number(params.glow));
+			}
 		}
 	});
 }
@@ -293,7 +297,13 @@ Object.assign(mv3d,{
 			conf.transparent=true;
 			conf.alpha=Number(n);
 		},
-		glow(conf,n){ conf.glow=Number(n); },
+		glow(conf,n){
+			if(isNaN(n)){
+				conf.glow = makeColor(n);
+			}else{
+				conf.glow = new Color3(Number(n),Number(n),Number(n));
+			}
+		},
 		pass(conf,s=''){
 			s=falseString(s.toLowerCase());
 			if(!s || s[0]==='x'){
@@ -352,7 +362,13 @@ Object.assign(mv3d,{
 		alpha(conf,n){
 			conf.alpha=Number(n);
 		},
-		glow(conf,n){ conf.glow=Number(n); },
+		glow(conf,n){
+			if(isNaN(n)){
+				conf.glow = makeColor(n);
+			}else{
+				conf.glow = new Color3(Number(n),Number(n),Number(n));
+			}
+		},
 		dirfix(conf,b){
 			conf.dirfix=booleanString(b);
 		},

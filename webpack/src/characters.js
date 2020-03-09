@@ -448,19 +448,19 @@ class Character extends Sprite{
 	updateEmissive(){
 		if(!this.material){ return; }
 		const emissiveColor = this.material.emissiveColor;
-		const blendColor = this.mv_sprite._blendColor;
-		const glow = this.getConfig('glow',0);
+		const glow = this.getConfig('glow',BABYLON.Color3.Black());
 		if(this.lamp){
 			const lampColor=this.lamp.diffuse;
 			const intensity = Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));
 			emissiveColor.set(
-				Math.max(glow,lampColor.r*intensity),
-				Math.max(glow,lampColor.g*intensity),
-				Math.max(glow,lampColor.b*intensity)
+				Math.max(glow.r,lampColor.r*intensity),
+				Math.max(glow.g,lampColor.g*intensity),
+				Math.max(glow.b,lampColor.b*intensity)
 			);
 		}else{
-			emissiveColor.set(glow,glow,glow);
+			emissiveColor.set(glow.r,glow.g,glow.b);
 		}
+		const blendColor = this.mv_sprite._blendColor;
 		const blendAlpha=blendColor[3]/255;
 		emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
 		emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
@@ -738,8 +738,8 @@ class Character extends Sprite{
 			this.visible=this.visible&&this.char.isVisible();
 		}
 		this.disabled=!this.visible;
-		if(this.char.isTransparent() || !this.char._characterName&&!this.char._tileId
-		|| !this.char.mv3d_inRenderDist() || !this.textureLoaded){
+		if(this.char.isTransparent() || !this.char.mv3d_inRenderDist()
+		|| (this.char._characterName||this.char._tileId)&&!this.textureLoaded){
 			this.visible=false;
 		}
 		if(!this._isEnabled){

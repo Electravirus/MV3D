@@ -552,6 +552,7 @@ player upgrade their airship's height and speed.
 - hsumi
 - nemoma
 - AmalgamAsh
+- Gaikiken
 
 
 ## Patron Heroes:
@@ -559,7 +560,6 @@ player upgrade their airship's height and speed.
 - A Memory of Eternity
 - Fyoha
 - 冬空 橙
-- 中华国哥
 - nyrion
 - Vaan Auroris
 

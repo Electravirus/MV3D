@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { Texture, StandardMaterial, Color3 } from './mod_babylon.js';
-import { tileWidth, tileHeight } from './util.js';
+import { tileWidth, tileHeight, unround } from './util.js';
 
 Object.assign(mv3d,{
 
@@ -102,7 +102,7 @@ Object.assign(mv3d,{
 		material.mv3d_noShadow=!options.shadow;
 		material.alphaCutOff = mv3d.ALPHA_CUTOFF;
 		material.ambientColor.set(1,1,1);
-		material.emissiveColor.set(options.glow,options.glow,options.glow);
+		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
 		if(!isNaN(this.LIGHT_LIMIT)){ material.maxSimultaneousLights=this.LIGHT_LIMIT; }
 		this.materialCache[key]=material;
@@ -125,8 +125,10 @@ Object.assign(mv3d,{
 			}
 		}else{ options.alpha=1; }
 		if('glow' in options){
-			options.glow = Math.round(options.glow*7)/7;
-		}else{ options.glow=0; }
+			options.glow.r = unround(options.glow.r,255);
+			options.glow.g = unround(options.glow.g,255);
+			options.glow.b = unround(options.glow.b,255);
+		}else{ options.glow=Color3.Black(); }
 		if(!('shadow' in options)){options.shadow=true;}
 	},
 
@@ -134,8 +136,9 @@ Object.assign(mv3d,{
 		let extra = 0;
 		extra|=Boolean(options.transparent)<<0;
 		extra|=7-options.alpha*7<<1;
-		extra|=options.glow*7<<4;
-		extra|=(!options.shadow)<<7;
+		extra|=(!options.shadow)<<4;
+		// 3 empty bits available here
+		extra|=options.glow.toNumber()<<8;
 		return extra.toString(36);
 	},
 
