@@ -102,6 +102,7 @@ Object.assign(mv3d,{
 		material.mv3d_noShadow=!options.shadow;
 		material.alphaCutOff = mv3d.ALPHA_CUTOFF;
 		material.ambientColor.set(1,1,1);
+		material.mv3d_glowColor=options.glow;
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
 		if(!isNaN(this.LIGHT_LIMIT)){ material.maxSimultaneousLights=this.LIGHT_LIMIT; }

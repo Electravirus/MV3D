@@ -449,6 +449,7 @@ class Character extends Sprite{
 		if(!this.material){ return; }
 		const emissiveColor = this.material.emissiveColor;
 		const glow = this.getConfig('glow',BABYLON.Color3.Black());
+		this.material.mv3d_glowColor=glow;
 		if(this.lamp){
 			const lampColor=this.lamp.diffuse;
 			const intensity = Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));

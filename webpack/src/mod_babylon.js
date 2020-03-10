@@ -11,7 +11,6 @@ export const {
 	ShadowGenerator,
 	Vector2,
 	Vector3,
-	Vector4,
 	Quaternion,
 	Matrix,
 	Color3,
