@@ -138,7 +138,8 @@ you can set alpha to 1 to turn on alpha blending.
 Examples: texture(|1), texture(alpha:0.5)
 
 The glow parameter will make the texture glow in the dark. Good for lava.  
-Example: texture(||1), texture(glow:1)
+Can take a number (0-1) or a color.  
+Example: texture(||1), texture(glow:1), texture(glow:red)
 
 [Anim] is a named parameter group for defining custom animated tiles.  
 The number supplied to animx and animy will be the offset used by the
@@ -298,6 +299,10 @@ Examples: shadow(0), shadow(3)
 The alpha function is used to make the event partially transparent or to turn
 on alpha blending.  
 Examples: alpha(0.5), alpha(1)
+
+The glow parameter will make the event glow in the dark.  
+Can take a number (0-1) or a color.  
+Examples: glow(1), glow(red)
 
 The dirfix function will set whether the event rotates depending on the camera
 angle.  

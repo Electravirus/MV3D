@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2, Color3 } from './mod_babylon.js';
+import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2, Color3, Color4 } from './mod_babylon.js';
 import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep } from './util.js';
 
 class ConfigurationFunction{
@@ -82,7 +82,7 @@ function TextureConfigurator(name,extraParams=''){
 			if(isNaN(params.glow)){
 				conf[`${name}_glow`] = makeColor(params.glow);
 			}else{
-				conf[`${name}_glow`] = new Color3(Number(params.glow),Number(params.glow),Number(params.glow));
+				conf[`${name}_glow`] = new Color4(Number(params.glow),Number(params.glow),Number(params.glow),1);
 			}
 		}
 	});
@@ -301,7 +301,7 @@ Object.assign(mv3d,{
 			if(isNaN(n)){
 				conf.glow = makeColor(n);
 			}else{
-				conf.glow = new Color3(Number(n),Number(n),Number(n));
+				conf.glow = new Color4(Number(n),Number(n),Number(n),1);
 			}
 		},
 		pass(conf,s=''){
@@ -366,7 +366,7 @@ Object.assign(mv3d,{
 			if(isNaN(n)){
 				conf.glow = makeColor(n);
 			}else{
-				conf.glow = new Color3(Number(n),Number(n),Number(n));
+				conf.glow = new Color4(Number(n),Number(n),Number(n),1);
 			}
 		},
 		dirfix(conf,b){

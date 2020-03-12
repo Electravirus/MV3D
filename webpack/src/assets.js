@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { Texture, StandardMaterial, Color3 } from './mod_babylon.js';
+import { Texture, StandardMaterial, Color3, Color4 } from './mod_babylon.js';
 import { tileWidth, tileHeight, unround } from './util.js';
 
 Object.assign(mv3d,{
@@ -129,7 +129,7 @@ Object.assign(mv3d,{
 			options.glow.r = unround(options.glow.r,255);
 			options.glow.g = unround(options.glow.g,255);
 			options.glow.b = unround(options.glow.b,255);
-		}else{ options.glow=Color3.Black(); }
+		}else{ options.glow=new Color4(0,0,0,0); }
 		if(!('shadow' in options)){options.shadow=true;}
 	},
 

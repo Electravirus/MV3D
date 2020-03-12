@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { TransformNode, MeshBuilder, FRONTSIDE, Texture, StandardMaterial, Color3, Mesh, WORLDSPACE, Vector2, SpotLight, Vector3, PointLight, LOCALSPACE, DOUBLESIDE, Plane } from "./mod_babylon.js";
+import { TransformNode, MeshBuilder, FRONTSIDE, Texture, StandardMaterial, Color3, Mesh, WORLDSPACE, Vector2, SpotLight, Vector3, PointLight, LOCALSPACE, DOUBLESIDE, Plane, Color4 } from "./mod_babylon.js";
 import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
 
@@ -448,7 +448,7 @@ class Character extends Sprite{
 	updateEmissive(){
 		if(!this.material){ return; }
 		const emissiveColor = this.material.emissiveColor;
-		const glow = this.getConfig('glow',BABYLON.Color3.Black());
+		const glow = this.getConfig('glow', new Color4(0,0,0,0));
 		this.material.mv3d_glowColor=glow;
 		if(this.lamp){
 			const lampColor=this.lamp.diffuse;

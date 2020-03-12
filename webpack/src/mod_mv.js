@@ -130,3 +130,15 @@ SceneManager.initGraphics = function() {
 		throw new Error("MV3D requires WebGL");
 	}
 };
+
+// force webgl
+SceneManager.preferableRendererType = function() {
+    if (Utils.isOptionValid('canvas')) {
+        return 'canvas';
+    } else if (Utils.isOptionValid('webgl')) {
+        return 'webgl';
+    } else {
+		if(Graphics.hasWebGL()){ return 'webgl'; }
+        return 'auto';
+    }
+};
