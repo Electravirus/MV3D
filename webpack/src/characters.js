@@ -161,9 +161,6 @@ class Character extends Sprite{
 		if(!this.char.mv3d_settings){ this.char.mv3d_settings={}; }
 		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
 
-		this.updateCharacter();
-		this.updateShape();
-
 		this.isVehicle = this.char instanceof Game_Vehicle;
 		this.isBoat = this.isVehicle && this.char.isBoat();
 		this.isShip = this.isVehicle && this.char.isShip();
@@ -171,6 +168,9 @@ class Character extends Sprite{
 		this.isEvent = this.char instanceof Game_Event;
 		this.isPlayer = this.char instanceof Game_Player;
 		this.isFollower = this.char instanceof Game_Follower;
+
+		this.updateCharacter();
+		this.updateShape();
 
 		if(!('_mv3d_z' in this.char)){
 			this.char._mv3d_z = mv3d.getWalkHeight(this.char.x,this.char.y);
@@ -277,15 +277,19 @@ class Character extends Sprite{
 		this._characterIndex = this._character.characterIndex();
 		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
 		this.isEmpty=false;
+		this.mesh.setEnabled(true);
 		if(this._tileId>0){
 			this.setTileMaterial(this._tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
 		}else{
 			this.isEmpty=true;
-			this.setEnabled(false);
+			this.textureLoaded=false;
+			this.disposeMaterial();
+			this.mesh.setEnabled(false);
 			this.spriteWidth=1;
 			this.spriteHeight=1;
+			this.updateScale();
 		}
 	}
 	setFrame(x,y,w,h){
@@ -294,8 +298,12 @@ class Character extends Sprite{
 	}
 
 	async updateScale(){
-		//if(!this.texture||!this.mv_sprite){ return; }
-		//await this.waitTextureLoaded();
+		if(this.isEmpty){
+			this.spriteWidth=1;
+			this.spriteHeight=1;
+			this.mesh.scaling.set(1,1,1);
+			return;
+		}
 		if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
 		this.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new Vector2(1,1));
@@ -485,6 +493,11 @@ class Character extends Sprite{
 			this.mesh.order=this.order;
 			if(this.material){
 				this.mesh.material=this.material;
+			}
+			if(this.isEmpty){
+				this.mesh.setEnabled(false);
+			}else{
+				this.mesh.setEnabled(true);
 			}
 			this.mesh.mv3d_isSetup=true;
 		}
