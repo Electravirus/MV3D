@@ -41,7 +41,7 @@ Object.assign(mv3d,{
 
 	setupSpriteMeshes(){
 		this.Meshes = Sprite.Meshes = {};
-		Sprite.Meshes.BASIC=MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene)
+		Sprite.Meshes.BASIC=MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene);
 		Sprite.Meshes.FLAT=Mesh.MergeMeshes([Sprite.Meshes.BASIC.clone().rotate(XAxis,Math.PI/2,WORLDSPACE)]);
 		Sprite.Meshes.SPRITE=Mesh.MergeMeshes([Sprite.Meshes.BASIC.clone().translate(YAxis,0.5,WORLDSPACE)]);
 		Sprite.Meshes.CROSS=Mesh.MergeMeshes([
@@ -49,6 +49,7 @@ Object.assign(mv3d,{
 			Sprite.Meshes.SPRITE.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
 		]);
 		for (const key in Sprite.Meshes){
+			Sprite.Meshes[key].renderingGroupId=mv3d.enumRenderGroups.MAIN;
 			mv3d.scene.removeMesh(Sprite.Meshes[key]);
 		}
 	},
@@ -246,7 +247,7 @@ class Character extends Sprite{
 		}
 		this._waitingForBitmap=true;
 		this.char.mv_sprite.updateBitmap();
-		await new Promise(resolve=>this.char.mv_sprite.bitmap.addLoadListener(resolve));
+		await mv3d.waitBitmapLoaded(this.char.mv_sprite.bitmap);
 		this._waitingForBitmap=false;
 	}
 

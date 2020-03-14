@@ -82,6 +82,7 @@ export const tileSize=()=>tileWidth();
 export const tileWidth=()=>Game_Map.prototype.tileWidth();
 export const tileHeight=()=>Game_Map.prototype.tileHeight();
 
+export const file=(folder=mv3d.MV3D_FOLDER,name)=>name.startsWith('/')?name:`${folder}/${name}`;
 
 // useful consts
 export const XAxis = new Vector3(1,0,0);
@@ -132,6 +133,6 @@ const util = {
 	sleep,degtorad,radtodeg,sin,cos,unround,tileSize,tileWidth,tileHeight,
 	pointtorad,pointtodeg,minmax,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
-	overload, override
+	overload, override, file
 };
 export default util;

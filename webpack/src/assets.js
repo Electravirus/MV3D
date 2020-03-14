@@ -32,6 +32,10 @@ Object.assign(mv3d,{
 		});
 	})},
 
+	waitBitmapLoaded(bitmap){
+		return new Promise(resolve=>bitmap.addLoadListener(resolve));
+	},
+
 	async getCachedTilesetTexture(setN,animX=0,animY=0){
 		const key = `TS:${setN}|${animX},${animY}`;
 		if(key in this.textureCache){

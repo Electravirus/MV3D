@@ -245,38 +245,10 @@ Object.assign(mv3d,{
 		return direction.rot;
 	},
 
-	getWalkHeight(x,y,ignoreSlopes=false){
-		// get the height of characters for given x,y coord. Uses float coords. Should support ramps.
-		const rx=Math.round(x), ry=Math.round(y);
-		const tileData=this.getTileData(rx,ry);
-		let height=0;
-		let lastHeight=0;
-		for(let l=0; l<=3; ++l){
-			const tileId=tileData[l];
-			if(this.isTileEmpty(tileId)&&l>0){ continue; }
-			height += lastHeight;
-			const data = this.getTileConfig(tileId,rx,ry,l);
-			const shape = data.shape;
-			if(shape===this.enumShapes.SLOPE){
-				if(ignoreSlopes){
-					lastHeight=data.slopeHeight||1;
-					height+=this.getTileHeight(rx,ry,l) - lastHeight;
-				}else{
-					const slopeHeight = this.getSlopeHeight(x,y,l,data);
-					height+=this.getTileHeight(rx,ry,l)-(data.slopeHeight||1)+slopeHeight;
-					lastHeight=0;
-				}
-			}else{
-				lastHeight = this.getTileHeight(rx,ry,l);
-			}
-			lastHeight += this.getTileFringe(rx,ry,l);
-			if(!this.isSpecialShape(shape)){
-				height+=lastHeight;
-				lastHeight=0;
-			}
-		}
-		return height;
-		
+	getWalkHeight(x,y){
+		// get top height at x,y. Used for jumping and initializing z.
+		const heights = this.getCollisionHeights(x,y);
+		return heights[heights.length-1].z2;
 	},
 
 	getSlopeHeight(x,y,l,data=null){

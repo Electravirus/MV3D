@@ -99,6 +99,7 @@ export class MapCell extends TransformNode{
 		if(this.mesh){
 			this.mesh.parent=this;
 			this.mesh.alphaIndex=0;
+			this.mesh.renderingGroupId=mv3d.enumRenderGroups.MAIN;
 			mv3d.callFeatures('createCellMesh',this.mesh);
 		}
 		delete this.builder

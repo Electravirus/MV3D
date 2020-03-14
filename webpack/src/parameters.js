@@ -153,6 +153,10 @@ Object.assign(mv3d,{
 	},
 
 	updateParameters(){
+		this.updateRenderDist();
+		this.callFeatures('updateParameters');
+	},
+	updateRenderDist(){
 		if(this.camera.mode===ORTHOGRAPHIC_CAMERA){
 			this.camera.maxZ=this.RENDER_DIST;
 			this.camera.minZ=-this.RENDER_DIST;
@@ -160,8 +164,7 @@ Object.assign(mv3d,{
 			this.camera.maxZ=this.RENDER_DIST;
 			this.camera.minZ=0.1;
 		}
-		this.callFeatures('updateParameters');
-	}
+	},
 });
 
 Object.defineProperties(mv3d,{

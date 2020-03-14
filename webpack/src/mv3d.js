@@ -33,6 +33,8 @@ const mv3d = {
 		this.camera.minZ=0.1;
 		this.camera.maxZ=this.RENDER_DIST;
 
+		//this.scene.activeCameras.push(this.camera);
+
 		this.scene.ambientColor = new Color3(1,1,1);
 		this.scene.fogMode=FOGMODE_LINEAR;
 
@@ -65,6 +67,7 @@ const mv3d = {
 	render(){
 		this.scene.render();
 		this.texture.update();
+		//this.callFeatures('render');
 	},
 
 	lastMapUpdate:0,

@@ -91,7 +91,7 @@ Object.assign(mv3d,{
 		|this.blendCameraDist.update()|this.blendCameraHeight.update()|$gameScreen._shake!==0){
 			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
 			this.cameraNode.yaw = this.blendCameraYaw.currentValue();
-			this.camera.roll = this.blendCameraRoll.currentValue();
+			this.cameraNode.roll = this.blendCameraRoll.currentValue();
 			this.cameraNode.position.set(0,0,0);
 			this.cameraNode.translate(ZAxis,-this.blendCameraDist.currentValue(),LOCALSPACE);
 			if(this.camera.mode===ORTHOGRAPHIC_CAMERA){
@@ -116,7 +116,7 @@ Object.assign(mv3d,{
 
 		//fog
 		if(reorient|this.blendFogColor.update()|this.blendFogNear.update()|this.blendFogFar.update()){
-			if(mv3d.featureEnabled('alphaFog')){
+			if(mv3d.hasAlphaFog){
 				this.scene.fogStart=this.blendFogNear.currentValue();
 				this.scene.fogEnd=this.blendFogFar.currentValue();
 			}else{
@@ -128,11 +128,8 @@ Object.assign(mv3d,{
 				this.blendFogColor.g.currentValue()/255,
 				this.blendFogColor.b.currentValue()/255,
 			);
-			if($gameMap.parallaxName()){
-				mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),0);
-			}else{
-				mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),1);
-			}
+			mv3d.updateClearColor();
+			mv3d.updateRenderDist();
 		}
 
 		//light
@@ -147,16 +144,24 @@ Object.assign(mv3d,{
 		this.callFeatures('blend',reorient);
 	},
 
+	updateClearColor(){
+		if($gameMap.parallaxName()||mv3d.hasSkybox){
+			if(mv3d.hasAlphaFog){
+				mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),0);
+			}else{
+				mv3d.scene.clearColor.set(0,0,0,0);
+			}
+		}else{
+			mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),1);
+		}
+	},
+
 });
 
 const _changeParallax = Game_Map.prototype.changeParallax;
 Game_Map.prototype.changeParallax = function() {
 	_changeParallax.apply(this,arguments);
-	if($gameMap.parallaxName()){
-		mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),0);
-	}else{
-		mv3d.scene.clearColor.set(...mv3d.blendFogColor.currentComponents(),1);
-	}
+	mv3d.updateClearColor();
 };
 
 

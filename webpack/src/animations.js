@@ -158,7 +158,7 @@ class DepthAnimation{
 			//sprite.parent=this.char.spriteOrigin;
 			const settings = this.animation._mv3d_animationSettings
 			if(settings.depth==false&&settings.depth!=null){
-				sprite.mesh.renderingGroupId=1;
+				sprite.mesh.renderingGroupId=mv3d.enumRenderGroups.FRONT;
 			}
 		}
 		return sprite;
