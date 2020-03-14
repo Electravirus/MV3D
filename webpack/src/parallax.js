@@ -59,13 +59,13 @@ Game_Map.prototype.updateScroll = function() {
 
 Game_CharacterBase.prototype.mv3d_inRenderDist=function(){
 	const loopPos = mv3d.loopCoords(this.x,this.y);
-	return Math.abs(loopPos.x - mv3d.cameraStick.x)<=mv3d.RENDER_DIST
-	&& Math.abs(loopPos.y - mv3d.cameraStick.y)<=mv3d.RENDER_DIST;
+	return Math.abs(loopPos.x - mv3d.cameraStick.x)<=mv3d.renderDist
+	&& Math.abs(loopPos.y - mv3d.cameraStick.y)<=mv3d.renderDist;
 };
 
 override(Game_CharacterBase.prototype,'isNearTheScreen',o=>function(){
 	if(!mv3d.EVENTS_UPDATE_NEAR){ return o.apply(this,arguments); }
-	return this.mv3d_inRenderDist();
+	return this.mv3d_inRenderDist() || o.apply(this,arguments);
 });
 
 

@@ -158,10 +158,10 @@ Object.assign(mv3d,{
 	},
 	updateRenderDist(){
 		if(this.camera.mode===ORTHOGRAPHIC_CAMERA){
-			this.camera.maxZ=this.RENDER_DIST;
-			this.camera.minZ=-this.RENDER_DIST;
+			this.camera.maxZ=this.renderDist;
+			this.camera.minZ=-this.renderDist;
 		}else{
-			this.camera.maxZ=this.RENDER_DIST;
+			this.camera.maxZ=this.renderDist;
 			this.camera.minZ=0.1;
 		}
 	},
@@ -170,5 +170,8 @@ Object.assign(mv3d,{
 Object.defineProperties(mv3d,{
 	AMBIENT_COLOR:{
 		get(){ return mv3d.featureEnabled('dynamicShadows')?0x888888:0xffffff; }
-	}
+	},
+	renderDist:{
+		get(){ return Math.min(this.RENDER_DIST, mv3d.blendFogFar.currentValue()+7.5); }
+	},
 });

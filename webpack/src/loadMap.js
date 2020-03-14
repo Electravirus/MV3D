@@ -62,10 +62,10 @@ Object.assign(mv3d,{
 		}
 		// get range of cells based on render distance
 		const bounds = {
-			left:Math.floor((this.cameraStick.x-this.RENDER_DIST)/this.CELL_SIZE),
-			right:Math.floor((this.cameraStick.x+this.RENDER_DIST)/this.CELL_SIZE),
-			top:Math.floor((this.cameraStick.y-this.RENDER_DIST)/this.CELL_SIZE),
-			bottom:Math.floor((this.cameraStick.y+this.RENDER_DIST)/this.CELL_SIZE),
+			left:Math.floor((this.cameraStick.x-this.renderDist)/this.CELL_SIZE),
+			right:Math.floor((this.cameraStick.x+this.renderDist)/this.CELL_SIZE),
+			top:Math.floor((this.cameraStick.y-this.renderDist)/this.CELL_SIZE),
+			bottom:Math.floor((this.cameraStick.y+this.renderDist)/this.CELL_SIZE),
 		}
 		//clamp cell range to map
 		if(!$gameMap.isLoopHorizontal()){
