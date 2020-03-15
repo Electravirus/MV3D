@@ -8,22 +8,21 @@ Object.assign(mv3d,{
 	textureCache:{},
 	materialCache:{},
 
-	createTexture(url){return new Promise((resolve,reject)=>{
+	async createTexture(url){
+		const textureUrl = await this.getTextureUrl(url);
+		const texture = new BABYLON.Texture(textureUrl,mv3d.scene,!mv3d.MIPMAP,true,BABYLON.Texture.NEAREST_SAMPLINGMODE);
+		return texture;
+	},
+
+	async getTextureUrl(url){
 		const bitmap = ImageManager.loadNormalBitmap(encodeURI(url));
 		if(Decrypter.hasEncryptedImages){
-			bitmap.addLoadListener(()=>{
-				const texture = new BABYLON.DynamicTexture('dt',{width:bitmap.width,height:bitmap.height},!mv3d.MIPMAP,BABYLON.Texture.NEAREST_SAMPLINGMODE);
-				texture.updateSamplingMode(1);
-				texture.getContext().drawImage(bitmap.canvas,0,0);
-				texture.update();
-				resolve(texture);
-			});
+			await mv3d.waitBitmapLoaded(bitmap);
+			return bitmap.canvas.toDataURL();
 		}else{
-			const texture = new BABYLON.Texture(bitmap._image.src,mv3d.scene,!mv3d.MIPMAP,true,BABYLON.Texture.NEAREST_SAMPLINGMODE);
-			resolve(texture);
+			return bitmap._image.src;
 		}
-
-	})},
+	},
 
 	waitTextureLoaded(texture){return new Promise((resolve,reject)=>{
 		if(texture.isReady()){ resolve(); }

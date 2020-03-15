@@ -82,7 +82,11 @@ export const tileSize=()=>tileWidth();
 export const tileWidth=()=>Game_Map.prototype.tileWidth();
 export const tileHeight=()=>Game_Map.prototype.tileHeight();
 
-export const file=(folder=mv3d.MV3D_FOLDER,name)=>name.startsWith('/')?name:`${folder}/${name}`;
+export const file=(folder=mv3d.MV3D_FOLDER,name)=>{
+	if(name.startsWith('/')){ return '.'+name; }
+	if(folder.startsWith('/')){ folder='.'+folder; }
+	return `${folder}/${name}`;
+};
 
 // useful consts
 export const XAxis = new Vector3(1,0,0);

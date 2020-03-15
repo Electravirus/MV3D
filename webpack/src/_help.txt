@@ -288,7 +288,9 @@ Examples: bush(true), bush(false)
 
 You can disable or change the size of the event's shadow using the shadow
 function.  
-Examples: shadow(0), shadow(3)
+A second parameter can be supplied to control how far the shadow may travel.
+before fading out.  
+Examples: shadow(0), shadow(3), shadow(1,6)
 
 The alpha function is used to make the event partially transparent or to turn
 on alpha blending.  
@@ -526,6 +528,18 @@ Sets the elevation of the target character.
 
 Configure the target with a list of configuration functions.
 Example: mv3d ＠p configure scale(2)
+
+---
+
+    mv3d ＠t animation <id>
+    mv3d ＠t animation <id> depth <true/false> scale <n>
+
+Play an animation on the event, with additional features.  
+Animations played with this command will have depth by default 
+(they can be occluded by other 3D objects).  
+They can also have a custom scale.  
+Examples:  
+mv3d ＠p animation 8 scale 0.25
 
 ---
 
