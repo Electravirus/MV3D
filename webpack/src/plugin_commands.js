@@ -243,3 +243,14 @@ Game_CharacterBase.prototype.mv3d_requestAnimation = function(id,opts={}) {
 	this.requestAnimation(id);
 	this._mv3d_animationSettings=opts;
 };
+
+Game_Character.prototype.mv3d_configure = function(data){
+	mv3d.readConfigurationFunctions(
+		data,
+		mv3d.eventConfigurationFunctions,
+		this.mv3d_settings,
+	);
+	if(this.mv3d_sprite){
+		this.mv3d_sprite.pageConfigure(this.mv3d_settings);
+	}
+};

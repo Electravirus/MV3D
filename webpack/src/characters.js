@@ -481,7 +481,7 @@ class Character extends Sprite{
 
 	configureHeight(){
 		this.isAbove = this.char._priorityType===2;
-		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('z')?mv3d.EVENT_HEIGHT:0) );
+		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('zlock')?mv3d.EVENT_HEIGHT:0) );
 		this.blendElevation.setValue(height,0);
 		this.z = this.platformHeight + height;
 	}
