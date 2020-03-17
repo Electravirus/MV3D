@@ -909,11 +909,9 @@ class Character extends Sprite{
 			this.lightOrigin.y=0;
 		}
 
-		this.spriteOrigin.x += this.getConfig('x',0);
-		this.spriteOrigin.y += this.getConfig('y',0);
-
-		const height = this.getConfig('height',0);
-		if(height<0){ this.spriteOrigin.z+=height; }
+		this.spriteOrigin.x += this.getConfig('xoff',0);
+		this.spriteOrigin.y += this.getConfig('yoff',0);
+		this.spriteOrigin.z += this.getConfig('zoff',0);
 	}
 
 	updatePosition(){
@@ -958,8 +956,8 @@ class Character extends Sprite{
 			}
 		}
 
-		if(this.hasConfig('z')){
-			this.z=this.getConfig('z',0);
+		if(this.hasConfig('zlock')){
+			this.z=this.getConfig('zlock',0);
 			this.z += this.blendElevation.currentValue();
 			return;
 		}
@@ -1047,8 +1045,7 @@ class Character extends Sprite{
 		}
 		if(!shadowVisible){ return; }
 
-		const shadowBase = Math.min(0,this.getConfig('height',0));
-		const shadowDist = Math.max(this.z - this.platformHeight, shadowBase);
+		const shadowDist = Math.max(this.z - this.platformHeight, 0);
 		const shadowFadeDist = this.getConfig('shadowDist',4);
 		const shadowStrength = Math.max(0,1-Math.abs(shadowDist)/shadowFadeDist);
 		this.shadow.z = -shadowDist + mv3d.LAYER_DIST*3.5;
@@ -1115,11 +1112,6 @@ class Character extends Sprite{
 		Object.defineProperties(collider,{
 			z1:{get:()=>this.z },
 			z2:{get:()=>{
-				let z = this.z;
-				if(this.hasConfig('height')){
-					const height = this.getConfig('height')
-					if(height<0){ z += height; }
-				}
 				return Math.max(this.z,this.z+this.getCHeight());
 			}}
 		});
@@ -1155,10 +1147,6 @@ class Character extends Sprite{
 	}
 
 	getCollisionHeight(z=this.z){
-		if(this.hasConfig('height')){
-			const height = this.getConfig('height')
-			if(height<0){ z += height; }
-		}
 		const cHeight=this.getCHeight();
 		return {z1:z, z2:z+cHeight, char:this};
 	}

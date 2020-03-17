@@ -100,14 +100,8 @@ Object.assign(mv3d,{
 				this.camera.orthoRight=fieldSize.width/2;
 				this.camera.orthoTop=fieldSize.height/2;
 				this.camera.orthoBottom=-fieldSize.height/2;
-				//this.camera.zoom=10/this.blendCameraDist.currentValue();
-				//this.camera.updateProjectionMatrix();
-				//this.camera.maxZ=this.RENDER_DIST;
-				//this.camera.minZ=-this.RENDER_DIST;
 			}else{
 				if(this.cameraNode.z<0){ this.cameraNode.z=0; }
-				//this.camera.maxZ=this.RENDER_DIST;
-				//this.camera.minZ=0.1;
 			}
 			this.cameraNode.z += this.blendCameraHeight.currentValue();
 			this.cameraNode.translate(XAxis,-$gameScreen._shake/48,LOCALSPACE);

@@ -245,6 +245,7 @@ export class MapCell extends TransformNode{
 		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'side');
 		const isAutotile = Tilemap.isAutotile(tileId);
 		const edges = [];
+		const fenceposts = tileConf.fencePosts==null?true:tileConf.fencePosts;
 		for (let ni=0; ni<MapCell.neighborPositions.length; ++ni){
 			const np = MapCell.neighborPositions[ni];
 			const neighborHeight = mv3d.getTileHeight(this.ox+x+np.x,this.oy+y+np.y,l);
@@ -253,10 +254,14 @@ export class MapCell extends TransformNode{
 		for (let ni=0; ni<MapCell.neighborPositions.length; ++ni){
 			const np = MapCell.neighborPositions[ni];
 
-			const edge = edges.includes(ni);
-			if(edge&&edges.length<4&&!isAutotile){ continue; }
+			let edge = edges.includes(ni);
+			if(!isAutotile||!fenceposts){
+				let connect = !(edge&&edges.length<4);
+				if(edges.length===3 && !edges.includes((ni+2)%4)){ connect=true; }
+				if(!connect){ continue; }
+			}
 
-			const rightSide = np.x>0||np.y>0;
+			const rightSide = np.x>0||np.y<0;
 			let rot = Math.atan2(np.x, np.y)+Math.PI/2;
 			if(rightSide){
 				rot-=Math.PI;
@@ -278,7 +283,7 @@ export class MapCell extends TransformNode{
 			}else{
 				const rect = configRect ? configRect : mv3d.getTileRects(tileId)[0];
 				this.builder.addWallFace(tsMaterial,
-					rect.x+rect.width/2*rightSide,
+					rect.x+rect.width/2*(np.x>0||np.y>0),
 					rect.y,
 					rect.width/2, rect.height,
 					x+np.x/4,

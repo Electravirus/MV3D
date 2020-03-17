@@ -290,9 +290,12 @@ Object.assign(mv3d,{
 				mv3d.tilesetConfigurationFunctions.side.func(conf,params);
 			}
 		}),
-		shape(conf,name){
+		shape(conf,name,data){
 			conf.shape=mv3d.enumShapes[name.toUpperCase()];
-			if(conf.shape===mv3d.enumShapes.SLOPE && !('slopeHeight' in conf)){ conf.slopeHeight=1; }
+			if(conf.shape===mv3d.enumShapes.SLOPE && data||!('slopeHeight' in conf)){ conf.slopeHeight=Number(data)||1; }
+			if(data){
+				if(conf.shape===mv3d.enumShapes.FENCE){ conf.fencePosts=booleanString(data); }
+			}
 		},
 		alpha(conf,n){
 			conf.transparent=true;
@@ -320,10 +323,32 @@ Object.assign(mv3d,{
 		},
 	},
 	eventConfigurationFunctions:{
-		height(conf,n){ conf.height=Number(n); },
-		z(conf,n){ conf.z=Number(n); },
-		x(conf,n){ conf.x=Number(n); },
-		y(conf,n){ conf.y=Number(n); },
+		height(conf,n){
+			const height = Number(n);
+			if(height<0){
+				conf.zoff=height;
+			}else{
+				conf.height=height;
+			}
+			console.warn('event config height() is deprecated. Use elevation(), offset(), or zoff() instead.');
+		},
+		elevation(conf,n){ conf.height=Number(n); },
+		z(conf,n){ conf.zlock=Number(n); },
+		x(conf,n){ conf.xoff=Number(n); console.warn('event config x() is deprecated. Use offset() or xoff() instead.'); },
+		y(conf,n){ conf.yoff=Number(n); console.warn('event config y() is deprecated. Use offset() or yoff() instead.'); },
+		xoff(conf,n){ conf.xoff=Number(n); },
+		yoff(conf,n){ conf.yoff=Number(n); },
+		zoff(conf,n){ conf.zoff=Number(n); },
+		offset:new ConfigurationFunction('x,y,z',function(conf,params){
+			if(params.x)conf.xoff=Number(params.x);
+			if(params.y)conf.yoff=Number(params.y);
+			if(params.z)conf.zoff=Number(params.z);
+		}),
+		pos:new ConfigurationFunction('x,y',function(conf,params){
+			if(!conf.pos){conf.pos={};}
+			if(params.x){ conf.pos.x=params.x; }
+			if(params.y){ conf.pos.y=params.y; }
+		}),
 		scale(conf,x,y=x){ conf.scale = new Vector2(Number(x),Number(y)); },
 		rot(conf,n){ conf.rot=Number(n); },
 		yaw(conf,n){ conf.yaw=Number(n); },
@@ -338,9 +363,6 @@ Object.assign(mv3d,{
 		}),
 		shape(conf,name){
 			conf.shape=mv3d.enumShapes[name.toUpperCase()];
-		},
-		pos(conf,x,y){
-			conf.pos={x:x,y:y};
 		},
 		lamp:new ConfigurationFunction('color,intensity,range',function(conf,params){
 			const {color='white',intensity=1,range=mv3d.LIGHT_DIST} = params;

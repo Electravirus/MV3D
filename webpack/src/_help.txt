@@ -211,12 +211,15 @@ Next let's attach a flashlight to an event.
 
 ### Adjust event position
 
-The x() and y() functions will offset the x and y position of the event's
-mesh.  
-Example: y(0.51)
+The offset() function can be used to offset an event's mesh. This is 
+purely visual. xoff(), yoff(), and zoff() can be used to change the 
+x, y, and z offset independently.  
+Examples: offset(0.5,0.5,0.5), offset(z:1),
+xoff(0.49), yoff(0.51), zoff(1)
 
-The height() function will adjust the event's height above the ground.  
-Example: height(2)
+The elevation() function will adjust the event's height above the ground.
+With elevation greater than zero, the event will be flying.  
+Example: elevation(2)
 
 The z() function will set the event's absolute z position, ignoring ground
 level.  
