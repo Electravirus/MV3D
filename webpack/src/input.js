@@ -20,10 +20,11 @@ Object.assign(mv3d,{
 		if( this.loadData('allowRotation',mv3d.KEYBOARD_TURN) || is1stPerson ){
 			const leftKey=mv3d.getTurnKey('left'), rightKey=mv3d.getTurnKey('right');
 			if(mv3d.TURN_INCREMENT>1){
+				const turning = this.blendCameraYaw.currentValue()!==this.blendCameraYaw.targetValue();
 				const yawSpeed = mv3d.TURN_INCREMENT / mv3d.YAW_SPEED;
-				if(Input.isTriggered(leftKey)){
+				if(Input.isTriggered(leftKey)||Input.isPressed(leftKey)&&!turning){
 					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d.TURN_INCREMENT,yawSpeed);
-				}else if(Input.isTriggered(rightKey)){
+				}else if(Input.isTriggered(rightKey)||Input.isPressed(rightKey)&&!turning){
 					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-mv3d.TURN_INCREMENT,yawSpeed);
 				}
 			}else{
