@@ -108,6 +108,7 @@ Object.assign(mv3d,{
 		material.mv3d_glowColor=options.glow;
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
+		material.backFaceCulling=mv3d.BACKFACE_CULLING;
 		if(!isNaN(this.LIGHT_LIMIT)){ material.maxSimultaneousLights=this.LIGHT_LIMIT; }
 		this.materialCache[key]=material;
 		return material;

@@ -69,6 +69,12 @@
 @min 4
 @default 8
 
+@param backfaceCulling
+@text Backface Culling
+@parent graphics
+@type Boolean
+@default true
+
 @param map
 @text Map Settings
 

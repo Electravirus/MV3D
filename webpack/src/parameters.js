@@ -10,6 +10,10 @@ if(!PluginManager._scripts.includes("mv3d")){
 const parameters = PluginManager.parameters(pluginName);
 export default parameters;
 
+function parameter(name,dfault,type){
+	return name in parameters ? (type?type(parameters[name]):parameters[name]) : dfault;
+}
+
 Object.assign(mv3d,{
 	CAMERA_MODE:"PERSPECTIVE",
 	ORTHOGRAPHIC_DIST:100,
@@ -92,6 +96,8 @@ Object.assign(mv3d,{
 	PITCH_SPEED: Number(parameters.pitchSpeed)||90,
 
 	TRIGGER_INFINITE: !booleanString(parameters.heightTrigger),
+
+	BACKFACE_CULLING: parameter('backfaceCulling',true,booleanString),
 
 	setupParameters(){
 		this.REGION_DATA=new Proxy(this._REGION_DATA,{
