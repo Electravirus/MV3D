@@ -132,6 +132,7 @@ Object.assign(mv3d,{
 			options.glow.r = unround(options.glow.r,255);
 			options.glow.g = unround(options.glow.g,255);
 			options.glow.b = unround(options.glow.b,255);
+			options.glow.a = unround(options.glow.a,7);
 		}else{ options.glow=new Color4(0,0,0,0); }
 		if(!('shadow' in options)){options.shadow=true;}
 	},
@@ -141,8 +142,9 @@ Object.assign(mv3d,{
 		extra|=Boolean(options.transparent)<<0;
 		extra|=7-options.alpha*7<<1;
 		extra|=(!options.shadow)<<4;
-		// 3 empty bits available here
+		extra|=options.glow.a*7<<5;
 		extra|=options.glow.toNumber()<<8;
+		//out of bits.
 		return extra.toString(36);
 	},
 

@@ -301,12 +301,13 @@ Object.assign(mv3d,{
 			conf.transparent=true;
 			conf.alpha=Number(n);
 		},
-		glow(conf,n){
+		glow(conf,n,a=1){
 			if(isNaN(n)){
 				conf.glow = makeColor(n);
 			}else{
 				conf.glow = new Color4(Number(n),Number(n),Number(n),1);
 			}
+			conf.glow.a=booleanNumber(a);
 		},
 		pass(conf,s=''){
 			s=falseString(s.toLowerCase());
@@ -385,12 +386,13 @@ Object.assign(mv3d,{
 		alpha(conf,n){
 			conf.alpha=Number(n);
 		},
-		glow(conf,n){
+		glow(conf,n,a=1){
 			if(isNaN(n)){
 				conf.glow = makeColor(n);
 			}else{
 				conf.glow = new Color4(Number(n),Number(n),Number(n),1);
 			}
+			conf.glow.a=booleanNumber(a);
 		},
 		dirfix(conf,b){
 			conf.dirfix=booleanString(b);
