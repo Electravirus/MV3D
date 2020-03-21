@@ -127,7 +127,7 @@ Object.assign(mv3d,{
 });
 
 Game_CharacterBase.prototype._mv3d_isFlying=function(){
-	if(!mv3d.sprite){ return false;}
+	if(!this.mv3d_sprite){ return false;}
 	return this.mv3d_sprite.blendElevation.currentValue()>0||this.mv3d_sprite.hasConfig('zlock');
 };
 Game_Vehicle.prototype._mv3d_isFlying=function(){
