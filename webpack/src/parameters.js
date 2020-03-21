@@ -98,6 +98,7 @@ Object.assign(mv3d,{
 	TRIGGER_INFINITE: !booleanString(parameters.heightTrigger),
 
 	BACKFACE_CULLING: parameter('backfaceCulling',true,booleanString),
+	CAMERA_COLLISION: parameter('cameraCollision',true,booleanString),
 
 	setupParameters(){
 		this.REGION_DATA=new Proxy(this._REGION_DATA,{

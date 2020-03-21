@@ -75,6 +75,12 @@
 @type Boolean
 @default true
 
+@param cameraCollision
+@text Camera Collision
+@parent graphics
+@type Boolean
+@default true
+
 @param map
 @text Map Settings
 

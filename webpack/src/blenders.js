@@ -1,7 +1,12 @@
 import mv3d from './mv3d.js';
 import { hexNumber, ZAxis, XAxis } from "./util.js";
 import parameters from './parameters.js';
-import { ORTHOGRAPHIC_CAMERA, LOCALSPACE } from './mod_babylon.js';
+import { ORTHOGRAPHIC_CAMERA, LOCALSPACE, Ray, Vector3 } from './mod_babylon.js';
+
+const raycastPredicate=mesh=>{
+	if(!mesh.isEnabled() || !mesh.isVisible || !mesh.isPickable || mesh.character){ return false; }
+	return true;
+}
 
 Object.assign(mv3d,{
 
@@ -88,12 +93,24 @@ Object.assign(mv3d,{
 
 		// camera yaw, pitch, dist & height
 		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()|this.blendCameraRoll.update()
-		|this.blendCameraDist.update()|this.blendCameraHeight.update()|$gameScreen._shake!==0){
+		|this.blendCameraDist.update()|this.blendCameraHeight.update()|$gameScreen._shake!==0
+		|(mv3d.CAMERA_COLLISION&&$gamePlayer.mv3d_positionUpdated)){
 			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
 			this.cameraNode.yaw = this.blendCameraYaw.currentValue();
 			this.cameraNode.roll = this.blendCameraRoll.currentValue();
 			this.cameraNode.position.set(0,0,0);
-			this.cameraNode.translate(ZAxis,-this.blendCameraDist.currentValue(),LOCALSPACE);
+			let dist = this.blendCameraDist.currentValue();
+			if(mv3d.CAMERA_COLLISION){
+				const raycastOrigin = new Vector3().copyFrom(this.cameraStick.position);
+				raycastOrigin.y+=this.blendCameraHeight.currentValue()+0.1;
+				const ray = new Ray(raycastOrigin, Vector3.TransformCoordinates(mv3d.camera.getTarget().negate(),mv3d.getRotationMatrix(mv3d.camera)),dist);
+				const hit = mv3d.scene.pickWithRay(ray,raycastPredicate);
+				if(hit.hit){ dist=hit.distance; }
+				if(this.camera.dist==null){this.camera.dist=dist;}
+				this.camera.dist=this.camera.dist+(dist-this.camera.dist)/2;
+				dist=this.camera.dist;
+			}
+			this.cameraNode.translate(ZAxis,-dist,LOCALSPACE);
 			if(this.camera.mode===ORTHOGRAPHIC_CAMERA){
 				const fieldSize = this.getFieldSize();
 				this.camera.orthoLeft=-fieldSize.width/2;

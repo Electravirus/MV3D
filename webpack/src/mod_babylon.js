@@ -29,6 +29,7 @@ export const {
 	SceneSerializer,
 	Sprite,
 	SpriteManager,
+	Ray,
 } = BABYLON;
 
 export const {

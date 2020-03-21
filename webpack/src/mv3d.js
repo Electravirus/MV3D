@@ -214,6 +214,12 @@ const mv3d = {
 		matrix.decompose(null,null,vtrans);
 		return Matrix.Compose(Vector3.One(),vrot.toQuaternion(),vtrans);
 	},
+	getRotationMatrix(mesh){
+		const matrix = mesh.getWorldMatrix();
+		const qrot=new Quaternion();
+		matrix.decompose(null,qrot,null);
+		return Matrix.Compose(Vector3.One(),qrot,Vector3.Zero());
+	},
 
 }
 window.mv3d=mv3d;

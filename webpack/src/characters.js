@@ -795,6 +795,7 @@ class Character extends Sprite{
 			this.updateEmissive();
 			this.needsMaterialUpdate=false;
 		}
+		this.char.mv3d_positionUpdated=this.needsPositionUpdate;
 		this.needsPositionUpdate=false;
 		//this.mesh.renderOutline=true;
 		//this.mesh.outlineWidth=1;
