@@ -134,7 +134,8 @@ export const override=(obj,methodName,getNewMethod,condition=_override_default_c
 //
 const util = {
 	makeColor,hexNumber,relativeNumber,booleanString,falseString,booleanNumber,
-	sleep,degtorad,radtodeg,sin,cos,unround,tileSize,tileWidth,tileHeight,
+	sleep,degtorad,radtodeg,sin,cos,unround,
+	tileSize,tileWidth,tileHeight,
 	pointtorad,pointtodeg,minmax,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
 	overload, override, file

@@ -780,7 +780,8 @@ class Character extends Sprite{
 		}else if(this.x!==this.char._realX || this.y!==this.char._realY
 		|| this.falling || this.prevZ !== this.z
 		|| this.platformChar&&this.platformChar.needsPositionUpdate
-		|| this.isPlayer || this.char===$gamePlayer.vehicle()){
+		//|| this.isPlayer || this.char===$gamePlayer.vehicle()
+		){
 			this.needsPositionUpdate=true;
 			this.prevZ = this.z;
 		}
@@ -800,6 +801,8 @@ class Character extends Sprite{
 		//this.mesh.renderOutline=true;
 		//this.mesh.outlineWidth=1;
 	}
+	//get needsPositionUpdate(){return this._needsPositionUpdate; }
+	//set needsPositionUpdate(v){ this._needsPositionUpdate=v; }
 
 	updateNormal(){
 		const shapes = mv3d.enumShapes;

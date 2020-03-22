@@ -1,5 +1,5 @@
 import { Engine, Scene, HemisphericLight, TransformNode, FreeCamera, Node, Matrix, Vector2, Vector3, Color3, FOGMODE_LINEAR, DirectionalLight, ShadowGenerator, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods, Quaternion } from "./mod_babylon.js";
-import util, { v3origin, degtorad, tileSize } from "./util.js";
+import util, { v3origin, degtorad, tileSize, viewHeight, radtodeg } from "./util.js";
 
 
 const mv3d = {
@@ -194,12 +194,21 @@ const mv3d = {
 	getScaleForDist(dist=mv3d.blendCameraDist.currentValue()){
 		return Graphics.height/this.getFieldSize(dist).height/48;
 	},
+	getFovForDist(dist=mv3d.blendCameraDist.currentValue(),height=viewHeight()){
+		return 2*Math.atan(height/2/dist);
+	},
+	getFrustrumHeight(dist=mv3d.blendCameraDist.currentValue(),fov=mv3d.camera.fov){
+		return 2*dist*Math.tan(fov/2);
+	},
+
+
 	getScreenPosition(node,offset=Vector3.Zero()){
 		const matrix = node.parent ? node.parent.getWorldMatrix() : Matrix.Identity();
 		const pos = node instanceof Vector3 ? node.add(offset) : node.position.add(offset);
 		const projected = Vector3.Project(pos,matrix,mv3d.scene.getTransformMatrix(),mv3d.camera.viewport);
 		return {x:projected.x*Graphics.width, y:projected.y*Graphics.height, behindCamera:projected.z>1};
 	},
+	
 	getUnscaledMatrix(mesh){
 		const matrix = mesh.getWorldMatrix();
 		const qrot=new Quaternion(), vtrans=new Vector3();

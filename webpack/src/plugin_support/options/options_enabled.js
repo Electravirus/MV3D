@@ -5,9 +5,9 @@ import { override } from '../../util.js';
 const _option_command_list = Window_Options.prototype.makeCommandList;
 Window_Options.prototype.makeCommandList = function() {
 	_option_command_list.apply(this,arguments);
-	if(mv3d.ENABLE_3D_OPTIONS===2){
+	if(mv3d.ENABLE_3D_OPTIONS===mv3d.enumOptionModes.SUBMENU && Object.keys(mv3d.options).length){
 		this.addCommand("3D Options", 'mv3d-options');
-	}else if(mv3d.ENABLE_3D_OPTIONS===1){
+	}else if(mv3d.ENABLE_3D_OPTIONS===mv3d.enumOptionModes.ENABLE){
 		for (const key in mv3d.options){
 			this.addCommand(mv3d.options[key].name,key);
 		}

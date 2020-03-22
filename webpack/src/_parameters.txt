@@ -4,31 +4,87 @@
 @param 3dMenu
 @text 3D Options Menu
 @desc Whether 3D options will be in a submenu, regular options menu, or disabled.
+@parent options
 @type Select
 @option SUBMENU
 @option ENABLE
 @option DISABLE
 @default SUBMENU
 
+
 @param renderDist
-@text Default Render Distance
+@text Render Distance
 @desc The maximum distance that can be rendered by the camera.
 @parent options
 @type Number
 @default 25
+@min 0
+
+@param renderDistOption
+@text Render Distance Option
+@desc Should Render Distance appear on options menu?
+@parent renderDist
+@type Boolean
+@default true
+
+@param renderDistMin
+@text Render Distance Min
+@parent renderDist
+@type Number
+@default 10
+@min 0
+
+@param renderDistMax
+@text Render Distance Max
+@parent renderDist
+@type Number
+@default 100
+@min 0
+
 
 @param mipmap
-@text Mipmap Default
+@text Mipmapping
 @parent options
 @type Boolean
 @default true
 
 @param mipmapOption
-@text Mipmap Option
+@text Mipmapping Option
 @desc Should Mipmapping appear on options menu?
-@parent options
+@parent mipmap
 @type Boolean
 @default true
+
+
+@param fov
+@text FOV
+@parent options
+@type Number
+@default 65
+@min 0 @max 180
+
+@param fovOption
+@text FOV Option
+@desc Should FOV appear on options menu?
+@parent fov
+@type Boolean
+@default false
+
+@param fovMin
+@text FOV Min
+@parent fov
+@type Number
+@default 50
+@min 0 @max 180
+
+@param fovMax
+@text FOV Max
+@parent fov
+@type Number
+@default 100
+@min 0 @max 180
+
+@param spacer|graphics @text‏‏‎ ‎@desc ===============================================
 
 @param graphics
 @text Graphics
@@ -38,12 +94,6 @@
 @parent graphics
 @type Boolean
 @default true
-
-@param fov
-@text FOV
-@parent graphics
-@type Number
-@default 65
 
 @param edgefix
 @text Edge Fix
@@ -81,6 +131,8 @@
 @type Boolean
 @default true
 
+@param spacer|map @text‏‏‎ ‎@desc ===============================================
+
 @param map
 @text Map Settings
 
@@ -111,6 +163,8 @@
 @type Boolean
 @default true
 
+@param spacer|fog @text‏‏‎ ‎@desc ===============================================
+
 @param fog
 @text Fog
 
@@ -136,6 +190,8 @@
 @type Number
 @decimals 1
 @default 25.0
+
+@param spacer|input @text‏‏‎ ‎@desc ===============================================
 
 @param input
 @text Input & Gameplay
@@ -238,6 +294,8 @@
 @decimals 2
 @default 8
 
+@param spacer|tileconfig @text‏‏‎ ‎@desc ===============================================
+
 @param tileconfig
 @text Tile Config
 
@@ -306,6 +364,8 @@ there may be z-fighting issues. (default: 0.0100)
 @type struct<TTagHeight>[]
 @default ["{\"terrainTag\":\"1\",\"conf\":\"shape(xcross),height(1),fringe(0)\"}","{\"terrainTag\":\"2\",\"conf\":\"shape(fence),height(1)\"}"]
 
+@param spacer|characters @text‏‏‎ ‎@desc ===============================================
+
 @param characters
 @text Characters
 
@@ -373,6 +433,8 @@ there may be z-fighting issues. (default: 0.0100)
 @min 0 @max 1
 @decimals 2
 @default 0.9
+
+@param spacer|assets @text‏‏‎ ‎@desc ===============================================
 
 @param assets
 @text Assets

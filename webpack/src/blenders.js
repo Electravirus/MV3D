@@ -48,6 +48,7 @@ Object.assign(mv3d,{
 		this.blendCameraPitch.min=0;
 		this.blendCameraPitch.max=180;
 		this.blendCameraDist = new Blender('cameraDist',10);
+		this.blendCameraZoom = new Blender('cameraZoom',1);
 		this.blendCameraDist.min=0;
 		this.blendCameraHeight = new Blender('cameraHeight',0.7);
 		this.blendAmbientColor = new ColorBlender('ambientColor',this.AMBIENT_COLOR);
@@ -93,7 +94,8 @@ Object.assign(mv3d,{
 
 		// camera yaw, pitch, dist & height
 		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()|this.blendCameraRoll.update()
-		|this.blendCameraDist.update()|this.blendCameraHeight.update()|$gameScreen._shake!==0
+		|this.blendCameraDist.update()|this.blendCameraHeight.update()|this.blendCameraZoom.update()
+		|$gameScreen._shake!==0
 		|(mv3d.CAMERA_COLLISION&&$gamePlayer.mv3d_positionUpdated)){
 			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
 			this.cameraNode.yaw = this.blendCameraYaw.currentValue();
@@ -123,6 +125,7 @@ Object.assign(mv3d,{
 			this.cameraNode.z += this.blendCameraHeight.currentValue();
 			this.cameraNode.translate(XAxis,-$gameScreen._shake/48,LOCALSPACE);
 			this.updateDirection();
+			this.updateFov();
 		}
 
 		//fog

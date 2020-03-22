@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { hexNumber,booleanString,falseString, makeColor } from './util.js';
+import { hexNumber,booleanString,falseString, makeColor, degtorad } from './util.js';
 import { Vector2, Texture, ORTHOGRAPHIC_CAMERA } from './mod_babylon.js';
 
 let pluginName = 'mv3d';
@@ -13,6 +13,14 @@ export default parameters;
 function parameter(name,dfault,type){
 	return name in parameters ? (type?type(parameters[name]):parameters[name]) : dfault;
 }
+
+Object.assign(mv3d,{
+	enumOptionModes:{
+		DISABLE: 0,
+		ENABLE: 1,
+		SUBMENU: 2,
+	}
+});
 
 Object.assign(mv3d,{
 	CAMERA_MODE:"PERSPECTIVE",
@@ -39,7 +47,14 @@ Object.assign(mv3d,{
 	CELL_SIZE: Number(parameters.cellSize),
 	RENDER_DIST: Number(parameters.renderDist),
 	MIPMAP:booleanString(parameters.mipmap),
-	MIPMAP_OPTION:booleanString(parameters.mipmapOption),
+
+	OPTION_MIPMAP:booleanString(parameters.mipmapOption),
+	OPTION_RENDER_DIST: parameter('renderDistOption',true,booleanString),
+	OPTION_FOV: parameter('fovOption',false,booleanString),
+	OPTION_RENDER_DIST_MIN: parameter('renderDistMin',10,Number),
+	OPTION_RENDER_DIST_MAX: parameter('renderDistMax',100,Number),
+	OPTION_FOV_MIN: parameter('fovMin',50,Number),
+	OPTION_FOV_MAX: parameter('fovMax',100,Number),
 
 	STAIR_THRESH: Number(parameters.stairThresh),
 	WALK_OFF_EDGE:booleanString(parameters.walkOffEdge),
@@ -76,7 +91,7 @@ Object.assign(mv3d,{
 
 	SPRITE_OFFSET:Number(parameters.spriteOffset)/2,
 
-	ENABLE_3D_OPTIONS:{disable:0,enable:1,submenu:2}[parameters['3dMenu'].toLowerCase()],
+	ENABLE_3D_OPTIONS:mv3d.enumOptionModes[parameters['3dMenu'].toUpperCase()],
 
 	TEXTURE_SHADOW: parameters.shadowTexture||'shadow',
 	TEXTURE_BUSHALPHA: parameters.alphaMask||'bushAlpha',
@@ -161,6 +176,7 @@ Object.assign(mv3d,{
 
 	updateParameters(){
 		this.updateRenderDist();
+		this.updateFov();
 		this.callFeatures('updateParameters');
 	},
 	updateRenderDist(){
@@ -171,6 +187,12 @@ Object.assign(mv3d,{
 			this.camera.maxZ=this.renderDist;
 			this.camera.minZ=0.1;
 		}
+	},
+	updateFov(){
+		const dist = this.blendCameraDist.currentValue();
+		const frustrumHeight = this.getFrustrumHeight(dist,degtorad(this.FOV));
+		const fov = this.getFovForDist(dist,frustrumHeight/this.blendCameraZoom.currentValue());
+		this.camera.fov=fov;
 	},
 });
 

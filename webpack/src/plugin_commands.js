@@ -46,10 +46,11 @@ mv3d.PluginCommand=class{
 			case 'roll'     : this.roll  (a[1],time); return;
 			case 'dist'     :
 			case 'distance' : this.dist  (a[1],time); return;
+			case 'zoom'     : this.zoom  (a[1],time); return;
 			case 'height'   : this.height(a[1],time); return;
 			case 'mode'     : this.cameramode(a[1]); return;
-			case 'target': this._cameraTarget(a[1],time); return;
-			case 'pan': this.pan(a[1],a[2],a[3]); return;
+			case 'target'   : this._cameraTarget(a[1],time); return;
+			case 'pan'      : this.pan(a[1],a[2],a[3]); return;
 		}
 	}
 	yaw(deg,time=1){
@@ -59,6 +60,7 @@ mv3d.PluginCommand=class{
 	pitch(deg,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraPitch,deg,time); }
 	roll(deg,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraRoll,deg,time); }
 	dist(n,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraDist,n,time); }
+	zoom(n,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraZoom,n,time); }
 	height(n,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraHeight,n,time); }
 	_cameraTarget(target,time){
 		mv3d.setCameraTarget(this.TARGET_CHAR(target), time);
