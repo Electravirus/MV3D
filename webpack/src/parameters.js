@@ -189,7 +189,7 @@ Object.assign(mv3d,{
 		}
 	},
 	updateFov(){
-		const dist = this.blendCameraDist.currentValue();
+		const dist = this.blendCameraDist.currentValue()||0.1;
 		const frustrumHeight = this.getFrustrumHeight(dist,degtorad(this.FOV));
 		const fov = this.getFovForDist(dist,frustrumHeight/this.blendCameraZoom.currentValue());
 		this.camera.fov=fov;
