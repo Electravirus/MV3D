@@ -446,8 +446,16 @@ Object.assign(mv3d,{
 			if(mode){ conf.cameraMode=mode; }
 		}),
 		ceiling:TextureConfigurator('ceiling','height,skylight'),
-		edge(conf,b){
-			conf.edge=booleanString(b);
+		edge(conf,b,data){
+			b=b.toLowerCase();
+			switch(b){
+				case 'clamp':
+					conf.edgeData=data==null?1:Number(data);
+					conf.edge=b;
+					break;
+				default:
+					conf.edge=booleanString(b);
+			}
 		},
 		disable(conf,b=true){
 			conf.disabled=booleanString(b);

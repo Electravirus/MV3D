@@ -68,13 +68,15 @@ Object.assign(mv3d,{
 			bottom:Math.floor((this.cameraStick.y+this.renderDist)/this.CELL_SIZE),
 		}
 		//clamp cell range to map
-		if(!$gameMap.isLoopHorizontal()){
-			bounds.left=Math.max(0,bounds.left);
-			bounds.right=Math.min(bounds.right,Math.ceil($gameMap.width()/mv3d.CELL_SIZE)-1);
-		}
-		if(!$gameMap.isLoopVertical()){
-			bounds.top=Math.max(0,bounds.top);
-			bounds.bottom=Math.min(bounds.bottom,Math.ceil($gameMap.height()/mv3d.CELL_SIZE)-1);
+		if(this.getMapConfig('edge')!=='clamp'){
+			if(!$gameMap.isLoopHorizontal()){
+				bounds.left=Math.max(0,bounds.left);
+				bounds.right=Math.min(bounds.right,Math.ceil($gameMap.width()/mv3d.CELL_SIZE)-1);
+			}
+			if(!$gameMap.isLoopVertical()){
+				bounds.top=Math.max(0,bounds.top);
+				bounds.bottom=Math.min(bounds.bottom,Math.ceil($gameMap.height()/mv3d.CELL_SIZE)-1);
+			}
 		}
 		const cellsToLoad=[];
 		for (let ix=bounds.left;ix<=bounds.right;++ix)

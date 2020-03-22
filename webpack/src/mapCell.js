@@ -29,8 +29,11 @@ export class MapCell extends TransformNode{
 		const shapes = mv3d.enumShapes;
 		this.builder = new CellMeshBuilder();
 		// load all tiles in mesh
-		const cellWidth = Math.min(mv3d.CELL_SIZE,$gameMap.width()-this.cx*mv3d.CELL_SIZE);
-		const cellHeight = Math.min(mv3d.CELL_SIZE,$gameMap.height()-this.cy*mv3d.CELL_SIZE);
+		let cellWidth=mv3d.CELL_SIZE,cellHeight=mv3d.CELL_SIZE;
+		if(mv3d.getMapConfig('edge')!=='clamp'){
+			cellWidth = Math.min(mv3d.CELL_SIZE,$gameMap.width()-this.cx*mv3d.CELL_SIZE);
+			cellHeight = Math.min(mv3d.CELL_SIZE,$gameMap.height()-this.cy*mv3d.CELL_SIZE);
+		}
 		const ceiling = mv3d.getCeilingConfig();
 		for (let y=0; y<cellHeight; ++y)
 		for (let x=0; x<cellWidth; ++x){
@@ -97,6 +100,8 @@ export class MapCell extends TransformNode{
 		
 		this.mesh=this.builder.build();
 		if(this.mesh){
+			this.mesh.isPickable=false;
+			sleep(10).then(()=>this.mesh.isPickable=true);
 			this.mesh.parent=this;
 			this.mesh.alphaIndex=0;
 			this.mesh.renderingGroupId=mv3d.enumRenderGroups.MAIN;
