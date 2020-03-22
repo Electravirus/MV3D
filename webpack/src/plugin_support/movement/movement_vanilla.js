@@ -170,6 +170,15 @@ override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 
 },_dir8Condition);
 
+override(Game_CharacterBase.prototype,'canPassDiagonally',o=>function(x,y,horz,vert){
+    const x2 = $gameMap.roundXWithDirection(x, horz);
+	const y2 = $gameMap.roundYWithDirection(y, vert);
+	if(mv3d.tileCollision(this,x,y2,true,true)||mv3d.tileCollision(this,x2,y,true,true)){
+		return false;
+	}
+	return o.apply(this,arguments);
+});
+
 const _dontSnapRealXY=o=>function(){
 	const realX=this._realX, realY=this._realY;
 	o.apply(this,arguments);
