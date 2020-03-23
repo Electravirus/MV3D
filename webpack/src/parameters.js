@@ -115,6 +115,8 @@ Object.assign(mv3d,{
 	BACKFACE_CULLING: parameter('backfaceCulling',true,booleanString),
 	CAMERA_COLLISION: parameter('cameraCollision',true,booleanString),
 
+	DIAG_SYMBOL: parameter('diagSymbol','{d}',String),
+
 	setupParameters(){
 		this.REGION_DATA=new Proxy(this._REGION_DATA,{
 			get:(target,key)=>{

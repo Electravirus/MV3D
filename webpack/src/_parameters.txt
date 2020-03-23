@@ -439,6 +439,13 @@ there may be z-fighting issues. (default: 0.0100)
 @param assets
 @text Assets
 
+@param diagSymbol
+@text Diagonal Sprite Symbol
+@desc Character sheets with this symbol contain diagonal sprites. Leave blank to use diagonal sprites with all images.
+@parent assets
+@type Text
+@default {d}
+
 @param shadowTexture
 @text Shadow Texture
 @parent assets

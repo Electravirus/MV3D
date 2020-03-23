@@ -40,12 +40,12 @@ Object.assign(mv3d,{
 		}
 	},
 	
-	transformDirection(dir,yaw=this.blendCameraYaw.currentValue()){
-		return mv3d.yawToDir(mv3d.dirToYaw(dir)+yaw,mv3d.DIR8MOVE);
+	transformDirection(dir,yaw=this.blendCameraYaw.currentValue(),dir8=mv3d.DIR8MOVE){
+		return mv3d.yawToDir(mv3d.dirToYaw(dir)+yaw,dir8);
 	},
 
-	transformFacing(dir,yaw=this.blendCameraYaw.currentValue()){
-		return mv3d.yawToDir(mv3d.dirToYaw(dir)-yaw,false);
+	transformFacing(dir,yaw=this.blendCameraYaw.currentValue(),dir8=false){
+		return mv3d.yawToDir(mv3d.dirToYaw(dir)-yaw,dir8);
 	},
 
 	updateDirection(){

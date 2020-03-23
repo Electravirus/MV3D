@@ -752,8 +752,9 @@ class Character extends Sprite{
 		if(typeof this.char.isVisible === 'function'){
 			this.visible=this.visible&&this.char.isVisible();
 		}
+		const inRenderDist = this.char.mv3d_inRenderDist();
 		this.disabled=!this.visible;
-		if(this.char.isTransparent() || !this.char.mv3d_inRenderDist()
+		if(this.char.isTransparent() || !inRenderDist
 		|| (this.char._characterName||this.char._tileId)&&!this.textureLoaded){
 			this.visible=false;
 		}
@@ -770,8 +771,8 @@ class Character extends Sprite{
 		//	this.updateFrame();
 		//}
 
-		if(!this._isEnabled){
-			this.updateAnimations();
+		if(!inRenderDist){
+			//this.updateAnimations();
 			return;
 		}
 
@@ -780,7 +781,7 @@ class Character extends Sprite{
 		}else if(this.x!==this.char._realX || this.y!==this.char._realY
 		|| this.falling || this.prevZ !== this.z
 		|| this.platformChar&&this.platformChar.needsPositionUpdate
-		//|| this.isPlayer || this.char===$gamePlayer.vehicle()
+		|| this.isPlayer || this.char===$gamePlayer.vehicle()
 		){
 			this.needsPositionUpdate=true;
 			this.prevZ = this.z;
@@ -1174,9 +1175,25 @@ override(Sprite_Character.prototype,'characterPatternY',o=>function(){
 	if(dirfix){
 		return sprite.char.direction()/2-1;
 	}
-	let dir = mv3d.transformFacing(sprite.char.mv3d_direction());
-	return dir/2-1;
+	const ddir=sprite.char.mv3d_direction();
+	let dir;
+	if(!this._isBigCharacter&&this._characterIndex<4&&this._characterName.includes(mv3d.DIAG_SYMBOL)){
+		dir = mv3d.transformFacing(ddir,mv3d.blendCameraYaw.currentValue(),true);
+	}else{
+		dir = mv3d.transformFacing(ddir,mv3d.blendCameraYaw.currentValue(),false);
+	}
+	if(dir%2){
+		return diagRow[dir];
+	}else{
+		return dir/2-1;
+	}
 });
+const diagRow={
+	3:4,
+	1:5,
+	9:6,
+	7:7,
+};
 
 override(Sprite_Character.prototype,'setFrame',o=>function(x, y, width, height){
 	o.apply(this,arguments);
