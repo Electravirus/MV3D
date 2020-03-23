@@ -787,7 +787,7 @@ class Character extends Sprite{
 			this.prevZ = this.z;
 		}
 
-		if(this.material){
+		if(this.material && this._isEnabled){
 			this.updateNormal();
 		}else{
 			this.updateEmpty();
@@ -820,7 +820,7 @@ class Character extends Sprite{
 			if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
 		}
 
-		if(this.char===$gamePlayer){
+		if(this.isPlayer){
 			this.mesh.visibility = +!mv3d.is1stPerson(true);
 		}
 
@@ -1172,12 +1172,13 @@ override(Sprite_Character.prototype,'characterPatternY',o=>function(){
 	const sprite = this._character.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
 	const dirfix = sprite.getConfig('dirfix', sprite.isEvent && sprite.char.isObjectCharacter());
-	if(dirfix){
-		return sprite.char.direction()/2-1;
-	}
-	const ddir=sprite.char.mv3d_direction();
+	const ddir=this._character.mv3d_direction();
+	const useDiagonal = !this._isBigCharacter&&this._characterIndex<4&&this._characterName.includes(mv3d.DIAG_SYMBOL);
 	let dir;
-	if(!this._isBigCharacter&&this._characterIndex<4&&this._characterName.includes(mv3d.DIAG_SYMBOL)){
+	if(dirfix||mv3d.isDisabled()){
+		if(useDiagonal){ dir=ddir; }
+		else{ dir=this._character.direction(); }
+	}else if(useDiagonal){
 		dir = mv3d.transformFacing(ddir,mv3d.blendCameraYaw.currentValue(),true);
 	}else{
 		dir = mv3d.transformFacing(ddir,mv3d.blendCameraYaw.currentValue(),false);
@@ -1187,7 +1188,7 @@ override(Sprite_Character.prototype,'characterPatternY',o=>function(){
 	}else{
 		return dir/2-1;
 	}
-});
+},()=> !mv3d.isDisabled() || mv3d.DIR8MOVE&&mv3d.DIR8_2D);
 const diagRow={
 	3:4,
 	1:5,
