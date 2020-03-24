@@ -584,4 +584,5 @@ player upgrade their airship's height and speed.
 - 冬空 橙
 - nyrion
 - Vaan Auroris
+- Chainer Valentine
 

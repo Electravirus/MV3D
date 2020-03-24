@@ -230,7 +230,8 @@ class Character extends Sprite{
 		const setN = mv3d.getSetNumber(this._tileId);
 		const tsName = $gameMap.tileset().tilesetNames[setN];
 		if(tsName){
-			const textureSrc=`img/tilesets/${tsName}.png`;
+			//const textureSrc=`img/tilesets/${tsName}.png`;
+			const textureSrc=ImageManager.loadTileset(tsName)._url;
 			this.setMaterial(textureSrc);
 		}else{
 			this.setMaterial("MV3D/errorTexture.png");

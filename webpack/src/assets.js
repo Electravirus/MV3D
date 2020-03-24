@@ -44,7 +44,8 @@ Object.assign(mv3d,{
 		if(!tsName){
 			return await this.getErrorTexture();
 		}
-		const textureSrc=`img/tilesets/${tsName}.png`;
+		//const textureSrc=`img/tilesets/${tsName}.png`;
+		const textureSrc=ImageManager.loadTileset(tsName)._url;
 		const texture = await this.createTexture(textureSrc);
 		texture.hasAlpha=true;
 		this.textureCache[key]=texture;

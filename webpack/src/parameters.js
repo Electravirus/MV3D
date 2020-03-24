@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { hexNumber,booleanString,falseString, makeColor, degtorad } from './util.js';
+import { hexNumber,booleanString,falseString, makeColor, degtorad, tileSize } from './util.js';
 import { Vector2, Texture, ORTHOGRAPHIC_CAMERA } from './mod_babylon.js';
 
 let pluginName = 'mv3d';
@@ -30,7 +30,7 @@ Object.assign(mv3d,{
 	ANIM_DELAY:Number(parameters.animDelay),
 	ALPHA_CUTOFF:Math.max(0.01,parameters.alphatest),
 
-	EDGE_FIX: Number(parameters.edgefix),
+	EDGE_FIX: Number(parameters.edgefix)*tileSize()/48,
 	ANTIALIASING: booleanString(parameters.antialiasing),
 	FOV:Number(parameters.fov),
 
