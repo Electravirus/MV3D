@@ -19,6 +19,7 @@ class AnimSprite extends TransformNode{
 		this.cellIndex=0;
 		this.isSmooth=smooth;
 		this.mesh = mv3d.Meshes.BASIC.clone();
+		this.mesh.isPickable=false;
 		this.mesh.parent=this;
 		this.mesh.setEnabled(false);
 		this.material = new StandardMaterial('anim material',mv3d.scene);
