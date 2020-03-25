@@ -93,7 +93,12 @@ class Sprite extends TransformNode{
 		this.textureLoaded=false;
 	}
 	async setMaterial(src){
-		const newTexture = await mv3d.createTexture(src);
+		let newTexture;
+		if(src==='error'){
+			newTexture = await mv3d.getErrorTexture();
+		}else{
+			newTexture = await mv3d.createTexture(src);
+		}
 		await this.waitTextureLoaded(newTexture);
 		this.disposeMaterial();
 		this.texture = newTexture;
@@ -234,7 +239,7 @@ class Character extends Sprite{
 			const textureSrc=ImageManager.loadTileset(tsName)._url;
 			this.setMaterial(textureSrc);
 		}else{
-			this.setMaterial("MV3D/errorTexture.png");
+			this.setMaterial("error");
 		}
 	}
 
