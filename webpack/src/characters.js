@@ -415,6 +415,7 @@ class Character extends Sprite{
 	}
 
 	pageConfigure(settings=this.settings_event_page){
+		const transient = settings===this.settings;
 		if('pos' in settings){
 			const event=this.char.event();
 			const pos = settings;
@@ -422,6 +423,7 @@ class Character extends Sprite{
 				relativeNumber(event.x,pos.x),
 				relativeNumber(event.y,pos.y),
 			);
+			if(transient)delete settings.pos;
 		}
 		this.setupEventLights();
 
@@ -432,6 +434,7 @@ class Character extends Sprite{
 				this.blendLampIntensity.setValue(lampConfig.intensity,0.5);
 				this.blendLampDistance.setValue(lampConfig.distance,0.5);
 			}
+			if(transient)delete settings.lamp;
 		}
 		if(this.flashlight){
 			if('flashlight' in settings){
@@ -440,13 +443,16 @@ class Character extends Sprite{
 				this.blendFlashlightIntensity.setValue(flashlightConfig.intensity,0.5);
 				this.blendFlashlightDistance.setValue(flashlightConfig.distance,0.5);
 				this.blendFlashlightAngle.setValue(flashlightConfig.angle,0.5);
+				if(transient)delete settings.flashlight;
 			}
 			if('flashlightPitch' in settings){
 				this.blendFlashlightPitch.setValue(this.getConfig('flashlightPitch',90),0.25);
+				if(transient)delete settings.flashlightPitch;
 			}
 		}
 		if('height' in settings || this.isAbove!==(this.char._priorityType===2)){
 			this.configureHeight();
+			if(transient)delete settings.height;
 		}
 
 		this.updateScale();
