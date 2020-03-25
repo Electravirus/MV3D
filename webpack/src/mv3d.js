@@ -1,5 +1,5 @@
-import { Engine, Scene, HemisphericLight, TransformNode, FreeCamera, Node, Matrix, Vector2, Vector3, Color3, FOGMODE_LINEAR, DirectionalLight, ShadowGenerator, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods, Quaternion } from "./mod_babylon.js";
-import util, { v3origin, degtorad, tileSize, viewHeight, radtodeg } from "./util.js";
+import { Engine, Scene, TransformNode, FreeCamera, Node, Matrix, Vector2, Vector3, Color3, FOGMODE_LINEAR, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods, Quaternion } from "./mod_babylon.js";
+import util, { degtorad, viewHeight } from "./util.js";
 
 
 const mv3d = {
@@ -11,6 +11,7 @@ const mv3d = {
 
 		this.canvas = document.createElement('canvas');
 		this.texture = PIXI.Texture.fromCanvas(this.canvas);
+		this.texture.baseTexture.scaleMode=PIXI.SCALE_MODES.NEAREST;
 		this.engine = new Engine(this.canvas,this.ANTIALIASING);
 		this.scene = new Scene(this.engine);
 		//this.scene.clearColor.a=0;
@@ -60,8 +61,8 @@ const mv3d = {
 	},
 
 	updateCanvas(){
-		this.canvas.width = Graphics._width;
-		this.canvas.height = Graphics._height;
+		this.canvas.width = Graphics._width*mv3d.RES_SCALE;
+		this.canvas.height = Graphics._height*mv3d.RES_SCALE;
 	},
 
 	render(){

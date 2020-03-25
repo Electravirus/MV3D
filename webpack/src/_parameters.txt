@@ -131,6 +131,15 @@
 @type Boolean
 @default true
 
+@param resScale
+@text Resolution Scale
+@desc Scale the resolution
+@parent graphics
+@type Number
+@decimals 2
+@min 0 @max 1
+@default 1
+
 @param spacer|map @text‏‏‎ ‎@desc ===============================================
 
 @param map

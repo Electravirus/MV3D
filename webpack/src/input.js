@@ -157,7 +157,7 @@ Scene_Map.prototype.processMapTouch = function() {
 		if (TouchInput.isPressed()) {
 			if (this._touchCount === 0 || this._touchCount >= 15) {
 				
-				const intersection = mv3d.scene.pick(TouchInput.x,TouchInput.y,raycastPredicate);
+				const intersection = mv3d.scene.pick(TouchInput.x*mv3d.RES_SCALE,TouchInput.y*mv3d.RES_SCALE,raycastPredicate);
 				if(intersection.hit){
 					mv3d.processMapTouch(intersection);
 				}

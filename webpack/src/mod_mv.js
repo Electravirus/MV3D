@@ -40,6 +40,7 @@ Spriteset_Map.prototype.createTilemap=function(){
 	if(mv3d.mapDisabled){ return; }
 	this._tilemap.visible=false;
 	mv3d.pixiSprite=new PIXI.Sprite(mv3d.texture);
+	mv3d.pixiSprite.scale.set(1/mv3d.RES_SCALE,1/mv3d.RES_SCALE);
 	this._baseSprite.addChild( mv3d.pixiSprite );
 };
 

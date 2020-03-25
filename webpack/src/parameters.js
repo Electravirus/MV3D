@@ -33,6 +33,7 @@ Object.assign(mv3d,{
 	EDGE_FIX: Number(parameters.edgefix)*tileSize()/48,
 	ANTIALIASING: booleanString(parameters.antialiasing),
 	FOV:Number(parameters.fov),
+	RES_SCALE: parameter('resScale',1,Number)||1,
 
 	WALL_HEIGHT:Number(parameters.wallHeight),
 	TABLE_HEIGHT:Number(parameters.tableHeight),
