@@ -170,6 +170,8 @@ Example: fringe(2)
 
 There are a few special shapes which can be given to your tiles using the
 shape() function. Valid shapes are FLAT, FENCE, CROSS, and XCROSS.  
+Some shapes can have additional data passed to them. For instance,  
+shape(fence,false) will disable fenceposts.
 Examples: shape(fence), shape(xcross)
 
 
