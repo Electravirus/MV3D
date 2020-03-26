@@ -376,7 +376,8 @@ Example: ceiling(A4,0,0|2)
 ### Other map settings
 
 The edge function sets whether to render walls at the map edge.  
-Examples: edge(true), edge(false)
+Edge can be set to clamp to repeat tiles at the edge of the map.  
+Examples: edge(true), edge(false), edge(clamp), edge(clamp,2)
 
 The disable function will turn off the 3D rendering for the map.  
 Example: disable()
