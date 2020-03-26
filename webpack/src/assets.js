@@ -103,6 +103,9 @@ Object.assign(mv3d,{
 			material.opacityTexture=texture;
 			material.alpha=options.alpha;
 		}
+		if(options.through){
+			material.mv3d_through=true;
+		}
 		material.mv3d_noShadow=!options.shadow;
 		material.alphaCutOff = mv3d.ALPHA_CUTOFF;
 		material.ambientColor.set(1,1,1);
@@ -147,7 +150,11 @@ Object.assign(mv3d,{
 		extra|=options.glow.a*7<<5;
 		extra|=options.glow.toNumber()<<8;
 		//out of bits.
-		return extra.toString(36);
+		let string = extra.toString(36);
+		extra = 0;
+		extra|=Boolean(options.through)<<0;
+		string += ','+extra.toString(36);
+		return string;
 	},
 
 	// animations

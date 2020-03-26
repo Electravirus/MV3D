@@ -59,6 +59,7 @@ Object.assign(mv3d,{
 
 	getMaterialOptions(conf,side){
 		const options={};
+		if ('pass' in conf){ options.through=conf.pass===this.enumPassage.THROUGH; }
 		if ('alpha' in conf){ options.alpha=conf.alpha; }
 		if ('glow' in conf){ options.glow=conf.glow; }
 		if ('shadow' in conf){ options.shadow=conf.shadow; }
@@ -112,7 +113,6 @@ Object.assign(mv3d,{
 	getTileTextureOffsets(tileId,x,y,l){
 		const conf = this.getTileConfig(tileId,x,y,l);
 		const tileRange = Tilemap.isAutotile(tileId)?48:1;
-		const tilemap = this.getTilemap();
 		conf.hasInsideConf=Boolean(conf.inside_offset||conf.rectInside||('inside_id' in conf));
 		conf.hasBottomConf=Boolean(conf.bottom_offset||conf.rectBottom||('bottom_id' in conf));
 		if(conf.top_id==null){ 
@@ -138,6 +138,9 @@ Object.assign(mv3d,{
 			if(conf.bottom_offset){
 				conf.bottom_id=tileId+conf.bottom_offset.x*tileRange+conf.bottom_offset.y*tileRange*8;
 			}
+		}
+		if(!('pass' in conf)){
+			conf.pass = this.getTilePassage(tileId,conf);
 		}
 		return conf;
 	},

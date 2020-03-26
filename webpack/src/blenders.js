@@ -106,8 +106,17 @@ Object.assign(mv3d,{
 				const raycastOrigin = new Vector3().copyFrom(this.cameraStick.position);
 				raycastOrigin.y+=this.blendCameraHeight.currentValue()+0.1;
 				const ray = new Ray(raycastOrigin, Vector3.TransformCoordinates(mv3d.camera.getTarget().negate(),mv3d.getRotationMatrix(mv3d.camera)),dist);
-				const hit = mv3d.scene.pickWithRay(ray,raycastPredicate);
-				if(hit.hit){ dist=hit.distance; }
+				const intersections = mv3d.scene.multiPickWithRay(ray,raycastPredicate);
+				for (const intersection of intersections){
+					if(!intersection.hit){ continue; }
+					let material = intersection.pickedMesh.material; if(!material){ continue; }
+					if(material.subMaterials){
+						material = material.subMaterials[intersection.pickedMesh.subMeshes[intersection.subMeshId].materialIndex];
+					}
+					if(material.mv3d_through){ continue; }
+					dist=intersection.distance;
+					break;
+				}
 				if(this.camera.dist==null){this.camera.dist=dist;}
 				this.camera.dist=this.camera.dist+(dist-this.camera.dist)/2;
 				dist=this.camera.dist;
