@@ -86,7 +86,9 @@ export const viewHeight=()=>Graphics.height/48;
 
 export const file=(folder=mv3d.MV3D_FOLDER,name)=>{
 	if(name.startsWith('/')){ return '.'+name; }
+	else if(name.startsWith('./')){ return name; }
 	if(folder.startsWith('/')){ folder='.'+folder; }
+	else if(!folder.startsWith('./')){ folder='./'+folder; }
 	return `${folder}/${name}`;
 };
 
