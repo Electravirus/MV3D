@@ -1,5 +1,5 @@
 import mv3d from '../../mv3d.js';
-import { override, unround } from '../../util.js';
+import { override, unround, hvtodir, dirtoh, dirtov } from '../../util.js';
 
 const _characterBase_canPass = Game_CharacterBase.prototype.canPass
 Game_CharacterBase.prototype.canPass = function(x, y, d) {
@@ -164,7 +164,7 @@ override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 	}
 
 	if(adjustDirection){
-		const d = 5 + (Math.floor((v-1)/3)-1)*3 + ((h-1)%3-1);
+		const d = hvtodir(h,v);
 		this.mv3d_setDirection(d);
 	}
 
@@ -194,6 +194,21 @@ override(Game_CharacterBase.prototype,'distancePerFrame',o=>function(){
 		return dist * Math.SQRT1_2;
 	}
 	return dist;
+},_dir8Condition);
+
+// triggering
+
+override(Game_Player.prototype,'checkEventTriggerThere',o=>function(triggers){
+	if (!this.canStartLocalEvents()) { return; }
+	const dir = this.mv3d_direction();
+	if(dir%2===0){ return o.apply(this,arguments); }
+	const horz = dirtoh(dir),vert = dirtov(dir);
+	const x2 = $gameMap.roundXWithDirection(this.x, horz);
+	const y2 = $gameMap.roundYWithDirection(this.y, vert);
+	this.startMapEvent(x2, y2, triggers, true);
+	if(!$gameMap.isAnyEventStarting()){
+		return o.apply(this,arguments);
+	}
 },_dir8Condition);
 
 

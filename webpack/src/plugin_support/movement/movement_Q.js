@@ -1,4 +1,4 @@
-import { override, unround, minmax, radtodeg, degtorad } from "../../util";
+import { override, unround, minmax, radtodeg, degtorad, hvtodir } from "../../util";
 import mv3d from "../../mv3d";
 import { Feature } from "../../features";
 
@@ -343,7 +343,7 @@ override(Game_Character.prototype,'moveRadian',o=>function(radian, dist){
 
 override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 	o.apply(this,arguments);
-	const d = 5 + (Math.floor((v-1)/3)-1)*3 + ((h-1)%3-1);
+	const d = hvtodir(h,v);
 	this.mv3d_setDirection(d);
 });
 

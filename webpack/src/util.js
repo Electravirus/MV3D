@@ -92,6 +92,12 @@ export const file=(folder=mv3d.MV3D_FOLDER,name)=>{
 	return `${folder}/${name}`;
 };
 
+// directions
+
+export const dirtoh=d=>5 + ((d-1)%3-1);
+export const dirtov=d=>5 + (Math.floor((d-1)/3)-1)*3;
+export const hvtodir=(h,v)=>5 + (Math.floor((v-1)/3)-1)*3 + ((h-1)%3-1);
+
 // useful consts
 export const XAxis = new Vector3(1,0,0);
 export const YAxis = new Vector3(0,1,0);
@@ -141,6 +147,7 @@ const util = {
 	sleep,degtorad,radtodeg,sin,cos,unround,
 	tileSize,tileWidth,tileHeight,viewWidth,viewHeight,
 	pointtorad,pointtodeg,minmax,
+	dirtov,dirtoh,hvtodir,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
 	overload, override, file
 };
