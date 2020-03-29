@@ -68,6 +68,10 @@ Object.assign(mv3d,{
 			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
 			if(`${side}_shadow` in conf){ options.shadow=conf[`${side}_shadow`]; }
 		}
+		if(conf.isCeiling){
+			options.backfaceCulling=conf.backfaceCulling;
+			options.through = conf.skylight;
+		}
 		if('alpha' in options){ options.transparent=true; }
 		return options;
 	},

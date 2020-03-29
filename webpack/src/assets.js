@@ -112,7 +112,7 @@ Object.assign(mv3d,{
 		material.mv3d_glowColor=options.glow;
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
-		material.backFaceCulling=mv3d.BACKFACE_CULLING;
+		material.backFaceCulling=options.backfaceCulling;
 		if(!isNaN(this.LIGHT_LIMIT)){ material.maxSimultaneousLights=this.LIGHT_LIMIT; }
 		this.materialCache[key]=material;
 		return material;
@@ -140,6 +140,7 @@ Object.assign(mv3d,{
 			options.glow.a = unround(options.glow.a,7);
 		}else{ options.glow=new Color4(0,0,0,0); }
 		if(!('shadow' in options)){options.shadow=true;}
+		if(!('backfaceCulling' in options)){ options.backfaceCulling = mv3d.BACKFACE_CULLING; }
 	},
 
 	getExtraBit(options){
@@ -153,6 +154,7 @@ Object.assign(mv3d,{
 		let string = extra.toString(36);
 		extra = 0;
 		extra|=Boolean(options.through)<<0;
+		extra|=(!options.backfaceCulling)<<1;
 		string += ','+extra.toString(36);
 		return string;
 	},

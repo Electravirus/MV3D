@@ -55,7 +55,7 @@ class ConfigurationFunction{
 }
 mv3d.ConfigurationFunction=ConfigurationFunction;
 
-function TextureConfigurator(name,extraParams=''){
+function TextureConfigurator(name,extraParams='',apply){
 	const paramlist = `img,x,y,w,h|${extraParams}|alpha|glow[anim]animx,animy`;
 	return new ConfigurationFunction(paramlist,function(conf,params){
 		if(params.group1.length===5){
@@ -72,9 +72,6 @@ function TextureConfigurator(name,extraParams=''){
 		if(params.animx&&params.animy){
 			conf[`${name}_animData`]={ animX:Number(params.animx), animY:Number(params.animy) };
 		}
-		if(params.height){
-			conf[`${name}_height`]=Number(params.height);
-		}
 		if(params.alpha){
 			conf[`${name}_alpha`]=Number(params.alpha);
 		}
@@ -84,6 +81,9 @@ function TextureConfigurator(name,extraParams=''){
 			}else{
 				conf[`${name}_glow`] = new Color4(Number(params.glow),Number(params.glow),Number(params.glow),1);
 			}
+		}
+		if(apply){
+			apply.call(this,conf,params);
 		}
 	});
 }
@@ -194,7 +194,9 @@ Object.assign(mv3d,{
 		}
 		conf.bottom_id = this.getMapConfig('ceiling_id',0);
 		conf.height = this.getMapConfig('ceiling_height',this.CEILING_HEIGHT);
-		conf.skylight = this.getMapConfig('ceiling_skylight',false);
+		conf.skylight = this.getMapConfig('ceiling_skylight',true);
+		conf.backfaceCulling = true;
+		conf.isCeiling = true;
 		return conf;
 	},
 
@@ -445,7 +447,14 @@ Object.assign(mv3d,{
 			if(height){ conf.cameraHeight=Number(height); }
 			if(mode){ conf.cameraMode=mode; }
 		}),
-		ceiling:TextureConfigurator('ceiling','height,skylight'),
+		ceiling:TextureConfigurator('ceiling','height,backface',function(conf,params){
+			if(params.height){
+				conf[`ceiling_height`]=Number(params.height);
+			}
+			if(params.backface){
+				conf[`ceiling_skylight`]=!booleanString(params.backface);
+			}
+		}),
 		edge(conf,b,data){
 			b=b.toLowerCase();
 			switch(b){

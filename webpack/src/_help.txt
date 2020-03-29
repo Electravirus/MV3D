@@ -369,9 +369,15 @@ Examples: camera(0,60,dist:5,height:0.75), camera(45,45),
 
 The ceiling function sets a ceiling texture and height, and also supports 
 all the other properties from the texture function like alpha and animation.  
+
+The backface parameter will force backfaces to be rendered on the ceiling. 
+This will also cause the ceiling to collide with the camera (if camera collision
+is on), and to cast shadows (if dynamic shadows is on).
+
 Parameter List:  
-img,x,y,w,h|height|alpha|glow[anim]animx,animy  
-Example: ceiling(A4,0,0|2)
+img,x,y,w,h|height,backface|alpha|glow[anim]animx,animy  
+
+Example: ceiling(A4,0,0|2),ceiling(A4,0,0|2,true)
 
 
 
