@@ -3307,6 +3307,9 @@ Game_Player.prototype.performTransfer = function() {
 };
 
 // On Map Load
+
+let tilesetLoaded = false;
+
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
 	Input.clear();
@@ -3317,8 +3320,10 @@ Scene_Map.prototype.onMapLoaded=function(){
 		mv3d["a" /* default */].reloadMap();
 		mv3d["a" /* default */].needReloadMap=false;
 	}
+	tilesetLoaded = false;
 	mv3d["a" /* default */].loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
+	if(!tilesetLoaded){ mv3d["a" /* default */].loadTilesetSettings(); }
 	if(!mv3d["a" /* default */].mapLoaded){
 		mv3d["a" /* default */].applyMapSettings();
 		if(mv3d["a" /* default */].isDisabled()){
@@ -3338,6 +3343,7 @@ const _map_battleback_Setup = Game_Map.prototype.setupBattleback;
 Game_Map.prototype.setupBattleback=function(){
 	_map_battleback_Setup.apply(this,arguments);
 	mv3d["a" /* default */].loadTilesetSettings();
+	tilesetLoaded = true;
 };
 
 const _onLoadSuccess = Scene_Load.prototype.onLoadSuccess;
@@ -3648,6 +3654,7 @@ Object.assign(mv3d["a" /* default */],{
 		this.blendPanX = new blenders_Blender('panX',0);
 		this.blendPanY = new blenders_Blender('panY',0);
 		this.blendCameraTransition = new blenders_Blender('cameraTransition',0);
+		this.blendResolutionScale = new blenders_Blender('resolutionScale',mv3d["a" /* default */].RES_SCALE);
 	},
 
     updateBlenders(reorient){
@@ -3755,6 +3762,14 @@ Object.assign(mv3d["a" /* default */],{
 				this.blendAmbientColor.g.currentValue()/255,
 				this.blendAmbientColor.b.currentValue()/255,
 			);
+		}
+
+		// res scale
+		if(reorient|this.blendResolutionScale.update()){
+			const resScale=this.blendResolutionScale.currentValue();
+			mv3d["a" /* default */].RES_SCALE=resScale;
+			mv3d["a" /* default */].pixiSprite.scale.set(1/resScale,1/resScale);
+			mv3d["a" /* default */].updateCanvas();
 		}
 
 		this.callFeatures('blend',reorient);

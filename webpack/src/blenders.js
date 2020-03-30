@@ -55,6 +55,7 @@ Object.assign(mv3d,{
 		this.blendPanX = new Blender('panX',0);
 		this.blendPanY = new Blender('panY',0);
 		this.blendCameraTransition = new Blender('cameraTransition',0);
+		this.blendResolutionScale = new Blender('resolutionScale',mv3d.RES_SCALE);
 	},
 
     updateBlenders(reorient){
@@ -162,6 +163,14 @@ Object.assign(mv3d,{
 				this.blendAmbientColor.g.currentValue()/255,
 				this.blendAmbientColor.b.currentValue()/255,
 			);
+		}
+
+		// res scale
+		if(reorient|this.blendResolutionScale.update()){
+			const resScale=this.blendResolutionScale.currentValue();
+			mv3d.RES_SCALE=resScale;
+			mv3d.pixiSprite.scale.set(1/resScale,1/resScale);
+			mv3d.updateCanvas();
 		}
 
 		this.callFeatures('blend',reorient);

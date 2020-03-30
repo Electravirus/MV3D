@@ -74,6 +74,9 @@ Game_Player.prototype.performTransfer = function() {
 };
 
 // On Map Load
+
+let tilesetLoaded = false;
+
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
 	Input.clear();
@@ -84,8 +87,10 @@ Scene_Map.prototype.onMapLoaded=function(){
 		mv3d.reloadMap();
 		mv3d.needReloadMap=false;
 	}
+	tilesetLoaded = false;
 	mv3d.loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
+	if(!tilesetLoaded){ mv3d.loadTilesetSettings(); }
 	if(!mv3d.mapLoaded){
 		mv3d.applyMapSettings();
 		if(mv3d.isDisabled()){
@@ -105,6 +110,7 @@ const _map_battleback_Setup = Game_Map.prototype.setupBattleback;
 Game_Map.prototype.setupBattleback=function(){
 	_map_battleback_Setup.apply(this,arguments);
 	mv3d.loadTilesetSettings();
+	tilesetLoaded = true;
 };
 
 const _onLoadSuccess = Scene_Load.prototype.onLoadSuccess;
