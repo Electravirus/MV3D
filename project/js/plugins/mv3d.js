@@ -8017,7 +8017,9 @@ Sprite_Character.prototype.updateAnimationSprites = function() {
 		const offsetVector = new mod_babylon["z" /* Vector3 */](0, getAnimationOffset(animationSprite), 0);
 		const animationOrigin = transformVectorForCharacter(offsetVector,this._character.mv3d_sprite);
 		const pos = mv3d["a" /* default */].getScreenPosition(animationOrigin);
-		const dist = mod_babylon["z" /* Vector3 */].Distance(mv3d["a" /* default */].camera.globalPosition,animationOrigin);
+		const dist = mod_babylon["z" /* Vector3 */].Distance(
+			BABYLON.Vector3.TransformCoordinates(mv3d["a" /* default */].camera.position,mv3d["a" /* default */].getTranslationMatrix(mv3d["a" /* default */].camera)),
+			animationOrigin);
 		const scale = mv3d["a" /* default */].camera.mode===mod_babylon["n" /* ORTHOGRAPHIC_CAMERA */] ? mv3d["a" /* default */].getScaleForDist() : mv3d["a" /* default */].getScaleForDist(dist);
 
 		animationSprite.behindCamera = pos.behindCamera;

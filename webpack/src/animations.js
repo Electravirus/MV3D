@@ -242,7 +242,9 @@ Sprite_Character.prototype.updateAnimationSprites = function() {
 		const offsetVector = new Vector3(0, getAnimationOffset(animationSprite), 0);
 		const animationOrigin = transformVectorForCharacter(offsetVector,this._character.mv3d_sprite);
 		const pos = mv3d.getScreenPosition(animationOrigin);
-		const dist = Vector3.Distance(mv3d.camera.globalPosition,animationOrigin);
+		const dist = Vector3.Distance(
+			BABYLON.Vector3.TransformCoordinates(mv3d.camera.position,mv3d.getTranslationMatrix(mv3d.camera)),
+			animationOrigin);
 		const scale = mv3d.camera.mode===ORTHOGRAPHIC_CAMERA ? mv3d.getScaleForDist() : mv3d.getScaleForDist(dist);
 
 		animationSprite.behindCamera = pos.behindCamera;
