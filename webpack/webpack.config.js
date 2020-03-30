@@ -43,7 +43,7 @@ module.exports = {
 	mode: 'production',
 	devtool: 'source-map',
 	optimization:{
-		minimize: true,
+		minimize: false,
 		minimizer: [
 			new TerserPlugin({
 				sourceMap: true,

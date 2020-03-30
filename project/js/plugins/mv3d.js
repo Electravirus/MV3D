@@ -1097,6 +1097,7 @@ there may be z-fighting issues. (default: 0.0100)
 @type Text
 @default height(2)
 */
+
 /*~struct~TTagHeight:
 @param terrainTag
 @text Terrain Tag
@@ -1110,6 +1111,7 @@ there may be z-fighting issues. (default: 0.0100)
 @type Text
 @default shape(flat),height(0)
 */
+
 /*~struct~BoatStruct:
 @param conf
 @text Settings
@@ -1117,6 +1119,7 @@ there may be z-fighting issues. (default: 0.0100)
 @default shadow(0.8,4),shape(sprite),scale(1),bush(false)
 
 */
+
 /*~struct~AirshipStruct:
 @param conf
 @text Settings
@@ -1135,5 +1138,7117 @@ there may be z-fighting issues. (default: 0.0100)
 @type Boolean
 @default false
 
-*/!function(t){var e={};function i(a){if(e[a])return e[a].exports;var s=e[a]={i:a,l:!1,exports:{}};return t[a].call(s.exports,s,s.exports,i),s.l=!0,s.exports}i.m=t,i.c=e,i.d=function(t,e,a){i.o(t,e)||Object.defineProperty(t,e,{enumerable:!0,get:a})},i.r=function(t){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})},i.t=function(t,e){if(1&e&&(t=i(t)),8&e)return t;if(4&e&&"object"==typeof t&&t&&t.__esModule)return t;var a=Object.create(null);if(i.r(a),Object.defineProperty(a,"default",{enumerable:!0,value:t}),2&e&&"string"!=typeof t)for(var s in t)i.d(a,s,function(e){return t[e]}.bind(null,s));return a},i.n=function(t){var e=t&&t.__esModule?function(){return t.default}:function(){return t};return i.d(e,"a",e),e},i.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},i.p="",i(i.s=13)}([function(t,e,i){"use strict";var a=i(2),s=i(1);const r={util:s.h,setup(){if(this.setupParameters(),Object(a.C)(),this.canvas=document.createElement("canvas"),this.texture=PIXI.Texture.fromCanvas(this.canvas),this.texture.baseTexture.scaleMode=PIXI.SCALE_MODES.NEAREST,this.engine=new a.e(this.canvas,this.ANTIALIASING),this.scene=new a.t(this.engine),this.scene.clearColor.set(0,0,0,0),this.cameraStick=new a.x("cameraStick",this.scene),this.cameraNode=new a.x("cameraNode",this.scene),this.cameraNode.parent=this.cameraStick,this.camera=new a.h("camera",new a.z(0,0,0),this.scene),this.camera.parent=this.cameraNode,this.camera.fov=Object(s.i)(r.FOV),this.camera.minZ=.1,this.camera.maxZ=this.RENDER_DIST,this.scene.ambientColor=new a.b(1,1,1),this.scene.fogMode=a.f,this.map=new a.m("map",this.scene),this.cells={},this.characters=[],this.setupBlenders(),this.setupInput(),this.setupSpriteMeshes(),this.callFeatures("setup"),isNaN(this.LIGHT_LIMIT)){const t=BABYLON.Scene.prototype.sortLightsByPriority;BABYLON.Scene.prototype.sortLightsByPriority=function(){t.apply(this,arguments),r.updateAutoLightLimit()}}},updateCanvas(){this.canvas.width=Graphics._width*r.RES_SCALE,this.canvas.height=Graphics._height*r.RES_SCALE},render(){this.scene.render(),this.texture.update()},lastMapUpdate:0,update(){performance.now()-this.lastMapUpdate>1e3&&!this.mapUpdating&&(this.updateMap(),this.lastMapUpdate=performance.now()),this.updateAnimations(),this.updateCharacters(),this.intensiveUpdate(),this.updateBlenders(),this.updateInput();for(const t in this.cells)this.cells[t].update();this.callFeatures("update"),this.updateData()},loadData:(t,e)=>$gameVariables&&$gameVariables.mv3d&&t in $gameVariables.mv3d?$gameVariables.mv3d[t]:e,saveData(t,e){if(!$gameVariables)return console.warn(`MV3D: Couldn't save data ${t}:${e}`);$gameVariables.mv3d||($gameVariables.mv3d={}),$gameVariables.mv3d[t]=e},updateCameraMode(){let t=!1;this.cameraMode.startsWith("O")?this.camera.mode!==a.n&&(this.camera.mode=a.n,t=!0):this.camera.mode!==a.o&&(this.camera.mode=a.o,t=!0),t&&(this.updateBlenders(!0),this.callFeatures("updateCameraMode"),this.updateParameters())},get cameraMode(){return this.loadData("cameraMode",this.CAMERA_MODE).toUpperCase()},set cameraMode(t){t=String(t).toUpperCase().startsWith("O")?"ORTHOGRAPHIC":"PERSPECTIVE",this.saveData("cameraMode",t),this.updateBlenders(!0)},is1stPerson(t){const e=t?"currentValue":"targetValue";return this.getCameraTarget()===$gamePlayer&&this.blendCameraTransition[e]()<=0&&this.blendCameraDist[e]()<=0&&0===this.blendPanX[e]()&&0===this.blendPanY[e]()},isDisabled(){return this.loadData("disabled",this.getMapConfig("disabled",!r.ENABLED_DEFAULT))},disable(t=2){r.saveData("disabled",!0),$gamePlayer.reserveTransfer($gameMap.mapId(),$gamePlayer.x,$gamePlayer.y,$gamePlayer.direction(),t)},enable(t=2){r.saveData("disabled",!1),$gamePlayer.reserveTransfer($gameMap.mapId(),$gamePlayer.x,$gamePlayer.y,$gamePlayer.direction(),t),r.createCharacters()},loopCoords(t,e){if($gameMap.isLoopHorizontal()){const e=$gameMap.width(),i=this.cameraStick.x-e/2;t=(t-i).mod(e)+i}if($gameMap.isLoopVertical()){const t=$gameMap.height(),i=this.cameraStick.y-t/2;e=(e-i).mod(t)+i}return new a.y(t,e)},autoLightLimit(t){return isNaN(this.LIGHT_LIMIT)?Math.max(4,t):this.LIGHT_LIMIT},updateAutoLightLimit(){const t=this.autoLightLimit(r.scene.lights.length);for(const e of Object.values(r.materialCache))e.maxSimultaneousLights=t;for(const t of this.characters)t.material&&(t.material.maxSimultaneousLights=this.autoLightLimit(t.mesh.lightSources.length))},getFieldSize(t=r.blendCameraDist.currentValue()){const e=Math.tan(r.camera.fov/2)*t*2;return{width:e*r.engine.getAspectRatio(r.camera),height:e}},getScaleForDist(t=r.blendCameraDist.currentValue()){return Graphics.height/this.getFieldSize(t).height/48},getFovForDist:(t=r.blendCameraDist.currentValue(),e=Object(s.z)())=>2*Math.atan(e/2/t),getFrustrumHeight:(t=r.blendCameraDist.currentValue(),e=r.camera.fov)=>2*t*Math.tan(e/2),getScreenPosition(t,e=a.z.Zero()){const i=t.parent?t.parent.getWorldMatrix():a.j.Identity(),s=t instanceof a.z?t.add(e):t.position.add(e),n=a.z.Project(s,i,r.scene.getTransformMatrix(),r.camera.viewport);return{x:n.x*Graphics.width,y:n.y*Graphics.height,behindCamera:n.z>1}},getUnscaledMatrix(t){const e=t.getWorldMatrix(),i=new a.r,s=new a.z;return e.decompose(null,i,s),a.j.Compose(a.z.One(),i,s)},getTranslationMatrix(t){const e=t.getWorldMatrix(),i=a.z.Zero(),n=new a.z;return i.y=-Object(s.i)(r.blendCameraYaw.currentValue()),i.x=-Object(s.i)(r.blendCameraPitch.currentValue()-90),e.decompose(null,null,n),a.j.Compose(a.z.One(),i.toQuaternion(),n)},getRotationMatrix(t){const e=t.getWorldMatrix(),i=new a.r;return e.decompose(null,i,null),a.j.Compose(a.z.One(),i,a.z.Zero())}};window.mv3d=r,e.a=r},function(t,e,i){"use strict";i.d(e,"n",(function(){return h})),i.d(e,"s",(function(){return l})),i.d(e,"e",(function(){return c})),i.d(e,"f",(function(){return p})),i.d(e,"l",(function(){return d})),i.d(e,"u",(function(){return u})),i.d(e,"i",(function(){return g})),i.d(e,"r",(function(){return m})),i.d(e,"q",(function(){return _})),i.d(e,"t",(function(){return b})),i.d(e,"g",(function(){return y})),i.d(e,"y",(function(){return C})),i.d(e,"w",(function(){return T})),i.d(e,"x",(function(){return M})),i.d(e,"v",(function(){return v})),i.d(e,"z",(function(){return S})),i.d(e,"j",(function(){return E})),i.d(e,"k",(function(){return O})),i.d(e,"m",(function(){return I})),i.d(e,"b",(function(){return w})),i.d(e,"c",(function(){return A})),i.d(e,"d",(function(){return L})),i.d(e,"a",(function(){return P})),i.d(e,"o",(function(){return R})),i.d(e,"p",(function(){return H}));var a=i(0);const{Vector2:s,Vector3:r,Color3:n,Color4:o}=window.BABYLON,h=t=>{if("number"==typeof t)return{r:(t>>16)/255,g:(t>>8&255)/255,b:(255&t)/255,a:1};if(t instanceof n)return t.toColor4();if(t instanceof o)return t;{const e=document.createElement("canvas");e.width=1,e.height=1;const i=e.getContext("2d");i.fillStyle=t,i.fillRect(0,0,1,1);const a=i.getImageData(0,0,1,1).data;return new o(a[0]/255,a[1]/255,a[2]/255,a[3]/255)}},l=(t,e)=>{if(""===e)return+t;const i=/^[+]/.test(e);return i&&(e=e.substr(1)),e=Number(e),Number.isNaN(e)?+t:i?+t+e:+e},c=t=>isNaN(t)?p(t):Number(t),p=t=>Boolean(d(t)),d=t=>{if(!t)return!1;"string"!=typeof t&&(t=String(t));const e=t.toUpperCase();return!d.values.includes(e)&&t};d.values=["OFF","FALSE","UNDEFINED","NULL","DISABLE","DISABLED"];const u=(t=0)=>new Promise(e=>setTimeout(e,t)),g=t=>t*Math.PI/180,m=t=>180*t/Math.PI,f=(t,e)=>Math.atan2(-e,t)-Math.PI/2,_=(t,e)=>m(f(t,e)),b=t=>C(Math.sin(t),1e15),y=t=>C(Math.cos(t),1e15),C=(t,e=1e15)=>Math.round(t*e)/e,T=()=>M(),M=()=>Game_Map.prototype.tileWidth(),v=()=>Game_Map.prototype.tileHeight(),S=()=>Graphics.height/48,E=t=>(t-1)%3-1+5,O=t=>5+3*(Math.floor((t-1)/3)-1),I=(t,e)=>5+3*(Math.floor((e-1)/3)-1)+((t-1)%3-1),w=new r(1,0,0),A=new r(0,1,0),L=new r(0,0,1),x=new s(0,0),D=new r(0,0,0),P=Math.PI,N=2*Math.PI,R=t=>{const e=function(){const e=arguments.length;return"function"==typeof t[e]?t[e].apply(this,arguments):"function"==typeof t.default?t.default.apply(this,arguments):void console.warn("Unsupported number of arguments.")};for(const i in t)e[i]=t[i].bind;return e},F=()=>!a.a.isDisabled(),H=(t,e,i,a=F)=>{const s=t[e],r=i(s),n=function(){return("function"==typeof a?a():a)?r.apply(this,arguments):s.apply(this,arguments)};return Object.defineProperty(n,"name",{value:`${e}<mv3d_override>`}),Object.defineProperty(r,"name",{value:`${e}<mv3d>`}),n.oldMethod=s,n.newMethod=r,t[e]=n},B={makeColor:h,hexNumber:t=>((t=String(t)).startsWith("#")&&(t=t.substr(1)),Number.parseInt(t,16)),relativeNumber:l,booleanString:p,falseString:d,booleanNumber:c,sleep:u,degtorad:g,radtodeg:m,sin:b,cos:y,unround:C,tileSize:T,tileWidth:M,tileHeight:v,viewWidth:()=>Graphics.width/48,viewHeight:S,pointtorad:f,pointtodeg:_,minmax:(t,e,i)=>Math.min(e,Math.max(t,i)),dirtov:O,dirtoh:E,hvtodir:I,XAxis:w,YAxis:A,ZAxis:L,v2origin:x,v3origin:D,PI:P,PI2:N,overload:R,override:H,file:(t=a.a.MV3D_FOLDER,e)=>e.startsWith("/")?"."+e:e.startsWith("./")?e:(t.startsWith("/")?t="."+t:t.startsWith("./")||(t="./"+t),`${t}/${e}`)};e.h=B},function(t,e,i){"use strict";var a=i(0),s=i(1);function r(){n("shadowMapPixelShader"),n("depthPixelShader"),o("defaultPixelShader","vec4 color=vec4(finalDiffuse*baseAmbientColor+finalSpecular+reflectionColor+refractionColor,alpha);","vec3 mv3d_extra_emissiveColor = max(emissiveColor-1.,0.);\n\t\tvec4 color=vec4(clamp(finalDiffuse*baseAmbientColor+finalSpecular+reflectionColor+mv3d_extra_emissiveColor+refractionColor,0.0,1.0),alpha);")}function n(t){o(t,"if (texture2D(diffuseSampler,vUV).a<0.4)",`if (texture2D(diffuseSampler,vUV).a<${mv3d.ALPHA_CUTOFF})`)}function o(t,e,i){BABYLON.Effect.ShadersStore[t]=BABYLON.Effect.ShadersStore[t].replace(e,i)}i.d(e,"t",(function(){return l})),i.d(e,"e",(function(){return c})),i.d(e,"h",(function(){return p})),i.d(e,"u",(function(){return g})),i.d(e,"q",(function(){return m})),i.d(e,"y",(function(){return _})),i.d(e,"z",(function(){return b})),i.d(e,"r",(function(){return y})),i.d(e,"j",(function(){return C})),i.d(e,"b",(function(){return T})),i.d(e,"c",(function(){return M})),i.d(e,"p",(function(){return v})),i.d(e,"m",(function(){return S})),i.d(e,"x",(function(){return E})),i.d(e,"w",(function(){return O})),i.d(e,"v",(function(){return I})),i.d(e,"k",(function(){return L})),i.d(e,"A",(function(){return x})),i.d(e,"l",(function(){return D})),i.d(e,"s",(function(){return H})),i.d(e,"g",(function(){return B})),i.d(e,"a",(function(){return G})),i.d(e,"d",(function(){return j})),i.d(e,"o",(function(){return V})),i.d(e,"n",(function(){return z})),i.d(e,"f",(function(){return U})),i.d(e,"B",(function(){return W})),i.d(e,"i",(function(){return X})),i.d(e,"C",(function(){return tt}));const h=window.BABYLON,{Scene:l,Engine:c,FreeCamera:p,HemisphericLight:d,DirectionalLight:u,SpotLight:g,PointLight:m,ShadowGenerator:f,Vector2:_,Vector3:b,Quaternion:y,Matrix:C,Color3:T,Color4:M,Plane:v,Node:S,TransformNode:E,Texture:O,StandardMaterial:I,ShaderMaterial:w,Effect:A,Mesh:L,VertexData:x,MeshBuilder:D,AssetsManager:P,SceneSerializer:N,Sprite:R,SpriteManager:F,Ray:H}=h,{FRONTSIDE:B,BACKSIDE:G,DOUBLESIDE:j}=L,{PERSPECTIVE_CAMERA:V,ORTHOGRAPHIC_CAMERA:z}=h.Camera,{FOGMODE_NONE:$,FOGMODE_EXP:Y,FOGMODE_EXP2:k,FOGMODE_LINEAR:U}=l,W=h.Space.WORLD,X=h.Space.LOCAL;h.Space.BONE;O.prototype.crop=function(t=0,e=0,i=0,s=0,r=!1){const{width:n,height:o}=r?this.getBaseSize():this.getSize();if(i||(i=n-t),s||(s=o-e),a.a.EDGE_FIX&&(t+=a.a.EDGE_FIX,e+=a.a.EDGE_FIX,i-=2*a.a.EDGE_FIX,s-=2*a.a.EDGE_FIX),!r){const a=this.getSize(),r=this.getBaseSize(),n=r.width/a.width,o=r.height/a.height;t/=n,i/=n,e/=o,s/=o}this.uScale=i/n,this.vScale=s/o,this.uOffset=t/n,this.vOffset=1-e/o-this.vScale};const Z={x:{get(){return this.position?this.position.x:void 0},set(t){this.position&&(this.position.x=t)}},y:{get(){return this.position?-this.position.z:void 0},set(t){this.position&&(this.position.z=-t)}},z:{get(){return this.position?this.position.y:void 0},set(t){this.position&&(this.position.y=t)}}},Q={pitch:{get(){return this.rotation?-Object(s.r)(this.rotation.x):void 0},set(t){this.rotation&&(this.rotation.x=-Object(s.i)(t))}},yaw:{get(){return this.rotation?-Object(s.r)(this.rotation.y):void 0},set(t){this.rotation&&(this.rotation.y=-Object(s.i)(t))}},roll:{get(){return this.rotation?-Object(s.r)(this.rotation.z):void 0},set(t){this.rotation&&(this.rotation.z=-Object(s.i)(t))}}};Object.defineProperties(S.prototype,Z),Object.defineProperties(S.prototype,Q),Object.defineProperties(R.prototype,Z),Object.defineProperty(L.prototype,"order",{get(){return this._order},set(t){this._order=t,this._scene.sortMeshes()}});const K=(t,e)=>(0|t._order)-(0|e._order);l.prototype.sortMeshes=function(){this.meshes.sort(K)};const J=l.prototype.addMesh;l.prototype.addMesh=function(t){J.apply(this,arguments),"number"==typeof t._order&&this.sortMeshes()};const q=l.prototype.removeMesh;function tt(){r()}l.prototype.removeMesh=function(t){q.apply(this,arguments),this.sortMeshes()},T.prototype.toNumber=M.prototype.toNumber=function(){return 255*this.r<<16|255*this.g<<8|255*this.b},I.prototype._shouldTurnAlphaTestOn=function(t){return this.needAlphaTesting()}},function(t,e,i){"use strict";var a=i(0);a.a.features={},a.a.callFeature=function(t,e,...i){if(!this.featureEnabled(t))return;const a=this.features[t];e in a.methods&&a.methods[e](...i)},a.a.callFeatures=function(t,...e){for(const i in this.features)this.callFeature(i,t,...e)},a.a.featureEnabled=function(t){return t in this.features&&!!this.features[t].enabled()};a.a.Feature=class Feature{constructor(t,e,i=!0){Object.assign(this,{name:t,condition:i,methods:e}),a.a.features[t]=this}enabled(){return"function"==typeof this.condition?this.condition():Boolean(this.condition)}}},function(t,e){t.exports=require("fs")},function(t,e){t.exports=require("path")},function(t,e,i){if(i(7),i(9),window.Imported&&Imported.YEP_SaveCore){const t=Scene_File.prototype.onLoadSuccess;Scene_File.prototype.onLoadSuccess=function(){t.apply(this,arguments),mv3d.needClearMap=!0}}},function(t,e,i){"use strict";i.r(e);var a=i(0);a.a["option-store"]={},a.a.options={},a.a.OPTION_RENDER_DIST&&(a.a.options["mv3d-renderDist"]={name:"Render Distance",min:a.a.OPTION_RENDER_DIST_MIN,max:a.a.OPTION_RENDER_DIST_MAX,increment:5,wrap:!1,apply(t){a.a.RENDER_DIST=t},default:a.a.RENDER_DIST}),a.a.OPTION_FOV&&(a.a.options["mv3d-fov"]={name:"FOV",min:a.a.OPTION_FOV_MIN,max:a.a.OPTION_FOV_MAX,increment:5,apply(t){a.a.FOV=t},default:a.a.FOV}),a.a.OPTION_MIPMAP&&(a.a.options["mv3d-mipmap"]={name:"Mipmapping",type:"bool",apply(t){a.a.MIPMAP=t,a.a.needReloadMap=!0},default:a.a.MIPMAP}),a.a.ENABLE_3D_OPTIONS&&i(8)},function(t,e,i){"use strict";i.r(e);var a=i(0),s=i(1);const r=Window_Options.prototype.makeCommandList;Window_Options.prototype.makeCommandList=function(){if(r.apply(this,arguments),a.a.ENABLE_3D_OPTIONS===a.a.enumOptionModes.SUBMENU&&Object.keys(a.a.options).length)this.addCommand("3D Options","mv3d-options");else if(a.a.ENABLE_3D_OPTIONS===a.a.enumOptionModes.ENABLE)for(const t in a.a.options)this.addCommand(a.a.options[t].name,t)};const n=Window_Options.prototype.statusText;Window_Options.prototype.statusText=function(t){const e=this.commandSymbol(t);this.getConfigValue(e);return"mv3d-options"===e?"":n.apply(this,arguments)},Object.defineProperty(ConfigManager,"mv3d-options",{get(){},set(t){SceneManager.push(Scene_3D_Options)},configurable:!0});const o=ConfigManager.makeData;ConfigManager.makeData=function(){const t=o.apply(this,arguments);return Object.assign(t,a.a["option-store"]),t};const h=ConfigManager.applyData;ConfigManager.applyData=function(t){h.apply(this,arguments);for(const e in a.a.options)e in t&&(a.a["option-store"][e]=t[e],a.a.options[e].apply(t[e]));a.a.updateParameters()};class Scene_3D_Options extends Scene_Options{createOptionsWindow(){this._optionsWindow=new Window_3D_Options,this._optionsWindow.setHandler("cancel",this.popScene.bind(this)),this.addWindow(this._optionsWindow)}terminate(){super.terminate(),a.a.updateParameters()}}class Window_3D_Options extends Window_Options{makeCommandList(){for(const t in a.a.options)this.addCommand(a.a.options[t].name,t)}}1===a.a.ENABLE_3D_OPTIONS&&Object(s.p)(Scene_Options.prototype,"terminate",t=>(function(){t.apply(this,arguments),a.a.updateParameters()}),!0),Window_Options.prototype._is_mv3d_option=function(t){return t in a.a.options},Window_Options.prototype._mv3d_cursor=function(t,e){const i=this.index(),s=this.commandSymbol(i);let r=this.getConfigValue(s);const n=a.a.options[s];if(n)if("bool"===n.type)this.changeValue(s,e>0);else{const i=n.min||0,a=n.values?n.values.length-1:n.max||1;r+=(n.increment||1)*e,t&&n.wrap||"ok"===t?(r>a&&(r=i),r<i&&(r=a)):r=r.clamp(i,a),this.changeValue(s,r)}},Object(s.p)(Window_Options.prototype,"statusText",t=>(function(e){const i=this.commandSymbol(e);if(!this._is_mv3d_option(i))return t.apply(this,arguments);const s=this.getConfigValue(i),r=a.a.options[i];return"bool"===r.type?this.booleanStatusText(s):r.values?r.values[s]:String(s)}),!0),Object(s.p)(Window_Options.prototype,"setConfigValue",t=>(function(e,i){if(!this._is_mv3d_option(e))return t.apply(this,arguments);a.a["option-store"][e]=i;const s=a.a.options[e];s.apply&&s.apply(i)}),!0),Object(s.p)(Window_Options.prototype,"getConfigValue",t=>(function(e){if(!this._is_mv3d_option(e))return t.apply(this,arguments);const i=a.a.options[e];let s=a.a["option-store"][e];return null==s&&(s=i.default||i.min||0),s}),!0),Object(s.p)(Window_Options.prototype,"cursorLeft",t=>(function(e){const i=this.commandSymbol(this.index());return this._is_mv3d_option(i)?this._mv3d_cursor(e,-1):t.apply(this,arguments)}),!0),Object(s.p)(Window_Options.prototype,"cursorRight",t=>(function(e){const i=this.commandSymbol(this.index());return this._is_mv3d_option(i)?this._mv3d_cursor(e,1):t.apply(this,arguments)}),!0),Object(s.p)(Window_Options.prototype,"processOk",t=>(function(){const e=this.index(),i=this.commandSymbol(e);if(!this._is_mv3d_option(i))return t.apply(this,arguments);let s=this.getConfigValue(i);const r=a.a.options[i];"bool"===r.type?this.changeValue(i,!s):this._mv3d_cursor("ok",1)}),!0)},function(t,e,i){"use strict";i.r(e);var a=i(0),s=i(1);Object.assign(a.a,{vehicleObstructed:(t,...e)=>vehicleObstructed.apply(t,e),tileCollision(t,e,i,s=!1,r=!1){if(!(t instanceof a.a.Character)){if(!t.mv3d_sprite)return!1;t=t.mv3d_sprite}const n="number"==typeof r?r:r?t.targetElevation:t.z,o=t.getCollisionHeight(n),h=this.getCollisionHeights(e,i);2==s&&(o.z1+=a.a.STAIR_THRESH,o.z2+=a.a.STAIR_THRESH);for(const n of h)if(o.z1<n.z2&&o.z2>n.z1)return 1!=s||!a.a.STAIR_THRESH||this.tileCollision(t,e,i,2,r);return!1},charCollision(t,e,i=!1,s=!1,r=s,n=!1){if(!(t instanceof a.a.Character)){if(!t.mv3d_sprite)return!1;t=t.mv3d_sprite}if(!(e instanceof a.a.Character)){if(!e.mv3d_sprite)return!1;e=e.mv3d_sprite}if(!(n||t.char._mv3d_hasCollide()&&e.char._mv3d_hasCollide()))return!1;const o="number"==typeof s?s:s?t.targetElevation:t.z,h="number"==typeof r?r:r?e.targetElevation:e.z,l=t.getCollisionHeight(o),c=n?e.getTriggerHeight(h):e.getCollisionHeight(h);return 2==i&&(l.z1+=a.a.STAIR_THRESH,l.z2+=a.a.STAIR_THRESH),!!(!n&&l.z1<c.z2&&l.z2>c.z1||n&&l.z1<=c.z2&&l.z2>=c.z1)&&(1!=i||!a.a.STAIR_THRESH||this.charCollision(t,e,2,s,r))},getPlatformFloatForCharacter(t,e,i,s={}){if(!(t instanceof a.a.Character)){if(!t.mv3d_sprite)return 0;t=t.mv3d_sprite}let r=a.a.getPlatformForCharacter(t,e,i,s).z2;if(t.hasFloat){const s=t.getCHeight();r+=a.a.getFloatHeight(e,i,t.z+Math.max(s,a.a.STAIR_THRESH),a.a.STAIR_THRESH>=s)}return r},getPlatformForCharacter(t,e,i,s={}){if(!(t instanceof a.a.Character)){if(!t.mv3d_sprite)return!1;t=t.mv3d_sprite}const r=t.getCHeight(),n=a.a.STAIR_THRESH>=r;return Object.assign(s,{char:t,gte:n}),this.getPlatformAtLocation(e,i,t.z+Math.max(r,a.a.STAIR_THRESH),s)},getPlatformAtLocation(t,e,i,s={}){const r=s.char,n=this.getCollisionHeights(t,e,s);n.push(...a.a.getEventsAt(t,e).filter(t=>{if(!(t.mv3d_sprite&&t._mv3d_isPlatform()&&t._mv3d_hasCollide()&&t.mv3d_sprite.visible))return!1;if(r){if(r.char===t||t.isMoving())return!1;let e=t.mv3d_sprite;for(;e=e.platformChar;)if(e===r||e===t.mv3d_sprite)return!1}return!0}).map(t=>t.mv3d_sprite.getCollisionHeight()));let o=n[0];for(const t of n)t.z2>o.z2&&(s.gte?t.z2<=i:t.z2<i)&&(o=t);return o},getEventsAt:(t,e)=>$gameMap.eventsXyNt(Math.round(t),Math.round(e)),isRampAt(t,e,i){const a=this.getTileData(t,e);let s=0;for(let r=0;r<4;++r){s+=this.getTileFringe(t,e,r),s+=this.getTileHeight(t,e,r);const n=this.getTileConfig(a[r],t,e,r);if(n.shape!==this.enumShapes.SLOPE)continue;const o=n.slopeHeight||1;if(i>=s-o&&i<=s)return{id:a[r],x:t,y:e,l:r,conf:n,z1:s-o,z2:s}}return!1},getRampData(t,e,i,s=null){const r=a.a.getTileId(t,e,i);if(s||(s=this.getTileConfig(r,t,e,i)),s.shape!==this.enumShapes.SLOPE)return!1;const n=a.a.getStackHeight(t,e,i);return{id:r,x:t,y:e,l:i,conf:s,z1:n-(s.slopeHeight||1),z2:n}},canPassRamp(t,e){if(5===t||t<=0||t>=10)return!0;const{dir:i}=a.a.getSlopeDirection(e.x,e.y,e.l,!0),s=$gameMap.roundXWithDirection(e.x,t),r=$gameMap.roundYWithDirection(e.y,t),n=this.isRampAt(s,r,i===t?e.z1:i===10-t?e.z2:(e.z1+e.z2)/2);if(n){const{dir:o}=a.a.getSlopeDirection(s,r,n.l,!0);return i!==t&&i!==10-t?i===o&&e.z1===n.z1&&e.z2===n.z2:i===o&&(i===t?e.z1===n.z2:e.z2===n.z1)}if(i!==t&&i!==10-t)return!1;const o=this.getPlatformAtLocation(s,r,(i===t?e.z1:e.z2)+a.a.STAIR_THRESH).z2;return Math.abs(o-(i===t?e.z1:e.z2))<=a.a.STAIR_THRESH}}),Game_CharacterBase.prototype._mv3d_isFlying=function(){return!!this.mv3d_sprite&&(this.mv3d_sprite.blendElevation.currentValue()>0||this.mv3d_sprite.hasConfig("zlock"))},Game_Vehicle.prototype._mv3d_isFlying=function(){return this.isAirship()||Game_CharacterBase.prototype._mv3d_isFlying.apply(this,arguments)},Game_Player.prototype._mv3d_isFlying=function(){return!(!this.isInVehicle()||!this.vehicle().isAirship())||Game_CharacterBase.prototype._mv3d_isFlying.apply(this,arguments)},Game_CharacterBase.prototype._mv3d_isPlatform=function(){return this.mv3d_sprite&&this.mv3d_sprite.getConfig("platform",a.a.WALK_ON_EVENTS)},Game_CharacterBase.prototype._mv3d_hasCollide=function(){const t=this.mv3d_sprite;return!(!t||!1===t.getConfig("collide"))&&(this._mv3d_isPlatform()||Boolean(t.getCHeight()))},window.Imported&&Imported.QMovement?i(10):PluginManager._scripts.includes("AltimitMovement")&&Game_CharacterBase.prototype.moveVector?i(11):i(12);const r=Game_CharacterBase.prototype.jump;Game_CharacterBase.prototype.jump=function(t,e){if(a.a.isDisabled())return r.apply(this,arguments);this.mv3d_jumpHeightStart=this.z||a.a.getWalkHeight(this.x,this.y),this.mv3d_jumpHeightEnd=a.a.getWalkHeight(this.x+t,this.y+e),r.apply(this,arguments)},Object(s.p)(Game_Map.prototype,"allTiles",t=>(function(t,e){return this.layeredTiles(t,e)}))},function(t,e,i){"use strict";i.r(e);var a=i(1),s=i(0);i(3);Object(a.p)(ColliderManager,"update",t=>(function(){this.hide()})),Object(a.p)(ColliderManager.container,"update",t=>(function(){this.visible&&t.apply(this,arguments)}),!0);let r={};function n(t,e,i,a){const s=new Box_Collider($gameMap.tileWidth(),$gameMap.tileHeight());return s.x=t*$gameMap.tileWidth(),s.y=e*$gameMap.tileHeight(),s.mv3d_collider=i,s.mv3d_collider_type=a,s}s.a.getQTileColliders=()=>r;const o={z1:-1/0,z2:1/0};function h(t,e){return!t.mv3d_collider||!e.mv3d_collider||l(t=t.mv3d_collider,e=e.mv3d_collider)}function l(t,e){return t.z1<e.z2&&t.z2>e.z1&&t.z1+s.a.STAIR_THRESH<e.z2&&t.z2+s.a.STAIR_THRESH>e.z1}Object(a.p)(Game_Map.prototype,"setupMapColliders",t=>(function(){this._tileCounter=0,r={};for(let e=0;e<this.width();e++)for(let i=0;i<this.height();i++){const a=e*this.tileWidth(),h=i*this.tileHeight(),l=this.tilesetFlags(),c=s.a.getTileData(e,i),p=s.a.getCollisionHeights(e,i,{layers:!0,slopeMin:!0}),d=r[[e,i]]=[];for(let t=0;t<p.length;++t)d[t]=n(e,i,p[t],"mv3d");r[[e,i,"x"]]=n(e,i,o,"mv3d_x");for(let n=0;n<c.length;++n){const d=l[c[n]],u=s.a.getTilePassage(c[n],e,i,n);if(u===s.a.enumPassage.THROUGH)continue;const g=s.a.getTileConfig(e,i,n);if(g.shape===s.a.enumShapes.SLOPE){const t=s.a.getRampData(e,i,n,g);let l=0;s.a.canPassRamp(2,t)||(l|=1),s.a.canPassRamp(4,t)||(l|=2),s.a.canPassRamp(6,t)||(l|=4),s.a.canPassRamp(8,t)||(l|=8),l+=1536;const c=s.a.getStackHeight(e,i,n),p=c-(g.slopeHeight||1);let d=QMovement.tileBoxes[l];const u=[e,i,n,"slope"].toString();if(r[u]=[],d){d[0].constructor!==Array&&(d=[d]);for(const t of d){const e=new Box_Collider(t[0]||0,t[1]||0,t[2],t[3]);e.slopeZ1=p,e.slopeZ2=c,e.moveTo(a,h),e.mv3d_collider=o,r[u].push(e)}}}let m;p.layers[n]&&((m=p.layers[n]).passage=u,m.l=n);let f=this.getMapCollider(e,i,d);if(f)if((f=Array.from(f))[0].constructor===Array)for(var t=0;t<f.length;t++)f[t].mv3d_collider=m,f[t].isRegionCollider=!0,this.makeTileCollider(e,i,d,f[t],t);else f.mv3d_collider=m,f.isQCollider=!0,this.makeTileCollider(e,i,d,f,0)}}}),!0),Object(a.p)(Game_Map.prototype,"makeTileCollider",t=>(function(e,i,a,s,r){const n=t.apply(this,arguments);return s.mv3d_collider&&(s.isRegionCollider?n.mv3d_collider=o:s.isQCollider?(n.mv3d_collider={z1:-1/0,z2:1/0},s.mv3d_collider&&(n.mv3d_collider.l=s.mv3d_collider.l)):n.mv3d_collider=s.mv3d_collider),n}),!0),Object(a.p)(Game_CharacterBase.prototype,"collider",t=>(function(){const e=t.apply(this,arguments);return this.mv3d_sprite?(e.mv3d_collider||(Object.defineProperty(e,"mv3d_collider",{configurable:!0,value:this.mv3d_sprite.getCollider()}),Object.defineProperty(e,"mv3d_triggerCollider",{configurable:!0,value:this.mv3d_sprite.getTriggerCollider()})),e):e})),Object(a.p)(ColliderManager,"getCollidersNear",t=>(function(e,i,n){let o=!1;const l=t.call(this,e,t=>{if(!1===h(e,t))return!1;if(e.mv3d_collider){const i=Math.round(t.x/QMovement.tileSize),a=Math.round(t.y/QMovement.tileSize);if(e.mv3d_collider.char){if(e.mv3d_collider.char.getPlatform(i,a).char)return!1}if(t.mv3d_collider){if(!s.a.getTileLayers(i,a,e.mv3d_collider.z1+s.a.STAIR_THRESH).includes(t.mv3d_collider.l))return!1}}if(i){const e=i(t);return"break"===e&&(o=!0),e}return!0},n);if(o)return l;const c=(e.x+e._offset.x-1)/QMovement.tileSize,p=(e.y+e._offset.y-1)/QMovement.tileSize,d=(e.x+e._offset.x+e.width+1)/QMovement.tileSize,u=(e.y+e._offset.y+e.height+1)/QMovement.tileSize;if(e.mv3d_collider)for(let t=Math.floor(c);t<Math.ceil(d);++t)for(let n=Math.floor(p);n<Math.ceil(u);++n){const o=r[[t,n]],c=r[[t,n,"x"]];let p=null,d=!1;const u=s.a.getTileLayers(t,n,e.mv3d_collider.z1+s.a.STAIR_THRESH);for(const e of u){s.a.getTilePassage(t,n,e)===s.a.enumPassage.WALL&&(d=!0);const i=[t,n,e,"slope"].toString();i in r&&(p=r[i])}let g=!1;if(c&&e.mv3d_collider.char){const r=e.mv3d_collider.char,o={slopeMin:!0},h=r.getPlatform(t,n,o);if(o.platform=h,r.falling&&!r.char._mv3d_isFlying())g=!0;else if(d&&!h.char)g=!0;else if(!p||r.platform.char||h.char)s.a.WALK_OFF_EDGE||r.char._mv3d_isFlying()||r.platform&&r.platform.isSlope||!(Object(a.y)(Math.abs(r.getPlatformFloat(t,n,o)-r.targetElevation))>s.a.STAIR_THRESH)||(g=!0);else for(const t of p){if(s.a.WALK_OFF_EDGE&&r.z>t.slopeZ1)continue;let e=!0;if(i&&(e=i(t)),!1===e);else if(l.push(t),"break"===e)return l}if(g){let t=!0;if(i&&(t=i(c)),!1!==t){if(l.push(c),"break"===t)return l;continue}}}if(o)for(let t=0;t<o.length;++t)if(h(e,o[t]))if(i){const e=i(o[t]);if(!1!==e&&l.push(o[t]),"break"===e)return l}else l.push(o[t])}return l})),Object(a.p)(ColliderManager,"getCharactersNear",t=>(function(e,i){return t.call(this,e,t=>{const a=t.mv3d_sprite;if(!a)return!0;const s=e.mv3d_collider,r=$gameTemp._mv3d_Q_getCharactersTriggerHeight?a.getTriggerHeight():a.getCollisionHeight();return!s||!r||!1!==l(s,r)&&(!i||i(t))})})),Object(a.p)(Game_Player.prototype,"startMapEvent",t=>(function(e,i,a,s){$gameTemp._mv3d_Q_getCharactersTriggerHeight=!0,t.apply(this,arguments),$gameTemp._mv3d_Q_getCharactersTriggerHeight=!1})),s.a.Character.prototype.getPlatform=function(t=this.char._realX,e=this.char._realY,i={}){const a=(t-.5)*QMovement.tileSize,r=(e-.5)*QMovement.tileSize,n=this.char.collider(),o=(a+n._offset.x+1)/QMovement.tileSize,h=(r+n._offset.y+1)/QMovement.tileSize,l=(a+n._offset.x+n.width-1)/QMovement.tileSize,c=(r+n._offset.y+n.height-1)/QMovement.tileSize;return[s.a.getPlatformForCharacter(this,o,h,i),s.a.getPlatformForCharacter(this,l,h,i),s.a.getPlatformForCharacter(this,l,c,i),s.a.getPlatformForCharacter(this,o,c,i)].reduce((t,e)=>t.z2>=e.z2?t:e)},s.a.getEventsAt=function(t,e){let i;try{i=ColliderManager._characterGrid[Math.round(t)][Math.round(e)]}catch(t){return[]}return i?i.filter(t=>t instanceof Game_Event&&!t.isThrough()):[]},s.a.setDestination=function(t,e){$gameTemp.setPixelDestination(Math.round(t*$gameMap.tileWidth()),Math.round(e*$gameMap.tileHeight()))};const c=Game_Player.prototype.clearMouseMove;Game_Player.prototype.clearMouseMove=function(){c.apply(this,arguments),this._pathfind&&this.clearPathfind()};const p={1:[4,2],3:[6,2],7:[4,8],9:[6,8]},d=t=>(function(t){if($gameMap.offGrid())this.mv3d_QMoveRadian(t);else if((t=s.a.transformDirection(t))%2){const e=p[t];this.moveDiagonally(e[0],e[1])}else this.moveStraight(t)});Object(a.p)(Game_Player.prototype,"moveInputHorizontal",d),Object(a.p)(Game_Player.prototype,"moveInputVertical",d),Object(a.p)(Game_Player.prototype,"moveInputDiagonal",d),Game_Player.prototype.mv3d_QMoveRadian=function(t,e=this.moveTiles()){this.moveRadian(-Object(a.i)(s.a.blendCameraYaw.currentValue()+90+s.a.dirToYaw(t)),e)},Object(a.p)(Game_Character.prototype,"moveRadian",t=>(function(e,i){t.apply(this,arguments);const r=s.a.yawToDir(Object(a.r)(-e)-90,!0);this.mv3d_setDirection(r)})),Object(a.p)(Game_Character.prototype,"moveDiagonally",t=>(function(e,i){t.apply(this,arguments);const s=Object(a.m)(e,i);this.mv3d_setDirection(s)})),Game_Follower.prototype.updateMoveList&&Object(a.p)(Game_Follower.prototype,"updateMoveList",t=>(function(){const e=this._moveList[0];t.apply(this,arguments),e&&this.mv3d_setDirection(e[3])}))},function(t,e,i){"use strict";i.r(e);var a=i(1);function s(t,e){return t=t.getCollisionHeight(),e=e.getCollisionHeight(),t.z1===t.z2||e.z1===e.z2?t.z1<=e.z2&&t.z2>=e.z1:t.z1<e.z2&&t.z2>e.z1}Object(a.p)(Game_Player.prototype,"moveByInput",t=>(function(){$gameTemp._mv3d_altimit_moveByInput=!0,t.apply(this,arguments),$gameTemp._mv3d_altimit_moveByInput=!1})),mv3d.getInputDirection=function(){return mv3d.DIR8MOVE?Input.dir8:Input.dir4},Object(a.p)(Game_Player.prototype,"moveVector",t=>(function(e,i){if($gameTemp._mv3d_altimit_moveByInput&&!this._touchTarget){const t=e,s=i,r=Object(a.i)(mv3d.blendCameraYaw.currentValue());e=Object(a.g)(r)*t+Object(a.t)(r)*s,i=-Object(a.t)(r)*t+Object(a.g)(r)*s}this.mv3d_sprite&&this.mv3d_sprite.platform&&this.mv3d_sprite.platform.isSlope&&(Math.abs(e)>Math.abs(i)?(e=Math.round(this._x)-this._x+Math.sign(e),i=Math.round(this._y)-this._y):(e=Math.round(this._x)-this._x,i=Math.round(this._y)-this._y+Math.sign(i)),$gamePlayer._touchTarget&&($gamePlayer._touchTarget.x=Math.round($gamePlayer._touchTarget.x),$gamePlayer._touchTarget.y=Math.round($gamePlayer._touchTarget.y))),t.call(this,e,i)})),Object(a.p)(Game_CharacterBase.prototype,"setDirectionVector",t=>(function(t,e){this.mv3d_setDirection(mv3d.yawToDir(Object(a.q)(t,e),!0))})),Object(a.p)(Game_CharacterBase.prototype,"moveVectorMap",t=>(function(e,i,s,r,n,o){t.apply(this,arguments);const h=e.mv3d_sprite;if(!h)return;const l=Math.floor(e.x+i.x),c=Math.floor(e.y+i.y),p=Math.floor(e.x+r.x+i.aabbox.left),d=Math.ceil(e.x+r.x+i.aabbox.right),u=Math.floor(e.y+r.y+i.aabbox.top),g=Math.ceil(e.y+r.y+i.aabbox.bottom);for(let t=p;t<d;++t)for(let e=u;e<g;++e){const i=Input._makeNumpadDirection(Math.sign(t-l),Math.sign(e-c));let s;if((s=mv3d.isRampAt(t,e,h.z))&&mv3d.canPassRamp(10-i,s))continue;const n=$gameMap.roundXWithDirection(t,10-i),o=$gameMap.roundYWithDirection(e,10-i);if((s=mv3d.isRampAt(n,o,h.z))&&mv3d.canPassRamp(i,s))continue;let p=!1;if(this._mv3d_isFlying())(!mv3d.ALLOW_GLIDE&&mv3d.tileCollision(this,t,e,!0,!0)||mv3d.tileCollision(this,t,e,!0,!1))&&(p=!0);else if(h.falling)p=!0;else if(mv3d.tileCollision(this,t,e,!0,!0))p=!0;else if(!mv3d.WALK_OFF_EDGE){const i=mv3d.getPlatformFloatForCharacter(this,t,e);Object(a.y)(Math.abs(i-h.targetElevation))>mv3d.STAIR_THRESH&&(p=!0)}p&&(t!==l&&(r.x=0),e!==c&&(r.y=0))}})),Object(a.p)(Game_CharacterBase.prototype,"moveVectorCharacters",t=>(function(e,i,a,s,r){const n=this.mv3d_sprite;if(!n)return t.apply(this,arguments);const o=n.getCollisionHeight();return a=a.filter(t=>{const e=t.mv3d_sprite;if(!e)return!0;const i=e.getCollisionHeight();return o.z1<i.z2&&o.z2>i.z1}),t.call(this,e,i,a,s,r)})),mv3d.Character.prototype.getPlatform=function(t=this.char._realX,e=this.char._realY,i={}){const a=this.char.collider();if(0===a.type){t+=a.x-.5,e+=a.y-.5;const s=.95*a.radius,r=[mv3d.getPlatformForCharacter(this,t,e),mv3d.getPlatformForCharacter(this,t,e-s,i),mv3d.getPlatformForCharacter(this,t-s,e,i),mv3d.getPlatformForCharacter(this,t,e+s,i),mv3d.getPlatformForCharacter(this,t+s,e,i)],n=[-1/0,mv3d.getPlatformForCharacter(this,t-s*Math.SQRT1_2,e-s*Math.SQRT1_2,i),mv3d.getPlatformForCharacter(this,t-s*Math.SQRT1_2,e+s*Math.SQRT1_2,i),mv3d.getPlatformForCharacter(this,t+s*Math.SQRT1_2,e+s*Math.SQRT1_2,i),mv3d.getPlatformForCharacter(this,t+s*Math.SQRT1_2,e-s*Math.SQRT1_2,i)].filter(t=>t.z2<=this.z);return r.concat(n).reduce((t,e)=>t.z2>=e.z2?t:e)}{t-=.5,e-=.5;const s={l:.99*a.aabbox.left,r:.99*a.aabbox.right,t:.99*a.aabbox.top,b:.99*a.aabbox.bottom};return[mv3d.getPlatformForCharacter(this,t,e),mv3d.getPlatformForCharacter(this,t+s.l,e+s.t,i),mv3d.getPlatformForCharacter(this,t+s.l,e+s.b,i),mv3d.getPlatformForCharacter(this,t+s.r,e+s.t,i),mv3d.getPlatformForCharacter(this,t+s.r,e+s.b,i)].reduce((t,e)=>t.z2>=e.z2?t:e)}},mv3d.getEventsAt=function(t,e){return t=Math.round(t),e=Math.round(e),$gameMap.events().filter(i=>{if(i.isThrough())return!1;const{x:a,y:s}=i,{left:r,right:n,top:o,bottom:h}=i.collider().aabbox;return a+r<t+1&&a+n>t&&s+o<e+1&&s+h>e})},Object(a.p)(Game_Map.prototype,"events",t=>(function(){const e=t.apply(this,arguments);if(!$gameTemp._mv3d_altimit_eventsHeightFilter)return e;delete $gameTemp._mv3d_altimit_eventsHeightFilter;const i=$gamePlayer.mv3d_sprite;return i?e.filter(t=>{const e=t.mv3d_sprite;return!e||s(e,i)}):e})),Object(a.p)(Game_Event.prototype,"checkEventTriggerTouch",t=>(function(){const e=this.mv3d_sprite,i=$gamePlayer.mv3d_sprite;return!(e&&i&&!s(e,i))&&t.apply(this,arguments)}));const r=t=>(function(){return $gameTemp._mv3d_altimit_eventsHeightFilter=!0,t.apply(this,arguments)});Object(a.p)(Game_Player.prototype,"checkEventTriggerHere",r),Object(a.p)(Game_Player.prototype,"checkEventTriggerThere",r)},function(t,e,i){"use strict";i.r(e);var a=i(0),s=i(1);const r=Game_CharacterBase.prototype.canPass;function n(t,e,i,s){return e.some(e=>{const r=e._mv3d_isPlatform();if(a.a.WALK_OFF_EDGE&&!r){const r=a.a.getPlatformForCharacter(t,i,s).z2;if(a.a.charCollision(t,e,!1,r))return!0}return a.a.charCollision(t,e,r,!0)})}Game_CharacterBase.prototype.canPass=function(t,e,i){return!!r.apply(this,arguments)&&(a.a.isDisabled()||this.isDebugThrough()||this.isThrough(),!0)};const o=t=>(function(t,e){return n(this,$gameMap.eventsXyNt(t,e),t,e)});Object(s.p)(Game_CharacterBase.prototype,"isCollidedWithEvents",o),Object(s.p)(Game_Event.prototype,"isCollidedWithEvents",o),Object(s.p)(Game_Event.prototype,"isCollidedWithPlayerCharacters",t=>(function(t,e){if($gamePlayer.isThrough())return!1;return n(this,[$gamePlayer,...$gamePlayer.followers()._data.filter(t=>t.isVisible()&&t.mv3d_sprite&&t.mv3d_sprite.visible)].filter(i=>i.pos(t,e)),t,e)})),Object(s.p)(Game_CharacterBase.prototype,"isCollidedWithVehicles",t=>(function(t,e){const i=$gameMap.boat(),s=$gameMap.ship();return i.posNt(t,e)&&a.a.charCollision(this,i,i._mv3d_isPlatform(),!0)||s.posNt(t,e)&&a.a.charCollision(this,s,s._mv3d_isPlatform(),!0)}));const h=t=>(function(e,i,r){const n=this.mv3d_sprite;if(!n)return t.apply(this,arguments);$gameTemp._mv3d_collision_char=n;let o,h=!t.apply(this,arguments);if(delete $gameTemp._mv3d_collision_char,h)return!1;if((o=a.a.isRampAt(e,i,n.z))&&a.a.canPassRamp(r,o))return!0;var l=$gameMap.roundXWithDirection(e,r),c=$gameMap.roundYWithDirection(i,r);if((o=a.a.isRampAt(l,c,n.z))&&a.a.canPassRamp(10-r,o))return!0;if(this._mv3d_isFlying()){if(!a.a.ALLOW_GLIDE&&a.a.tileCollision(this,l,c,!0,!0)||a.a.tileCollision(this,l,c,!0,!1))return!1}else{if(a.a.tileCollision(this,l,c,!0,!0))return!1;if(n.falling)return!1;if(!a.a.WALK_OFF_EDGE){const t=a.a.getPlatformFloatForCharacter(this,l,c);if(Object(s.y)(Math.abs(t-n.targetElevation))>a.a.STAIR_THRESH)return!1}}return!0});Object(s.p)(Game_CharacterBase.prototype,"isMapPassable",h),Object(s.p)(Game_Vehicle.prototype,"isMapPassable",h),Object(s.p)(Game_Player.prototype,"startMapEvent",t=>(function(t,e,i,s){$gameMap.isEventRunning()||$gameMap.eventsXy(t,e).filter(t=>a.a.charCollision(this,t,!1,!1,!1,!0)).forEach(t=>{t.isTriggerIn(i)&&t.isNormalPriority()===s&&t.start()})}));const l=Game_Map.prototype.checkPassage;Game_Map.prototype.checkPassage=function(t,e,i){if(!("_mv3d_collision_char"in $gameTemp))return l.apply(this,arguments);const s=$gameTemp._mv3d_collision_char,r=s.getCHeight(),n=s.z+Math.max(r,a.a.STAIR_THRESH),o=a.a.getPlatformForCharacter(s,t,e);if(o.char)return!0;var h=this.tilesetFlags();const c=a.a.getTileLayers(t,e,n,a.a.STAIR_THRESH>=r),p=a.a.getTileData(t,e);for(var d=c.length-1;d>=0;--d){const s=c[d];if(15&i){const i=a.a.getTileConfig(t,e,s);if("pass"in i){if(i.pass===a.a.enumPassage.THROUGH)continue;if(i.pass===a.a.enumPassage.FLOOR)return!0;if(i.pass===a.a.enumPassage.WALL)return!1}}const r=h[p[s]];if(0==(16&r)){if(0==(r&i))return!0;if((r&i)===i)return!1}}return!1};const c=()=>!a.a.isDisabled()||a.a.DIR8MOVE&&a.a.DIR8_2D;Object(s.p)(Game_Player.prototype,"moveStraight",t=>(function(e){if(!a.a.DIR8MOVE)return t.apply(this,arguments);switch(e){case 1:this.moveDiagonally(4,2);break;case 3:this.moveDiagonally(6,2);break;case 7:this.moveDiagonally(4,8);break;case 9:this.moveDiagonally(6,8);break;default:t.apply(this,arguments)}}),c),Object(s.p)(Game_Character.prototype,"moveDiagonally",t=>(function(e,i){t.apply(this,arguments);let r=!1;if(this.isMovementSucceeded()?r=!0:a.a.DIR8SMART&&(this.moveStraight(e),this.isMovementSucceeded()||(this.moveStraight(i),this.isMovementSucceeded()||(r=!0))),r){const t=Object(s.m)(e,i);this.mv3d_setDirection(t)}}),c),Object(s.p)(Game_CharacterBase.prototype,"canPassDiagonally",t=>(function(e,i,s,r){const n=$gameMap.roundXWithDirection(e,s),o=$gameMap.roundYWithDirection(i,r);return!a.a.tileCollision(this,e,o,!0,!0)&&!a.a.tileCollision(this,n,i,!0,!0)&&t.apply(this,arguments)}));const p=t=>(function(){const e=this._realX,i=this._realY;t.apply(this,arguments),Math.abs(e-this._realX)>2||Math.abs(i-this._realY)>2||(this._realX=e,this._realY=i)});Object(s.p)(Game_Follower.prototype,"moveDiagonally",p,c),Object(s.p)(Game_Follower.prototype,"moveStraight",p,c),Object(s.p)(Game_CharacterBase.prototype,"distancePerFrame",t=>(function(){const e=t.apply(this,arguments);return this._mv3d_direction%2?e*Math.SQRT1_2:e}),c),Object(s.p)(Game_Player.prototype,"checkEventTriggerThere",t=>(function(e){if(!this.canStartLocalEvents())return;const i=this.mv3d_direction();if(i%2==0)return t.apply(this,arguments);const a=Object(s.j)(i),r=Object(s.k)(i),n=$gameMap.roundXWithDirection(this.x,a),o=$gameMap.roundYWithDirection(this.y,r);return this.startMapEvent(n,o,e,!0),$gameMap.isAnyEventStarting()?void 0:t.apply(this,arguments)}),c);const d=Game_Map.prototype.isAirshipLandOk;Game_Map.prototype.isAirshipLandOk=function(t,e){return a.a.isDisabled()?d.apply(this,arguments):a.a.AIRSHIP_SETTINGS.bushLanding?this.checkPassage(t,e,15):d.apply(this,arguments)};const u=Game_Player.prototype.updateVehicleGetOn;Game_Player.prototype.updateVehicleGetOn=function(){if(a.a.isDisabled())return u.apply(this,arguments);const t=this.vehicle(),e=a.a.loadData(`${t._type}_speed`,t._moveSpeed);t.setMoveSpeed(e),u.apply(this,arguments),this.setThrough(!1)};const g=Game_Player.prototype.getOnVehicle;Game_Player.prototype.getOnVehicle=function(){if(a.a.isDisabled())return g.apply(this,arguments);var t=this.direction(),e=Math.round(this.x),i=Math.round(this.y),s=$gameMap.roundXWithDirection(e,t),r=$gameMap.roundYWithDirection(i,t);return $gameMap.airship().pos(e,i)&&a.a.charCollision(this,$gameMap.airship(),!1,!1,!1,!0)?this._vehicleType="airship":$gameMap.ship().pos(s,r)&&a.a.charCollision(this,$gameMap.ship())?this._vehicleType="ship":$gameMap.boat().pos(s,r)&&a.a.charCollision(this,$gameMap.boat())&&(this._vehicleType="boat"),this.isInVehicle()&&(this._vehicleGettingOn=!0,this.isInAirship()||this.forceMoveForward(),this.gatherFollowers()),this._vehicleGettingOn},Object(s.p)(Game_Vehicle.prototype,"isLandOk",t=>(function(e,i,s){$gameTemp._mv3d_collision_char=$gamePlayer.mv3d_sprite;let r=t.apply(this,arguments);if(delete $gameTemp._mv3d_collision_char,this.isAirship())return r;var n=$gameMap.roundXWithDirection(e,s),o=$gameMap.roundYWithDirection(i,s);const h=a.a.getPlatformForCharacter($gamePlayer,n,o);h.char&&(r=!0);const l=Math.abs(h.z2-this.z);return r&&l<Math.max($gamePlayer.mv3d_sprite.getCHeight(),this.mv3d_sprite.getCHeight())}))},function(t,e,i){"use strict";i.r(e);var a=i(0),s=i(2),r=i(1);const n=Graphics._createCanvas;Graphics._createCanvas=function(){a.a.setup(),a.a.updateCanvas(),n.apply(this,arguments)};const o=Graphics._updateAllElements;Graphics._updateAllElements=function(){o.apply(this,arguments),a.a.updateCanvas()};const h=Graphics.render;Graphics.render=function(){a.a.render(),h.apply(this,arguments)};const l=Scene_Map.prototype.update;Scene_Map.prototype.update=function(){l.apply(this,arguments),a.a.isDisabled()||a.a.update()};const c=ShaderTilemap.prototype.renderWebGL;ShaderTilemap.prototype.renderWebGL=function(t){a.a.mapDisabled&&c.apply(this,arguments)};const p=Spriteset_Map.prototype.createTilemap;Spriteset_Map.prototype.createTilemap=function(){p.apply(this,arguments),a.a.mapDisabled=a.a.isDisabled(),a.a.mapDisabled||(this._tilemap.visible=!1,a.a.pixiSprite=new PIXI.Sprite(a.a.texture),a.a.pixiSprite.scale.set(1/a.a.RES_SCALE,1/a.a.RES_SCALE),this._baseSprite.addChild(a.a.pixiSprite))};const d=Sprite_Character.prototype.setCharacter;Sprite_Character.prototype.setCharacter=function(t){d.apply(this,arguments),Object.defineProperty(t,"mv_sprite",{value:this,configurable:!0})};const u=Game_Player.prototype.performTransfer;Game_Player.prototype.performTransfer=function(){const t=this._newMapId!==$gameMap.mapId();t&&($gameVariables.mv3d&&delete $gameVariables.mv3d.disabled,a.a.clearMap(),delete $gamePlayer._mv3d_z),u.apply(this,arguments),a.a.is1stPerson()&&a.a.blendCameraYaw.setValue(a.a.dirToYaw($gamePlayer.direction(),0))};const g=Scene_Map.prototype.onMapLoaded;Scene_Map.prototype.onMapLoaded=function(){Input.clear(),a.a.needClearMap?(a.a.clearMap(),a.a.needClearMap=!1):a.a.needReloadMap&&(a.a.reloadMap(),a.a.needReloadMap=!1),a.a.loadMapSettings(),g.apply(this,arguments),a.a.mapLoaded||(a.a.applyMapSettings(),a.a.isDisabled()?a.a.mapReady=!0:(a.a.mapReady=!1,a.a.loadMap())),a.a.updateBlenders(!0)};const m=Game_Map.prototype.setupBattleback;Game_Map.prototype.setupBattleback=function(){m.apply(this,arguments),a.a.loadTilesetSettings()};const f=Scene_Load.prototype.onLoadSuccess;Scene_Load.prototype.onLoadSuccess=function(){f.apply(this,arguments),a.a.needClearMap=!0};const _=Scene_Map.prototype.isReady;Scene_Map.prototype.isReady=function(){let t=_.apply(this,arguments);return t&&a.a.mapReady};const b=Scene_Title.prototype.start;Scene_Title.prototype.start=function(){b.apply(this,arguments),a.a.clearMap(),a.a.clearCameraTarget()};const y=SceneManager.initGraphics;SceneManager.initGraphics=function(){if(y.apply(this,arguments),!Graphics.isWebGL())throw new Error("MV3D requires WebGL")},SceneManager.preferableRendererType=function(){return Utils.isOptionValid("canvas")?"canvas":Utils.isOptionValid("webgl")?"webgl":Graphics.hasWebGL()?"webgl":"auto"};let C="mv3d";PluginManager._scripts.includes("mv3d")||PluginManager._scripts.includes("mv3d-babylon")&&(C="mv3d-babylon");const T=PluginManager.parameters(C);function M(t,e,i){return t in T?i?i(T[t]):T[t]:e}Object.assign(a.a,{enumOptionModes:{DISABLE:0,ENABLE:1,SUBMENU:2}}),Object.assign(a.a,{CAMERA_MODE:"PERSPECTIVE",ORTHOGRAPHIC_DIST:100,MV3D_FOLDER:"img/MV3D",ANIM_DELAY:Number(T.animDelay),ALPHA_CUTOFF:Math.max(.01,T.alphatest),EDGE_FIX:Number(T.edgefix)*Object(r.w)()/48,ANTIALIASING:Object(r.f)(T.antialiasing),FOV:Number(T.fov),RES_SCALE:M("resScale",1,Number)||1,WALL_HEIGHT:Number(T.wallHeight),TABLE_HEIGHT:Number(T.tableHeight),FRINGE_HEIGHT:Number(T.fringeHeight),CEILING_HEIGHT:Number(T.ceilingHeight),LAYER_DIST:Number(T.layerDist),ENABLED_DEFAULT:Object(r.f)(T.enabledDefault),EVENTS_UPDATE_NEAR:Object(r.f)(T.eventsUpdateNear),UNLOAD_CELLS:Object(r.f)(T.unloadCells),CELL_SIZE:Number(T.cellSize),RENDER_DIST:Number(T.renderDist),MIPMAP:Object(r.f)(T.mipmap),OPTION_MIPMAP:Object(r.f)(T.mipmapOption),OPTION_RENDER_DIST:M("renderDistOption",!0,r.f),OPTION_FOV:M("fovOption",!1,r.f),OPTION_RENDER_DIST_MIN:M("renderDistMin",10,Number),OPTION_RENDER_DIST_MAX:M("renderDistMax",100,Number),OPTION_FOV_MIN:M("fovMin",50,Number),OPTION_FOV_MAX:M("fovMax",100,Number),STAIR_THRESH:Number(T.stairThresh),WALK_OFF_EDGE:Object(r.f)(T.walkOffEdge),WALK_ON_EVENTS:Object(r.f)(T.walkOnEvents),GRAVITY:Number(T.gravity),FOG_COLOR:Object(r.n)(T.fogColor).toNumber(),FOG_NEAR:Number(T.fogNear),FOG_FAR:Number(T.fogFar),LIGHT_LIMIT:Number(T.lightLimit),LIGHT_HEIGHT:.5,LAMP_HEIGHT:.5,FLASHLIGHT_HEIGHT:.25,LIGHT_DECAY:1,LIGHT_DIST:3,LIGHT_ANGLE:60,FLASHLIGHT_EXTRA_ANGLE:10,FLASHLIGHT_INTENSITY_MULTIPLIER:2,REGION_DATA:{},_REGION_DATA:{},_REGION_DATA_MAP:{},TTAG_DATA:{},EVENT_HEIGHT:Number(T.eventHeight),BOAT_SETTINGS:JSON.parse(T.boatSettings),SHIP_SETTINGS:JSON.parse(T.shipSettings),AIRSHIP_SETTINGS:JSON.parse(T.airshipSettings),ALLOW_GLIDE:Object(r.f)(T.allowGlide),SPRITE_OFFSET:Number(T.spriteOffset)/2,ENABLE_3D_OPTIONS:a.a.enumOptionModes[T["3dMenu"].toUpperCase()],TEXTURE_SHADOW:T.shadowTexture||"shadow",TEXTURE_BUSHALPHA:T.alphaMask||"bushAlpha",TEXTURE_ERROR:T.errorTexture||"errorTexture",DIR8MOVE:Object(r.f)(T.dir8Movement),DIR8SMART:T.dir8Movement.includes("Smart"),DIR8_2D:!T.dir8Movement.includes("3D"),TURN_INCREMENT:Number(T.turnIncrement),WASD:Object(r.f)(T.WASD),KEYBOARD_PITCH:Object(r.f)(T.keyboardPitch),KEYBOARD_TURN:Object(r.l)(T.keyboardTurn),KEYBOARD_STRAFE:Object(r.l)(T.keyboardStrafe),YAW_SPEED:Number(T.yawSpeed)||90,PITCH_SPEED:Number(T.pitchSpeed)||90,TRIGGER_INFINITE:!Object(r.f)(T.heightTrigger),BACKFACE_CULLING:M("backfaceCulling",!0,r.f),CAMERA_COLLISION:M("cameraCollision",!0,r.f),DIAG_SYMBOL:M("diagSymbol","{d}",String),setupParameters(){this.REGION_DATA=new Proxy(this._REGION_DATA,{get:(t,e)=>e in this._REGION_DATA_MAP?this._REGION_DATA_MAP[e]:e in this._REGION_DATA?this._REGION_DATA[e]:void 0,set:(t,e,i)=>{t[e]=i},has:(t,e)=>e in this._REGION_DATA_MAP||e in this._REGION_DATA});for(let t of JSON.parse(T.regions)){t=JSON.parse(t);const e=this.readConfigurationFunctions(t.conf,this.tilesetConfigurationFunctions);this._REGION_DATA[t.regionId]=e}for(let t of JSON.parse(T.ttags))t=JSON.parse(t),this.TTAG_DATA[t.terrainTag]=this.readConfigurationFunctions(t.conf,this.tilesetConfigurationFunctions);this.EVENT_CHAR_SETTINGS=this.readConfigurationFunctions(T.eventCharDefaults,this.eventConfigurationFunctions),this.EVENT_OBJ_SETTINGS=this.readConfigurationFunctions(T.eventObjDefaults,this.eventConfigurationFunctions),this.EVENT_TILE_SETTINGS=this.readConfigurationFunctions(T.eventTileDefaults,this.eventConfigurationFunctions),this.BOAT_SETTINGS.big=Object(r.f)(this.BOAT_SETTINGS.big),this.SHIP_SETTINGS.big=Object(r.f)(this.SHIP_SETTINGS.big),this.AIRSHIP_SETTINGS.height=Number(this.AIRSHIP_SETTINGS.height),this.AIRSHIP_SETTINGS.big=Object(r.f)(this.AIRSHIP_SETTINGS.big),this.AIRSHIP_SETTINGS.bushLanding=Object(r.f)(this.AIRSHIP_SETTINGS.bushLanding),this.BOAT_SETTINGS.conf=this.readConfigurationFunctions(this.BOAT_SETTINGS.conf,this.eventConfigurationFunctions),this.SHIP_SETTINGS.conf=this.readConfigurationFunctions(this.SHIP_SETTINGS.conf,this.eventConfigurationFunctions),this.AIRSHIP_SETTINGS.conf=this.readConfigurationFunctions(this.AIRSHIP_SETTINGS.conf,this.eventConfigurationFunctions)},updateParameters(){this.updateRenderDist(),this.updateFov(),this.callFeatures("updateParameters")},updateRenderDist(){this.camera.mode===s.n?(this.camera.maxZ=this.renderDist,this.camera.minZ=-this.renderDist):(this.camera.maxZ=this.renderDist,this.camera.minZ=.1)},updateFov(){const t=this.blendCameraDist.currentValue()||.1,e=this.getFrustrumHeight(t,Object(r.i)(this.FOV)),i=this.getFovForDist(t,e/this.blendCameraZoom.currentValue());this.camera.fov=i}}),Object.defineProperties(a.a,{AMBIENT_COLOR:{get:()=>a.a.featureEnabled("dynamicShadows")?8947848:16777215},renderDist:{get(){return Math.min(this.RENDER_DIST,a.a.blendFogFar.currentValue()+7.5)}}});const v=t=>!(!(t.isEnabled()&&t.isVisible&&t.isPickable)||t.character);Object.assign(a.a,{cameraTargets:[],getCameraTarget(){return this.cameraTargets[0]},setCameraTarget(t,e){t?(this.cameraTargets.unshift(t),this.cameraTargets.length>2&&(this.cameraTargets.length=2),this.saveData("cameraTarget",this.getTargetString(t)),this.blendCameraTransition.value=1,this.blendCameraTransition.setValue(0,e)):this.cameraTargets.length=0},clearCameraTarget(){this.cameraTargets.length=0},resetCameraTarget(){this.clearCameraTarget(),this.setCameraTarget($gamePlayer,0)},rememberCameraTarget(){const t=this.loadData("cameraTarget");t&&this.setCameraTarget(this.targetChar(t),0)},setupBlenders(){this.blendFogColor=new ColorBlender("fogColor",this.FOG_COLOR),this.blendFogNear=new blenders_Blender("fogNear",this.FOG_NEAR),this.blendFogFar=new blenders_Blender("fogFar",this.FOG_FAR),this.blendCameraRoll=new blenders_Blender("cameraRoll",0),this.blendCameraRoll.cycle=360,this.blendCameraYaw=new blenders_Blender("cameraYaw",0),this.blendCameraYaw.cycle=360,this.blendCameraPitch=new blenders_Blender("cameraPitch",60),this.blendCameraPitch.min=0,this.blendCameraPitch.max=180,this.blendCameraDist=new blenders_Blender("cameraDist",10),this.blendCameraZoom=new blenders_Blender("cameraZoom",1),this.blendCameraDist.min=0,this.blendCameraHeight=new blenders_Blender("cameraHeight",.7),this.blendAmbientColor=new ColorBlender("ambientColor",this.AMBIENT_COLOR),this.blendPanX=new blenders_Blender("panX",0),this.blendPanY=new blenders_Blender("panY",0),this.blendCameraTransition=new blenders_Blender("cameraTransition",0)},updateBlenders(t){if(this.updateCameraMode(),this.cameraTargets.length||$gamePlayer&&(this.cameraTargets[0]=$gamePlayer),this.blendCameraTransition.update()&&this.cameraTargets.length>=2){const t=this.blendCameraTransition.currentValue();let e=this.cameraTargets[0],i=this.cameraTargets[1];this.cameraStick.x=e._realX*(1-t)+i._realX*t,this.cameraStick.y=e._realY*(1-t)+i._realY*t,e.mv3d_sprite&&i.mv3d_sprite?this.cameraStick.z=e.mv3d_sprite.z*(1-t)+i.mv3d_sprite.z*t:e.mv3d_sprite&&(this.cameraStick.z=e.mv3d_sprite.z)}else if(this.cameraTargets.length){let t=this.getCameraTarget();this.cameraStick.x=t._realX,this.cameraStick.y=t._realY,t.mv3d_sprite&&(this.cameraStick.z=t.mv3d_sprite.z)}if(this.blendPanX.update(),this.blendPanY.update(),this.cameraStick.x+=this.blendPanX.currentValue(),this.cameraStick.y+=this.blendPanY.currentValue(),t|this.blendCameraPitch.update()|this.blendCameraYaw.update()|this.blendCameraRoll.update()|this.blendCameraDist.update()|this.blendCameraHeight.update()|this.blendCameraZoom.update()|0!==$gameScreen._shake|(a.a.CAMERA_COLLISION&&$gamePlayer.mv3d_positionUpdated)){this.cameraNode.pitch=this.blendCameraPitch.currentValue()-90,this.cameraNode.yaw=this.blendCameraYaw.currentValue(),this.cameraNode.roll=this.blendCameraRoll.currentValue(),this.cameraNode.position.set(0,0,0);let t=this.blendCameraDist.currentValue();if(a.a.CAMERA_COLLISION){const e=(new s.z).copyFrom(this.cameraStick.position);e.y+=this.blendCameraHeight.currentValue()+.1;const i=new s.s(e,s.z.TransformCoordinates(a.a.camera.getTarget().negate(),a.a.getRotationMatrix(a.a.camera)),t),r=a.a.scene.multiPickWithRay(i,v);for(const e of r){if(!e.hit)continue;let i=e.pickedMesh.material;if(i&&(i.subMaterials&&(i=i.subMaterials[e.pickedMesh.subMeshes[e.subMeshId].materialIndex]),!i.mv3d_through)){t=e.distance;break}}null==this.camera.dist&&(this.camera.dist=t),this.camera.dist=this.camera.dist+(t-this.camera.dist)/2,t=this.camera.dist}if(this.cameraNode.translate(r.d,-t,s.i),this.camera.mode===s.n){const t=this.getFieldSize();this.camera.orthoLeft=-t.width/2,this.camera.orthoRight=t.width/2,this.camera.orthoTop=t.height/2,this.camera.orthoBottom=-t.height/2}else this.cameraNode.z<0&&(this.cameraNode.z=0);this.cameraNode.z+=this.blendCameraHeight.currentValue(),this.cameraNode.translate(r.b,-$gameScreen._shake/48,s.i),this.updateDirection(),this.updateFov()}t|this.blendFogColor.update()|this.blendFogNear.update()|this.blendFogFar.update()&&(a.a.hasAlphaFog?(this.scene.fogStart=this.blendFogNear.currentValue(),this.scene.fogEnd=this.blendFogFar.currentValue()):(this.scene.fogStart=Math.min(a.a.RENDER_DIST-1,this.blendFogNear.currentValue()),this.scene.fogEnd=Math.min(a.a.RENDER_DIST,this.blendFogFar.currentValue())),this.scene.fogColor.copyFromFloats(this.blendFogColor.r.currentValue()/255,this.blendFogColor.g.currentValue()/255,this.blendFogColor.b.currentValue()/255),a.a.updateClearColor(),a.a.updateRenderDist()),t|this.blendAmbientColor.update()&&this.scene.ambientColor.copyFromFloats(this.blendAmbientColor.r.currentValue()/255,this.blendAmbientColor.g.currentValue()/255,this.blendAmbientColor.b.currentValue()/255),this.callFeatures("blend",t)},updateClearColor(){$gameMap.parallaxName()||a.a.hasSkybox?a.a.hasAlphaFog?a.a.scene.clearColor.set(...a.a.blendFogColor.currentComponents(),0):a.a.scene.clearColor.set(0,0,0,0):a.a.scene.clearColor.set(...a.a.blendFogColor.currentComponents(),1)}});const S=Game_Map.prototype.changeParallax;Game_Map.prototype.changeParallax=function(){S.apply(this,arguments),a.a.updateClearColor()};class blenders_Blender{constructor(t,e){this.key=t,this.dfault=a.a.loadData(t,e),this.value=e,this.speed=1,this.max=1/0,this.min=-1/0,this.cycle=!1,this.changed=!1}setValue(t,e=0){let i=(t=Math.min(this.max,Math.max(this.min,t)))-this.value;if(i){if(this.saveValue(this.key,t),e||(this.changed=!0,this.value=t),this.cycle)for(;Math.abs(i)>this.cycle/2;)this.value+=Math.sign(i)*this.cycle,i=t-this.value;this.speed=Math.abs(i)/(60*e)}}currentValue(){return this.value}targetValue(){return this.loadValue(this.key)}defaultValue(){return this.dfault}update(){const t=this.targetValue();if(this.value===t)return!!this.changed&&(this.changed=!1,!0);const e=t-this.value;return this.speed>Math.abs(e)?this.value=t:this.value+=this.speed*Math.sign(e),!0}storageLocation(){return $gameVariables?($gameVariables.mv3d||($gameVariables.mv3d={}),$gameVariables.mv3d):(console.warn("MV3D: Couldn't get Blend storage location."),{})}loadValue(t){const e=this.storageLocation();return t in e?e[t]:this.dfault}saveValue(t,e){this.storageLocation()[t]=e}}class ColorBlender{constructor(t,e){this.dfault=e,this.r=new blenders_Blender(`${t}_r`,e>>16),this.g=new blenders_Blender(`${t}_g`,e>>8&255),this.b=new blenders_Blender(`${t}_b`,255&e)}setValue(t,e){this.r.setValue(t>>16,e),this.g.setValue(t>>8&255,e),this.b.setValue(255&t,e)}currentValue(){return this.r.value<<16|this.g.value<<8|this.b.value}targetValue(){return this.r.targetValue()<<16|this.g.targetValue()<<8|this.b.targetValue()}defaultValue(){return this.dfault}update(){let t=0;return t|=this.r.update(),t|=this.g.update(),t|=this.b.update(),Boolean(t)}get storageLocation(){return this.r.storageLocation}set storageLocation(t){this.r.storageLocation=t,this.g.storageLocation=t,this.b.storageLocation=t}currentComponents(){return[this.r.currentValue()/255,this.g.currentValue()/255,this.b.currentValue()/255]}targetComponents(){return[this.r.targetValue()/255,this.g.targetValue()/255,this.b.targetValue()/255]}}a.a.Blender=blenders_Blender,a.a.ColorBlender=ColorBlender,a.a.blendModes={[PIXI.BLEND_MODES.NORMAL]:BABYLON.Engine.ALPHA_COMBINE,[PIXI.BLEND_MODES.ADD]:BABYLON.Engine.ALPHA_ADD,[PIXI.BLEND_MODES.MULTIPLY]:BABYLON.Engine.ALPHA_MULTIPLY,[PIXI.BLEND_MODES.SCREEN]:BABYLON.Engine.ALPHA_SCREENMODE,NORMAL:BABYLON.Engine.ALPHA_COMBINE,ADD:BABYLON.Engine.ALPHA_ADD,MULTIPLY:BABYLON.Engine.ALPHA_MULTIPLY,SCREEN:BABYLON.Engine.ALPHA_SCREENMODE};i(3);let E=!1;function O(t,e,i){let s=void 0;return{configurable:!0,get:()=>null!=s?s:SceneManager._scene instanceof Scene_Map?a.a.isDisabled()?e:a.a.is1stPerson()?i:e:t,set(t){s=t}}}Object.assign(a.a,{updateInput(){const t=a.a.is1stPerson();E!==t&&(Input.clear(),E=t),a.a.updateInputCamera()},updateInputCamera(){if(this.isDisabled()||this.loadData("cameraLocked"))return;const t=this.is1stPerson();if(this.loadData("allowRotation",a.a.KEYBOARD_TURN)||t){const t=a.a.getTurnKey("left"),e=a.a.getTurnKey("right");if(a.a.TURN_INCREMENT>1){const i=this.blendCameraYaw.currentValue()!==this.blendCameraYaw.targetValue(),s=a.a.TURN_INCREMENT/a.a.YAW_SPEED;Input.isTriggered(t)||Input.isPressed(t)&&!i?this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+a.a.TURN_INCREMENT,s):(Input.isTriggered(e)||Input.isPressed(e)&&!i)&&this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-a.a.TURN_INCREMENT,s)}else{const i=a.a.YAW_SPEED/60;Input.isPressed(t)&&Input.isPressed(e)||(Input.isPressed(t)?this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+i,.1):Input.isPressed(e)&&this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-i,.1))}}if(this.loadData("allowPitch",a.a.KEYBOARD_PITCH)){const t=a.a.PITCH_SPEED/60;Input.isPressed("pageup")&&Input.isPressed("pagedown")||(Input.isPressed("pageup")?this.blendCameraPitch.setValue(Math.min(179,this.blendCameraPitch.targetValue()+t),.1):Input.isPressed("pagedown")&&this.blendCameraPitch.setValue(Math.max(1,this.blendCameraPitch.targetValue()-t),.1))}},getStrafeKey(t){if(a.a.is1stPerson())switch(a.a.KEYBOARD_STRAFE){case"QE":return"rot"+t;case"AD":return t;default:return!1}else switch(a.a.KEYBOARD_TURN){case"QE":return t;case"AD":return"rot"+t;default:return t}},getTurnKey(t){if(a.a.is1stPerson())switch(a.a.KEYBOARD_STRAFE){case"QE":return t;case"AD":return"rot"+t;default:return t}else switch(a.a.KEYBOARD_TURN){case"QE":return"rot"+t;case"AD":return t;default:return"rot"+t}}}),Object(r.p)(Input,"_signX",t=>(function(){if(!a.a.KEYBOARD_STRAFE&&a.a.is1stPerson())return 0;const t=a.a.getStrafeKey("left"),e=a.a.getStrafeKey("right");let i=0;return this.isPressed(t)&&--i,this.isPressed(e)&&++i,i})),a.a.setupInput=function(){if(!a.a.WASD)return;Object.assign(Input.keyMapper,{81:"rotleft",69:"rotright",87:"up",65:"left",83:"down",68:"right"});const t={rotleft:O("pageup","rotleft","rotleft"),rotright:O("pagedown","rotright","rotright")};Object.defineProperties(Input.keyMapper,{81:t.rotleft,69:t.rotright})};const I=Game_Player.prototype.getInputDirection;Game_Player.prototype.getInputDirection=function(){return a.a.isDisabled()?a.a.DIR8MOVE&&a.a.DIR8_2D?Input.dir8:I.apply(this,arguments):a.a.getInputDirection()},a.a.getInputDirection=function(){let t=a.a.DIR8MOVE?Input.dir8:Input.dir4;return a.a.transformDirection(t,a.a.blendCameraYaw.currentValue())};const w=t=>!!(t.isEnabled()&&t.isVisible&&t.isPickable)&&(!t.character||!t.character.isFollower&&!t.character.isPlayer),A=Scene_Map.prototype.processMapTouch;Scene_Map.prototype.processMapTouch=function(){if(a.a.isDisabled())return A.apply(this,arguments);if(TouchInput.isTriggered()||this._touchCount>0)if(TouchInput.isPressed()){if(0===this._touchCount||this._touchCount>=15){const t=a.a.scene.pick(TouchInput.x*a.a.RES_SCALE,TouchInput.y*a.a.RES_SCALE,w);t.hit&&a.a.processMapTouch(t)}this._touchCount++}else this._touchCount=0},a.a.processMapTouch=function(t){const e={x:t.pickedPoint.x,y:-t.pickedPoint.z},i=t.pickedMesh;i.character&&(e.x=i.character.x,e.y=i.character.y),a.a.setDestination(e.x,e.y)},a.a.setDestination=function(t,e){$gameTemp.setDestination(Math.round(t),Math.round(e))};const L=Game_Player.prototype.findDirectionTo;Game_Player.prototype.findDirectionTo=function(){const t=L.apply(this,arguments);if(a.a.isDisabled())return t;if(a.a.is1stPerson()&&t){let e=a.a.dirToYaw(t);a.a.blendCameraYaw.setValue(e,.25)}return t},Object.assign(a.a,{playerFaceYaw(){let t=this.yawToDir(a.a.blendCameraYaw.targetValue(),!0);$gamePlayer.mv3d_setDirection(t)},yawToDir(t=a.a.blendCameraYaw.targetValue(),e=a.a.DIR8){const i=e?45:90;for(t=Math.round(t/i)*i;t<0;)t+=360;for(;t>=360;)t-=360;switch(t){case 0:return 8;case 45:return 7;case 90:return 4;case 135:return 1;case 180:return 2;case 225:return 3;case 270:return 6;case 315:return 9;default:return 0}},dirToYaw(t){switch(t){case 3:return-135;case 6:return-90;case 9:return-45;case 8:return 0;case 7:return 45;case 4:return 90;case 1:return 135;case 2:return 180;default:return NaN}},transformDirection(t,e=this.blendCameraYaw.currentValue(),i=a.a.DIR8MOVE){return a.a.yawToDir(a.a.dirToYaw(t)+e,i)},transformFacing(t,e=this.blendCameraYaw.currentValue(),i=!1){return a.a.yawToDir(a.a.dirToYaw(t)-e,i)},updateDirection(){a.a.is1stPerson()&&a.a.playerFaceYaw()}});let x=0;Object(r.p)(Game_Player.prototype,"update",t=>(function(){t.apply(this,arguments),this._direction!==x&&(a.a.updateDirection(),x=this._direction)})),Object(r.p)(Game_Player.prototype,"moveStraight",t=>(function(){t.apply(this,arguments),a.a.updateDirection()})),Object(r.p)(Game_Player.prototype,"direction",t=>(function(){return a.a.is1stPerson()&&this.isMoving()&&!this.isDirectionFixed()?a.a.yawToDir(a.a.blendCameraYaw.targetValue(),!1):t.apply(this,arguments)}));const D=Game_CharacterBase.prototype.setDirection;Game_CharacterBase.prototype.setDirection=function(){D.apply(this,arguments),this._mv3d_direction=this._direction},Game_CharacterBase.prototype.mv3d_setDirection=function(t){this.isDirectionFixed()||(this._direction=a.a.yawToDir(a.a.dirToYaw(t),!1),a.a.DIR8MOVE?this._mv3d_direction=t:this._mv3d_direction=this._direction)},Game_CharacterBase.prototype.mv3d_direction=function(){return this._mv3d_direction||this.direction()},Object(r.p)(Game_CharacterBase.prototype,"copyPosition",t=>(function(e){t.apply(this,arguments),this._mv3d_direction=e._mv3d_direction})),Object(r.p)(Game_Player.prototype,"processMoveCommand",t=>(function(e){t.apply(this,arguments);const i=Game_Character;switch(e.code){case i.ROUTE_TURN_DOWN:case i.ROUTE_TURN_LEFT:case i.ROUTE_TURN_RIGHT:case i.ROUTE_TURN_UP:case i.ROUTE_TURN_90D_R:case i.ROUTE_TURN_90D_L:case i.ROUTE_TURN_180D:case i.ROUTE_TURN_90D_R_L:case i.ROUTE_TURN_RANDOM:case i.ROUTE_TURN_TOWARD:case i.ROUTE_TURN_AWAY:let t=a.a.dirToYaw(this._direction);a.a.blendCameraYaw.setValue(t,.25)}}),()=>!a.a.isDisabled()&&a.a.is1stPerson());class ConfigurationFunction{constructor(t,e){this.groups=t.match(/\[?[^[\]|]+\]?/g),this.labels={};for(let t=0;t<this.groups.length;++t){for(;this.groups[t]&&"["===this.groups[t][0];)this.labels[this.groups[t].slice(1,-1)]=t,this.groups.splice(t,1);if(t>this.groups.length)break;this.groups[t]=this.groups[t].split(",").map(t=>t.trim())}this.func=e}run(t,e){const i=/([,|]+)? *(?:(\w+) *: *)?([^,|\r\n]+)/g;let a,s=0,r=0;const n={};for(let t=0;t<this.groups.length;++t)n[`group${t+1}`]=[];for(;a=i.exec(e);){if(a[1])for(const t of a[1])","===t&&++s,("|"===t||s>=this.groups[r].length)&&(s=0,++r);if(a[2])if(a[2]in this.labels)r=this.labels[a[2]];else{let t=!1;t:for(let e=0;e<this.groups.length;++e)for(let i=0;i<this.groups[e].length;++i)if(this.groups[e][i]===a[2]){t=!0,r=e,s=i;break t}if(!t)break}if(r>this.groups.length)break;n[this.groups[r][s]]=n[`group${r+1}`][s]=a[3].trim()}this.func(t,n)}}function P(t,e="",i){return new ConfigurationFunction(`img,x,y,w,h|${e}|alpha|glow[anim]animx,animy`,(function(e,n){if(5===n.group1.length){const[i,s,r,o,h]=n.group1;e[`${t}_id`]=a.a.constructTileId(i,1,0),e[`${t}_rect`]=new PIXI.Rectangle(s,r,o,h)}else if(3===n.group1.length){const[i,s,r]=n.group1;e[`${t}_id`]=a.a.constructTileId(i,s,r)}else if(2===n.group1.length){const[i,a]=n.group1;e[`${t}_offset`]=new s.y(Number(i),Number(a))}n.animx&&n.animy&&(e[`${t}_animData`]={animX:Number(n.animx),animY:Number(n.animy)}),n.alpha&&(e[`${t}_alpha`]=Number(n.alpha)),n.glow&&(isNaN(n.glow)?e[`${t}_glow`]=Object(r.n)(n.glow):e[`${t}_glow`]=new s.c(Number(n.glow),Number(n.glow),Number(n.glow),1)),i&&i.call(this,e,n)}))}a.a.ConfigurationFunction=ConfigurationFunction,Object.assign(a.a,{tilesetConfigurations:{},loadTilesetSettings(){this.tilesetConfigurations={};const t=this.readConfigurationBlocks($gameMap.tileset().note)+"\n"+this.readConfigurationBlocks($dataMap.note,"mv3d-tiles"),e=/^\s*([abcde]\d?)\s*,\s*(\d+(?:-\d+)?)\s*,\s*(\d+(?:-\d+)?)\s*:(.*)$/gim;let i;for(;i=e.exec(t);){const t=this.readConfigurationFunctions(i[4],this.tilesetConfigurationFunctions),e=i[2].split("-").map(t=>Number(t)),a=i[3].split("-").map(t=>Number(t));for(let s=e[0];s<=e[e.length-1];++s)for(let e=a[0];e<=a[a.length-1];++e){const a=`${i[1]},${s},${e}`,r=this.constructTileId(...a.split(","));r in this.tilesetConfigurations||(this.tilesetConfigurations[r]={}),Object.assign(this.tilesetConfigurations[r],t)}}},mapConfigurations:{},loadMapSettings(){const t=this.mapConfigurations={};this.readConfigurationFunctions(this.readConfigurationBlocks($dataMap.note),this.mapConfigurationFunctions,t),this._REGION_DATA_MAP={};const e=this.readConfigurationBlocks($dataMap.note,"mv3d-regions");if(e){const t=/^\s*(\d+)\s*:(.*)$/gm;let i;for(;i=t.exec(e);)i[1]in this._REGION_DATA_MAP||(i[1]in this._REGION_DATA?this._REGION_DATA_MAP[i[1]]=JSON.parse(JSON.stringify(this._REGION_DATA[i[1]])):this._REGION_DATA_MAP[i[1]]={}),this.readConfigurationFunctions(i[2],a.a.tilesetConfigurationFunctions,this._REGION_DATA_MAP[i[1]])}},applyMapSettings(){const t=this.mapConfigurations;if("fog"in t){const e=t.fog;"color"in e&&this.blendFogColor.setValue(e.color,0),"near"in e&&this.blendFogNear.setValue(e.near,0),"far"in e&&this.blendFogFar.setValue(e.far,0),this.blendFogColor.update()}"light"in t&&this.blendAmbientColor.setValue(t.light.color,0),"cameraDist"in t&&this.blendCameraDist.setValue(t.cameraDist,0),"cameraHeight"in t&&this.blendCameraHeight.setValue(t.cameraHeight,0),"cameraMode"in t&&(this.cameraMode=t.cameraMode),"cameraPitch"in t&&this.blendCameraPitch.setValue(t.cameraPitch,0),"cameraYaw"in t&&this.blendCameraYaw.setValue(t.cameraYaw,0),a.a.updateClearColor(),this.callFeatures("applyMapSettings",t)},getMapConfig(t,e){return t in this.mapConfigurations?this.mapConfigurations[t]:e},getCeilingConfig(){let t={};for(const e in this.mapConfigurations)e.startsWith("ceiling_")&&(t[e.replace("ceiling_","bottom_")]=this.mapConfigurations[e]);return t.bottom_id=this.getMapConfig("ceiling_id",0),t.height=this.getMapConfig("ceiling_height",this.CEILING_HEIGHT),t.skylight=this.getMapConfig("ceiling_skylight",!0),t.backfaceCulling=!0,t.isCeiling=!0,t},readConfigurationBlocksAndTags(t,e="mv3d"){return this.readConfigurationBlocks(t,e)+this.readConfigurationTags(t,e)},readConfigurationBlocks(t,e="mv3d"){const i=new RegExp(`<${e}>([\\s\\S]*?)</${e}>`,"gi");let a,s="";for(;a=i.exec(t);)s+=a[1]+"\n";return s},readConfigurationTags(t,e="mv3d"){const i=new RegExp(`<${e}:([\\s\\S]*?)>`,"gi");let a,s="";for(;a=i.exec(t);)s+=a[1]+"\n";return s},readConfigurationFunctions(t,e=a.a.tilesetConfigurationFunctions,i={}){const s=/(\w+)\((.*?)\)/g;let r;for(;r=s.exec(t);){const t=r[1].toLowerCase();if(t in e)if(e[t]instanceof ConfigurationFunction)e[t].run(i,r[2]);else{const a=r[2].split(",");1===a.length&&""===a[0]&&(a.length=0),e[t](i,...a)}}return i},get configurationSides(){return this.enumSides},get configurationShapes(){return this.enumShapes},get configurationPassage(){return this.enumPassage},enumSides:{front:s.g,back:s.a,double:s.d},enumShapes:{FLAT:1,TREE:2,SPRITE:3,FENCE:4,WALL:4,CROSS:5,XCROSS:6,SLOPE:7},enumPassage:{WALL:0,FLOOR:1,THROUGH:2},enumRenderGroups:{BACK:0,MAIN:1,FRONT:2},tilesetConfigurationFunctions:{height(t,e){t.height=Number(e)},depth(t,e){t.depth=Number(e)},fringe(t,e){t.fringe=Number(e)},float(t,e){t.float=Number(e)},slope(t,e=1,i=null){t.shape=a.a.enumShapes.SLOPE,t.slopeHeight=Number(e),i&&(t.slopeDirection={n:2,s:8,e:4,w:6}[i.toLowerCase()[0]])},top:P("top"),side:P("side"),inside:P("inside"),bottom:P("bottom"),texture:Object.assign(P("hybrid"),{func(t,e){a.a.tilesetConfigurationFunctions.top.func(t,e),a.a.tilesetConfigurationFunctions.side.func(t,e)}}),shape(t,e,i){t.shape=a.a.enumShapes[e.toUpperCase()],(t.shape!==a.a.enumShapes.SLOPE||!i)&&"slopeHeight"in t||(t.slopeHeight=Number(i)||1),i&&t.shape===a.a.enumShapes.FENCE&&(t.fencePosts=Object(r.f)(i))},alpha(t,e){t.transparent=!0,t.alpha=Number(e)},glow(t,e,i=1){isNaN(e)?t.glow=Object(r.n)(e):t.glow=new s.c(Number(e),Number(e),Number(e),1),t.glow.a=Object(r.e)(i)},pass(t,e=""){(e=Object(r.l)(e.toLowerCase()))&&"x"!==e[0]?"o"===e[0]?t.pass=a.a.enumPassage.FLOOR:t.pass=a.a.enumPassage.THROUGH:t.pass=a.a.enumPassage.WALL},shadow(t,e=!0){t.shadow=Object(r.f)(e)}},eventConfigurationFunctions:{height(t,e){const i=Number(e);i<0?t.zoff=i:t.height=i,console.warn("event config height() is deprecated. Use elevation(), offset(), or zoff() instead.")},elevation(t,e){t.height=Number(e)},z(t,e){t.zlock=Number(e)},x(t,e){t.xoff=Number(e),console.warn("event config x() is deprecated. Use offset() or xoff() instead.")},y(t,e){t.yoff=Number(e),console.warn("event config y() is deprecated. Use offset() or yoff() instead.")},xoff(t,e){t.xoff=Number(e)},yoff(t,e){t.yoff=Number(e)},zoff(t,e){t.zoff=Number(e)},offset:new ConfigurationFunction("x,y,z",(function(t,e){e.x&&(t.xoff=Number(e.x)),e.y&&(t.yoff=Number(e.y)),e.z&&(t.zoff=Number(e.z))})),pos:new ConfigurationFunction("x,y",(function(t,e){t.pos||(t.pos={}),e.x&&(t.pos.x=e.x),e.y&&(t.pos.y=e.y)})),scale(t,e,i=e){t.scale=new s.y(Number(e),Number(i))},rot(t,e){t.rot=Number(e)},yaw(t,e){t.yaw=Number(e)},pitch(t,e){t.pitch=Number(e)},bush(t,e){t.bush=Object(r.f)(e)},shadow:new ConfigurationFunction("size,dist|3d",(function(t,e){let{size:i,dist:a,"3d":s}=e;null==s&&(s=null==i||i),t.dynShadow=s=Object(r.f)(s),null!=i&&(t.shadow=Object(r.e)(i)),null!=a&&(t.shadowDist=Number(a))})),shape(t,e){t.shape=a.a.enumShapes[e.toUpperCase()]},lamp:new ConfigurationFunction("color,intensity,range",(function(t,e){const{color:i="white",intensity:s=1,range:n=a.a.LIGHT_DIST}=e;t.lamp={color:Object(r.n)(i).toNumber(),intensity:Number(s),distance:Number(n)}})),flashlight:new ConfigurationFunction("color,intensity,range,angle[dir]yaw,pitch",(function(t,e){const{color:i="white",intensity:s=1,range:n=a.a.LIGHT_DIST,angle:o=a.a.LIGHT_ANGLE}=e;t.flashlight={color:Object(r.n)(i).toNumber(),intensity:Number(s),distance:Number(n),angle:Number(o)},e.yaw&&(t.flashlightYaw=e.yaw),e.pitch&&(t.flashlightPitch=Number(e.pitch))})),flashlightpitch(t,e="90"){t.flashlightPitch=Number(e)},flashlightyaw(t,e="+0"){t.flashlightYaw=e},lightheight(t,e=1){this.lampheight(t,e),this.flashlightheight(t,e)},lightoffset(t,e=0,i=0){this.lampoffset(t,e,i),this.flashlightoffset(t,e,i)},lampheight(t,e=1){t.lampHeight=Number(e)},lampoffset(t,e=0,i=0){t.lampOffset={x:+e,y:+i}},flashlightheight(t,e=1){t.flashlightHeight=Number(e)},flashlightoffset(t,e=0,i=0){t.flashlightOffset={x:+e,y:+i}},alpha(t,e){t.alpha=Number(e)},glow(t,e,i=1){isNaN(e)?t.glow=Object(r.n)(e):t.glow=new s.c(Number(e),Number(e),Number(e),1),t.glow.a=Object(r.e)(i)},dirfix(t,e){t.dirfix=Object(r.f)(e)},gravity(t,e){t.gravity=Object(r.e)(e)},platform(t,e){t.platform=Object(r.f)(e)},collide(t,e){t.collide=Object(r.e)(e)},trigger(t,e,i=0){t.trigger={up:Number(e),down:Number(i)}},pass(t,e=""){(e=Object(r.l)(e.toLowerCase()))&&"x"!==e[0]?"o"===e[0]?t.platform=!0:(t.platform=!1,t.collide=!1):(t.platform=!1,t.collide=!0)}},mapConfigurationFunctions:{get ambient(){return this.light},light(t,e){e="default"===e.toLowerCase()?a.a.AMBIENT_COLOR:Object(r.n)(e).toNumber(),t.light={color:e}},fog:new ConfigurationFunction("color|near,far",(function(t,e){const{color:i,near:a,far:s}=e;t.fog||(t.fog={}),i&&(t.fog.color=Object(r.n)(i).toNumber()),a&&(t.fog.near=Number(a)),s&&(t.fog.far=Number(s))})),camera:new ConfigurationFunction("yaw,pitch|dist|height|mode",(function(t,e){const{yaw:i,pitch:a,dist:s,height:r,mode:n}=e;i&&(t.cameraYaw=Number(i)),a&&(t.cameraPitch=Number(a)),s&&(t.cameraDist=Number(s)),r&&(t.cameraHeight=Number(r)),n&&(t.cameraMode=n)})),ceiling:P("ceiling","height,backface",(function(t,e){e.height&&(t.ceiling_height=Number(e.height)),e.backface&&(t.ceiling_skylight=!Object(r.f)(e.backface))})),edge(t,e,i){switch(e=e.toLowerCase()){case"clamp":t.edgeData=null==i?1:Number(i),t.edge=e;break;default:t.edge=Object(r.f)(e)}},disable(t,e=!0){t.disabled=Object(r.f)(e)},enable(t,e=!0){t.disabled=!Object(r.f)(e)}}});const N=Game_Event.prototype.setupPage;Game_Event.prototype.setupPage=function(){N.apply(this,arguments),this.mv3d_sprite&&(this.mv3d_needsConfigure=!0,this.mv3d_sprite.eventConfigure())};const R=Game_Event.prototype.initialize;Game_Event.prototype.initialize=async function(){R.apply(this,arguments);const t=this.event();let e={};a.a.readConfigurationFunctions(a.a.readConfigurationTags(t.note),a.a.eventConfigurationFunctions,e),"pos"in e&&this.locate(Object(r.s)(t.x,e.pos.x),Object(r.s)(t.y,e.pos.y)),this.mv3d_blenders||(this.mv3d_blenders={}),"lamp"in e&&(this.mv3d_blenders.lampColor_r=e.lamp.color>>16,this.mv3d_blenders.lampColor_g=e.lamp.color>>8&255,this.mv3d_blenders.lampColor_b=255&e.lamp.color,this.mv3d_blenders.lampIntensity=e.lamp.intensity,this.mv3d_blenders.lampDistance=e.lamp.distance),"flashlight"in e&&(this.mv3d_blenders.flashlightColor_r=e.flashlight.color>>16,this.mv3d_blenders.flashlightColor_g=e.flashlight.color>>8&255,this.mv3d_blenders.flashlightColor_b=255&e.flashlight.color,this.mv3d_blenders.flashlightIntensity=e.flashlight.intensity,this.mv3d_blenders.flashlightDistance=e.flashlight.distance,this.mv3d_blenders.flashlightAngle=e.flashlight.angle),"flashlightPitch"in e&&(this.mv3d_blenders.flashlightPitch=Number(e.flashlightPitch)),"flashlightYaw"in e&&(this.mv3d_blenders.flashlightYaw=e.flashlightYaw),this.mv3d_needsConfigure=!0,await Object(r.u)(),a.a.mapLoaded&&a.a.createCharacterFor(this)};const F=Game_Interpreter.prototype.pluginCommand;Game_Interpreter.prototype.pluginCommand=function(t,e){if("mv3d"!==t.toLowerCase())return F.apply(this,arguments);const i=new a.a.PluginCommand;if(i.INTERPRETER=this,i.FULL_COMMAND=[t,...e].join(" "),e=e.filter(t=>t),i.CHAR=$gameMap.event(this._eventId),e[0]){const t=e[0][0];"@"!==t&&"＠"!==t||(i.CHAR=i.TARGET_CHAR(e.shift()))}const s=e.shift().toLowerCase();s in i&&i[s](...e)},a.a.PluginCommand=class{async animation(t,...e){const i=(await this.AWAIT_CHAR(this.CHAR)).char;if(i.requestAnimation(t),a.a.isDisabled())return;let s=!0,n=1;for(let t=0;t<e.length;++t)switch(e[t].toLowerCase()){case"depth":null!=e[t+1]&&(s=Object(r.f)(e[t+1]));break;case"scale":null!=e[t+1]&&(n=Number(e[t+1]))}i._mv3d_animationSettings={depth:s,scale:n}}async camera(...t){var e=this._TIME(t[2]);switch(t[0].toLowerCase()){case"pitch":return void this.pitch(t[1],e);case"yaw":return void this.yaw(t[1],e);case"roll":return void this.roll(t[1],e);case"dist":case"distance":return void this.dist(t[1],e);case"zoom":return void this.zoom(t[1],e);case"height":return void this.height(t[1],e);case"mode":return void this.cameramode(t[1]);case"target":return void this._cameraTarget(t[1],e);case"pan":return void this.pan(t[1],t[2],t[3])}}yaw(t,e=1){this._RELATIVE_BLEND(a.a.blendCameraYaw,t,e),a.a.is1stPerson()&&a.a.playerFaceYaw()}pitch(t,e=1){this._RELATIVE_BLEND(a.a.blendCameraPitch,t,e)}roll(t,e=1){this._RELATIVE_BLEND(a.a.blendCameraRoll,t,e)}dist(t,e=1){this._RELATIVE_BLEND(a.a.blendCameraDist,t,e)}zoom(t,e=1){this._RELATIVE_BLEND(a.a.blendCameraZoom,t,e)}height(t,e=1){this._RELATIVE_BLEND(a.a.blendCameraHeight,t,e)}_cameraTarget(t,e){a.a.setCameraTarget(this.TARGET_CHAR(t),e)}pan(t,e,i=1){console.log(t,e,i),i=this._TIME(i),this._RELATIVE_BLEND(a.a.blendPanX,t,i),this._RELATIVE_BLEND(a.a.blendPanY,e,i)}get rotationmode(){return this.allowrotation}get pitchmode(){return this.allowpitch}allowrotation(t){a.a.saveData("allowRotation",Object(r.f)(t))}allowpitch(t){a.a.saveData("allowPitch",Object(r.f)(t))}lockcamera(t){a.a.saveData("cameraLocked",Object(r.f)(t))}_VEHICLE(t,e,i){e=e.toLowerCase();const s=`${Vehicle}_${e}`;i="big"===e?Object(r.f)(i):Object(r.s)(a.a.loadData(s,0),i),a.a.saveData(s,i)}boat(t,e){this._VEHICLE("boat",t,e)}ship(t,e){this._VEHICLE("ship",t,e)}airship(t,e){this._VEHICLE("airship",t,e)}cameramode(t){a.a.cameraMode=t}fog(...t){var e=this._TIME(t[2]);switch(t[0].toLowerCase()){case"color":return void this._fogColor(t[1],e);case"near":return void this._fogNear(t[1],e);case"far":return void this._fogFar(t[1],e);case"dist":case"distance":return e=this._TIME(t[3]),this._fogNear(t[1],e),void this._fogFar(t[2],e)}e=this._TIME(t[3]),this._fogColor(t[0],e),this._fogNear(t[1],e),this._fogFar(t[2],e)}_fogColor(t,e){a.a.blendFogColor.setValue(Object(r.n)(t).toNumber(),e)}_fogNear(t,e){this._RELATIVE_BLEND(a.a.blendFogNear,t,e)}_fogFar(t,e){this._RELATIVE_BLEND(a.a.blendFogFar,t,e)}get ambient(){return this.light}light(...t){var e=this._TIME(t[2]);switch(t[0].toLowerCase()){case"color":return void this._lightColor(t[1],e)}e=this._TIME(t[1]),this._lightColor(t[0],e)}_lightColor(t,e=1){a.a.blendAmbientColor.setValue(Object(r.n)(t).toNumber(),e)}async lamp(...t){const e=await this.AWAIT_CHAR(this.CHAR);e.setupLamp();var i=this._TIME(t[2]);switch(t[0].toLowerCase()){case"color":return void this._lampColor(e,t[1],i);case"intensity":return void this._lampIntensity(e,t[1],i);case"dist":case"distance":return void this._lampDistance(e,t[1],i)}i=this._TIME(t[3]),this._lampColor(e,t[0],i),this._lampIntensity(e,t[1],i),this._lampDistance(e,t[2],i)}_lampColor(t,e,i=1){t.blendLampColor.setValue(Object(r.n)(e).toNumber(),i)}_lampIntensity(t,e,i=1){this._RELATIVE_BLEND(t.blendLampIntensity,e,i)}_lampDistance(t,e,i=1){this._RELATIVE_BLEND(t.blendLampDistance,e,i)}async flashlight(...t){const e=await this.AWAIT_CHAR(this.CHAR);e.setupFlashlight();var i=this._TIME(t[2]);switch(t[0].toLowerCase()){case"color":return void this._flashlightColor(e,t[1],i);case"intensity":return void this._flashlightIntensity(e,t[1],i);case"dist":case"distance":return void this._flashlightDistance(e,t[1],i);case"angle":return void this._flashlightAngle(e,t[1],i);case"yaw":return void this._flashlightYaw(e,t[1]);case"pitch":return void this._flashlightPitch(e,t[1],i)}i=this._TIME(t[4]),this._flashlightColor(e,t[0],i),this._flashlightIntensity(e,t[1],i),this._flashlightDistance(e,t[2],i),this._flashlightAngle(e,t[3],i)}_flashlightColor(t,e,i){t.blendFlashlightColor.setValue(Object(r.n)(e).toNumber(),i)}_flashlightIntensity(t,e,i){this._RELATIVE_BLEND(t.blendFlashlightIntensity,e,i)}_flashlightDistance(t,e,i){this._RELATIVE_BLEND(t.blendFlashlightDistance,e,i)}_flashlightAngle(t,e,i){this._RELATIVE_BLEND(t.blendFlashlightAngle,e,i)}_flashlightPitch(t,e,i){this._RELATIVE_BLEND(t.blendFlashlightPitch,e,i)}_flashlightYaw(t,e){this.configure(`flashlightYaw(${e})`)}async elevation(...t){const e=await this.AWAIT_CHAR(this.CHAR);let i=this._TIME(t[1]);this._RELATIVE_BLEND(e.blendElevation,t[0],i)}async configure(...t){const e=await this.AWAIT_CHAR(this.CHAR);a.a.readConfigurationFunctions(t.join(" "),a.a.eventConfigurationFunctions,e.settings),e.pageConfigure(e.settings)}disable(t){a.a.disable(t)}enable(t){a.a.enable(t)}_RELATIVE_BLEND(t,e,i){t.setValue(Object(r.s)(t.targetValue(),e),Number(i))}_TIME(t){return"number"==typeof t?t:(t=Number(t),Number.isNaN(t)?1:t)}ERROR_CHAR(){console.warn(`MV3D: Plugin command \`${this.FULL_COMMAND}\` failed because target character was invalid.`)}async AWAIT_CHAR(t){if(!t)return this.ERROR_CHAR();let e=0;for(;!t.mv3d_sprite;)if(await Object(r.u)(100),++e>10)return this.ERROR_CHAR();return t.mv3d_sprite}TARGET_CHAR(t){return a.a.targetChar(t,$gameMap.event(this.INTERPRETER._eventId),this.CHAR)}},a.a.targetChar=function(t,e=null,i=null){if(!t)return i;let a=t.toLowerCase().match(/[a-z]+/);const s=a?a[0]:"e",r=(a=t.match(/\d+/))?Number(a[0]):0;switch(s[0]){case"s":return e;case"p":return $gamePlayer;case"e":return r?$gameMap.event(r):e;case"v":return $gameMap.vehicle(r);case"f":return $gamePlayer.followers()._data[r]}return char},a.a.getTargetString=function(t){return t instanceof Game_Player?"@p":t instanceof Game_Event?`@e${t._eventId}`:t instanceof Game_Follower?`@f${$gamePlayer._followers._data.indexOf(t)}`:t instanceof Game_Vehicle?`@v${$gameMap._vehicles.indexOf(t)}`:void 0},Game_CharacterBase.prototype.mv3d_requestAnimation=function(t,e={}){this.requestAnimation(t),this._mv3d_animationSettings=e},Game_Character.prototype.mv3d_configure=function(t){a.a.readConfigurationFunctions(t,a.a.eventConfigurationFunctions,this.mv3d_settings),this.mv3d_sprite&&this.mv3d_sprite.pageConfigure(this.mv3d_settings)};class MapCellBuilder_CellMeshBuilder{constructor(){this.submeshBuilders={}}build(){const t=Object.values(this.submeshBuilders);if(!t.length)return null;const e=t.map(t=>t.build()),i=e.reduce((t,e)=>("number"!=typeof t&&(t=t.getTotalVertices()),t+e.getTotalVertices()));return s.k.MergeMeshes(e,!0,i>65536,void 0,!1,!0)}getBuilder(t){return t.name in this.submeshBuilders||(this.submeshBuilders[t.name]=new MapCellBuilder_SubMeshBuilder(t)),this.submeshBuilders[t.name]}addWallFace(t,e,i,a,s,r,n,o,h,l,c,p={}){const d=this.getBuilder(t),u=MapCellBuilder_SubMeshBuilder.getUvRect(t.diffuseTexture,e,i,a,s);d.addWallFace(r,n,o,h,l,c,u,p),p.double&&(p.flip=!p.flip,d.addWallFace(r,n,o,h,l,c,u,p))}addFloorFace(t,e,i,a,s,r,n,o,h,l,c={}){const p=this.getBuilder(t),d=MapCellBuilder_SubMeshBuilder.getUvRect(t.diffuseTexture,e,i,a,s);p.addFloorFace(r,n,o,h,l,d,c),c.double&&(c.flip=!c.flip,p.addFloorFace(r,n,o,h,l,d,c))}addSlopeFace(t,e,i,a,s,r,n,o,h,l,c,p={}){const d=this.getBuilder(t),u=MapCellBuilder_SubMeshBuilder.getUvRect(t.diffuseTexture,e,i,a,s);d.addSlopeFace(r,n,o,h,l,c,u,p),p.double&&(p.flip=!p.flip,d.addSlopeFace(r,n,o,h,l,c,u,p))}addSlopeSide(t,e,i,a,s,r,n,o,h,l,c,p={}){const d=this.getBuilder(t),u=MapCellBuilder_SubMeshBuilder.getUvRect(t.diffuseTexture,e,i,a,s);d.addSlopeSide(r,n,o,h,l,c,u,p),p.double&&(p.flip=!p.flip,d.addSlopeSide(r,n,o,h,l,c,u,p))}}class MapCellBuilder_SubMeshBuilder{constructor(t){this.material=t,this.positions=[],this.indices=[],this.normals=[],this.uvs=[]}build(){const t=new s.k("cell mesh",a.a.scene),e=new s.A;return e.positions=this.positions,e.indices=this.indices,e.normals=this.normals,e.uvs=this.uvs,e.applyToMesh(t),t.material=this.material,t}addWallFace(t,e,i,a,s,n,o,h){e=-e,i=i;const l=Object(r.g)(n),c=Object(r.t)(n),p=a/2,d=s/2,u=[t-p*l,i+d,e+p*c,t+p*l,i+d,e-p*c,t-p*l,i-d,e+p*c,t+p*l,i-d,e-p*c];let g=[-c,0,-l,-c,0,-l,-c,0,-l,-c,0,-l];const m=MapCellBuilder_SubMeshBuilder.getDefaultUvs(o),f=MapCellBuilder_SubMeshBuilder.getDefaultIndices();h.flip&&MapCellBuilder_SubMeshBuilder.flipFace(f,g),h.abnormal&&(g=[0,1,0,0,1,0,0,1,0,0,1,0]),this.pushNewData(u,f,g,m)}addFloorFace(t,e,i,a,s,r,n){const o=a/2,h=s/2,l=[t-o,i=i,(e=-e)+h,t+o,i,e+h,t-o,i,e-h,t+o,i,e-h],c=[0,1,0,0,1,0,0,1,0,0,1,0],p=MapCellBuilder_SubMeshBuilder.getDefaultUvs(r),d=MapCellBuilder_SubMeshBuilder.getDefaultIndices();n.flip&&MapCellBuilder_SubMeshBuilder.flipFace(d,c),this.pushNewData(l,d,c,p)}addSlopeFace(t,e,i,a,s,n,o,h){e=-e,i=i;const l=Object(r.g)(n),c=Object(r.t)(n),p=a/2,d=s/2,u=h.autotile?[t-p,i+d+d*Math.round(Object(r.t)(-n+1*r.a/4)),e+p,t+p,i+d+d*Math.round(Object(r.t)(-n+3*r.a/4)),e+p,t-p,i+d+d*Math.round(Object(r.t)(-n+7*r.a/4)),e-p,t+p,i+d+d*Math.round(Object(r.t)(-n+5*r.a/4)),e-p]:[t-p*l+p*c,i+s,e+p*c+p*l,t+p*l+p*c,i+s,e-p*c+p*l,t-p*l-p*c,i,e+p*c-p*l,t+p*l-p*c,i,e-p*c-p*l],g=Math.pow(2,-s),m=1-g,f=[-c*m,g,-l*m,-c*m,g,-l*m,-c*m,g,-l*m,-c*m,g,-l*m];let _=MapCellBuilder_SubMeshBuilder.getDefaultUvs(o);const b=MapCellBuilder_SubMeshBuilder.getDefaultIndices();h.flip&&MapCellBuilder_SubMeshBuilder.flipFace(b,f),this.pushNewData(u,b,f,_)}addSlopeSide(t,e,i,a,s,n,o,h){e=-e,i=i;const l=Object(r.g)(n),c=Object(r.t)(n),p=a/2,d=[t-p*l,i+s,e+p*c,t-p*l,i,e+p*c,t+p*l,i,e-p*c],u=[-c,0,-l,-c,0,-l,-c,0,-l],g=[o.x1,o.y1,o.x1,o.y2,o.x2,o.y2],m=[0,1,2];h.flip&&MapCellBuilder_SubMeshBuilder.flipFace(m,u),this.pushNewData(d,m,u,g)}pushNewData(t,e,i,a){this.indices.push(...e.map(t=>t+this.positions.length/3)),this.positions.push(...t),this.normals.push(...i),this.uvs.push(...a)}static getUvRect(t,e,i,s,r){const{width:n,height:o}=t.getBaseSize();return a.a.EDGE_FIX&&(e+=a.a.EDGE_FIX,i+=a.a.EDGE_FIX,s-=2*a.a.EDGE_FIX,r-=2*a.a.EDGE_FIX),{x1:e/n,y1:(o-i)/o,x2:(e+s)/n,y2:(o-i-r)/o}}static getDefaultUvs(t){return[t.x1,t.y1,t.x2,t.y1,t.x1,t.y2,t.x2,t.y2]}static getDefaultIndices(){return[1,0,2,1,2,3]}static flipFace(t,e){t.reverse();for(let t=0;t<e.length;++t)e[t]*=-1}}new s.p(0,1,-Math.pow(.1,100),0),new s.p(0,0,-1,0);class mapCell_MapCell extends s.x{constructor(t,e){const i=[t,e].toString();super(`MapCell[${i}]`,a.a.scene),this.parent=a.a.map,this.cx=t,this.cy=e,this.ox=t*a.a.CELL_SIZE,this.oy=e*a.a.CELL_SIZE,this.x=this.ox,this.y=this.oy,this.key=i,this.characters=[]}update(){const t=a.a.loopCoords((this.cx+.5)*a.a.CELL_SIZE,(this.cy+.5)*a.a.CELL_SIZE);this.x=t.x-a.a.CELL_SIZE/2,this.y=t.y-a.a.CELL_SIZE/2}async load(){const t=a.a.enumShapes;this.builder=new MapCellBuilder_CellMeshBuilder;let e=a.a.CELL_SIZE,i=a.a.CELL_SIZE;"clamp"!==a.a.getMapConfig("edge")&&(e=Math.min(a.a.CELL_SIZE,$gameMap.width()-this.cx*a.a.CELL_SIZE),i=Math.min(a.a.CELL_SIZE,$gameMap.height()-this.cy*a.a.CELL_SIZE));const s=a.a.getCeilingConfig();for(let r=0;r<i;++r)for(let i=0;i<e;++i){s.cull=!1;const e=a.a.getTileData(this.ox+i,this.oy+r);let n=1/0;const o=a.a.getCullingHeight(this.ox+i,this.oy+r);for(let h=3;h>=0;--h){if(a.a.isTileEmpty(e[h]))continue;let l=a.a.getStackHeight(this.ox+i,this.oy+r,h);const c=a.a.getTileTextureOffsets(e[h],this.ox+i,this.oy+r,h),p=c.shape;c.realId=e[h];let d=a.a.getTileHeight(this.ox+i,this.oy+r,h)||c.height||0,u=!1;if(n<l&&(u=!0),a.a.getTileFringe(this.ox+i,this.oy+r,h)||(n=l),!p||p===t.FLAT||p===t.SLOPE){const e=d||0===h,n=d>0&&l-d>o||c.fringe>0;if(p&&p!==t.FLAT){if(p===t.SLOPE){const t=c.slopeHeight||1;d-=t,await this.loadSlope(c,i,r,l,h,t),e&&await this.loadWalls(c,i,r,l-t,h,d),n&&await this.loadTile(c,i,r,l-t-Math.max(0,d),h,!0)}}else u||await this.loadTile(c,i,r,l+h*a.a.LAYER_DIST*!e,h),e&&await this.loadWalls(c,i,r,l,h,d),n&&await this.loadTile(c,i,r,l-d,h,!0);l>=s.height&&(s.cull=!0)}p===t.FENCE?await this.loadFence(c,i,r,l,h,d):p!==t.CROSS&&p!==t.XCROSS||await this.loadCross(c,i,r,l,h,d)}a.a.isTileEmpty(s.bottom_id)||s.cull||await this.loadTile(s,i,r,s.height,0,!0,!s.skylight)}this.mesh=this.builder.build(),this.mesh&&(this.mesh.isPickable=!1,Object(r.u)(10).then(()=>this.mesh.isPickable=!0),this.mesh.parent=this,this.mesh.alphaIndex=0,this.mesh.renderingGroupId=a.a.enumRenderGroups.MAIN,a.a.callFeatures("createCellMesh",this.mesh)),delete this.builder}dispose(){super.dispose(...arguments),this.mesh&&a.a.callFeatures("destroyCellMesh",this.mesh)}async loadTile(t,e,i,s,n,o=!1,h=!1){const l=o?t.bottom_id:t.top_id;if(a.a.isTileEmpty(l))return;const c=o?t.bottom_rect:t.top_rect,p=Tilemap.isAutotile(l)&&!c;let d;d=c?[c]:a.a.getTileRects(l);const u=await a.a.getCachedTilesetMaterialForTile(t,o?"bottom":"top");for(const t of d)this.builder.addFloorFace(u,t.x,t.y,t.width,t.height,e+(0|t.ox)/Object(r.w)()-.25*p,i+(0|t.oy)/Object(r.w)()-.25*p,s,1-p/2,1-p/2,{flip:o,double:h})}async loadWalls(t,e,i,a,s,r){for(const n of mapCell_MapCell.neighborPositions)await this.loadWall(t,e,i,a,s,r,n)}async loadWall(t,e,i,n,o,h,l){const c=a.a.isStarTile(t.realId)||t.fringe>0;if(!a.a.getMapConfig("edge",!0)&&((this.ox+e+l.x>=$dataMap.width||this.ox+e+l.x<0)&&!$gameMap.isLoopHorizontal()||(this.oy+i+l.y>=$dataMap.height||this.oy+i+l.y<0)&&!$gameMap.isLoopVertical()))return;let p,d=h,u=t.side_id,g="side";if(a.a.isTileEmpty(u))return;if((d=n-a.a.getCullingHeight(this.ox+e+l.x,this.oy+i+l.y,t.depth>0?3:o,{ignorePits:!(t.depth>0),dir:Input._makeNumpadDirection(l.x,l.y)}))>0&&(o>0||c)&&(d=Math.min(h,d)),t.depth>0&&d<0){if(a.a.tileHasPit(this.ox+e+l.x,this.oy+i+l.y,o))return;d=Math.max(d,-t.depth),t.hasInsideConf&&(g="inside")}else if(d<=0)return;"inside"===g?(u=t.inside_id,t.inside_rect&&(p=t.inside_rect)):t.side_rect&&(p=t.side_rect);const m=await a.a.getCachedTilesetMaterialForTile(t,g),f=new s.z(e+l.x/2,i+l.y/2,n),_=-Math.atan2(l.x,l.y);if(p||!Tilemap.isAutotile(u)){const t=p||a.a.getTileRects(u)[0],e={};d<0&&(e.flip=!0),this.builder.addWallFace(m,t.x,t.y,t.width,t.height,f.x,f.y,n-d/2,1,Math.abs(d),_,e)}else{const c=new s.y(-l.y,l.x),p=new s.y(l.y,-l.x),g=a.a.getCullingHeight(this.ox+e+c.x,this.oy+i+c.y,o,{dir:Input._makeNumpadDirection(c.x,c.y)}),b=a.a.getCullingHeight(this.ox+e+p.x,this.oy+i+p.y,o,{dir:Input._makeNumpadDirection(p.x,p.y)}),{x:y,y:C}=this.getAutotileCorner(u,t.realId,!0);let T=Math.max(1,Math.abs(Math.round(2*d))),M=Math.abs(d/T),v=Object(r.w)()/2,S=Object(r.w)()/2;a.a.isTableTile(t.realId)&&(S=Object(r.w)()/3,T=1,M=h);for(let e=-1;e<=1;e+=2)for(let i=0;i<T;++i){let s,o,h,l;a.a.isTableTile(t.realId)?(s=g!=n,o=b!=n):(s=g<n-i*M,o=b<n-i*M),h=y*Object(r.w)(),l=C*Object(r.w)(),h=(y+(e>0?.5+o:1-s))*Object(r.w)(),l=a.a.isWaterfallTile(u)?(C+i%2/2)*Object(r.w)():a.a.isTableTile(u)?(C+5/3)*Object(r.w)():(C+(0===i?0:i===T-1?1.5:1-i%2*.5))*Object(r.w)();const c={};d<0&&(c.flip=!0),this.builder.addWallFace(m,h,l,v,S,f.x+.25*e*Math.cos(_),f.y+.25*e*Math.sin(_),n-d*(d<0)-M/2-M*i,.5,M,_,c)}}}async loadFence(t,e,i,s,n,o){const h=t.side_id;if(a.a.isTileEmpty(h))return;const l=t.side_rect,c=await a.a.getCachedTilesetMaterialForTile(t,"side"),p=Tilemap.isAutotile(h),d=[],u=null==t.fencePosts||t.fencePosts;for(let t=0;t<mapCell_MapCell.neighborPositions.length;++t){const s=mapCell_MapCell.neighborPositions[t];a.a.getTileHeight(this.ox+e+s.x,this.oy+i+s.y,n)!==o&&d.push(t)}for(let n=0;n<mapCell_MapCell.neighborPositions.length;++n){const g=mapCell_MapCell.neighborPositions[n];let m=d.includes(n);if(!p||!u){let t=!(m&&d.length<4);if(3!==d.length||d.includes((n+2)%4)||(t=!0),!t)continue}const f=g.x>0||g.y<0;let _=Math.atan2(g.x,g.y)+Math.PI/2;if(f&&(_-=Math.PI),p&&!l){const{x:n,y:l}=this.getAutotileCorner(h,t.realId,!0);for(let t=0;t<=1;++t)this.builder.addWallFace(c,(m?n+1.5*f:n+1-.5*f)*Object(r.x)(),(l+1.5*t)*Object(r.v)(),Object(r.x)()/2,Object(r.v)()/2,e+g.x/4,i+g.y/4,s-o/4-t*o/2,.5,o/2,-_,{double:!0,abnormal:a.a.ABNORMAL})}else{const t=l||a.a.getTileRects(h)[0];this.builder.addWallFace(c,t.x+t.width/2*(g.x>0||g.y>0),t.y,t.width/2,t.height,e+g.x/4,i+g.y/4,s-o/2,.5,o,_,{double:!0})}}}async loadCross(t,e,i,s,n,o){const h=t.side_id;if(a.a.isTileEmpty(h))return;const l=t.side_rect,c=await a.a.getCachedTilesetMaterialForTile(t,"side"),p=Tilemap.isAutotile(h);let d;d=l?[l]:a.a.getTileRects(h);const u=t.shape===a.a.enumShapes.XCROSS?Math.PI/4:0,g=p?o/2:o;for(let t=0;t<=1;++t)for(const n of d){const h=-Math.PI/2*t+u,l=-.25*p+(0|n.ox)/Object(r.x)();this.builder.addWallFace(c,n.x,n.y,n.width,n.height,e+l*Math.cos(h),i+l*Math.sin(h),s-(0|n.oy)/Object(r.v)()*o-g/2,1-p/2,g,h,{double:!0,abnormal:a.a.ABNORMAL})}}async loadSlope(t,e,i,n,o,h){const{dir:l,rot:c}=a.a.getSlopeDirection(this.ox+e,this.oy+i,o,!0),p=new s.y(-Object(r.t)(c+Math.PI),Object(r.g)(c+Math.PI));a.a.getCullingHeight(this.ox+e+p.x,this.oy+i+p.y,o)<n&&await this.loadWall(t,e,i,n,o+1,h,p);const d=new s.y(p.y,-p.x),u=this.ox+e+d.x,g=this.oy+i+d.y;if(a.a.getCullingHeight(u,g,o)<n){let s=a.a.isRampAt(u,g,n);s&&s.z2===n&&s.z1===n-h&&l==a.a.getSlopeDirection(u,g,s.l,!0).dir||await this.loadSlopeSide(t,e+d.x/2,i+d.y/2,n,o,h,c+Math.PI/2)}const m=new s.y(-p.y,p.x),f=this.ox+e+m.x,_=this.oy+i+m.y;if(a.a.getCullingHeight(f,_,o)<n){let s=a.a.isRampAt(f,_,n);s&&s.z2===n&&s.z1===n-h&&l==a.a.getSlopeDirection(f,_,s.l,!0).dir||await this.loadSlopeSide(t,e+m.x/2,i+m.y/2,n,o,h,c+Math.PI/2,{flip:!0})}await this.loadSlopeTop(t,e,i,n,o,h,c)}async loadSlopeTop(t,e,i,s,n,o,h){const l=t.top_id,c=await a.a.getCachedTilesetMaterialForTile(t,"top");if(Tilemap.isAutotile(l)&&!t.top_rect){const t=a.a.getTileRects(l);for(let a=0;a<t.length;++a){const n=t[a],l=(a+1)%2*-2+1,p=(Math.floor(a/2)+1)%2*2-1,d=Math.max(0,Object(r.t)(h)*l)*o/2,u=Math.max(0,Object(r.g)(h)*p)*o/2;this.builder.addSlopeFace(c,n.x,n.y,n.width,n.height,e+n.ox/Object(r.w)()-.25,i+n.oy/Object(r.w)()-.25,s-o+d+u,.5,o/2,h,{autotile:!0})}}else{const r=t.top_rect?t.top_rect:a.a.getTileRects(l)[0];this.builder.addSlopeFace(c,r.x,r.y,r.width,r.height,e,i,s-o,1,o,h,{})}}async loadSlopeSide(t,e,i,s,n,o,h,l={}){const c=t.side_id,p=await a.a.getCachedTilesetMaterialForTile(t,"side");let d;if(Tilemap.isAutotile(c)&&!t.side_rect){const{x:e,y:i}=this.getAutotileCorner(c,t.realId,!0);d={x:(e+.5)*Object(r.x)(),y:(i+.5)*Object(r.v)(),width:Object(r.x)(),height:Object(r.v)()}}else d=t.side_rect?t.side_rect:a.a.getTileRects(c)[0];this.builder.addSlopeSide(p,d.x,d.y,d.width,d.height,e,i,s-o,1,o,h,l)}getAutotileCorner(t,e=t,i=!0){const s=Tilemap.getAutotileKind(t);let r=s%8,n=Math.floor(s/8);var o,h;return t===e&&1==a.a.isWallTile(t)&&++n,o=2*r,h=n,Tilemap.isTileA1(t)?(s<4?(o=6*Math.floor(s/2),h=s%2*3+i):(o=8*Math.floor(r/4)+s%2*6,h=6*n+3*Math.floor(r%4/2)+i*!(r%2)),i&&s>=4&&!(s%2)&&(h+=1)):Tilemap.isTileA2(t)?h=3*(n-2)+i:Tilemap.isTileA3(t)?h=2*(n-6):Tilemap.isTileA4(t)&&(h=i?Math.ceil(2.5*(n-10)+.5):2.5*(n-10)+(n%2?.5:0)),{x:o,y:h}}}mapCell_MapCell.neighborPositions=[new s.y(0,1),new s.y(1,0),new s.y(0,-1),new s.y(-1,0)],mapCell_MapCell.meshCache={};Object.assign(a.a,{_tilemap:null,getTilemap(){return SceneManager._scene&&SceneManager._scene._spriteset&&(this._tilemap=SceneManager._scene._spriteset._tilemap),this._tilemap},getDataMap(){return $dataMap&&(this._dataMap=$dataMap),this._dataMap},getRegion(t,e){return this.getTileId(t,e,5)},getSetNumber:t=>Tilemap.isAutotile(t)?Tilemap.isTileA1(t)?0:Tilemap.isTileA2(t)?1:Tilemap.isTileA3(t)?2:3:Tilemap.isTileA5(t)?4:5+Math.floor(t/256),getShadowBits(t,e){return this.getTileId(t,e,4)},getTerrainTag:t=>$gameMap.tilesetFlags()[t]>>12,getTilePassage:Object(r.o)({1(t){return this.getTilePassage(t,this.getTileConfig(t))},2(t,e){if("pass"in e)return e.pass;const i=$gameMap.tilesetFlags()[t];return 16&i?this.enumPassage.THROUGH:15==(15&i)?this.enumPassage.WALL:this.enumPassage.FLOOR},3(t,e,i){const a=this.getTileId(t,e,i);return this.getTilePassage(a,this.getTileConfig(a,t,e,i))},default(t,e,i,a){return this.getTilePassage(t,this.getTileConfig(t,e,i,a))}}),getMaterialOptions(t,e){const i={};return"pass"in t&&(i.through=t.pass===this.enumPassage.THROUGH),"alpha"in t&&(i.alpha=t.alpha),"glow"in t&&(i.glow=t.glow),"shadow"in t&&(i.shadow=t.shadow),e&&(`${e}_alpha`in t&&(i.alpha=t[`${e}_alpha`]),`${e}_glow`in t&&(i.glow=t[`${e}_glow`]),`${e}_shadow`in t&&(i.shadow=t[`${e}_shadow`])),t.isCeiling&&(i.backfaceCulling=t.backfaceCulling,i.through=t.skylight),"alpha"in i&&(i.transparent=!0),i},getTileAnimationData(t,e){const i=t[`${e}_id`];if(`${e}_animData`in t)return t[`${e}_animData`];const a={animX:0,animY:0};if(Tilemap.isTileA1(i)){const t=Tilemap.getAutotileKind(i);a.animX=t<=1?2:t<=3?0:t%2?0:2,a.animY=t<=3?0:t%2?1:0}return a},getTileConfig:Object(r.o)({3(t,e,i){return this.getTileConfig(this.getTileData(t,e)[i],t,e,i)},default(t,e,i,s){const r={};if(!this.isTileEmpty(t)){const e=this.getTerrainTag(t);e&&e in this.TTAG_DATA&&Object.assign(r,this.TTAG_DATA[e]);const i=this.tilesetConfigurations[this.normalizeAutotileId(t)];i&&Object.assign(r,i)}if(0===s){const t=this.getRegion(e,i);t&&t in a.a.REGION_DATA&&Object.assign(r,this.REGION_DATA[t])}return r}}),getTileTextureOffsets(t,e,i,a){const s=this.getTileConfig(t,e,i,a),r=Tilemap.isAutotile(t)?48:1;return s.hasInsideConf=Boolean(s.inside_offset||s.rectInside||"inside_id"in s),s.hasBottomConf=Boolean(s.bottom_offset||s.rectBottom||"bottom_id"in s),null==s.top_id&&(s.top_id=t,s.top_offset&&(s.top_id=t+s.top_offset.x*r+s.top_offset.y*r*8)),null==s.side_id&&(s.side_id=t,s.side_offset&&(s.side_id=t+s.side_offset.x*r+s.side_offset.y*r*8)),null==s.inside_id&&(s.inside_id=s.side_id,s.inside_offset&&(s.inside_id=t+s.inside_offset.x*r+s.inside_offset.y*r*8)),null==s.bottom_id&&(s.bottom_id=s.top_id,s.bottom_offset&&(s.bottom_id=t+s.bottom_offset.x*r+s.bottom_offset.y*r*8)),"pass"in s||(s.pass=this.getTilePassage(t,s)),s},getTileId(t,e,i=0){const a=this.getDataMap();if($gameMap.isLoopHorizontal()&&(t=t.mod(a.width)),$gameMap.isLoopVertical()&&(e=e.mod(a.height)),t<0||t>=a.width||e<0||e>=a.height){if("clamp"!==this.getMapConfig("edge"))return 0;{const i=this.getMapConfig("edgeData",1);t>=a.width?t=a.width+(t-a.width).mod(i)-i:t<0&&(t=t.mod(i)),e>=a.height?e=a.height+(e-a.height).mod(i)-i:e<0&&(e=e.mod(i))}}return a.data[(i*a.height+e)*a.width+t]||0},getTileData(t,e){if(!$dataMap||!$dataMap.data)return[0,0,0,0];const i=$dataMap.data,a=$dataMap.width,s=$dataMap.height;if($gameMap.isLoopHorizontal()&&(t=t.mod(a)),$gameMap.isLoopVertical()&&(e=e.mod(s)),t<0||t>=a||e<0||e>=s){if("clamp"!==this.getMapConfig("edge"))return[0,0,0,0];{const i=this.getMapConfig("edgeData",1);t>=a?t=a+(t-a).mod(i)-i:t<0&&(t=t.mod(i)),e>=s?e=s+(e-s).mod(i)-i:e<0&&(e=e.mod(i))}}if(t<0||t>=a||e<0||e>=s)return[0,0,0,0];const r=[];for(let n=0;n<4;++n)r[n]=i[(n*s+e)*a+t]||0;return r},getTileHeight(t,e,i=0){if(!$dataMap)return 0;$gameMap.isLoopHorizontal()&&(t=t.mod($dataMap.width)),$gameMap.isLoopVertical()&&(e=e.mod($dataMap.height));const a=this.getTileData(t,e)[i];if(this.isTileEmpty(a)&&i>0)return 0;const s=this.enumShapes,r=this.getTileConfig(a,t,e,i);let n=0;if("height"in r)n=r.height;else if(this.isWallTile(a))n=this.WALL_HEIGHT;else if(this.isTableTile(a))n=this.TABLE_HEIGHT;else if(this.isSpecialShape(r.shape))switch(r.shape){case s.SLOPE:n=0;break;default:n=1}return"depth"in r&&(n-=r.depth),r.shape===s.SLOPE&&(n+=r.slopeHeight||1),n},getStackHeight(t,e,i=3){let a=0;for(let s=0;s<=i;++s)a+=this.getTileFringe(t,e,s),a+=this.getTileHeight(t,e,s);return a},getSlopeDirection(t,e,i,s=!1){const n=this.getStackHeight(t,e,i),o=this.getTileData(t,e)[i],h=this.getTileConfig(o,t,e,i),l=h.slopeHeight||1,c=mapCell_MapCell.neighborPositions,p=$gameMap.tilesetFlags()[o],d=this.getShadowBits(t,e),u=[0,3,10,5,12];let g;for(let i=0;i<c.length;++i){const s=c[i],r={neighbor:s,favor:0};r.dir=5-3*s.y+s.x;const o=this.getCollisionHeights(t+s.x,e+s.y,{slopeMax:!0}),m=this.getCollisionHeights(t-s.x,e-s.y,{slopeMin:!0});o.some(t=>Math.abs(n-l-t.z2)<=a.a.STAIR_THRESH)&&(r.favor+=1),m.some(t=>Math.abs(n-t.z2)<=a.a.STAIR_THRESH)&&(r.favor+=1),p&1<<r.dir/2-1&&(r.favor=-2),p&1<<(10-r.dir)/2-1&&(r.favor=-1),(d&u[r.dir/2])===u[r.dir/2]&&(r.favor=30),h.slopeDirection===r.dir&&(r.favor=100),(!g||r.favor>g.favor)&&(g=r)}return g.rot=Object(r.i)(180-this.dirToYaw(g.dir)),s?g:g.rot},getWalkHeight(t,e){const i=this.getCollisionHeights(t,e);return i[i.length-1].z2},getSlopeHeight(t,e,i,a=null){const s=Math.round(t),n=Math.round(e);null==a&&(a=this.getTileConfig(this.getTileData(s,n)[i],s,n,i));const o=this.getSlopeDirection(s,n,i),h=Object(r.t)(o),l=-Object(r.g)(o);let c=(t+.5)%1,p=(e+.5)%1;Math.sign(h<0)&&(c=1-c),Math.sign(l<0)&&(p=1-p);const d=Math.abs(h)*c+Math.abs(l)*p;return(a.slopeHeight||1)*d},getCollisionHeights(t,e,i={}){const a=Math.round(t),s=Math.round(e);let r=0;const n=[{z1:-1/0,z2:0}];i.layers&&(n.layers=[]);const o=this.getTileData(a,s);for(let h=0;h<=3;++h){let l=this.getTileHeight(a,s,h);const c=o[h],p=this.getTileConfig(c,a,s,h),d=p.shape;let u=!1;this.getTilePassage(c,p)===this.enumPassage.THROUGH?(l=0,u=!0):d===this.enumShapes.SLOPE&&(i.slopeMax?l=l:i.slopeMin?l-=p.slopeHeight||1:l=l-(p.slopeHeight||1)+this.getSlopeHeight(t,e,h,p));const g=this.getTileFringe(a,s,h);r+=g,u||(l<0?g+l<0&&(n[n.length-1].z2+=g+l):0===h?n[0].z2=r+l:n.push({z1:r,z2:r+l}),r+=l,i.layers&&(n.layers[h]=n[n.length-1]),d===this.enumShapes.SLOPE&&(n[n.length-1].isSlope=!0))}return n},getTileLayers(t,e,i,a=!0){let s=1/0,r=[0],n=0;for(let o=0;o<=3;++o){if(this.getTilePassage(t,e,o)===this.enumPassage.THROUGH)continue;const h=this.getTileFringe(t,e,o),l=this.getTileHeight(t,e,o),c=this.getTileConfig(t,e,o);n+=h+l;const p=c.shape===this.enumShapes.SLOPE;p&&(n-=c.slopeHeight||1);const d=i-n;(a?i>=n:i>n)&&(d<s||p&&d<=s?(r=[o],s=d):d===s&&r.push(o))}return r},getFloatHeight(t,e,i=null,a=!0){const s=this.getTileData(t,e),r=null==i?[0,1,2,3]:this.getTileLayers(t,e,i,a);let n=0;for(const i of r){const a=s[i];if(this.isTileEmpty(a))continue;const r=this.getTileConfig(a,t,e,i);r&&"float"in r&&(n+=r.float)}return n},getStackFringeHeight(t,e,i=3){return this.getStackHeight(t,e,i)},getTileFringe(t,e,i){const a=this.getTileData(t,e)[i];if(this.isTileEmpty(a))return 0;const s=this.getTileConfig(a,t,e,i);return s&&"fringe"in s?s.fringe:this.isStarTile(a)?this.FRINGE_HEIGHT:0},getCullingHeight(t,e,i=3,a={}){const s=this.getDataMap();if(!this.getMapConfig("edge",!0)&&(!$gameMap.isLoopHorizontal()&&(t<0||t>=s.width)||!$gameMap.isLoopVertical()&&(e<0||e>=s.height)))return 1/0;const r=this.getTileData(t,e);let n=0;for(let s=0;s<=i;++s){if(this.getTileFringe(t,e,s))return n;const i=r[s],o=this.getTileConfig(i,t,e,s),h=o.shape;if(this.isSpecialShape(h))return h===this.enumShapes.SLOPE&&(n+=this.getTileHeight(t,e,s),a.dir&&a.dir===this.getSlopeDirection(t,e,s,!0).dir||(n-=o.slopeHeight||1)),n;a.ignorePits&&o.depth>0&&(n+=o.depth),n+=this.getTileHeight(t,e,s)}return n},tileHasPit(t,e,i=3){const a=this.getTileData(t,e);for(let s=0;s<=i;++s){const i=a[s];if(this.getTileConfig(i,t,e,s).depth>0)return!0}return!1},isTilePit(t,e,i){const a=this.getTileData(t,e)[i];return this.getTileConfig(a,t,e,i).depth>0},getTileRects(t){const e=[],i=this.getTilemap(),a=i._isTableTile(t);if(i._drawTile({addRect:(t,i,a,s,r,n,o,h,l)=>{e.push({setN:t,x:i,y:a,width:n,height:o,ox:s,oy:r})}},t,0,0),a)for(let t=e.length-1;t>=0;--t)e[t].oy>Object(r.w)()/2&&(e[t-1].y+=2*Object(r.w)()/3,e.splice(t,1));return e},isTileEmpty:t=>!t||1544===t,isWallTile(t){const e=Tilemap.getAutotileKind(t),i=Math.floor(e/8),a=Tilemap.isTileA3(t)||Tilemap.isTileA4(t);return a&&i%2?2:a},isTableTile:t=>Boolean(Tilemap.isTileA2(t)&&128&$gameMap.tilesetFlags()[t]),isStarTile:t=>Boolean(16&$gameMap.tilesetFlags()[t]),isWaterfallTile(t){const e=Tilemap.getAutotileKind(t);return Tilemap.isTileA1(t)&&e>=4&&e%2},isSpecialShape(t){const e=a.a.enumShapes;return t===e.FENCE||t===e.CROSS||t===e.XCROSS||t===e.SLOPE},isPlatformShape(t){const e=a.a.enumShapes;return null==t||t===e.FLAT||t===e.SLOPE},constructTileId(t,e,i){const a=`TILE_ID_${t.toUpperCase()}`;let s=a in Tilemap?Tilemap[a]:0;const r=Tilemap.isAutotile(s)?48:1;return s+=Number(e)*r+Number(i)*r*8},normalizeAutotileId(t){if(!Tilemap.isAutotile(t))return t;const e=Tilemap.getAutotileKind(t);return Tilemap.TILE_ID_A1+48*e}}),Object.assign(a.a,{mapLoaded:!1,mapReady:!1,clearMap(){this.mapLoaded=!1,this.clearMapCells();for(let t=this.characters.length-1;t>=0;--t)this.characters[t].dispose(!1,!0);this.characters.length=0,this.resetCameraTarget(),this.callFeatures("clearMap")},clearMapCells(){for(const t in this.textureCache)this.textureCache[t].dispose();for(const t in this.materialCache)this.materialCache[t].dispose();this.animatedTextures.length=0,this.textureCache={},this.materialCache={};for(const t in this.cells)this.cells[t].dispose(!1,!0);this.cells={}},reloadMap(){this.clearMapCells(),a.a.mapReady&&this.updateMap(),this.callFeatures("reloadMap")},loadMap(){this.updateBlenders(),this.updateMap(),this.createCharacters(),this.rememberCameraTarget(),this.callFeatures("loadMap")},async updateMap(){if(this.mapUpdating)return;this.mapLoaded=!0,this.mapUpdating=!0;for(const t in this.cells)this.cells[t].unload=!0;const t={left:Math.floor((this.cameraStick.x-this.renderDist)/this.CELL_SIZE),right:Math.floor((this.cameraStick.x+this.renderDist)/this.CELL_SIZE),top:Math.floor((this.cameraStick.y-this.renderDist)/this.CELL_SIZE),bottom:Math.floor((this.cameraStick.y+this.renderDist)/this.CELL_SIZE)};"clamp"!==this.getMapConfig("edge")&&($gameMap.isLoopHorizontal()||(t.left=Math.max(0,t.left),t.right=Math.min(t.right,Math.ceil($gameMap.width()/a.a.CELL_SIZE)-1)),$gameMap.isLoopVertical()||(t.top=Math.max(0,t.top),t.bottom=Math.min(t.bottom,Math.ceil($gameMap.height()/a.a.CELL_SIZE)-1)));const e=[];for(let i=t.left;i<=t.right;++i)for(let r=t.top;r<=t.bottom;++r){let t=i,n=r;$gameMap.isLoopHorizontal()&&(t=t.mod(Math.ceil($gameMap.width()/a.a.CELL_SIZE))),$gameMap.isLoopVertical()&&(n=n.mod(Math.ceil($gameMap.height()/a.a.CELL_SIZE)));const o=[t,n].toString();o in this.cells?this.cells[o].unload=!1:e.push(new s.y(t,n))}for(const t in this.cells)a.a.UNLOAD_CELLS&&this.cells[t].unload&&(this.cells[t].dispose(),delete this.cells[t]);const i=new s.y(Math.round(this.cameraStick.x/this.CELL_SIZE-.5),Math.round(this.cameraStick.y/this.CELL_SIZE-.5));e.sort((t,e)=>s.y.DistanceSquared(t,i)-s.y.DistanceSquared(e,i)),this.mapReady&&(e.length=Math.min(25,e.length));for(const t of e){let{x:e,y:i}=t;if(await this.loadMapCell(e,i),this.mapReady&&await Object(r.u)(10),!this.mapLoaded)return void this.endMapUpdate()}this.endMapUpdate()},endMapUpdate(){this.mapUpdating=!1,this.mapReady=!0},async loadMapCell(t,e){const i=[t,e].toString();if(i in this.cells)return;const a=new mapCell_MapCell(t,e);this.cells[i]=a,await a.load()},_cellsNeedingIntensiveUpdate:[],intensiveUpdate(){if(0===this._cellsNeedingIntensiveUpdate.length)return;const t=performance.now();let e,i=null;for(e of this._cellsNeedingIntensiveUpdate)if(!(t-e._lastIntensiveUpdate<=300)){i=this._cellsNeedingIntensiveUpdate.indexOf(e);break}if(!(null==i||i<0)){this._cellsNeedingIntensiveUpdate.splice(i,1),e._lastIntensiveUpdate=t,e._needsIntensiveUpdate=!1;for(let t of e.characters)t.intensiveUpdate();a.a.scene.sortLightsByPriority()}}}),Object.assign(a.a,{animatedTextures:[],textureCache:{},materialCache:{},async createTexture(t){const e=await this.getTextureUrl(t);return new BABYLON.Texture(e,a.a.scene,!a.a.MIPMAP,!0,BABYLON.Texture.NEAREST_SAMPLINGMODE)},async getTextureUrl(t){const e=ImageManager.loadNormalBitmap(encodeURI(t));return Decrypter.hasEncryptedImages?(await a.a.waitBitmapLoaded(e),e.canvas.toDataURL()):e._image.src},waitTextureLoaded:t=>new Promise((e,i)=>{t.isReady()&&e(),t.onLoadObservable.addOnce(()=>{e()})}),waitBitmapLoaded:t=>new Promise(e=>t.addLoadListener(e)),async getCachedTilesetTexture(t,e=0,i=0){const a=`TS:${t}|${e},${i}`;if(a in this.textureCache)return this.textureCache[a];const s=$gameMap.tileset().tilesetNames[t];if(!s)return await this.getErrorTexture();const r=ImageManager.loadTileset(s)._url,n=await this.createTexture(r);if(n.hasAlpha=!0,this.textureCache[a]=n,await this.waitTextureLoaded(n),this.textureCache[a]!==n)return await this.getErrorTexture();if(n.updateSamplingMode(1),e||i){const{width:t,height:a}=n.getBaseSize();n.frameData={x:0,y:0,w:t,h:a},n.animX=e,n.animY=i,this.animatedTextures.push(n)}return n},async getErrorTexture(){return this.errorTexture?this.errorTexture:(this.errorTexture=await this.createTexture(`${a.a.MV3D_FOLDER}/errorTexture.png`),this.errorTexture.isError=!0,this.errorTexture.dispose=()=>{},this.errorTexture)},async getBushAlphaTexture(){return this.bushAlphaTexture?this.bushAlphaTexture:(this.getBushAlphaTexture.getting=!0,this.bushAlphaTexture=await this.createTexture(`${a.a.MV3D_FOLDER}/bushAlpha.png`),this.bushAlphaTexture.getAlphaFromRGB=!0,this.bushAlphaTexture.dispose=()=>{},this.getBushAlphaTexture.getting=!1,this.bushAlphaTexture)},getBushAlphaTextureSync(){return this.bushAlphaTexture?this.bushAlphaTexture:(this.getBushAlphaTexture.getting||this.getBushAlphaTexture(),null)},async getCachedTilesetMaterial(t,e=0,i=0,r={}){this.processMaterialOptions(r);const n=`TS:${t}|${e},${i}|${this.getExtraBit(r)}`;if(n in this.materialCache)return this.materialCache[n];const o=await this.getCachedTilesetTexture(t,e,i),h=new s.v(n,this.scene);return h.diffuseTexture=o,r.transparent&&(h.opacityTexture=o,h.alpha=r.alpha),r.through&&(h.mv3d_through=!0),h.mv3d_noShadow=!r.shadow,h.alphaCutOff=a.a.ALPHA_CUTOFF,h.ambientColor.set(1,1,1),h.mv3d_glowColor=r.glow,h.emissiveColor.copyFrom(r.glow),h.specularColor.set(0,0,0),h.backFaceCulling=r.backfaceCulling,isNaN(this.LIGHT_LIMIT)||(h.maxSimultaneousLights=this.LIGHT_LIMIT),this.materialCache[n]=h,h},async getCachedTilesetMaterialForTile(t,e){const i=a.a.getSetNumber(t[`${e}_id`]),s=a.a.getMaterialOptions(t,e),r=a.a.getTileAnimationData(t,e);return await a.a.getCachedTilesetMaterial(i,r.animX,r.animY,s)},processMaterialOptions(t){"alpha"in t?(t.alpha=Math.round(7*t.alpha)/7,t.alph<1&&(t.transparent=!0)):t.alpha=1,"glow"in t?(t.glow.r=Object(r.y)(t.glow.r,255),t.glow.g=Object(r.y)(t.glow.g,255),t.glow.b=Object(r.y)(t.glow.b,255),t.glow.a=Object(r.y)(t.glow.a,7)):t.glow=new s.c(0,0,0,0),"shadow"in t||(t.shadow=!0),"backfaceCulling"in t||(t.backfaceCulling=a.a.BACKFACE_CULLING)},getExtraBit(t){let e=0;e|=Boolean(t.transparent)<<0,e|=7-7*t.alpha<<1,e|=!t.shadow<<4,e|=7*t.glow.a<<5;let i=(e|=t.glow.toNumber()<<8).toString(36);return e=0,e|=Boolean(t.through)<<0,i+=","+(e|=!t.backfaceCulling<<1).toString(36)},lastAnimUpdate:0,animXFrame:0,animYFrame:0,animDirection:1,updateAnimations(){if(!(performance.now()-this.lastAnimUpdate<=this.ANIM_DELAY)){this.lastAnimUpdate=performance.now(),this.animXFrame<=0?this.animDirection=1:this.animXFrame>=2&&(this.animDirection=-1),this.animXFrame+=this.animDirection,this.animYFrame=(this.animYFrame+1)%3;for(const t of this.animatedTextures)t.crop(t.frameData.x+t.animX*this.animXFrame*Object(r.x)(),t.frameData.y+t.animY*this.animYFrame*Object(r.v)(),t.frameData.w,t.frameData.h,!0)}}}),Object.assign(a.a,{createCharacters(){const t=$gameMap.events();for(const e of t)this.createCharacterFor(e,0);const e=$gameMap.vehicles();for(const t of e)this.createCharacterFor(t,1);const i=$gamePlayer.followers()._data;for(let t=i.length-1;t>=0;--t)this.createCharacterFor(i[t],29-t);this.createCharacterFor($gamePlayer,30)},createCharacterFor(t,e){if(!t.mv3d_sprite){const i=new characters_Character(t,e);return Object.defineProperty(t,"mv3d_sprite",{value:i,configurable:!0}),this.characters.push(i),i}return t.mv3d_sprite},updateCharacters(){for(let t=this.characters.length-1;t>=0;--t)this.characters[t].update()},setupSpriteMeshes(){this.Meshes=characters_Sprite.Meshes={},characters_Sprite.Meshes.BASIC=s.l.CreatePlane("sprite mesh",{sideOrientation:s.d},a.a.scene),characters_Sprite.Meshes.FLAT=s.k.MergeMeshes([characters_Sprite.Meshes.BASIC.clone().rotate(r.b,Math.PI/2,s.B)]),characters_Sprite.Meshes.SPRITE=s.k.MergeMeshes([characters_Sprite.Meshes.BASIC.clone().translate(r.c,.5,s.B)]),characters_Sprite.Meshes.CROSS=s.k.MergeMeshes([characters_Sprite.Meshes.SPRITE.clone(),characters_Sprite.Meshes.SPRITE.clone().rotate(r.c,Math.PI/2,s.B)]);for(const t in characters_Sprite.Meshes)characters_Sprite.Meshes[t].renderingGroupId=a.a.enumRenderGroups.MAIN,a.a.scene.removeMesh(characters_Sprite.Meshes[t])},async getShadowMaterial(){if(this._shadowMaterial)return this._shadowMaterial;const t=await a.a.createTexture(`${a.a.MV3D_FOLDER}/shadow.png`),e=new s.v("shadow material",a.a.scene);return this._shadowMaterial=e,e.diffuseTexture=t,e.opacityTexture=t,e.specularColor.set(0,0,0),e.dispose=()=>{},e},async getShadowMesh(){let t;for(;this.getShadowMesh.getting;)await Object(r.u)(100);return this._shadowMesh?t=this._shadowMesh:(this.getShadowMesh.getting=!0,(t=characters_Sprite.Meshes.FLAT.clone("shadow mesh")).material=await this.getShadowMaterial(),this._shadowMesh=t,a.a.scene.removeMesh(t),this.getShadowMesh.getting=!1),t.clone()},ACTOR_SETTINGS:[]});class characters_Sprite extends s.x{constructor(){super("sprite",a.a.scene),this.spriteOrigin=new s.x("sprite origin",a.a.scene),this.spriteOrigin.parent=this,this.mesh=characters_Sprite.Meshes.FLAT.clone(),this.mesh.parent=this.spriteOrigin,this.textureLoaded=!1}async setMaterial(t){let e;e="error"===t?await a.a.getErrorTexture():await a.a.createTexture(t),await this.waitTextureLoaded(e),this.disposeMaterial(),this.texture=e,this.texture.hasAlpha=!0,this.onTextureLoaded(),this.material=new s.v("sprite material",a.a.scene),this.material.diffuseTexture=this.texture,this.material.alphaCutOff=a.a.ALPHA_CUTOFF,this.material.ambientColor.set(1,1,1),this.material.specularColor.set(0,0,0),isNaN(this.LIGHT_LIMIT)||(this.material.maxSimultaneousLights=this.LIGHT_LIMIT),this.mesh.material=this.material}async waitTextureLoaded(t=this.texture){await a.a.waitTextureLoaded(t)}onTextureLoaded(){this.texture.updateSamplingMode(1),this.textureLoaded=!0}disposeMaterial(){this.material&&(this.material.dispose(),this.texture.dispose(),this.material=null,this.texture=null)}dispose(...t){this.disposeMaterial(),super.dispose(...t)}}const H={configurable:!0,get(){return this._mv3d_z},set(t){this._mv3d_z=t,this.mv3d_sprite&&(this.mv3d_sprite.position.y=t)}},B={configurable:!0,get(){return this.char._mv3d_z},set(t){this.char._mv3d_z=t,this.position.y=t}};class characters_Character extends characters_Sprite{constructor(t,e){super(),this.order=e,this.mesh.order=this.order,this.mesh.character=this,this._character=this.char=t,this.charName="",this.charIndex=0,this.char.mv_sprite&&this.char.mv_sprite.updateBitmap(),this.char.mv3d_settings||(this.char.mv3d_settings={}),this.char.mv3d_blenders||(this.char.mv3d_blenders={}),this.isVehicle=this.char instanceof Game_Vehicle,this.isBoat=this.isVehicle&&this.char.isBoat(),this.isShip=this.isVehicle&&this.char.isShip(),this.isAirship=this.isVehicle&&this.char.isAirship(),this.isEvent=this.char instanceof Game_Event,this.isPlayer=this.char instanceof Game_Player,this.isFollower=this.char instanceof Game_Follower,this.updateCharacter(),this.updateShape(),"_mv3d_z"in this.char||(this.char._mv3d_z=a.a.getWalkHeight(this.char.x,this.char.y)),Object.defineProperty(this.char,"z",H),Object.defineProperty(this,"z",B),this.z=this.z,this.platformHeight=this.z,this.targetElevation=this.z,this.prevZ=this.z,this.needsPositionUpdate=!0,this.needsMaterialUpdate=!0,a.a.getShadowMesh().then(t=>{this.shadow=t,this.shadow.parent=this}),this.blendElevation=this.makeBlender("elevation",0),this.lightOrigin=new s.x("light origin",a.a.scene),this.lightOrigin.parent=this,this.setupLights(),this.isEvent?this.eventConfigure():(this.initialConfigure(),this.needsMaterialUpdate=!0),this.intensiveUpdate()}get settings(){return this.char.mv3d_settings}isBitmapReady(){return Boolean(this.bitmap&&this.bitmap.isReady()&&!this._waitingForBitmap)}isTextureReady(){return Boolean(this.texture&&this.texture.isReady()&&this.isBitmapReady())}get mv_sprite(){return this.char.mv_sprite||{}}get bitmap(){return this.mv_sprite.bitmap}setTileMaterial(){const t=a.a.getSetNumber(this._tileId),e=$gameMap.tileset().tilesetNames[t];if(e){const t=ImageManager.loadTileset(e)._url;this.setMaterial(t)}else this.setMaterial("error")}async waitBitmapLoaded(){this.char.mv_sprite||(await Object(r.u)(),this.char.mv_sprite)?(this._waitingForBitmap=!0,this.char.mv_sprite.updateBitmap(),await a.a.waitBitmapLoaded(this.char.mv_sprite.bitmap),this._waitingForBitmap=!1):console.warn("mv_sprite is undefined")}async waitTextureLoaded(t=this.texture){await this.waitBitmapLoaded(),await super.waitTextureLoaded(t)}onTextureLoaded(){super.onTextureLoaded(),this.updateScale(),this.needsMaterialUpdate=!0}isImageChanged(){return this._tilesetId!==$gameMap.tilesetId()||this._tileId!==this._character.tileId()||this._characterName!==this._character.characterName()}updateCharacter(){this.needsPositionUpdate=!0,this._tilesetId=$gameMap.tilesetId(),this._tileId=this._character.tileId(),this._characterName=this._character.characterName(),this._characterIndex=this._character.characterIndex(),this._isBigCharacter=ImageManager.isBigCharacter(this._characterName),this.isEmpty=!1,this.mesh.setEnabled(!0),this._tileId>0?this.setTileMaterial(this._tileId):this._characterName?this.setMaterial(`img/characters/${this._characterName}.png`):(this.isEmpty=!0,this.textureLoaded=!1,this.disposeMaterial(),this.mesh.setEnabled(!1),this.spriteWidth=1,this.spriteHeight=1,this.updateScale())}setFrame(t,e,i,a){this.isTextureReady()&&this.texture.crop(t,e,i,a,this._tileId>0)}async updateScale(){if(this.isEmpty)return this.spriteWidth=1,this.spriteHeight=1,void this.mesh.scaling.set(1,1,1);this.isBitmapReady()||await this.waitBitmapLoaded(),this.mv_sprite.updateBitmap();const t=this.getConfig("scale",new s.y(1,1));this.spriteWidth=this.mv_sprite.patternWidth()/Object(r.w)()*t.x,this.spriteHeight=this.mv_sprite.patternHeight()/Object(r.w)()*t.y;const e=this.spriteWidth,i=this.spriteHeight;this.mesh.scaling.set(e,i,i)}getDefaultConfigObject(){return this.isVehicle?a.a[`${this.char._type.toUpperCase()}_SETTINGS`].conf:this.char.isTile()?a.a.EVENT_TILE_SETTINGS:this.isEvent&&this.char.isObjectCharacter()?a.a.EVENT_OBJ_SETTINGS:a.a.EVENT_CHAR_SETTINGS}getActorConfigObject(){const t=$gameParty._actors[this.isFollower?this.char._memberIndex:0];if(!t)return{};if(!(t in a.a.ACTOR_SETTINGS)){const e=$dataActors[t];a.a.ACTOR_SETTINGS[t]=a.a.readConfigurationFunctions(a.a.readConfigurationBlocksAndTags(e.note),a.a.eventConfigurationFunctions)}return a.a.ACTOR_SETTINGS[t]}getConfig(t,e){if(t in this.settings)return this.settings[t];if(this.isEvent){if(this.settings_event_page&&t in this.settings_event_page)return this.settings_event_page[t];if(this.settings_event&&t in this.settings_event)return this.settings_event[t]}else if(this.isPlayer||this.isFollower){const e=this.getActorConfigObject();if(t in e)return e[t]}const i=this.getDefaultConfigObject();return t in i?i[t]:e}hasConfig(t){return t in this.settings||this.isEvent&&(this.settings_event_page&&t in this.settings_event_page||this.settings_event&&t in this.settings_event)||(this.isPlayer||this.isFollower)&&t in this.getActorConfigObject()||t in this.getDefaultConfigObject()}eventConfigure(){if(!this.settings_event){this.settings_event={};const t=this.char.event().note;a.a.readConfigurationFunctions(a.a.readConfigurationTags(t),a.a.eventConfigurationFunctions,this.settings_event),this.initialConfigure()}this.settings_event_page={};const t=this.char.page();if(!t)return;let e="";for(const i of t.list)108!==i.code&&408!==i.code||(e+=i.parameters[0]);a.a.readConfigurationFunctions(a.a.readConfigurationTags(e),a.a.eventConfigurationFunctions,this.settings_event_page),this.updateScale(),this.updateShape(),this.char.mv3d_needsConfigure&&(this.char.mv3d_needsConfigure=!1,this.needsPositionUpdate=!0,this.pageConfigure())}initialConfigure(){this.configureHeight()}pageConfigure(t=this.settings_event_page){const e=t===this.settings;if("pos"in t){const i=this.char.event(),a=t;this.char.locate(Object(r.s)(i.x,a.x),Object(r.s)(i.y,a.y)),e&&delete t.pos}if(this.setupEventLights(),this.lamp){if("lamp"in t){const t=this.getConfig("lamp");this.blendLampColor.setValue(t.color,.5),this.blendLampIntensity.setValue(t.intensity,.5),this.blendLampDistance.setValue(t.distance,.5)}e&&delete t.lamp}if(this.flashlight){if("flashlight"in t){const i=this.getConfig("flashlight");this.blendFlashlightColor.setValue(i.color,.5),this.blendFlashlightIntensity.setValue(i.intensity,.5),this.blendFlashlightDistance.setValue(i.distance,.5),this.blendFlashlightAngle.setValue(i.angle,.5),e&&delete t.flashlight}"flashlightPitch"in t&&(this.blendFlashlightPitch.setValue(this.getConfig("flashlightPitch",90),.25),e&&delete t.flashlightPitch)}("height"in t||this.isAbove!==(2===this.char._priorityType))&&(this.configureHeight(),e&&delete t.height),this.updateScale(),this.updateShape(),this.needsMaterialUpdate=!0,this.updateLightOffsets()}updateEmissive(){if(!this.material)return;const t=this.material.emissiveColor,e=this.getConfig("glow",new s.c(0,0,0,0));if(this.material.mv3d_glowColor=e,this.lamp){const i=this.lamp.diffuse,a=Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));t.set(Math.max(e.r,i.r*a),Math.max(e.g,i.g*a),Math.max(e.b,i.b*a))}else t.set(e.r,e.g,e.b);const i=this.mv_sprite._blendColor,a=i[3]/255;t.r+=(2-t.r)*Math.pow(i[0]/255*a,.5),t.g+=(2-t.g)*Math.pow(i[1]/255*a,.5),t.b+=(2-t.b)*Math.pow(i[2]/255*a,.5),this.material.mv3d_noShadow=!this.getConfig("dynShadow",!0)}configureHeight(){this.isAbove=2===this.char._priorityType;let t=Math.max(0,this.getConfig("height",this.isAbove&&!this.hasConfig("zlock")?a.a.EVENT_HEIGHT:0));this.blendElevation.setValue(t,0),this.z=this.platformHeight+t}setupMesh(){this.mesh.mv3d_isSetup||(a.a.callFeatures("createCharMesh",this.mesh),this.mesh.parent=this.spriteOrigin,this.mesh.character=this,this.mesh.order=this.order,this.material&&(this.mesh.material=this.material),this.isEmpty?this.mesh.setEnabled(!1):this.mesh.setEnabled(!0),this.mesh.mv3d_isSetup=!0),this.flashlight&&(this.flashlight.excludedMeshes.splice(0,1/0),this.flashlight.excludedMeshes.push(this.mesh))}dirtyNearbyCells(){this.cell&&characters_Character.dirtyNearbyCells(this.cell.cx,this.cell.cy)}static dirtyNearbyCells(t,e){for(let i=t-1;i<=t+1;++i)for(let t=e-1;t<=e+1;++t){let e=i,s=t;$gameMap.isLoopHorizontal()&&(e=e.mod(Math.ceil($gameMap.width()/a.a.CELL_SIZE))),$gameMap.isLoopVertical()&&(s=s.mod(Math.ceil($gameMap.height()/a.a.CELL_SIZE)));const r=a.a.cells[[e,s]];r&&(r._needsIntensiveUpdate||(r._needsIntensiveUpdate=!0,a.a._cellsNeedingIntensiveUpdate.push(r)))}}intensiveUpdate(){this.setupLightInclusionLists()}setupLightInclusionLists(){this.flashlight&&(this.flashlight.includedOnlyMeshes.splice(0,1/0),this.flashlight.includedOnlyMeshes.push(...this.getMeshesInRangeOfLight(this.flashlight))),this.lamp&&(this.lamp.includedOnlyMeshes.splice(0,1/0),this.lamp.includedOnlyMeshes.push(...this.getMeshesInRangeOfLight(this.lamp)))}getMeshesInRangeOfLight(t){if(!this.cell)return[];const e=s.z.TransformCoordinates(t.position,t.getWorldMatrix()),i=[];for(let r=this.cell.cx-1;r<=this.cell.cx+1;++r)for(let n=this.cell.cy-1;n<=this.cell.cy+1;++n){let o=r,h=n;$gameMap.isLoopHorizontal()&&(o=o.mod(Math.ceil($gameMap.width()/a.a.CELL_SIZE))),$gameMap.isLoopVertical()&&(h=h.mod(Math.ceil($gameMap.height()/a.a.CELL_SIZE)));const l=a.a.cells[[o,h]];if(!l||!l.mesh)continue;const c=l.mesh.getBoundingInfo().boundingSphere;if(!(s.z.Distance(e,c.centerWorld)>=c.radiusWorld+t.range)){i.push(l.mesh);for(let a of l.characters){const r=a.mesh.getBoundingInfo().boundingSphere;s.z.Distance(e,r.centerWorld)>=r.radiusWorld+t.range||i.push(a.mesh)}}}return i}setupEventLights(){const t=this.getConfig("flashlight"),e=this.getConfig("lamp");t&&!this.flashlight&&this.setupFlashlight(),e&&!this.lamp&&this.setupLamp()}setupLights(){"flashlightColor"in this.char.mv3d_blenders&&this.setupFlashlight(),"lampColor"in this.char.mv3d_blenders&&this.setupLamp()}setupFlashlight(){if(this.flashlight)return;const t=this.getConfig("flashlight",{color:16777215,intensity:1,distance:a.a.LIGHT_DIST,angle:a.a.LIGHT_ANGLE});this.blendFlashlightColor=this.makeColorBlender("flashlightColor",t.color),this.blendFlashlightIntensity=this.makeBlender("flashlightIntensity",t.intensity),this.blendFlashlightDistance=this.makeBlender("flashlightDistance",t.distance);const e=this.blendFlashlightDistance.targetValue();this.blendFlashlightDistance.setValue(0,0),this.blendFlashlightDistance.setValue(e,.25),this.blendFlashlightAngle=this.makeBlender("flashlightAngle",t.angle),this.flashlight=new s.u("flashlight",s.z.Zero(),s.z.Zero(),Object(r.i)(this.blendFlashlightAngle.targetValue()+a.a.FLASHLIGHT_EXTRA_ANGLE),0,a.a.scene),this.flashlight.renderPriority=2,this.updateFlashlightExp(),this.flashlight.range=this.blendFlashlightDistance.targetValue(),this.flashlight.intensity=this.blendFlashlightIntensity.targetValue()*a.a.FLASHLIGHT_INTENSITY_MULTIPLIER,this.flashlight.diffuse.set(...this.blendFlashlightColor.targetComponents()),this.flashlight.direction.y=-1,this.flashlightOrigin=new s.x("flashlight origin",a.a.scene),this.flashlightOrigin.parent=this.lightOrigin,this.flashlight.parent=this.flashlightOrigin,this.blendFlashlightPitch=this.makeBlender("flashlightPitch",90),this.blendFlashlightYaw=this.makeBlender("flashlightYaw",0),this.blendFlashlightYaw.cycle=360,this.updateFlashlightDirection(),this.setupMesh(),this.updateLightOffsets()}updateFlashlightExp(){this.flashlight.exponent=64800*Math.pow(this.blendFlashlightAngle.currentValue(),-2)}setupLamp(){if(this.lamp)return;const t=this.getConfig("lamp",{color:16777215,intensity:1,distance:a.a.LIGHT_DIST});this.blendLampColor=this.makeColorBlender("lampColor",t.color),this.blendLampIntensity=this.makeBlender("lampIntensity",t.intensity),this.blendLampDistance=this.makeBlender("lampDistance",t.distance);const e=this.blendLampDistance.targetValue();this.blendLampDistance.setValue(0,0),this.blendLampDistance.setValue(e,.25),this.lamp=new s.q("lamp",s.z.Zero(),a.a.scene),this.lamp.renderPriority=1,this.lamp.diffuse.set(...this.blendLampColor.targetComponents()),this.lamp.intensity=this.blendLampIntensity.targetValue(),this.lamp.range=this.blendLampDistance.targetValue(),this.lampOrigin=new s.x("lamp origin",a.a.scene),this.lampOrigin.parent=this.lightOrigin,this.lamp.parent=this.lampOrigin,this.updateLightOffsets()}updateFlashlightDirection(){this.flashlightOrigin.yaw=this.blendFlashlightYaw.currentValue(),this.flashlightOrigin.pitch=-this.blendFlashlightPitch.currentValue()}updateLights(){if(this.flashlight){const t=180+Object(r.s)(a.a.dirToYaw(this.char.mv3d_direction(),a.a.DIR8MOVE),this.getConfig("flashlightYaw","+0"));t!==this.blendFlashlightYaw.targetValue()&&this.blendFlashlightYaw.setValue(t,.25),this.blendFlashlightColor.update()|this.blendFlashlightIntensity.update()|this.blendFlashlightDistance.update()|this.blendFlashlightAngle.update()|this.blendFlashlightYaw.update()|this.blendFlashlightPitch.update()&&(this.flashlight.diffuse.set(...this.blendFlashlightColor.currentComponents()),this.flashlight.intensity=this.blendFlashlightIntensity.currentValue()*a.a.FLASHLIGHT_INTENSITY_MULTIPLIER,this.flashlight.range=this.blendFlashlightDistance.currentValue(),this.flashlight.angle=Object(r.i)(this.blendFlashlightAngle.currentValue()+a.a.FLASHLIGHT_EXTRA_ANGLE),this.updateFlashlightExp(),this.updateFlashlightDirection())}this.lamp&&this.blendLampColor.update()|this.blendLampIntensity.update()|this.blendLampDistance.update()&&(this.lamp.diffuse.set(...this.blendLampColor.currentComponents()),this.lamp.intensity=this.blendLampIntensity.currentValue(),this.lamp.range=this.blendLampDistance.currentValue(),this.needsMaterialUpdate=!0)}makeBlender(t,e,i=blenders_Blender){t in this.char.mv3d_blenders?e=this.char.mv3d_blenders[t]:this.char.mv3d_blenders[t]=e;const a=new i(t,e);return a.storageLocation=()=>this.char.mv3d_blenders,a}makeColorBlender(t,e){return this.makeBlender(t,e,ColorBlender)}hasBush(){return!this.platformChar&&(this.getConfig("bush",!(this.char.isTile()||this.isVehicle||this.isEvent&&this.char.isObjectCharacter()))&&!(this.blendElevation.currentValue()||this.falling))}getShape(){return this.getConfig("shape",a.a.enumShapes.SPRITE)}updateShape(){const t=this.getShape();if(this.shape===t)return;this.shape=t;let e=characters_Sprite.Meshes.SPRITE;const i=a.a.enumShapes;switch(this.shape){case i.FLAT:e=characters_Sprite.Meshes.FLAT;break;case i.XCROSS:case i.CROSS:e=characters_Sprite.Meshes.CROSS;break;case i.WALL:case i.FENCE:}a.a.callFeatures("destroyCharMesh",this.mesh),this.mesh.dispose(),this.mesh=e.clone(),this.setupMesh(),this.spriteOrigin.rotation.set(0,0,0),this.dirtyNearbyCells()}update(){this.char._erased&&this.dispose(),this.visible=this.mv_sprite.visible,"function"==typeof this.char.isVisible&&(this.visible=this.visible&&this.char.isVisible());const t=this.char.mv3d_inRenderDist();this.disabled=!this.visible,(this.char.isTransparent()||!t||(this.char._characterName||this.char._tileId)&&!this.textureLoaded)&&(this.visible=!1),this._isEnabled?this.visible||this.setEnabled(!1):this.visible&&(this.setEnabled(!0),this.needsPositionUpdate=!0),this.isImageChanged()&&this.updateCharacter(),t&&(this.blendElevation.update()?this.needsPositionUpdate=!0:(this.x!==this.char._realX||this.y!==this.char._realY||this.falling||this.prevZ!==this.z||this.platformChar&&this.platformChar.needsPositionUpdate||this.isPlayer||this.char===$gamePlayer.vehicle())&&(this.needsPositionUpdate=!0,this.prevZ=this.z),this.material&&this._isEnabled?this.updateNormal():this.updateEmpty(),this.updateAnimations(),this.needsMaterialUpdate&&(this.updateEmissive(),this.needsMaterialUpdate=!1),this.char.mv3d_positionUpdated=this.needsPositionUpdate,this.needsPositionUpdate=!1)}updateNormal(){const t=a.a.enumShapes;this.shape===t.SPRITE?(this.mesh.pitch=a.a.blendCameraPitch.currentValue()-90,this.mesh.yaw=a.a.blendCameraYaw.currentValue()):this.shape===t.TREE?(this.spriteOrigin.pitch=this.getConfig("pitch",0),this.mesh.yaw=a.a.blendCameraYaw.currentValue()):(this.mesh.yaw=this.getConfig("rot",0),this.spriteOrigin.pitch=this.getConfig("pitch",0),this.spriteOrigin.yaw=this.getConfig("yaw",0),this.shape===t.XCROSS&&(this.mesh.yaw+=45)),this.isPlayer&&(this.mesh.visibility=+!a.a.is1stPerson(!0)),this.updateAlpha(),this.updatePosition(),this.updateElevation(),this.shadow&&this.updateShadow(),this.updateLights()}updateEmpty(){this.updatePosition(),this.updateElevation(),this.updateLights(),this.shadow&&this.shadow._isEnabled&&this.shadow.setEnabled(!1)}updateAlpha(){let t=this.hasConfig("alpha")||this.char.opacity()<255;this.bush=Boolean(this.char.bushDepth());const e=a.a.blendModes[this.char.blendMode()];if(this.material.alphaMode!==e&&(this.material.alphaMode=e),e!==a.a.blendModes.NORMAL)t=!0;else if(this.bush&&this.hasBush()){if(!this.material.opacityTexture){const t=a.a.getBushAlphaTextureSync();t&&t.isReady()&&(this.material.opacityTexture=t)}}else this.material.opacityTexture&&(this.material.opacityTexture=null);t||this.material.opacityTexture?(this.material.useAlphaFromDiffuseTexture=!0,this.material.alpha=this.getConfig("alpha",1)*this.char.opacity()/255):(this.material.useAlphaFromDiffuseTexture=!1,this.material.alpha=1)}updateLightOffsets(){if(this.lamp){const t=this.getConfig("lampHeight",a.a.LAMP_HEIGHT),e=this.getConfig("lampOffset",null);this.lampOrigin.position.set(0,0,0),this.lampOrigin.z=t,e&&(this.lampOrigin.x=e.x,this.lampOrigin.y=e.y)}if(this.flashlight){const t=this.getConfig("flashlightHeight",a.a.FLASHLIGHT_HEIGHT),e=this.getConfig("flashlightOffset",null);this.flashlightOrigin.position.set(0,0,0),this.flashlightOrigin.z=t,e&&(this.flashlightOrigin.x=e.x,this.flashlightOrigin.y=e.y)}}updatePositionOffsets(){this.spriteOrigin.position.set(0,0,0),this.shape===a.a.enumShapes.FLAT?this.spriteOrigin.z=4*a.a.LAYER_DIST:this.shape===a.a.enumShapes.SPRITE?this.spriteOrigin.z=4*a.a.LAYER_DIST*(1-Math.max(0,Math.min(90,a.a.blendCameraPitch.currentValue()))/90):this.spriteOrigin.z=0;const t=new s.y(Math.sin(-a.a.cameraNode.rotation.y),Math.cos(a.a.cameraNode.rotation.y));this.billboardOffset=t,this.shape===a.a.enumShapes.SPRITE?(this.spriteOrigin.x=t.x*a.a.SPRITE_OFFSET,this.spriteOrigin.y=t.y*a.a.SPRITE_OFFSET,this.lightOrigin.x=this.spriteOrigin.x,this.lightOrigin.y=this.spriteOrigin.y):(this.lightOrigin.x=0,this.lightOrigin.y=0),this.spriteOrigin.x+=this.getConfig("xoff",0),this.spriteOrigin.y+=this.getConfig("yoff",0),this.spriteOrigin.z+=this.getConfig("zoff",0)}updatePosition(){this.updatePositionOffsets();const t=a.a.loopCoords(this.char._realX,this.char._realY);if(this.x=t.x,this.y=t.y,!this.needsPositionUpdate)return;const e=Math.floor(Math.round(this.char._realX)/a.a.CELL_SIZE),i=Math.floor(Math.round(this.char._realY)/a.a.CELL_SIZE),s=a.a.cells[[e,i]];this.cell&&this.cell!==s&&this.removeFromCell(),s&&!this.cell&&(this.cell=s,s.characters.push(this)),this.dirtyNearbyCells()}updateElevation(){if(!this.needsPositionUpdate)return;if(this.char.isMoving()&&!((this.x-.5)%1)&&!((this.y-.5)%1))return;if(this.falling=!1,this.isPlayer){const t=this.char.vehicle();if(t&&(this.z=t.z,this.targetElevation=t.targetElevation,this.platformChar=t.platformChar,this.platformHeight=t.platformHeight,t._driving))return}if(this.hasConfig("zlock"))return this.z=this.getConfig("zlock",0),void(this.z+=this.blendElevation.currentValue());const t=this.getPlatform(this.char._realX,this.char._realY);this.platform=t,this.platformHeight=t.z2,this.platformChar=t.char,this.targetElevation=this.platformHeight+this.blendElevation.currentValue();let e=this.getConfig("gravity",a.a.GRAVITY)/60;if(this.hasFloat=this.isVehicle||(this.isPlayer||this.isFollower)&&$gamePlayer.vehicle(),this.hasFloat&&!this.platformChar&&(this.targetElevation+=a.a.getFloatHeight(Math.round(this.char._realX),Math.round(this.char._realY),this.z+this.spriteHeight)),this.isAirship&&$gamePlayer.vehicle()===this.char&&(this.targetElevation+=a.a.loadData("airship_height",a.a.AIRSHIP_SETTINGS.height)*this.char._altitude/this.char.maxAltitude()),this.char.isJumping()){let t=1-this.char._jumpCount/(2*this.char._jumpPeak),e=-4*Math.pow(t-.5,2)+1,i=Math.abs(this.char.mv3d_jumpHeightEnd-this.char.mv3d_jumpHeightStart);this.z=this.char.mv3d_jumpHeightStart*(1-t)+this.char.mv3d_jumpHeightEnd*t+e*i/2+this.char.jumpHeight()/Object(r.w)()}else if(e){const t=Math.abs(this.targetElevation-this.z);t<e&&(e=t),this.z<this.platformHeight&&(this.z=this.platformHeight),this.z>this.targetElevation?(this.z-=e,a.a.tileCollision(this,this.char._realX,this.char._realY,!1,!1)&&(this.z=this.platformHeight)):this.z<this.targetElevation&&(this.z+=e,a.a.tileCollision(this,this.char._realX,this.char._realY,!1,!1)&&(this.z-=e)),this.falling=this.z>this.targetElevation}}getPlatform(t=this.char._realX,e=this.char._realY,i={}){return a.a.getPlatformForCharacter(this,t,e,i)}getPlatformFloat(t=this.char._realX,e=this.char._realY,i={}){i.platform||(i.platform=this.getPlatform(t,e,i));const s=i.platform;let r=s.z2;if(this.hasFloat&&!s.char){const i=this.getCHeight();r+=a.a.getFloatHeight(Math.round(t),Math.round(e),this.z+Math.max(i,a.a.STAIR_THRESH),a.a.STAIR_THRESH>=i)}return r}updateShadow(){let t=Boolean(this.getConfig("shadow",this.shape!=a.a.enumShapes.FLAT));if(t&&(this.isPlayer||this.isFollower)){const e=a.a.characters.indexOf(this);if(e>=0)for(let i=e+1;i<a.a.characters.length;++i){const e=a.a.characters[i];if(e.shadow&&e.visible&&(e.char._realX===this.char._realX&&e.char._realY===this.char._realY)){t=!1;break}}}if(this.shadow._isEnabled?t||this.shadow.setEnabled(!1):t&&this.shadow.setEnabled(!0),!t)return;const e=Math.max(this.z-this.platformHeight,0),i=this.getConfig("shadowDist",4),s=Math.max(0,1-Math.abs(e)/i);this.shadow.z=-e+3.5*a.a.LAYER_DIST,this.shadow.x=this.spriteOrigin.x,this.shadow.y=this.spriteOrigin.y;const r=this.getConfig("shadow",1);this.shadow.scaling.setAll(r*s),this.shadow.isAnInstance||(this.shadow.visibility=s-.5*this.bush)}updateAnimations(){this.char.isBalloonPlaying()?(this._balloon||(this._balloon=a.a.showBalloon(this)),this._balloon.update()):this.disposeBalloon();for(const t of this.char.mv_sprite._animationSprites)t.mv3d_animation&&t.mv3d_animation.update();this.char.mv_sprite._animationSprites.length&&(this.needsMaterialUpdate=!0)}disposeBalloon(){this._balloon&&(this._balloon.dispose(),this._balloon=null)}dispose(...t){super.dispose(...t),delete this.char.mv3d_sprite;const e=a.a.characters.indexOf(this);a.a.characters.splice(e,1),this.disposeBalloon(),this.removeFromCell()}removeFromCell(){if(this.cell){const t=this.cell.characters.indexOf(this);t>=0&&this.cell.characters.splice(t,1),this.cell=null}}getCHeight(){let t=this.getConfig("collide",this.shape===a.a.enumShapes.FLAT||0===this.char._priorityType?0:this.spriteHeight);return!0===t?this.spriteHeight:Number(t)}getCollider(){if(this._collider)return this._collider;const t={char:this};return this._collider=t,Object.defineProperties(t,{z1:{get:()=>this.z},z2:{get:()=>Math.max(this.z,this.z+this.getCHeight())}}),t}getTriggerCollider(){if(this._triggerCollider)return this._triggerCollider;const t={};return this._triggerCollider=t,Object.defineProperties(t,{z1:{get:()=>{const t=this.getConfig("trigger");return t?this.z-t.down:a.a.TRIGGER_INFINITE||this.isEmpty?-1/0:this.getCollider().z1}},z2:{get:()=>{const t=this.getConfig("trigger");return t?this.z-t.up:a.a.TRIGGER_INFINITE||this.isEmpty?1/0:this.getCollider().z2}}}),t}getCollisionHeight(t=this.z){return{z1:t,z2:t+this.getCHeight(),char:this}}getTriggerHeight(t=this.z){const e=this.getConfig("trigger");return e?{z1:t-e.down,z2:t+e.up}:a.a.TRIGGER_INFINITE||this.isEmpty?{z1:-1/0,z2:1/0}:this.getCollisionHeight()}}Object(r.p)(Sprite_Character.prototype,"characterPatternY",t=>(function(){const e=this._character.mv3d_sprite;if(!e)return t.apply(this,arguments);const i=e.getConfig("dirfix",e.isEvent&&e.char.isObjectCharacter()),s=this._character.mv3d_direction(),r=!this._isBigCharacter&&this._characterIndex<4&&this._characterName.includes(a.a.DIAG_SYMBOL);let n;return(n=i||a.a.isDisabled()?r?s:this._character.direction():r?a.a.transformFacing(s,a.a.blendCameraYaw.currentValue(),!0):a.a.transformFacing(s,a.a.blendCameraYaw.currentValue(),!1))%2?G[n]:n/2-1}),()=>!a.a.isDisabled()||a.a.DIR8MOVE&&a.a.DIR8_2D);const G={3:4,1:5,9:6,7:7};Object(r.p)(Sprite_Character.prototype,"setFrame",t=>(function(e,i,a,s){t.apply(this,arguments);const r=this._character.mv3d_sprite;r&&(r.isImageChanged()||r.setFrame(e,i,this.patternWidth(),this.patternHeight()))})),Object(r.p)(Sprite_Character.prototype,"setBlendColor",t=>(function(){t.apply(this,arguments);const e=this._character.mv3d_sprite;e&&(e.needsMaterialUpdate=!0)})),a.a.Sprite=characters_Sprite,a.a.Character=characters_Character;const j=Game_CharacterBase.prototype.isOnBush;Game_CharacterBase.prototype.isOnBush=function(){if(a.a.isDisabled()||!this.mv3d_sprite)return j.apply(this,arguments);const t=Math.round(this._realX),e=Math.round(this._realY),i=a.a.getTileData(t,e),s=a.a.getTileLayers(t,e,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight(),!1),r=$gameMap.tilesetFlags();for(const t of s)if(0!=(64&r[i[t]]))return!0;return!1},Object.assign(a.a,{showAnimation(t){t||(t=$gamePlayer.mv3d_sprite)},showBalloon:t=>(t||(t=$gamePlayer.mv3d_sprite),new animations_Balloon(t))});class animations_AnimSprite extends s.x{constructor(t,e,i,r){super("animSprite",a.a.scene),this.cellWidth=e,this.cellHeight=i,this.cellIndex=0,this.isSmooth=r,this.mesh=a.a.Meshes.BASIC.clone(),this.mesh.isPickable=!1,this.mesh.parent=this,this.mesh.setEnabled(!1),this.material=new s.v("anim material",a.a.scene),this.mesh.material=this.material,this.material.useAlphaFromDiffuseTexture=!0,this.material.alphaCutOff=0,this.material.disableLighting=!0,this.material.emissiveColor.set(1,1,1),this.material.ambientColor.set(1,1,1),this.material.specularColor.set(0,0,0),this.loadTexture(t)}async loadTexture(t){this.texture=await a.a.createTexture(t),this.texture.hasAlpha=!0,this.material.diffuseTexture=this.texture,await a.a.waitTextureLoaded(this.texture),this.texture.updateSamplingMode(this.isSmooth?s.w.BILINEAR_SAMPLINGMODE:s.w.NEAREST_SAMPLINGMODE),this.textureLoaded=!0;const e=this.texture.getBaseSize();this.cellCols=Math.floor(e.width/this.cellWidth)}update(){this.textureLoaded&&(this.mesh.isEnabled()||this.mesh.setEnabled(!0),this.pitch=a.a.blendCameraPitch.currentValue()-90,this.yaw=a.a.blendCameraYaw.currentValue(),this.texture.crop(this.cellIndex%this.cellCols*this.cellWidth,Math.floor(this.cellIndex/this.cellCols)*this.cellHeight,this.cellWidth,this.cellHeight,!0))}dispose(){super.dispose(!1,!0)}}class animations_Balloon extends animations_AnimSprite{constructor(t){super("img/system/Balloon.png",48,48,!1),this.char=t}update(){if(!this.char)return;const t=V(new s.z(0,.5+this.char.spriteHeight,0),this.char);this.position.copyFrom(t);const e=this.char.char.mv_sprite._balloonSprite;e&&(this.cellIndex=8*(e._balloonId-1)+Math.max(0,e.frameIndex()),super.update())}}class animations_DepthAnimation{constructor(t){this.animation=t,this.spriteList=[],this.char=this.animation._target._character.mv3d_sprite}resetSpriteList(){for(const t of this.spriteList)t.unused=!0}clearUnusedSprites(){for(let t=this.spriteList.length-1;t>=0;--t){const e=this.spriteList[t];e.unused&&e.setEnabled(!1)}}update(){const t=this.char;if(!t)return;const e=a.a.camera.getDirection(a.a.camera.getTarget());this.resetSpriteList();const i=this.animation._animation.frames[this.animation.currentFrameIndex()];if(i)for(let n=0;n<Math.min(this.animation._cellSprites.length);++n){const o=this.animation._cellSprites[n];if(!o.visible||!o.bitmap)continue;const h=this.getAnimationSprite(o.bitmap._url);h.material.alphaMode=a.a.blendModes[o.blendMode],h.mesh.roll=Object(r.r)(o.rotation);const l=this.animation._mv3d_animationSettings.scale||1;h.mesh.scaling.x=4*o.scale.x*l,h.mesh.scaling.y=4*o.scale.y*l,h.material.alpha=o.opacity/255;const c=V(new s.z(o.position.x/48*l,k(this.animation)-o.position.y/48*l,0),t);h.position.copyFrom(c);const p=Math.pow(l,2);h.mesh.position.set(.1*-e.x*(n+1)*p,.1*-e.y*(n+1)*p,.1*-e.z*(n+1)*p);const d=i[n][0];h.cellIndex=d,h.update()}this.clearUnusedSprites()}getAnimationSprite(t){let e;for(const i of this.spriteList)if(i._mv3d_sprite_url===t&&i.unused){i.unused=!1,i.setEnabled(!0),e=i;break}if(!e){e=new animations_AnimSprite(t,192,192,!0),this.spriteList.push(e),e._mv3d_sprite_url=t;const i=this.animation._mv3d_animationSettings;0==i.depth&&null!=i.depth&&(e.mesh.renderingGroupId=a.a.enumRenderGroups.FRONT)}return e}remove(){for(const t of this.spriteList)t.dispose();this.spriteList.length=0}}function V(t,e){return e.isEmpty||e.shape!==a.a.enumShapes.SPRITE?s.z.TransformCoordinates(t,a.a.getTranslationMatrix(e.mesh)):s.z.TransformCoordinates(t,a.a.getUnscaledMatrix(e.mesh))}const z=Sprite_Character.prototype.startAnimation;Sprite_Character.prototype.startAnimation=function(){if(z.apply(this,arguments),a.a.mapDisabled||!(SceneManager._scene instanceof Scene_Map))return;const t=this._animationSprites[this._animationSprites.length-1];if(t._mv3d_animationSettings=this._character._mv3d_animationSettings,delete this._character._mv3d_animationSettings,t._mv3d_animationSettings)return t.mv3d_animation=new animations_DepthAnimation(t),void a.a.pixiSprite.addChild(t._screenFlashSprite);a.a.pixiSprite.addChild(t)};const $=Sprite_Animation.prototype.remove;Sprite_Animation.prototype.remove=function(){!a.a.mapDisabled&&this.mv3d_animation&&(this._screenFlashSprite&&this.addChild(this._screenFlashSprite),this.mv3d_animation.remove()),$.apply(this,arguments)};const Y=Sprite_Animation.prototype.updateScreenFlash;function k(t){const e=t._animation.position,i=3===e?0:1-e/2,a=t._target._character;return a.mv3d_sprite?i*a.mv3d_sprite.spriteHeight:i}Sprite_Animation.prototype.updateScreenFlash=function(){Y.apply(this,arguments),!a.a.mapDisabled&&SceneManager._scene instanceof Scene_Map&&(this._screenFlashSprite.x=0,this._screenFlashSprite.y=0)};const U=Sprite_Character.prototype.updateAnimationSprites;Sprite_Character.prototype.updateAnimationSprites=function(){if(U.apply(this,arguments),!a.a.mapDisabled&&this._animationSprites.length&&SceneManager._scene instanceof Scene_Map&&this._character.mv3d_sprite)for(const t of this._animationSprites){if(t.mv3d_animation)continue;if(3===t._animation.position){t.update();continue}const e=V(new s.z(0,k(t),0),this._character.mv3d_sprite),i=a.a.getScreenPosition(e),r=s.z.Distance(a.a.camera.globalPosition,e),n=a.a.camera.mode===s.n?a.a.getScaleForDist():a.a.getScaleForDist(r);t.behindCamera=i.behindCamera,t.update(),t.x=i.x,t.y=i.y,t.scale.set(n,n)}};const W=Sprite_Animation.prototype.updateCellSprite;Sprite_Animation.prototype.updateCellSprite=function(t,e){W.apply(this,arguments),this.behindCamera&&(t.visible=!1)},Object(r.p)(Game_Map.prototype,"setupParallax",t=>(function(){t.apply(this,arguments),this.mv3d_parallaxX=0,this.mv3d_parallaxY=0})),Object(r.p)(Game_Map.prototype,"changeParallax",t=>(function(e,i,a,s,r){(this._parallaxLoopX&&!i||this._parallaxSx&&!s)&&(this.mv3d_parallaxX=0),(this._parallaxLoopY&&!a||this._parallaxSy&&!r)&&(this.mv3d_parallaxY=0),t.apply(this,arguments)})),Object(r.p)(Game_Map.prototype,"updateParallax",t=>(function(){this._parallaxLoopX&&(this.mv3d_parallaxX+=this._parallaxSx/8),this._parallaxLoopY&&(this.mv3d_parallaxY+=this._parallaxSy/8)})),Object(r.p)(Game_Map.prototype,"parallaxOx",t=>(function(){let t=this.mv3d_parallaxX;return this._parallaxLoopX?t-816*a.a.blendCameraYaw.currentValue()/90:t})),Object(r.p)(Game_Map.prototype,"parallaxOy",t=>(function(){let t=this.mv3d_parallaxY;return this._parallaxLoopY?t-816*a.a.blendCameraPitch.currentValue()/90:0})),Game_CharacterBase.prototype.mv3d_inRenderDist=function(){const t=a.a.loopCoords(this.x,this.y);return Math.abs(t.x-a.a.cameraStick.x)<=a.a.renderDist&&Math.abs(t.y-a.a.cameraStick.y)<=a.a.renderDist},Object(r.p)(Game_CharacterBase.prototype,"isNearTheScreen",t=>(function(){return a.a.EVENTS_UPDATE_NEAR&&this.mv3d_inRenderDist()||t.apply(this,arguments)})),Object(r.p)(Game_Screen.prototype,"shake",t=>(function(){return 0}),()=>!a.a.isDisabled()&&SceneManager._scene instanceof Scene_Map),Object(r.p)(Game_CharacterBase.prototype,"screenX",t=>(function(){const e=this.mv3d_sprite;return e?SceneManager.isNextScene(Scene_Battle)&&this===$gamePlayer?Graphics.width/2:a.a.getScreenPosition(e).x:t.apply(this,arguments)})),Object(r.p)(Game_CharacterBase.prototype,"screenY",t=>(function(){const e=this.mv3d_sprite;return e?SceneManager.isNextScene(Scene_Battle)&&this===$gamePlayer?Graphics.height/2:a.a.getScreenPosition(e).y:t.apply(this,arguments)}));const X=Utils.isOptionValid("test"),Z=async(t,e)=>{const a=i(4),s=i(5),r=s.resolve(global.__dirname,t);await Q(s.dirname(r)),await new Promise((t,i)=>{a.writeFile(r,e,e=>{e?i(e):t()})})},Q=t=>new Promise((e,a)=>{const s=i(4),r=i(5);s.mkdir(r.resolve(global.__dirname,t),{recursive:!0},t=>{t&&"EEXIST"!==t.code?a(t):e()})}),K=DataManager.loadDataFile;DataManager.loadDataFile=function(t,e){e.startsWith("Test_mv3d_")&&(e=e.replace("Test_mv3d_","mv3d_")),K.call(this,t,e)};class DataProxy{constructor(t,e,a={}){if(this.varName=t,this.fileName=e,X){const t=i(4),s=i(5).resolve(nw.__dirname,"data",e);t.existsSync(s)||t.writeFileSync(s,JSON.stringify("function"==typeof a?a():a))}DataManager._databaseFiles.push({name:t,src:e}),this._dirty=!1,this._data_handler={get:(t,e)=>t[e]&&"object"==typeof t[e]?new Proxy(t[e],data_handler):t[e],set:(t,e,i)=>{this._dirty=!0,t[e]=i},deleteProperty:(t,e)=>{this._dirty=!0,delete t[e]}},this.writing=!1,DataProxy.list.push(this)}setup(){this._data=window[this.varName],X&&(window[this.varName]=new Proxy(this._data,this._data_handler))}async update(){X&&this._dirty&&!this.writing&&(this.writing=!0,this._dirty=!1,await Z(`data/${this.fileName}`,JSON.stringify(this._data)),this.writing=!1)}}DataProxy.list=[],a.a.DataProxy=DataProxy;const J=Scene_Boot.prototype.start;Scene_Boot.prototype.start=function(){J.apply(this,arguments),a.a.setupData()},Object.assign(a.a,{setupData(){for(const t of DataProxy.list)t.setup()},updateData(){for(const t of DataProxy.list)t.update()}}),new DataProxy("mv3d_data","mv3d_data.json",()=>({id:crypto.getRandomValues(new Uint32Array(1))[0]}));i(6)}]);
+*/
+
+
+/******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
+
+
+
+
+const mv3d = {
+	util:_util_js__WEBPACK_IMPORTED_MODULE_1__[/* default */ "h"],
+
+	setup(){
+		this.setupParameters();
+		Object(_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* setupBabylonMods */ "C"])();
+
+		this.canvas = document.createElement('canvas');
+		this.texture = PIXI.Texture.fromCanvas(this.canvas);
+		this.texture.baseTexture.scaleMode=PIXI.SCALE_MODES.NEAREST;
+		this.engine = new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Engine */ "e"](this.canvas,this.ANTIALIASING);
+		this.scene = new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Scene */ "t"](this.engine);
+		//this.scene.clearColor.a=0;
+		this.scene.clearColor.set(0,0,0,0);
+
+		//this.engine.forcePOTTextures=true;
+
+		this.cameraStick = new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* TransformNode */ "x"]("cameraStick",this.scene);
+		this.cameraNode = new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* TransformNode */ "x"]("cameraNode",this.scene);
+		this.cameraNode.parent=this.cameraStick;
+		this.camera = new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* FreeCamera */ "h"]("camera",new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"](0,0,0),this.scene);
+		this.camera.parent=this.cameraNode;
+		this.camera.fov=Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "i"])(mv3d.FOV);
+		/*
+		this.camera.orthoLeft=-Graphics.width/2/tileSize();
+		this.camera.orthoRight=Graphics.width/2/tileSize();
+		this.camera.orthoTop=Graphics.height/2/tileSize();
+		this.camera.orthoBottom=-Graphics.height/2/tileSize();
+		*/
+		this.camera.minZ=0.1;
+		this.camera.maxZ=this.RENDER_DIST;
+
+		//this.scene.activeCameras.push(this.camera);
+
+		this.scene.ambientColor = new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Color3 */ "b"](1,1,1);
+		this.scene.fogMode=_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* FOGMODE_LINEAR */ "f"];
+
+		this.map = new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Node */ "m"]("map",this.scene);
+		this.cells={};
+		this.characters=[];
+
+		this.setupBlenders();
+		//this.updateBlenders(true);
+		this.setupInput();
+
+		this.setupSpriteMeshes();
+
+		this.callFeatures('setup');
+
+		if(isNaN(this.LIGHT_LIMIT)){
+			const _sortLightsByPriority=BABYLON.Scene.prototype.sortLightsByPriority;
+			BABYLON.Scene.prototype.sortLightsByPriority=function(){
+				_sortLightsByPriority.apply(this,arguments);
+				mv3d.updateAutoLightLimit();
+			};
+		}
+	},
+
+	updateCanvas(){
+		this.canvas.width = Graphics._width*mv3d.RES_SCALE;
+		this.canvas.height = Graphics._height*mv3d.RES_SCALE;
+	},
+
+	render(){
+		this.scene.render();
+		this.texture.update();
+		//this.callFeatures('render');
+	},
+
+	lastMapUpdate:0,
+	update(){
+		if( performance.now()-this.lastMapUpdate > 1000 && !this.mapUpdating ){
+			this.updateMap();
+			this.lastMapUpdate=performance.now();
+		}
+
+		this.updateAnimations();
+
+		this.updateCharacters();
+
+		this.intensiveUpdate();
+
+		this.updateBlenders();
+
+		// input
+		this.updateInput();
+
+		for (const key in this.cells){
+			this.cells[key].update();
+		}
+
+		this.callFeatures('update');
+
+		this.updateData();
+	},
+
+	loadData(key,dfault){
+		if(!$gameVariables || !$gameVariables.mv3d || !(key in $gameVariables.mv3d)){ return dfault; }
+		return $gameVariables.mv3d[key];
+	},
+	saveData(key,value){
+		if(!$gameVariables){ return console.warn(`MV3D: Couldn't save data ${key}:${value}`); }
+		if(!$gameVariables.mv3d){ $gameVariables.mv3d={}; }
+		$gameVariables.mv3d[key]=value;
+	},
+
+	updateCameraMode(){
+		const mode = this.cameraMode;
+		let updated=false;
+		if(mode.startsWith('O')){
+			if(this.camera.mode!==_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* ORTHOGRAPHIC_CAMERA */ "n"]){ this.camera.mode=_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* ORTHOGRAPHIC_CAMERA */ "n"]; updated=true; }
+		}else{
+			if(this.camera.mode!==_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* PERSPECTIVE_CAMERA */ "o"]){ this.camera.mode=_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* PERSPECTIVE_CAMERA */ "o"]; updated=true; }
+		}
+		if(updated){
+			this.updateBlenders(true);
+			this.callFeatures('updateCameraMode');
+			this.updateParameters();
+		}
+	},
+	get cameraMode(){
+		return this.loadData('cameraMode',this.CAMERA_MODE).toUpperCase();
+	},
+	set cameraMode(v){
+		v = String(v).toUpperCase().startsWith('O') ? 'ORTHOGRAPHIC' : 'PERSPECTIVE' ;
+		this.saveData('cameraMode',v);
+		this.updateBlenders(true);
+	},
+
+	is1stPerson(useCurrent){
+		const k = useCurrent?'currentValue':'targetValue';
+		return this.getCameraTarget()===$gamePlayer && this.blendCameraTransition[k]()<=0
+		&& this.blendCameraDist[k]()<=0 && this.blendPanX[k]()===0 && this.blendPanY[k]()===0;
+	},
+
+	isDisabled(){
+		return this.loadData('disabled', this.getMapConfig('disabled', !mv3d.ENABLED_DEFAULT ));
+	},
+	disable(fadeType=2){
+		mv3d.saveData('disabled',true);
+		//SceneManager.goto(Scene_Map);
+		$gamePlayer.reserveTransfer($gameMap.mapId(),$gamePlayer.x,$gamePlayer.y,$gamePlayer.direction(),fadeType);
+	},
+	enable(fadeType=2){
+		mv3d.saveData('disabled',false);
+		//SceneManager.goto(Scene_Map);
+		$gamePlayer.reserveTransfer($gameMap.mapId(),$gamePlayer.x,$gamePlayer.y,$gamePlayer.direction(),fadeType);
+		mv3d.createCharacters();
+	},
+
+	loopCoords(x,y){
+		if($gameMap.isLoopHorizontal()){
+			const mapWidth=$gameMap.width();
+			const ox = this.cameraStick.x - mapWidth/2;
+			x=(x-ox).mod(mapWidth)+ox;
+		}
+		if($gameMap.isLoopVertical()){
+			const mapHeight=$gameMap.height();
+			const oy = this.cameraStick.y - mapHeight/2;
+			y=(y-oy).mod(mapHeight)+oy;
+		}
+		return new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector2 */ "y"](x,y);
+	},
+
+	autoLightLimit(lightLimit){
+		if(isNaN(this.LIGHT_LIMIT)){
+			return Math.max(4,lightLimit);
+		}else{
+			return this.LIGHT_LIMIT;
+		}
+	},
+
+	updateAutoLightLimit(){
+		const lightLimit=this.autoLightLimit(mv3d.scene.lights.length);
+		for(const m of Object.values(mv3d.materialCache)){
+			m.maxSimultaneousLights=lightLimit;
+		}
+		for(const char of this.characters){
+			if(!char.material){ continue; }
+			char.material.maxSimultaneousLights=this.autoLightLimit(char.mesh.lightSources.length);
+		}
+	},
+
+	getFieldSize(dist=mv3d.blendCameraDist.currentValue()){
+		const size = Math.tan(mv3d.camera.fov/2)*dist*2;
+		return {
+			width:size*mv3d.engine.getAspectRatio(mv3d.camera),
+			height:size,
+		};
+	},
+	getScaleForDist(dist=mv3d.blendCameraDist.currentValue()){
+		return Graphics.height/this.getFieldSize(dist).height/48;
+	},
+	getFovForDist(dist=mv3d.blendCameraDist.currentValue(),height=Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* optimalFrustrumHeight */ "o"])()){
+		return 2*Math.atan(height/2/dist);
+	},
+	getFrustrumHeight(dist=mv3d.blendCameraDist.currentValue(),fov=mv3d.camera.fov){
+		return 2*dist*Math.tan(fov/2);
+	},
+
+
+	getScreenPosition(node,offset=_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].Zero()){
+		const matrix = node.parent ? node.parent.getWorldMatrix() : _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Matrix */ "j"].Identity();
+		const pos = node instanceof _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"] ? node.add(offset) : node.position.add(offset);
+		const projected = _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].Project(pos,matrix,mv3d.scene.getTransformMatrix(),mv3d.camera.viewport);
+		return {x:projected.x*Graphics.width, y:projected.y*Graphics.height, behindCamera:projected.z>1};
+	},
+	
+	getUnscaledMatrix(mesh){
+		const matrix = mesh.getWorldMatrix();
+		const qrot=new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Quaternion */ "r"](), vtrans=new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"]();
+		matrix.decompose(null,qrot,vtrans);
+		return _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Matrix */ "j"].Compose(_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].One(),qrot,vtrans);
+	},
+	getTranslationMatrix(mesh){
+		const matrix = mesh.getWorldMatrix();
+		const vrot=_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].Zero(), vtrans=new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"]();
+		vrot.y=-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "i"])(mv3d.blendCameraYaw.currentValue());
+		vrot.x=-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "i"])(mv3d.blendCameraPitch.currentValue()-90);
+		matrix.decompose(null,null,vtrans);
+		return _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Matrix */ "j"].Compose(_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].One(),vrot.toQuaternion(),vtrans);
+	},
+	getRotationMatrix(mesh){
+		const matrix = mesh.getWorldMatrix();
+		const qrot=new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Quaternion */ "r"]();
+		matrix.decompose(null,qrot,null);
+		return _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Matrix */ "j"].Compose(_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].One(),qrot,_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].Zero());
+	},
+
+}
+window.mv3d=mv3d;
+/* harmony default export */ __webpack_exports__["a"] = (mv3d);
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return makeColor; });
+/* unused harmony export hexNumber */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "t", function() { return relativeNumber; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return booleanNumber; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return booleanString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return falseString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "v", function() { return sleep; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return degtorad; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "s", function() { return radtodeg; });
+/* unused harmony export pointtorad */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "r", function() { return pointtodeg; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "u", function() { return sin; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return cos; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "z", function() { return unround; });
+/* unused harmony export minmax */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "x", function() { return tileSize; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "y", function() { return tileWidth; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "w", function() { return tileHeight; });
+/* unused harmony export optimalFrustrumWidth */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return optimalFrustrumHeight; });
+/* unused harmony export file */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return dirtoh; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return dirtov; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return hvtodir; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return XAxis; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return YAxis; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return ZAxis; });
+/* unused harmony export v2origin */
+/* unused harmony export v3origin */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PI; });
+/* unused harmony export PI2 */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return overload; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return override; });
+/* harmony import */ var _mv3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+
+
+const {Vector2,Vector3,Color3,Color4} = window.BABYLON;
+
+const makeColor = color=>{
+	if (typeof color === 'number'){
+		return {
+			r: (color>>16)/255,
+			g: (color>>8&255)/255,
+			b: (color&255)/255,
+			a: 1,
+		};
+	}else if(color instanceof Color3){
+		return color.toColor4();
+	}else if(color instanceof Color4){
+		return color;
+	}else{
+		const canvas = document.createElement('canvas');
+		canvas.width=1; canvas.height=1;
+		const context = canvas.getContext('2d');
+		context.fillStyle = color; context.fillRect(0,0,1,1);
+		const bytes = context.getImageData(0,0,1,1).data;
+		return new Color4(bytes[0]/255,bytes[1]/255,bytes[2]/255,bytes[3]/255);
+	}
+}
+
+
+const hexNumber=n=>{
+	n=String(n);
+	if(n.startsWith('#')){
+		n=n.substr(1);
+	}
+	return Number.parseInt(n,16);
+};
+
+const relativeNumber=(current,n)=>{
+	if(n===''){ return +current; }
+	const relative = /^[+]/.test(n);
+	if(relative){n=n.substr(1);}
+	n=Number(n);
+	if(Number.isNaN(n)){ return +current; }
+	if(relative){
+		return +current+n;
+	}else{
+		return +n;
+	}
+};
+
+const booleanNumber=s=>{
+	if(!isNaN(s)){return Number(s);}
+	return booleanString(s);
+};
+const booleanString=s=>{
+	return Boolean(falseString(s));
+};
+const falseString=s=>{
+	if(!s){ return false; }
+	if(typeof s !=='string'){ s=String(s); }
+	const S=s.toUpperCase();
+	if(falseString.values.includes(S)){
+		return false;
+	}
+	return s;
+};
+falseString.values=['OFF','FALSE','UNDEFINED','NULL','DISABLE','DISABLED'];
+
+const sleep=(ms=0)=>new Promise(resolve=>setTimeout(resolve,ms));
+const degtorad=deg=>deg*Math.PI/180;
+const radtodeg=rad=>rad*180/Math.PI;
+
+const pointtorad=(x,y)=>Math.atan2(-y,x)-Math.PI/2;
+const pointtodeg=(x,y)=>radtodeg(pointtorad(x,y));
+
+const sin=r=>unround(Math.sin(r),1e15);
+const cos=r=>unround(Math.cos(r),1e15);
+
+const unround=(n,m=1e15)=>Math.round(n*m)/m;
+
+const minmax=(min,max,v)=>Math.min(max,Math.max(min,v));
+
+const tileSize=()=>tileWidth();
+const tileWidth=()=>Game_Map.prototype.tileWidth();
+const tileHeight=()=>Game_Map.prototype.tileHeight();
+const optimalFrustrumWidth=()=>Graphics.width/48;
+const optimalFrustrumHeight=()=>Graphics.height/48;
+
+const file=(folder=_mv3d__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].MV3D_FOLDER,name)=>{
+	if(name.startsWith('/')){ return '.'+name; }
+	else if(name.startsWith('./')){ return name; }
+	if(folder.startsWith('/')){ folder='.'+folder; }
+	else if(!folder.startsWith('./')){ folder='./'+folder; }
+	return `${folder}/${name}`;
+};
+
+// directions
+
+const dirtoh=d=>5 + ((d-1)%3-1);
+const dirtov=d=>5 + (Math.floor((d-1)/3)-1)*3;
+const hvtodir=(h,v)=>5 + (Math.floor((v-1)/3)-1)*3 + ((h-1)%3-1);
+
+// useful consts
+const XAxis = new Vector3(1,0,0);
+const YAxis = new Vector3(0,1,0);
+const ZAxis = new Vector3(0,0,1);
+const v2origin = new Vector2(0,0);
+const v3origin = new Vector3(0,0,0);
+
+const PI = Math.PI;
+const PI2 = Math.PI*2;
+
+// overloading
+
+const overload=funcs=>{
+	const overloaded = function(){
+		const l=arguments.length;
+		if(typeof funcs[l] === 'function'){
+			return funcs[l].apply(this,arguments);
+		}else if(typeof funcs.default === 'function'){
+			return funcs.default.apply(this,arguments);
+		}else{ console.warn("Unsupported number of arguments."); }
+	}
+	for(const key in funcs){
+		overloaded[key]=funcs[key].bind
+	}
+	return overloaded;
+};
+
+// override
+const _override_default_condition=()=>!_mv3d__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isDisabled();
+const override=(obj,methodName,getNewMethod,condition=_override_default_condition)=>{
+	const oldMethod = obj[methodName];
+	const newMethod = getNewMethod(oldMethod);
+	const overrider = function(){
+		if(!(typeof condition==='function'?condition():condition)){ return oldMethod.apply(this,arguments); }
+		return newMethod.apply(this,arguments);
+	};
+	Object.defineProperty(overrider,'name',{value:`${methodName}<mv3d_override>`});
+	Object.defineProperty(newMethod,'name',{value:`${methodName}<mv3d>`});
+	overrider.oldMethod=oldMethod; overrider.newMethod=newMethod;
+	return obj[methodName] = overrider;
+}
+
+
+//
+const util = {
+	makeColor,hexNumber,relativeNumber,booleanString,falseString,booleanNumber,
+	sleep,degtorad,radtodeg,sin,cos,unround,
+	tileSize,tileWidth,tileHeight,optimalFrustrumWidth,optimalFrustrumHeight,
+	pointtorad,pointtodeg,minmax,
+	dirtov,dirtoh,hvtodir,
+	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
+	overload, override, file
+};
+/* harmony default export */ __webpack_exports__["h"] = (util);
+
+/***/ }),
+/* 2 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+
+// EXTERNAL MODULE: ./src/mv3d.js
+var src_mv3d = __webpack_require__(0);
+
+// EXTERNAL MODULE: ./src/util.js
+var util = __webpack_require__(1);
+
+// CONCATENATED MODULE: ./src/shaders.js
+
+function hackShaders(){
+	hackShaderAlphaCutoff('shadowMapPixelShader');
+	hackShaderAlphaCutoff('depthPixelShader');
+	hackDefaultShader();
+}
+
+function hackShaderAlphaCutoff(shader){
+	hackShaderReplace(shader,
+		'if (texture2D(diffuseSampler,vUV).a<0.4)',
+		`if (texture2D(diffuseSampler,vUV).a<${mv3d.ALPHA_CUTOFF})`,
+	);
+}
+function hackShaderReplace(shader,find,replace){
+	BABYLON.Effect.ShadersStore[shader]=BABYLON.Effect.ShadersStore[shader].replace(find,replace);
+}
+function hackShaderInsert(shader,find,insert){
+	hackShaderReplace(shader,find,`${find}\n${insert}\n`);
+}
+
+function hackDefaultShader(){
+	hackShaderReplace('defaultPixelShader',
+		'vec4 color=vec4(finalDiffuse*baseAmbientColor+finalSpecular+reflectionColor+refractionColor,alpha);',
+		`vec3 mv3d_extra_emissiveColor = max(emissiveColor-1.,0.);
+		vec4 color=vec4(clamp(finalDiffuse*baseAmbientColor+finalSpecular+reflectionColor+mv3d_extra_emissiveColor+refractionColor,0.0,1.0),alpha);`,
+	);
+}
+
+// CONCATENATED MODULE: ./src/mod_babylon.js
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "t", function() { return Scene; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return Engine; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return FreeCamera; });
+/* unused harmony export HemisphericLight */
+/* unused harmony export DirectionalLight */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "u", function() { return SpotLight; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return PointLight; });
+/* unused harmony export ShadowGenerator */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "y", function() { return Vector2; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "z", function() { return Vector3; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "r", function() { return Quaternion; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return Matrix; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return Color3; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return Color4; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return Plane; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return Node; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "x", function() { return TransformNode; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "w", function() { return Texture; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "v", function() { return StandardMaterial; });
+/* unused harmony export ShaderMaterial */
+/* unused harmony export Effect */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return Mesh; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "A", function() { return VertexData; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return MeshBuilder; });
+/* unused harmony export AssetsManager */
+/* unused harmony export SceneSerializer */
+/* unused harmony export Sprite */
+/* unused harmony export SpriteManager */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "s", function() { return Ray; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return FRONTSIDE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return BACKSIDE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return DOUBLESIDE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return PERSPECTIVE_CAMERA; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return ORTHOGRAPHIC_CAMERA; });
+/* unused harmony export FOGMODE_NONE */
+/* unused harmony export FOGMODE_EXP */
+/* unused harmony export FOGMODE_EXP2 */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return FOGMODE_LINEAR; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "B", function() { return WORLDSPACE; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return LOCALSPACE; });
+/* unused harmony export BONESPACE */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "C", function() { return setupBabylonMods; });
+
+const mod_babylon_BABYLON = window.BABYLON;
+const {
+	Scene,
+	Engine,
+	FreeCamera,
+	HemisphericLight,
+	DirectionalLight,
+	SpotLight,
+	PointLight,
+	ShadowGenerator,
+	Vector2,
+	Vector3,
+	Quaternion,
+	Matrix,
+	Color3,
+	Color4,
+	Plane,
+	Node,
+	TransformNode,
+	Texture,
+	StandardMaterial,
+	ShaderMaterial,
+	Effect,
+	Mesh,
+	VertexData,
+	MeshBuilder,
+	AssetsManager,
+	SceneSerializer,
+	Sprite,
+	SpriteManager,
+	Ray,
+} = mod_babylon_BABYLON;
+
+const {
+	FRONTSIDE,BACKSIDE,DOUBLESIDE,
+} = Mesh;
+
+const {
+	PERSPECTIVE_CAMERA,
+	ORTHOGRAPHIC_CAMERA,
+} = mod_babylon_BABYLON.Camera;
+
+const{
+	FOGMODE_NONE,
+	FOGMODE_EXP,
+	FOGMODE_EXP2,
+	FOGMODE_LINEAR,
+} = Scene;
+
+const WORLDSPACE = mod_babylon_BABYLON.Space.WORLD,
+             LOCALSPACE = mod_babylon_BABYLON.Space.LOCAL,
+              BONESPACE = mod_babylon_BABYLON.Space.BONE;
+
+
+
+
+
+Texture.prototype.crop=function(x=0,y=0,w=0,h=0,useBaseSize=false){
+	const { width, height } = useBaseSize?this.getBaseSize():this.getSize();
+	if(!w)w=width-x;
+	if(!h)h=height-y;
+	if(src_mv3d["a" /* default */].EDGE_FIX){ x+=src_mv3d["a" /* default */].EDGE_FIX;y+=src_mv3d["a" /* default */].EDGE_FIX;w-=src_mv3d["a" /* default */].EDGE_FIX*2;h-=src_mv3d["a" /* default */].EDGE_FIX*2; }
+	if(!useBaseSize){
+		const size = this.getSize(), baseSize = this.getBaseSize();
+		const scaleX=baseSize.width/size.width;
+		const scaleY=baseSize.height/size.height;
+		x/=scaleX; w/=scaleX; y/=scaleY; h/=scaleY;
+	}
+	this.uScale=w/width;
+	this.vScale=h/height;
+	this.uOffset=x/width;
+	this.vOffset=1-y/height-this.vScale;
+}
+
+const _mixin_xyz = {
+	x:{
+		get(){ return this.position?this.position.x:undefined; },
+		set(v){ if(this.position){ this.position.x=v; } },
+	},
+	y:{
+		get(){ return this.position?-this.position.z:undefined; },
+		set(v){ if(this.position){ this.position.z=-v; } },
+	},
+	z:{
+		get(){ return this.position?this.position.y:undefined; },
+		set(v){ if(this.position){ this.position.y=v; } },
+	},
+};
+const _mixin_angles = {
+	pitch:{
+		get(){ return this.rotation?-Object(util["s" /* radtodeg */])(this.rotation.x):undefined; },
+		set(v){ if(this.rotation){ this.rotation.x=-Object(util["i" /* degtorad */])(v); } },
+	},
+	yaw:{
+		get(){ return this.rotation?-Object(util["s" /* radtodeg */])(this.rotation.y):undefined; },
+		set(v){  if(this.rotation){ this.rotation.y=-Object(util["i" /* degtorad */])(v); } },
+	},
+	roll:{
+		get(){ return this.rotation?-Object(util["s" /* radtodeg */])(this.rotation.z):undefined; },
+		set(v){  if(this.rotation){ this.rotation.z=-Object(util["i" /* degtorad */])(v); } },
+	},
+}
+Object.defineProperties(Node.prototype,_mixin_xyz);
+Object.defineProperties(Node.prototype,_mixin_angles);
+Object.defineProperties(Sprite.prototype,_mixin_xyz);
+
+// mesh sorting
+
+Object.defineProperty(Mesh.prototype,'order',{
+	get(){ return this._order; },
+	set(v){ this._order=v; this._scene.sortMeshes(); }
+});
+const meshSorter=(m1,m2)=>(m1._order|0)-(m2._order|0);
+Scene.prototype.sortMeshes=function(){
+	this.meshes.sort(meshSorter);
+}
+const _addMesh = Scene.prototype.addMesh;
+Scene.prototype.addMesh=function(mesh){
+	_addMesh.apply(this,arguments);
+	if(typeof mesh._order==='number'){
+		this.sortMeshes();
+	}
+}
+const _removeMesh = Scene.prototype.removeMesh;
+Scene.prototype.removeMesh=function(mesh){
+	_removeMesh.apply(this,arguments);
+	this.sortMeshes();
+}
+
+// color
+Color3.prototype.toNumber=Color4.prototype.toNumber=function(){return this.r*255<<16|this.g*255<<8|this.b*255;}
+
+// hack babylon
+function setupBabylonMods(){
+	hackShaders();
+};
+
+StandardMaterial.prototype._shouldTurnAlphaTestOn=function(mesh){
+	return this.needAlphaTesting();
+};
+
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export Feature */
+/* harmony import */ var _mv3d_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+
+
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].features={};
+
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].callFeature=function(name,method,...args){
+	if(!this.featureEnabled(name)){ return; }
+	const feature = this.features[name];
+	if(method in feature.methods){
+		feature.methods[method](...args);
+	}
+}
+
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].callFeatures=function(method,...args){
+	for(const name in this.features){
+		this.callFeature(name,method,...args);
+	}
+}
+
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].featureEnabled=function(name){
+	if( !(name in this.features) ){ return false; }
+	if(!this.features[name].enabled()){ return false; }
+	return true;
+}
+
+class Feature{
+	constructor(name,methods,condition=true){
+		Object.assign(this,{name,condition,methods});
+		_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].features[name]=this;
+	}
+	enabled(){
+		if(typeof this.condition==='function'){
+			return this.condition();
+		}
+		return Boolean(this.condition);
+	}
+}
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].Feature = Feature;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+module.exports = require("fs");
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+__webpack_require__(7);
+__webpack_require__(9);
+
+if(window.Imported&&Imported.YEP_SaveCore){
+	const _onLoadSuccess = Scene_File.prototype.onLoadSuccess;
+	Scene_File.prototype.onLoadSuccess=function(){
+		_onLoadSuccess.apply(this,arguments);
+		mv3d.needClearMap=true;
+	}
+}
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _mv3d_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+
+
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]['option-store']={}
+
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options={};
+
+if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_RENDER_DIST) _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options['mv3d-renderDist']={
+	name:"Render Distance",
+	min:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_RENDER_DIST_MIN, max:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_RENDER_DIST_MAX,
+	increment:5,
+	wrap:false,
+	apply(v){ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].RENDER_DIST=v; },
+	default:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].RENDER_DIST,
+};
+
+if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_FOV) _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options['mv3d-fov']={
+	name:"FOV",
+	min:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_FOV_MIN, max:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_FOV_MAX,
+	increment:5,
+	apply(v){ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].FOV=v; },
+	default:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].FOV,
+};
+
+if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_MIPMAP) _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options['mv3d-mipmap']={
+	name:"Mipmapping",
+	type:'bool',
+	apply(v){ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].MIPMAP=v; _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].needReloadMap=true; },
+	default:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].MIPMAP,
+};
+
+if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ENABLE_3D_OPTIONS){
+	__webpack_require__(8);
+}
+
+/***/ }),
+/* 8 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _mv3d_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
+
+
+
+
+const _option_command_list = Window_Options.prototype.makeCommandList;
+Window_Options.prototype.makeCommandList = function() {
+	_option_command_list.apply(this,arguments);
+	if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ENABLE_3D_OPTIONS===_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].enumOptionModes.SUBMENU && Object.keys(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options).length){
+		this.addCommand("3D Options", 'mv3d-options');
+	}else if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ENABLE_3D_OPTIONS===_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].enumOptionModes.ENABLE){
+		for (const key in _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options){
+			this.addCommand(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[key].name,key);
+		}
+	}
+};
+
+const _option_status_text = Window_Options.prototype.statusText;
+Window_Options.prototype.statusText = function(index) {
+	const symbol = this.commandSymbol(index);
+	const value = this.getConfigValue(symbol);
+	if(symbol==='mv3d-options'){ return ''; }
+	return _option_status_text.apply(this,arguments);
+};
+
+Object.defineProperty(ConfigManager, 'mv3d-options', {
+	get(){ return undefined; },
+	set(v){ SceneManager.push(Scene_3D_Options); },
+	configurable: true
+});
+
+const _config_makeData=ConfigManager.makeData;
+ConfigManager.makeData = function() {
+	const config = _config_makeData.apply(this,arguments);
+	Object.assign(config,_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]['option-store']);
+	return config;
+};
+const _config_applyData=ConfigManager.applyData;
+ConfigManager.applyData = function(config) {
+	_config_applyData.apply(this,arguments);
+	for(const key in _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options){
+		if(key in config){
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]['option-store'][key]=config[key];
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[key].apply(config[key]);
+		}
+	}
+	_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].updateParameters();
+};
+
+
+
+class Scene_3D_Options extends Scene_Options{
+	createOptionsWindow(){
+		this._optionsWindow = new Window_3D_Options();
+		this._optionsWindow.setHandler('cancel', this.popScene.bind(this));
+		this.addWindow(this._optionsWindow);
+	}
+	terminate(){
+		super.terminate();
+		_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].updateParameters();
+	}
+}
+
+class Window_3D_Options extends Window_Options{
+	makeCommandList(){
+		for (const key in _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options){
+			this.addCommand(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[key].name,key);
+		}
+	}
+}
+
+if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ENABLE_3D_OPTIONS===1) Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Scene_Options.prototype,'terminate',o=>function(){
+	o.apply(this,arguments);
+	_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].updateParameters();
+},true);
+
+Window_Options.prototype._is_mv3d_option=function(symbol){
+	return symbol in _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options;
+}
+
+Window_Options.prototype._mv3d_cursor=function(wrap,direction){
+	const index = this.index();
+	const symbol = this.commandSymbol(index);
+	let value = this.getConfigValue(symbol);
+	const option = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[symbol];
+	if(!option) { return; }
+	if(option.type==='bool'){
+		this.changeValue(symbol, direction>0);
+	}else{
+		const min = option.min||0;
+		const max = option.values?option.values.length-1:option.max||1;
+		value += (option.increment||1)*direction;
+		if(wrap&&option.wrap||wrap==='ok'){
+			if(value>max){ value = min; }
+			if(value<min){ value = max; }
+		}else{
+			value = value.clamp(min,max);
+		}
+		this.changeValue(symbol, value);
+	}
+}
+
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'statusText',o=>function(index){
+    const symbol = this.commandSymbol(index);
+    if(!this._is_mv3d_option(symbol)){ return o.apply(this,arguments); }
+    const value = this.getConfigValue(symbol);
+    const option = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[symbol];
+    if(option.type==='bool'){
+        return this.booleanStatusText(value);
+    }else if(option.values){
+        return option.values[value];
+    }
+    return String(value);
+},true);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'setConfigValue',o=>function(symbol, value){
+    if(!this._is_mv3d_option(symbol)){ return o.apply(this,arguments); }
+    _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]['option-store'][symbol]=value;
+    const option = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[symbol];
+    if(option.apply){ option.apply(value); }
+},true);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'getConfigValue',o=>function(symbol){
+    if(!this._is_mv3d_option(symbol)){ return o.apply(this,arguments); }
+    const option = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[symbol];
+    let value = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]['option-store'][symbol];
+    if(value==null){ value=option.default||option.min||0; }
+    return value;
+},true);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'cursorLeft',o=>function(wrap){
+    const symbol = this.commandSymbol(this.index());
+    if(this._is_mv3d_option(symbol)){
+        return this._mv3d_cursor(wrap,-1);
+    }else{
+        return o.apply(this,arguments);
+    }
+},true);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'cursorRight',o=>function(wrap){
+    const symbol = this.commandSymbol(this.index());
+    if(this._is_mv3d_option(symbol)){
+        return this._mv3d_cursor(wrap,1);
+    }else{
+        return o.apply(this,arguments);
+    }
+},true);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'processOk',o=>function(){
+    const index = this.index();
+    const symbol = this.commandSymbol(index);
+    if(!this._is_mv3d_option(symbol)){
+        return o.apply(this,arguments);
+    }
+    let value = this.getConfigValue(symbol);
+    const option = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[symbol];
+    if(option.type==='bool'){
+        this.changeValue(symbol, !value);
+    }else{
+        this._mv3d_cursor('ok',1);
+    }
+},true);
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _mv3d_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
+
+
+
+Object.assign(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"],{
+	vehicleObstructed(vehicle,...args){
+		return vehicleObstructed.apply(vehicle,args);
+	},
+	tileCollision(char,x,y,useStairThresh=false,useTargetZ=false){
+		if(!(char instanceof _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
+		const z = typeof useTargetZ==='number'? useTargetZ
+		:useTargetZ?char.targetElevation:char.z;
+		const cc = char.getCollisionHeight(z);
+		const tcs = this.getCollisionHeights(x,y);
+		if(useStairThresh==2){ cc.z1+=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH; cc.z2+=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH; }
+		for (const tc of tcs){
+			if(cc.z1<tc.z2&&cc.z2>tc.z1){
+				if(useStairThresh==1&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH){ return this.tileCollision(char,x,y,2,useTargetZ); }
+				return true;
+			}
+		}
+		return false;
+	},
+	charCollision(char1,char2,useStairThresh=false,useTargetZ1=false,useTargetZ2=useTargetZ1,triggerMode=false){
+		if(!(char1 instanceof _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].Character)){if(!char1.mv3d_sprite){return false;}char1=char1.mv3d_sprite;}
+		if(!(char2 instanceof _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].Character)){if(!char2.mv3d_sprite){return false;}char2=char2.mv3d_sprite;}
+		if(!triggerMode&&(!char1.char._mv3d_hasCollide()||!char2.char._mv3d_hasCollide())){ return false; } 
+		const c1z = typeof useTargetZ1==='number'? useTargetZ1 : useTargetZ1?char1.targetElevation:char1.z;
+		const c2z = typeof useTargetZ2==='number'? useTargetZ2 : useTargetZ2?char2.targetElevation:char2.z;
+		const cc1 = char1.getCollisionHeight(c1z);
+		const cc2 = triggerMode ? char2.getTriggerHeight(c2z) : char2.getCollisionHeight(c2z);
+		if(useStairThresh==2){ cc1.z1+=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH; cc1.z2+=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH; }
+		if(!triggerMode&&cc1.z1<cc2.z2&&cc1.z2>cc2.z1 || triggerMode&&cc1.z1<=cc2.z2&&cc1.z2>=cc2.z1){
+			if(useStairThresh==1&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH){ return this.charCollision(char1,char2,2,useTargetZ1,useTargetZ2); }
+			return true;
+		}
+		return false;
+	},
+	getPlatformFloatForCharacter(char,x,y,opts={}){
+		if(!(char instanceof _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].Character)){if(!char.mv3d_sprite){return 0;}char=char.mv3d_sprite;}
+		let z = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(char,x,y,opts).z2;
+		if(char.hasFloat){
+			const cHeight = char.getCHeight();
+			z += _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getFloatHeight(x,y,char.z+Math.max(cHeight,_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH),_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH>=cHeight);
+		}
+		return z;
+	},
+	getPlatformForCharacter(char,x,y,opts={}){
+		if(!(char instanceof _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
+		const cHeight = char.getCHeight();
+		const useStairThresh = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH>=cHeight;
+		Object.assign(opts,{char:char,gte:useStairThresh});
+		return this.getPlatformAtLocation(x,y,char.z+Math.max(cHeight,_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH),opts);
+	},
+	getPlatformAtLocation(x,y,z,opts={}){
+		const char = opts.char;
+		const cs = this.getCollisionHeights(x,y,opts);
+		cs.push(..._mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getEventsAt(x,y)
+			.filter(event=>{
+				if(!(event.mv3d_sprite&&event._mv3d_isPlatform()&&event._mv3d_hasCollide()&&event.mv3d_sprite.visible)){ return false; }
+				if(char){
+					if(char.char===event || event.isMoving()){ return false; }
+					let pc=event.mv3d_sprite;
+					while(pc=pc.platformChar){
+						if(pc===char||pc===event.mv3d_sprite){ return false; }
+					}
+				}
+				return true;
+			})
+			.map(event=>event.mv3d_sprite.getCollisionHeight())
+		);
+		let closest = cs[0];
+		for (const c of cs){
+			if(c.z2>closest.z2 && (opts.gte?c.z2<=z:c.z2<z) ){
+				closest=c;
+			}
+		}
+		return closest;
+	},
+
+	getEventsAt(x,y){
+		return $gameMap.eventsXyNt(Math.round(x),Math.round(y));
+	},
+
+	isRampAt(x,y,z){
+		const tileData = this.getTileData(x,y);
+		let height = 0;
+		for (let l=0;l<4;++l){
+			height += this.getTileFringe(x,y,l);
+			height += this.getTileHeight(x,y,l);
+			const conf = this.getTileConfig(tileData[l],x,y,l);
+			if(conf.shape!==this.enumShapes.SLOPE){ continue; }
+			const slopeHeight = conf.slopeHeight||1;
+			if(z>=height-slopeHeight && z<=height){
+				return { id:tileData[l], x,y,l,conf, z1:height-slopeHeight, z2:height };
+			}
+		}
+		return false;
+	},
+
+	getRampData(x,y,l,conf=null){
+		const tileId = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getTileId(x,y,l);
+		if(!conf){ conf = this.getTileConfig(tileId,x,y,l); }
+		if(conf.shape!==this.enumShapes.SLOPE){ return false; }
+		const height = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getStackHeight(x,y,l);
+		const slopeHeight = conf.slopeHeight||1;
+		return { id:tileId, x,y,l,conf, z1:height-slopeHeight, z2:height };
+	},
+
+	canPassRamp(d,slope){
+		if(d===5||d<=0||d>=10){ return true; }
+		const {dir:sd} = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getSlopeDirection(slope.x,slope.y,slope.l,true);
+		const x2 = $gameMap.roundXWithDirection(slope.x,d);
+		const y2 = $gameMap.roundYWithDirection(slope.y,d);
+		const slope2 = this.isRampAt(x2,y2,sd===d?slope.z1:sd===10-d?slope.z2:(slope.z1+slope.z2)/2);
+		if(slope2){
+			const  {dir:sd2} = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getSlopeDirection(x2,y2,slope2.l,true);
+			if(sd!==d&&sd!==10-d){
+				if(sd===sd2&&slope.z1===slope2.z1&&slope.z2===slope2.z2){ return true; }
+				return false;
+			}
+			return sd===sd2 && (sd===d?(slope.z1===slope2.z2):(slope.z2===slope2.z1));
+		}
+		if(sd!==d&&sd!==10-d){ return false; }
+		const dh = this.getPlatformAtLocation(x2,y2, (sd===d?slope.z1:slope.z2)+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH ).z2;
+		return Math.abs(dh-(sd===d?slope.z1:slope.z2))<=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH;
+	}
+});
+
+Game_CharacterBase.prototype._mv3d_isFlying=function(){
+	if(!this.mv3d_sprite){ return false;}
+	return this.mv3d_sprite.blendElevation.currentValue()>0||this.mv3d_sprite.hasConfig('zlock');
+};
+Game_Vehicle.prototype._mv3d_isFlying=function(){
+	return this.isAirship()||Game_CharacterBase.prototype._mv3d_isFlying.apply(this,arguments);
+};
+Game_Player.prototype._mv3d_isFlying=function(){
+	if(this.isInVehicle()&&this.vehicle().isAirship()){ return true; }
+	return Game_CharacterBase.prototype._mv3d_isFlying.apply(this,arguments);
+};
+
+Game_CharacterBase.prototype._mv3d_isPlatform=function(){
+	return this.mv3d_sprite&&this.mv3d_sprite.getConfig('platform',_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].WALK_ON_EVENTS);
+};
+
+Game_CharacterBase.prototype._mv3d_hasCollide=function(){
+	const sprite = this.mv3d_sprite;
+	if(!sprite || sprite.getConfig('collide')===false){ return false; }
+	return this._mv3d_isPlatform() || Boolean(sprite.getCHeight());
+};
+
+if(window.Imported&&Imported.QMovement){
+	__webpack_require__(10);
+}else if(PluginManager._scripts.includes("AltimitMovement")&&Game_CharacterBase.prototype.moveVector){
+	__webpack_require__(11);
+}else{
+	__webpack_require__(12);
+}
+
+// jump
+const _charBase_jump = Game_CharacterBase.prototype.jump;
+Game_CharacterBase.prototype.jump = function(xPlus, yPlus) {
+	if (_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isDisabled()){ return _charBase_jump.apply(this,arguments); }
+	this.mv3d_jumpHeightStart = this.z||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getWalkHeight(this.x,this.y);
+	this.mv3d_jumpHeightEnd = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getWalkHeight(this.x+xPlus,this.y+yPlus);
+	_charBase_jump.apply(this,arguments);
+};
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Map.prototype,'allTiles',o=>function(x,y){
+	return this.layeredTiles(x, y);
+});
+
+/***/ }),
+/* 10 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+/* harmony import */ var _mv3d__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(0);
+/* harmony import */ var _features__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3);
+
+
+
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'update',o=>function(){
+	this.hide();
+});
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager.container,'update',o=>function(){
+	if(this.visible){ o.apply(this,arguments); }
+},true);
+
+let _tileColliders={};
+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getQTileColliders=()=>_tileColliders;
+
+function mv3d_makeTileCollider(x,y,zcollider,extra){
+	const tc=new Box_Collider($gameMap.tileWidth(),$gameMap.tileHeight());
+	tc.x=x*$gameMap.tileWidth();
+	tc.y=y*$gameMap.tileHeight();
+	tc.mv3d_collider=zcollider;
+	tc.mv3d_collider_type=extra;
+	return tc;
+}
+
+const infiniteHeightCollider={z1:-Infinity,z2:Infinity};
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototype,'setupMapColliders',o=>function(){
+	this._tileCounter = 0;
+	_tileColliders={};
+	for (let x = 0; x < this.width(); x++)
+	for (let y = 0; y < this.height(); y++) {
+		const px = x * this.tileWidth(), py = y * this.tileHeight();
+		const flags = this.tilesetFlags();
+		const tiles = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getTileData(x, y);
+		const zColliders = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getCollisionHeights(x,y,{layers:true,slopeMin:true});
+		const tileCollider_list = _tileColliders[[x,y]]=[];
+		for (let i=0; i<zColliders.length; ++i) {
+			tileCollider_list[i]=mv3d_makeTileCollider(x,y,zColliders[i],'mv3d');
+		}
+		_tileColliders[[x,y,'x']]=mv3d_makeTileCollider(x,y,infiniteHeightCollider,'mv3d_x');
+		for (let l = 0; l < tiles.length; ++l) {
+			const flag = flags[tiles[l]];
+			const passage = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getTilePassage(tiles[l],x,y,l);
+			if(passage===_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].enumPassage.THROUGH){ continue; }
+			const conf = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getTileConfig(x,y,l);
+			if(conf.shape===_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].enumShapes.SLOPE){
+				const rampData = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getRampData(x,y,l,conf);
+				let dcol=0;
+				if(!_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].canPassRamp(2,rampData)){ dcol|=0b0001; }
+				if(!_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].canPassRamp(4,rampData)){ dcol|=0b0010; }
+				if(!_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].canPassRamp(6,rampData)){ dcol|=0b0100; }
+				if(!_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].canPassRamp(8,rampData)){ dcol|=0b1000; }
+				dcol+=1536;
+				const slopeZ2 = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getStackHeight(x,y,l);
+				const slopeZ1 = slopeZ2-(conf.slopeHeight||1);
+				//const data = Array.from(QMovement.tileBoxes[flag]);
+				let data = QMovement.tileBoxes[dcol];
+				const key = [x,y,l,'slope'].toString();
+				_tileColliders[key]=[];
+				if(data){
+					if(data[0].constructor!==Array){ data=[data]; }
+					for(const box of data){
+						const c = new Box_Collider(box[0]||0,box[1]||0,box[2],box[3]);
+						c.slopeZ1=slopeZ1; c.slopeZ2=slopeZ2;
+						c.moveTo(px,py);
+						c.mv3d_collider=infiniteHeightCollider;
+						_tileColliders[key].push(c);
+					}
+				}
+			}
+			let mv3d_collider;
+			if(zColliders.layers[l]){
+				mv3d_collider=zColliders.layers[l];
+				mv3d_collider.passage=passage;
+				mv3d_collider.l=l;
+			}
+			let data = this.getMapCollider(x, y, flag);
+			if (!data){ continue; }
+			data=Array.from(data);
+			if (data[0].constructor === Array) {
+				for (var j = 0; j < data.length; j++) {
+					data[j].mv3d_collider=mv3d_collider;
+					data[j].isRegionCollider=true;
+					this.makeTileCollider(x, y, flag, data[j], j);
+				}
+			} else {
+				data.mv3d_collider=mv3d_collider;
+				data.isQCollider=true;
+				this.makeTileCollider(x, y, flag, data, 0);
+			}
+		}
+	}
+},true);
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototype,'makeTileCollider',o=>function(x,y,flag,boxData,index){
+	const collider = o.apply(this,arguments);
+	if(boxData.mv3d_collider){
+		if(boxData.isRegionCollider){
+			collider.mv3d_collider = infiniteHeightCollider;
+		}else if(boxData.isQCollider){
+			collider.mv3d_collider = {z1:-Infinity,z2:Infinity};
+			if(boxData.mv3d_collider){
+				collider.mv3d_collider.l = boxData.mv3d_collider.l;
+			}
+			/*
+			collider.mv3d_collider = {
+				z1: boxData.mv3d_collider.z2,
+				z2: boxData.mv3d_collider.z2 + mv3d.STAIR_THRESH + 0.01,
+			};
+			*/
+		}else{
+			collider.mv3d_collider = boxData.mv3d_collider;
+		}
+	}
+	return collider;
+},true);
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBase.prototype,'collider',o=>function collider(){
+	const collider = o.apply(this,arguments);
+	if(!this.mv3d_sprite){ return collider; }
+	if(!collider.mv3d_collider){
+		Object.defineProperty(collider,'mv3d_collider',{
+			configurable:true, value: this.mv3d_sprite.getCollider(),
+		});
+		Object.defineProperty(collider,'mv3d_triggerCollider',{
+			configurable:true, value: this.mv3d_sprite.getTriggerCollider(),
+		});
+	}
+	return collider;
+});
+
+function QzCollidersOverlap(c1,c2){
+	if(!c1.mv3d_collider||!c2.mv3d_collider){ return true; }
+	c1=c1.mv3d_collider; c2=c2.mv3d_collider;
+	return zCollidersOverlap(c1,c2);
+}
+function zCollidersOverlap(c1,c2){
+	if(c1.z1<c2.z2&&c1.z2>c2.z1 && c1.z1+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].STAIR_THRESH<c2.z2&&c1.z2+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].STAIR_THRESH>c2.z1){
+		return true;
+	}
+	return false;
+}
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collider, only, debug){
+	// Q colliders
+	let isBreak=false;
+	const near = o.call(this,collider,c=>{
+		if(QzCollidersOverlap(collider,c)===false){ return false; }
+		if(collider.mv3d_collider){
+			const cx = Math.round(c.x/QMovement.tileSize);
+			const cy = Math.round(c.y/QMovement.tileSize);
+			if(collider.mv3d_collider.char){
+				// if we're standing on a character, ignore Q colliders.
+				//const platform = collider.mv3d_collider.char.getPlatform();
+				const platform = collider.mv3d_collider.char.getPlatform(cx,cy);
+				if(platform.char){ return false; }
+			}
+			if(c.mv3d_collider){
+				// ignore Q colliders not on current layer
+				const tileLayers = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getTileLayers(cx,cy,collider.mv3d_collider.z1+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].STAIR_THRESH);
+				if(!tileLayers.includes(c.mv3d_collider.l)){ return false; }
+			}
+		}
+		if(only){
+			const value = only(c);
+			if(value==='break'){isBreak=true;}
+			return value;
+		}
+		return true;
+	},debug);
+	if(isBreak){ return near; }
+	const x1 = (collider.x+collider._offset.x-1)/QMovement.tileSize;
+	const y1 = (collider.y+collider._offset.y-1)/QMovement.tileSize;
+	const x2 = (collider.x+collider._offset.x+collider.width+1)/QMovement.tileSize;
+	const y2 = (collider.y+collider._offset.y+collider.height+1)/QMovement.tileSize;
+	if (collider.mv3d_collider)
+	for (let tx = Math.floor(x1); tx < Math.ceil(x2); ++tx)
+	for (let ty = Math.floor(y1); ty < Math.ceil(y2); ++ty){
+		const colliderList=_tileColliders[[tx,ty]];
+		const xCollider = _tileColliders[[tx,ty,'x']];
+		let slopeColliders = null;
+		let isWall=false;
+		const tileLayers = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getTileLayers(tx,ty,collider.mv3d_collider.z1+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].STAIR_THRESH);
+		for(const l of tileLayers){
+			if( _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getTilePassage(tx,ty,l)===_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].enumPassage.WALL ){ isWall=true; }
+			const slopeKey = [tx,ty,l,'slope'].toString();
+			if(slopeKey in _tileColliders){ slopeColliders = _tileColliders[slopeKey]; }
+		}
+		let shouldCollide=false;
+		if(xCollider&&collider.mv3d_collider.char){
+			const char = collider.mv3d_collider.char;
+			const opts = {slopeMin:true};
+			const platform = char.getPlatform(tx,ty,opts);
+			opts.platform=platform;
+			// collide if falling
+			if(char.falling&&!char.char._mv3d_isFlying()){ shouldCollide=true; }
+			// x passage
+			else if(isWall && !platform.char){
+				shouldCollide=true;
+			}
+			// collide slopes
+			else if (slopeColliders && !char.platform.char && !platform.char){
+				for (const c of slopeColliders){
+					if(_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].WALK_OFF_EDGE && char.z>c.slopeZ1){ continue; }
+					let value=true;
+					if(only){ value = only(c); }
+					if(value!==false){
+						near.push(c);
+						if(value==='break'){ return near; }
+						continue;
+					}
+				}
+			}
+			// collide ledges
+			else if(!_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].WALK_OFF_EDGE && !char.char._mv3d_isFlying() && (!char.platform||!char.platform.isSlope)
+			&& Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* unround */ "z"])(Math.abs(char.getPlatformFloat(tx,ty,opts)-char.targetElevation))>_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].STAIR_THRESH){
+				shouldCollide=true;
+			}
+			
+			if(shouldCollide){
+				let value=true;
+				if(only){ value = only(xCollider); }
+				if(value!==false){
+					near.push(xCollider);
+					if(value==='break'){ return near; }
+					continue;
+				}
+			}
+		}
+		// collide with wall
+		if(colliderList) for(let i = 0; i<colliderList.length; ++i){
+			if(QzCollidersOverlap(collider,colliderList[i])){
+				if(only){
+					const value = only(colliderList[i]);
+					if(value!==false){ near.push(colliderList[i]); }
+					if(value==='break'){ return near; }
+				}else{
+					near.push(colliderList[i]);
+				}
+			}
+		}
+	}
+	return near;
+});
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'getCharactersNear',o=>function(collider, only){
+	return o.call(this,collider,char=>{
+		const sprite = char.mv3d_sprite; if(!sprite){ return true; }
+		const c1 = collider.mv3d_collider;
+		const c2 = $gameTemp._mv3d_Q_getCharactersTriggerHeight?sprite.getTriggerHeight():sprite.getCollisionHeight();
+		if(!c1||!c2){ return true; }
+		if(zCollidersOverlap(c1,c2)===false){ return false; }
+		if(only){ return only(char); }
+		return true;
+	});
+});
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'startMapEvent',o=>function(x,y,triggers,normal){
+	$gameTemp._mv3d_Q_getCharactersTriggerHeight=true;
+	o.apply(this,arguments);
+	$gameTemp._mv3d_Q_getCharactersTriggerHeight=false;
+});
+
+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._realY,opts={}){
+	const px = (x-0.5)*QMovement.tileSize;
+	const py = (y-0.5)*QMovement.tileSize;
+	const collider = this.char.collider();
+
+	const x1 = (px+collider._offset.x+1)/QMovement.tileSize;
+	const y1 = (py+collider._offset.y+1)/QMovement.tileSize;
+	const x2 = (px+collider._offset.x+collider.width-1)/QMovement.tileSize;
+	const y2 = (py+collider._offset.y+collider.height-1)/QMovement.tileSize;
+	
+	const platform = [
+		//mv3d.getPlatformForCharacter(this,x,y),
+		_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getPlatformForCharacter(this,x1,y1,opts),
+		_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getPlatformForCharacter(this,x2,y1,opts),
+		_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getPlatformForCharacter(this,x2,y2,opts),
+		_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getPlatformForCharacter(this,x1,y2,opts),
+	].reduce((a,b)=>a.z2>=b.z2?a:b);
+	return platform;
+};
+
+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].getEventsAt=function(x,y){
+	let events;
+	try{
+		events = ColliderManager._characterGrid[Math.round(x)][Math.round(y)];
+	}catch(err){
+		return [];
+	}
+	if(!events){ return []; }
+	return events.filter(event=>{
+		if(!(event instanceof Game_Event) || event.isThrough()){ return false; }
+		return true;
+	});
+};
+
+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].setDestination=function(x,y){
+	$gameTemp.setPixelDestination(Math.round(x*$gameMap.tileWidth()), Math.round(y*$gameMap.tileHeight()));
+};
+
+const _clearMouseMove = Game_Player.prototype.clearMouseMove;
+Game_Player.prototype.clearMouseMove=function(){
+	_clearMouseMove.apply(this,arguments);
+	if(this._pathfind){
+		this.clearPathfind();
+	}
+}
+
+
+const _QdiagMap={
+	1: [4, 2], 3: [6, 2],
+	7: [4, 8], 9: [6, 8]
+};
+const _QMoveVH=o=>function(dir) {
+	if($gameMap.offGrid()){
+		this.mv3d_QMoveRadian(dir);
+		return;
+	}
+	dir=_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].transformDirection(dir);
+	if(dir%2){
+		const diag = _QdiagMap[dir];
+		this.moveDiagonally(diag[0], diag[1]);
+	}else{
+		this.moveStraight(dir);
+	}
+	
+};
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveInputHorizontal',_QMoveVH);
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveInputVertical',_QMoveVH);
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveInputDiagonal',_QMoveVH);
+
+Game_Player.prototype.mv3d_QMoveRadian=function(dir,dist=this.moveTiles()){
+	this.moveRadian(-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* degtorad */ "i"])(_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].blendCameraYaw.currentValue()+90+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].dirToYaw(dir)),dist);
+	//this.mv3d_setDirection(mv3d.transformDirection(dir));
+};
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Character.prototype,'moveRadian',o=>function(radian, dist){
+	o.apply(this,arguments);
+	const d = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].yawToDir(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* radtodeg */ "s"])(-radian)-90,true);
+	this.mv3d_setDirection(d);
+});
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
+	o.apply(this,arguments);
+	const d = Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* hvtodir */ "m"])(h,v);
+	this.mv3d_setDirection(d);
+});
+
+if(Game_Follower.prototype.updateMoveList)
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Follower.prototype,'updateMoveList',o=>function(){
+	const move = this._moveList[0];
+	o.apply(this,arguments);
+	if(!move){ return; }
+	this.mv3d_setDirection(move[3]);
+});
+
+/***/ }),
+/* 11 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveByInput',o=>function(){
+	$gameTemp._mv3d_altimit_moveByInput=true;
+	o.apply(this,arguments);
+	$gameTemp._mv3d_altimit_moveByInput=false;
+});
+
+mv3d.getInputDirection=function(){
+	let dir = mv3d.DIR8MOVE ? Input.dir8 : Input.dir4;
+	return dir;
+};
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveVector',o=>function(vx,vy){
+	if($gameTemp._mv3d_altimit_moveByInput && !this._touchTarget){
+		const _vx=vx,_vy=vy;
+		const yaw = Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* degtorad */ "i"])(mv3d.blendCameraYaw.currentValue());
+		vx=Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* cos */ "g"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* sin */ "u"])(yaw)*_vy;
+		vy=-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* sin */ "u"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* cos */ "g"])(yaw)*_vy;
+		//console.log(_vx,_vy,vx,vy);
+	}
+	if(this.mv3d_sprite && this.mv3d_sprite.platform && this.mv3d_sprite.platform.isSlope){
+		if(Math.abs(vx)>Math.abs(vy)){ 
+			vx=Math.round(this._x)-this._x+Math.sign(vx);
+			vy=Math.round(this._y)-this._y;
+		}else{
+			vx=Math.round(this._x)-this._x;
+			vy=Math.round(this._y)-this._y+Math.sign(vy);
+		}
+		if($gamePlayer._touchTarget){
+			$gamePlayer._touchTarget.x=Math.round($gamePlayer._touchTarget.x);
+			$gamePlayer._touchTarget.y=Math.round($gamePlayer._touchTarget.y);
+		}
+	}
+	
+	o.call(this,vx,vy);
+});
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBase.prototype,'setDirectionVector',o=>function(vx,vy){
+	this.mv3d_setDirection(mv3d.yawToDir(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* pointtodeg */ "r"])(vx,vy),true));
+});
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBase.prototype,'moveVectorMap',o=>function(owner, collider, bboxTests, move, vx, vy){
+	o.apply(this,arguments);
+	const sprite = owner.mv3d_sprite;
+	if(!sprite){ return; }
+
+	const x = Math.floor(owner.x+collider.x);
+	const y = Math.floor(owner.y+collider.y);
+	const x1=Math.floor(owner.x+move.x+collider.aabbox.left), x2=Math.ceil(owner.x+move.x+collider.aabbox.right);
+	const y1=Math.floor(owner.y+move.y+collider.aabbox.top), y2=Math.ceil(owner.y+move.y+collider.aabbox.bottom);
+	
+	//const d = Input._makeNumpadDirection(Math.sign(move.x),Math.sign(move.y));
+	//const d = this.direction();
+
+	for (let tx = x1; tx < x2; ++tx)
+	for (let ty = y1; ty < y2; ++ty){
+		const d = Input._makeNumpadDirection(Math.sign(tx-x),Math.sign(ty-y));
+		//if(tx===x&&ty===y){continue;}
+		let slope;
+		let realign = false;
+		if(slope=mv3d.isRampAt(tx,ty,sprite.z)){
+			if(mv3d.canPassRamp(10-d,slope)){ continue; }
+		}
+		const tx2 = $gameMap.roundXWithDirection(tx, 10-d);
+		const ty2 = $gameMap.roundYWithDirection(ty, 10-d);
+		if(slope=mv3d.isRampAt(tx2,ty2,sprite.z)){
+			if(mv3d.canPassRamp(d,slope)){ continue; }
+		}
+
+		let collided = false;
+		if(this._mv3d_isFlying()){
+			if(!mv3d.ALLOW_GLIDE&&mv3d.tileCollision(this,tx,ty,true,true)||mv3d.tileCollision(this,tx,ty,true,false)){ collided=true; }
+		}else{
+			if(sprite.falling){ collided=true; }
+			else if(mv3d.tileCollision(this,tx,ty,true,true)){ collided=true; }
+			else if(!mv3d.WALK_OFF_EDGE){
+				const platformz = mv3d.getPlatformFloatForCharacter(this,tx,ty);
+				if(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* unround */ "z"])(Math.abs(platformz-sprite.targetElevation))>mv3d.STAIR_THRESH){
+					collided=true;
+				}
+			}
+		}
+		if(collided){
+			if(tx!==x){ move.x=0; }
+			if(ty!==y){ move.y=0; }
+		}
+	}
+});
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBase.prototype,'moveVectorCharacters',o=>function(owner, collider, characters, loopMap, move){
+	const spr1=this.mv3d_sprite; if(!spr1){ return o.apply(this,arguments); }
+	const zcol1=spr1.getCollisionHeight();
+	characters=characters.filter(character=>{
+		const spr2 = character.mv3d_sprite; if(!spr2){ return true; }
+		const zcol2=spr2.getCollisionHeight();
+		return zcol1.z1<zcol2.z2&&zcol1.z2>zcol2.z1;
+	});
+	return o.call(this,owner,collider,characters,loopMap,move);
+});
+
+mv3d.Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._realY,opts={}){
+	const collider = this.char.collider();
+	if(collider.type===0){
+		x+=collider.x-0.5; y+=collider.y-0.5;
+		const r = collider.radius*0.95;
+		
+		const platform = [
+			mv3d.getPlatformForCharacter(this,x,y),
+			mv3d.getPlatformForCharacter(this,x,y-r,opts),
+			mv3d.getPlatformForCharacter(this,x-r,y,opts),
+			mv3d.getPlatformForCharacter(this,x,y+r,opts),
+			mv3d.getPlatformForCharacter(this,x+r,y,opts),
+		]
+		const diagPlatforms = [
+			-Infinity,
+			mv3d.getPlatformForCharacter(this,x-r*Math.SQRT1_2,y-r*Math.SQRT1_2,opts),
+			mv3d.getPlatformForCharacter(this,x-r*Math.SQRT1_2,y+r*Math.SQRT1_2,opts),
+			mv3d.getPlatformForCharacter(this,x+r*Math.SQRT1_2,y+r*Math.SQRT1_2,opts),
+			mv3d.getPlatformForCharacter(this,x+r*Math.SQRT1_2,y-r*Math.SQRT1_2,opts),
+		].filter(c=>c.z2<=this.z);
+		return platform.concat(diagPlatforms).reduce((a,b)=>a.z2>=b.z2?a:b);
+	}else{
+		x-=0.5; y-=0.5;
+		const b = {
+			l:collider.aabbox.left*0.99,
+			r:collider.aabbox.right*0.99,
+			t:collider.aabbox.top*0.99,
+			b:collider.aabbox.bottom*0.99,
+		};
+		const platform = [
+			mv3d.getPlatformForCharacter(this,x,y),
+			mv3d.getPlatformForCharacter(this,x+b.l,y+b.t,opts),
+			mv3d.getPlatformForCharacter(this,x+b.l,y+b.b,opts),
+			mv3d.getPlatformForCharacter(this,x+b.r,y+b.t,opts),
+			mv3d.getPlatformForCharacter(this,x+b.r,y+b.b,opts),
+		].reduce((a,b)=>a.z2>=b.z2?a:b);
+		return platform;
+	}
+};
+
+mv3d.getEventsAt=function(x,y){
+	x=Math.round(x); y=Math.round(y);
+	return $gameMap.events().filter( character=>{
+		if(character.isThrough()){ return false; }
+		const {x:cx,y:cy}=character;
+		const {left,right,top,bottom}=character.collider().aabbox;
+		return cx+left<x+1 && cx+right>x && cy+top<y+1 && cy+bottom>y;
+	  } );
+};
+
+// give followers through if they fall behind
+/*
+const _FOLLOWER_THROUGH_THRESH=3;
+override(Game_Follower.prototype,'isThrough',o=>function(){
+	const precedingCharacter = (this._memberIndex > 1 ? $gamePlayer._followers._data[this._memberIndex - 2] : $gamePlayer);
+	if(Math.abs(precedingCharacter.x-this.x)+Math.abs(precedingCharacter.y-this.y)>_FOLLOWER_THROUGH_THRESH){ return true; }
+	return o.apply(this,arguments);
+});
+*/
+
+function zCollidersOverlap(s1,s2){
+	s1=s1.getCollisionHeight(); s2=s2.getCollisionHeight();
+	if(s1.z1===s1.z2||s2.z1===s2.z2){ return s1.z1<=s2.z2&&s1.z2>=s2.z1 }
+	return s1.z1<s2.z2&&s1.z2>s2.z1;
+}
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototype,'events',o=>function(){
+	const events = o.apply(this,arguments);
+	if(!$gameTemp._mv3d_altimit_eventsHeightFilter){ return events; }
+	delete $gameTemp._mv3d_altimit_eventsHeightFilter;
+	const player=$gamePlayer.mv3d_sprite;
+	if(!player){ return events; }
+	return events.filter(e=>{
+		const sprite = e.mv3d_sprite;
+		if(!sprite){ return true; }
+		return zCollidersOverlap(sprite,player);
+	});
+});
+
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Event.prototype,'checkEventTriggerTouch',o=>function(){
+	const sprite = this.mv3d_sprite, player=$gamePlayer.mv3d_sprite;
+	if(sprite&&player){
+		if(!zCollidersOverlap(sprite,player)){ return false; }
+	}
+	return o.apply(this,arguments);
+});
+
+const _eventsHeightFilter=o=>function(){
+	$gameTemp._mv3d_altimit_eventsHeightFilter=true;
+	return o.apply(this,arguments);
+};
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'checkEventTriggerHere',_eventsHeightFilter);
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'checkEventTriggerThere',_eventsHeightFilter);
+
+/***/ }),
+/* 12 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _mv3d_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
+
+
+
+const _characterBase_canPass = Game_CharacterBase.prototype.canPass
+Game_CharacterBase.prototype.canPass = function(x, y, d) {
+
+	if(!_characterBase_canPass.apply(this,arguments)){
+		return false;
+	}
+	if (_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isDisabled()||this.isDebugThrough()||this.isThrough()){return true; }
+
+	return true;
+};
+
+function charCollidesWithChars(char1,charlist,x,y){
+	return charlist.some(char2=>{
+		const isPlatform = char2._mv3d_isPlatform();
+		if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].WALK_OFF_EDGE&&!isPlatform){
+			const platformHeight = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(char1,x,y).z2;
+			if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(char1,char2,false,platformHeight)){ return true; }
+		}
+		return _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(char1,char2,isPlatform,true);
+	});
+}
+
+const _isCollidedWithEvents=o=>function(x,y){
+	return charCollidesWithChars(this,$gameMap.eventsXyNt(x,y),x,y);
+};
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'isCollidedWithEvents',_isCollidedWithEvents);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Event.prototype,'isCollidedWithEvents',_isCollidedWithEvents);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Event.prototype,'isCollidedWithPlayerCharacters',o=>function(x,y){
+	if($gamePlayer.isThrough()){ return false; }
+	const chars = [$gamePlayer,...$gamePlayer.followers()._data.filter(f=>f.isVisible()&&f.mv3d_sprite&&f.mv3d_sprite.visible)]
+	.filter(char=>char.pos(x,y));
+	return charCollidesWithChars(this,chars,x,y);
+});
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'isCollidedWithVehicles',o=>function(x,y){
+	const boat=$gameMap.boat(), ship=$gameMap.ship();
+	return boat.posNt(x,y)&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,boat,boat._mv3d_isPlatform(),true) || ship.posNt(x,y)&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,ship,ship._mv3d_isPlatform(),true);
+});
+
+const _isMapPassable=o=>function(x,y,d){
+	const sprite = this.mv3d_sprite;
+	if(!sprite){ return o.apply(this,arguments); }
+
+	$gameTemp._mv3d_collision_char = sprite;
+	let collided = !o.apply(this,arguments);
+	delete $gameTemp._mv3d_collision_char;
+	if(collided){ return false; }
+
+
+	let slope;
+	if(slope=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isRampAt(x,y,sprite.z)){
+		if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].canPassRamp(d,slope)){ return true; }
+	}
+
+	var x2 = $gameMap.roundXWithDirection(x, d);
+	var y2 = $gameMap.roundYWithDirection(y, d);
+	
+	if(slope=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isRampAt(x2,y2,sprite.z)){
+		if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].canPassRamp(10-d,slope)){ return true; }
+	}
+	
+	if(this._mv3d_isFlying()){
+		if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ALLOW_GLIDE&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,true)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,false)){ return false; }
+	}else{
+		if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,true)){ return false; }
+		
+		if(sprite.falling){ return false; }
+		if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].WALK_OFF_EDGE){
+			const platformz = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformFloatForCharacter(this,x2,y2);
+			if(Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* unround */ "z"])(Math.abs(platformz-sprite.targetElevation))>_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH){
+				return false; 
+			}
+		}
+	}
+	return true;
+};
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'isMapPassable',_isMapPassable);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Vehicle.prototype,'isMapPassable',_isMapPassable);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Player.prototype,'startMapEvent',o=>function(x,y,triggers,normal){
+	if ($gameMap.isEventRunning()) { return; }
+	$gameMap.eventsXy(x,y)
+	.filter(event=>_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,event,false,false,false,true))
+	.forEach(event=>{
+		if (event.isTriggerIn(triggers) && event.isNormalPriority() === normal) {
+			event.start();
+		}
+	});
+});
+
+const _checkPassage = Game_Map.prototype.checkPassage;
+Game_Map.prototype.checkPassage = function(x, y, bit) {
+	if(!('_mv3d_collision_char' in $gameTemp)){
+		return _checkPassage.apply(this,arguments);
+	}
+	const char = $gameTemp._mv3d_collision_char;
+	const cHeight = char.getCHeight();
+	const z = char.z+Math.max(cHeight,_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH);
+	const platform = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(char,x,y);
+	if(platform.char){ return true; }
+	var flags = this.tilesetFlags();
+	//var tiles = this.allTiles(x, y);
+	const layers = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getTileLayers(x,y,z,_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH>=cHeight);
+	const tiles = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getTileData(x,y);
+	for (var i = layers.length-1; i>=0; --i) {
+		const l=layers[i];
+		if(bit&0x0f){
+			const conf = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getTileConfig(x,y,l);
+			if('pass' in conf){
+				//const passage = mv3d.getTilePassage(x,y,l);
+				if(conf.pass===_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].enumPassage.THROUGH){ continue; }
+				if(conf.pass===_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].enumPassage.FLOOR){ return true; }
+				if(conf.pass===_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].enumPassage.WALL){ return false; }
+			}
+		}
+		const flag = flags[tiles[l]];
+		if ((flag & 0x10) !== 0)  // [*] No effect on passage
+			continue;
+		if ((flag & bit) === 0)   // [o] Passable
+			return true;
+		if ((flag & bit) === bit) // [x] Impassable
+			return false;
+	}
+    return false;
+};
+
+const _dir8Condition=()=> !_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isDisabled() || _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8MOVE&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8_2D;
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Player.prototype,'moveStraight',o=>function(d){
+	if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8MOVE){ return o.apply(this,arguments); }
+	switch(d){
+		case 1: this.moveDiagonally(4, 2); break;
+		case 3: this.moveDiagonally(6, 2); break;
+		case 7: this.moveDiagonally(4, 8); break;
+		case 9: this.moveDiagonally(6, 8); break;
+		default: o.apply(this,arguments);
+	}
+	
+},_dir8Condition);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
+	o.apply(this,arguments);
+
+	let adjustDirection=false;
+
+	if(this.isMovementSucceeded()){
+		adjustDirection=true;
+	}else if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8SMART){
+		this.moveStraight(h);
+		if(!this.isMovementSucceeded()){
+			this.moveStraight(v);
+			if(!this.isMovementSucceeded()){
+				adjustDirection=true;
+			}
+		}
+	}
+
+	if(adjustDirection){
+		const d = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* hvtodir */ "m"])(h,v);
+		this.mv3d_setDirection(d);
+	}
+
+},_dir8Condition);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'canPassDiagonally',o=>function(x,y,horz,vert){
+    const x2 = $gameMap.roundXWithDirection(x, horz);
+	const y2 = $gameMap.roundYWithDirection(y, vert);
+	if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x,y2,true,true)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y,true,true)){
+		return false;
+	}
+	return o.apply(this,arguments);
+});
+
+const _dontSnapRealXY=o=>function(){
+	const realX=this._realX, realY=this._realY;
+	o.apply(this,arguments);
+	if(Math.abs(realX-this._realX)>2||Math.abs(realY-this._realY)>2){ return;}
+	this._realX=realX; this._realY=realY;
+};
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Follower.prototype,'moveDiagonally',_dontSnapRealXY,_dir8Condition);
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Follower.prototype,'moveStraight',_dontSnapRealXY,_dir8Condition);
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'distancePerFrame',o=>function(){
+	const dist = o.apply(this,arguments);
+	if(this._mv3d_direction%2){
+		return dist * Math.SQRT1_2;
+	}
+	return dist;
+},_dir8Condition);
+
+// triggering
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Player.prototype,'checkEventTriggerThere',o=>function(triggers){
+	if (!this.canStartLocalEvents()) { return; }
+	const dir = this.mv3d_direction();
+	if(dir%2===0){ return o.apply(this,arguments); }
+	const horz = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* dirtoh */ "j"])(dir),vert = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* dirtov */ "k"])(dir);
+	const x2 = $gameMap.roundXWithDirection(this.x, horz);
+	const y2 = $gameMap.roundYWithDirection(this.y, vert);
+	this.startMapEvent(x2, y2, triggers, true);
+	if(!$gameMap.isAnyEventStarting()){
+		return o.apply(this,arguments);
+	}
+},_dir8Condition);
+
+
+// VEHICLES
+
+const _airship_land_ok = Game_Map.prototype.isAirshipLandOk;
+Game_Map.prototype.isAirshipLandOk = function(x, y) {
+	if (_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isDisabled()){ return _airship_land_ok.apply(this,arguments); }
+	if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].AIRSHIP_SETTINGS.bushLanding){
+		return this.checkPassage(x, y, 0x0f);
+	}else{
+		return _airship_land_ok.apply(this,arguments);
+	}
+
+};
+
+const _player_updateVehicleGetOn = Game_Player.prototype.updateVehicleGetOn;
+Game_Player.prototype.updateVehicleGetOn = function() {
+	if (_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isDisabled()){ return _player_updateVehicleGetOn.apply(this,arguments); }
+	const vehicle = this.vehicle();
+	const speed = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].loadData(`${vehicle._type}_speed`,vehicle._moveSpeed);
+	vehicle.setMoveSpeed(speed);
+	_player_updateVehicleGetOn.apply(this,arguments);
+	this.setThrough(false);
+};
+
+// get on off vehicle
+
+const _getOnVehicle = Game_Player.prototype.getOnVehicle;
+Game_Player.prototype.getOnVehicle = function(){
+	if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isDisabled()){ return _getOnVehicle.apply(this,arguments); }
+	var d = this.direction();
+	var x1 = Math.round(this.x);
+    var y1 = Math.round(this.y);
+    var x2 = $gameMap.roundXWithDirection(x1,d);
+	var y2 = $gameMap.roundYWithDirection(y1,d);
+	
+	if($gameMap.airship().pos(x1,y1) && _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,$gameMap.airship(),false,false,false,true)){
+		this._vehicleType = 'airship';
+	}else if($gameMap.ship().pos(x2,y2) && _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,$gameMap.ship())) {
+		this._vehicleType = 'ship';
+	}else if($gameMap.boat().pos(x2,y2) && _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,$gameMap.boat())) {
+		this._vehicleType = 'boat';
+	}
+	if (this.isInVehicle()) {
+		this._vehicleGettingOn = true;
+		if (!this.isInAirship()) {
+			this.forceMoveForward();
+		}
+		this.gatherFollowers();
+	}
+	return this._vehicleGettingOn;
+};
+
+
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Vehicle.prototype,'isLandOk',o=>function(x,y,d){
+	$gameTemp._mv3d_collision_char = $gamePlayer.mv3d_sprite;
+	let landOk = o.apply(this,arguments);
+	delete $gameTemp._mv3d_collision_char;
+	if (this.isAirship()) { return landOk; }
+	var x2 = $gameMap.roundXWithDirection(x, d);
+	var y2 = $gameMap.roundYWithDirection(y, d);
+	const platform = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter($gamePlayer,x2,y2);
+	if(platform.char){ landOk=true; }
+	const diff = Math.abs(platform.z2-this.z);
+	return landOk && diff<Math.max($gamePlayer.mv3d_sprite.getCHeight(),this.mv3d_sprite.getCHeight());
+});
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: ./src/mv3d.js
+var mv3d = __webpack_require__(0);
+
+// EXTERNAL MODULE: ./src/mod_babylon.js + 1 modules
+var mod_babylon = __webpack_require__(2);
+
+// EXTERNAL MODULE: ./src/util.js
+var util = __webpack_require__(1);
+
+// CONCATENATED MODULE: ./src/mod_mv.js
+
+
+
+const _graphics_createCanvas=Graphics._createCanvas;
+Graphics._createCanvas = function() {
+	mv3d["a" /* default */].setup();
+	mv3d["a" /* default */].updateCanvas();
+	_graphics_createCanvas.apply(this,arguments);
+};
+
+const _graphics_updateAllElements=Graphics._updateAllElements;
+Graphics._updateAllElements = function() {
+	_graphics_updateAllElements.apply(this,arguments);
+	mv3d["a" /* default */].updateCanvas();
+};
+
+const _graphics_render=Graphics.render;
+Graphics.render=function(){
+	mv3d["a" /* default */].render();
+	_graphics_render.apply(this,arguments);
+};
+
+const _sceneMap_update=Scene_Map.prototype.update;
+Scene_Map.prototype.update = function(){
+	_sceneMap_update.apply(this,arguments);
+	if(!mv3d["a" /* default */].isDisabled()){
+		mv3d["a" /* default */].update();
+	}
+}
+
+const _renderWebGL = ShaderTilemap.prototype.renderWebGL;
+ShaderTilemap.prototype.renderWebGL = function(renderer) {
+	if(mv3d["a" /* default */].mapDisabled){ _renderWebGL.apply(this,arguments); }
+};
+
+const _createTilemap=Spriteset_Map.prototype.createTilemap;
+Spriteset_Map.prototype.createTilemap=function(){
+	_createTilemap.apply(this,arguments);
+	mv3d["a" /* default */].mapDisabled = mv3d["a" /* default */].isDisabled();
+	if(mv3d["a" /* default */].mapDisabled){ return; }
+	this._tilemap.visible=false;
+	mv3d["a" /* default */].pixiSprite=new PIXI.Sprite(mv3d["a" /* default */].texture);
+	mv3d["a" /* default */].pixiSprite.scale.set(1/mv3d["a" /* default */].RES_SCALE,1/mv3d["a" /* default */].RES_SCALE);
+	mv3d["a" /* default */].pixiContainer=new PIXI.Container();
+	mv3d["a" /* default */].viewContainer=new PIXI.Container();
+	this._baseSprite.addChild( mv3d["a" /* default */].pixiContainer );
+	mv3d["a" /* default */].pixiContainer.addChild( mv3d["a" /* default */].viewContainer );
+	mv3d["a" /* default */].viewContainer.addChild( mv3d["a" /* default */].pixiSprite );
+};
+
+const _sprite_char_setchar = Sprite_Character.prototype.setCharacter;
+Sprite_Character.prototype.setCharacter = function(character) {
+	_sprite_char_setchar.apply(this,arguments);
+	Object.defineProperty(character,'mv_sprite',{
+		value:this,
+		configurable:true,
+	});
+};
+
+// Player Transfer
+
+const _performTransfer=Game_Player.prototype.performTransfer;
+Game_Player.prototype.performTransfer = function() {
+	const newmap = this._newMapId !== $gameMap.mapId();
+	if(newmap){
+		if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
+		mv3d["a" /* default */].clearMap();
+		delete $gamePlayer._mv3d_z;
+	}
+	_performTransfer.apply(this,arguments);
+	if(mv3d["a" /* default */].is1stPerson()){
+		mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].dirToYaw($gamePlayer.direction(),0));
+	}
+};
+
+// On Map Load
+const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
+Scene_Map.prototype.onMapLoaded=function(){
+	Input.clear();
+	if(mv3d["a" /* default */].needClearMap){
+		mv3d["a" /* default */].clearMap();
+		mv3d["a" /* default */].needClearMap=false;
+	}else if(mv3d["a" /* default */].needReloadMap){
+		mv3d["a" /* default */].reloadMap();
+		mv3d["a" /* default */].needReloadMap=false;
+	}
+	mv3d["a" /* default */].loadMapSettings();
+	_onMapLoaded.apply(this,arguments);
+	if(!mv3d["a" /* default */].mapLoaded){
+		mv3d["a" /* default */].applyMapSettings();
+		if(mv3d["a" /* default */].isDisabled()){
+			mv3d["a" /* default */].mapReady=true;
+		}else{
+			mv3d["a" /* default */].mapReady=false;
+			//mv3d.mapReady=true;
+			mv3d["a" /* default */].loadMap();
+		}
+	}
+	mv3d["a" /* default */].updateBlenders(true);
+};
+
+// onMapLoaded > performTransfer > map setup
+// hook into map setup before Qmovement's setup.
+const _map_battleback_Setup = Game_Map.prototype.setupBattleback;
+Game_Map.prototype.setupBattleback=function(){
+	_map_battleback_Setup.apply(this,arguments);
+	mv3d["a" /* default */].loadTilesetSettings();
+};
+
+const _onLoadSuccess = Scene_Load.prototype.onLoadSuccess;
+Scene_Load.prototype.onLoadSuccess = function() {
+	_onLoadSuccess.apply(this,arguments);
+	mv3d["a" /* default */].needClearMap=true;
+};
+
+const _map_isReady = Scene_Map.prototype.isReady;
+Scene_Map.prototype.isReady = function() {
+	let ready = _map_isReady.apply(this,arguments);
+	return ready && mv3d["a" /* default */].mapReady;
+};
+
+// Title
+
+const _title_start=Scene_Title.prototype.start;
+Scene_Title.prototype.start = function() {
+	_title_start.apply(this,arguments);
+	mv3d["a" /* default */].clearMap();
+	mv3d["a" /* default */].clearCameraTarget();
+};
+
+const _initGraphics = SceneManager.initGraphics;
+SceneManager.initGraphics = function() {
+	_initGraphics.apply(this,arguments);
+	if(!Graphics.isWebGL()){
+		throw new Error("MV3D requires WebGL");
+	}
+};
+
+// force webgl
+SceneManager.preferableRendererType = function() {
+    if (Utils.isOptionValid('canvas')) {
+        return 'canvas';
+    } else if (Utils.isOptionValid('webgl')) {
+        return 'webgl';
+    } else {
+		if(Graphics.hasWebGL()){ return 'webgl'; }
+        return 'auto';
+    }
+};
+// CONCATENATED MODULE: ./src/parameters.js
+
+
+
+
+let pluginName = 'mv3d';
+if(!PluginManager._scripts.includes("mv3d")){
+	if(PluginManager._scripts.includes("mv3d-babylon")){ pluginName='mv3d-babylon'; }
+}
+
+const parameters = PluginManager.parameters(pluginName);
+/* harmony default export */ var src_parameters = (parameters);
+
+function parameter(name,dfault,type){
+	return name in parameters ? (type?type(parameters[name]):parameters[name]) : dfault;
+}
+
+Object.assign(mv3d["a" /* default */],{
+	enumOptionModes:{
+		DISABLE: 0,
+		ENABLE: 1,
+		SUBMENU: 2,
+	}
+});
+
+Object.assign(mv3d["a" /* default */],{
+	CAMERA_MODE:"PERSPECTIVE",
+	ORTHOGRAPHIC_DIST:100,
+	MV3D_FOLDER:"img/MV3D",
+
+	ANIM_DELAY:Number(parameters.animDelay),
+	ALPHA_CUTOFF:Math.max(0.01,parameters.alphatest),
+
+	EDGE_FIX: Number(parameters.edgefix)*Object(util["x" /* tileSize */])()/48,
+	ANTIALIASING: Object(util["f" /* booleanString */])(parameters.antialiasing),
+	FOV:Number(parameters.fov),
+	RES_SCALE: parameter('resScale',1,Number)||1,
+
+	WALL_HEIGHT:Number(parameters.wallHeight),
+	TABLE_HEIGHT:Number(parameters.tableHeight),
+	FRINGE_HEIGHT:Number(parameters.fringeHeight),
+	CEILING_HEIGHT:Number(parameters.ceilingHeight),
+	LAYER_DIST:Number(parameters.layerDist),
+
+	ENABLED_DEFAULT: Object(util["f" /* booleanString */])(parameters.enabledDefault),
+	EVENTS_UPDATE_NEAR: Object(util["f" /* booleanString */])(parameters.eventsUpdateNear),
+
+	UNLOAD_CELLS: Object(util["f" /* booleanString */])(parameters.unloadCells),
+	CELL_SIZE: Number(parameters.cellSize),
+	RENDER_DIST: Number(parameters.renderDist),
+	MIPMAP:Object(util["f" /* booleanString */])(parameters.mipmap),
+
+	OPTION_MIPMAP:Object(util["f" /* booleanString */])(parameters.mipmapOption),
+	OPTION_RENDER_DIST: parameter('renderDistOption',true,util["f" /* booleanString */]),
+	OPTION_FOV: parameter('fovOption',false,util["f" /* booleanString */]),
+	OPTION_RENDER_DIST_MIN: parameter('renderDistMin',10,Number),
+	OPTION_RENDER_DIST_MAX: parameter('renderDistMax',100,Number),
+	OPTION_FOV_MIN: parameter('fovMin',50,Number),
+	OPTION_FOV_MAX: parameter('fovMax',100,Number),
+
+	STAIR_THRESH: Number(parameters.stairThresh),
+	WALK_OFF_EDGE:Object(util["f" /* booleanString */])(parameters.walkOffEdge),
+	WALK_ON_EVENTS:Object(util["f" /* booleanString */])(parameters.walkOnEvents),
+	GRAVITY:Number(parameters.gravity),
+
+	FOG_COLOR: Object(util["n" /* makeColor */])(parameters.fogColor).toNumber(),
+	FOG_NEAR: Number(parameters.fogNear),
+	FOG_FAR: Number(parameters.fogFar), 
+	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
+
+	LIGHT_LIMIT: Number(parameters.lightLimit),
+	LIGHT_HEIGHT: 0.5,
+	LAMP_HEIGHT: 0.5,
+	FLASHLIGHT_HEIGHT: 0.25,
+	LIGHT_DECAY: 1,
+	LIGHT_DIST: 3,
+	LIGHT_ANGLE: 60,
+	FLASHLIGHT_EXTRA_ANGLE: 10,
+	FLASHLIGHT_INTENSITY_MULTIPLIER: 2,
+
+	REGION_DATA:{},
+	_REGION_DATA:{},
+	_REGION_DATA_MAP:{},
+	TTAG_DATA:{},
+
+	EVENT_HEIGHT:Number(parameters.eventHeight),
+	//VEHICLE_BUSH:booleanString(parameters.vehicleBush),
+	BOAT_SETTINGS:JSON.parse(parameters.boatSettings),
+	SHIP_SETTINGS:JSON.parse(parameters.shipSettings),
+	AIRSHIP_SETTINGS:JSON.parse(parameters.airshipSettings),
+
+	ALLOW_GLIDE: Object(util["f" /* booleanString */])(parameters.allowGlide),
+
+	SPRITE_OFFSET:Number(parameters.spriteOffset)/2,
+
+	ENABLE_3D_OPTIONS:mv3d["a" /* default */].enumOptionModes[parameters['3dMenu'].toUpperCase()],
+
+	TEXTURE_SHADOW: parameters.shadowTexture||'shadow',
+	TEXTURE_BUSHALPHA: parameters.alphaMask||'bushAlpha',
+	TEXTURE_ERROR: parameters.errorTexture||'errorTexture',
+
+	DIR8MOVE: Object(util["f" /* booleanString */])(parameters.dir8Movement),
+	DIR8SMART: parameters.dir8Movement.includes("Smart"),
+	DIR8_2D: !parameters.dir8Movement.includes("3D"),
+	TURN_INCREMENT: Number(parameters.turnIncrement),
+	WASD: Object(util["f" /* booleanString */])(parameters.WASD),
+
+	KEYBOARD_PITCH: Object(util["f" /* booleanString */])(parameters.keyboardPitch),
+	KEYBOARD_TURN: Object(util["l" /* falseString */])(parameters.keyboardTurn),
+	KEYBOARD_STRAFE: Object(util["l" /* falseString */])(parameters.keyboardStrafe),
+
+	YAW_SPEED: Number(parameters.yawSpeed)||90,
+	PITCH_SPEED: Number(parameters.pitchSpeed)||90,
+
+	TRIGGER_INFINITE: !Object(util["f" /* booleanString */])(parameters.heightTrigger),
+
+	BACKFACE_CULLING: parameter('backfaceCulling',true,util["f" /* booleanString */]),
+	CAMERA_COLLISION: parameter('cameraCollision',true,util["f" /* booleanString */]),
+
+	DIAG_SYMBOL: parameter('diagSymbol','{d}',String),
+
+	setupParameters(){
+		this.REGION_DATA=new Proxy(this._REGION_DATA,{
+			get:(target,key)=>{
+				if(key in this._REGION_DATA_MAP){ return this._REGION_DATA_MAP[key]; }
+				if(key in this._REGION_DATA){ return this._REGION_DATA[key]; }
+			},
+			set:(target,key,value)=>{
+				target[key]=value;
+			},
+			has:(target,key)=>{
+				return key in this._REGION_DATA_MAP || key in this._REGION_DATA;
+			},
+		});
+		for (let entry of JSON.parse(parameters.regions)){
+			entry=JSON.parse(entry);
+			const regionData = this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions)
+			this._REGION_DATA[entry.regionId]=regionData;
+			
+		}
+		for (let entry of JSON.parse(parameters.ttags)){
+			entry=JSON.parse(entry);
+			this.TTAG_DATA[entry.terrainTag]=this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions);
+		}
+
+		this.EVENT_CHAR_SETTINGS = this.readConfigurationFunctions(
+			parameters.eventCharDefaults,
+			this.eventConfigurationFunctions,
+		);
+		this.EVENT_OBJ_SETTINGS = this.readConfigurationFunctions(
+			parameters.eventObjDefaults,
+			this.eventConfigurationFunctions,
+		);
+		this.EVENT_TILE_SETTINGS = this.readConfigurationFunctions(
+			parameters.eventTileDefaults,
+			this.eventConfigurationFunctions,
+		);
+
+		this.BOAT_SETTINGS.big=Object(util["f" /* booleanString */])(this.BOAT_SETTINGS.big);
+		this.SHIP_SETTINGS.big=Object(util["f" /* booleanString */])(this.SHIP_SETTINGS.big);
+		this.AIRSHIP_SETTINGS.height=Number(this.AIRSHIP_SETTINGS.height);
+		this.AIRSHIP_SETTINGS.big=Object(util["f" /* booleanString */])(this.AIRSHIP_SETTINGS.big);
+		this.AIRSHIP_SETTINGS.bushLanding=Object(util["f" /* booleanString */])(this.AIRSHIP_SETTINGS.bushLanding);
+
+		this.BOAT_SETTINGS.conf = this.readConfigurationFunctions(
+			this.BOAT_SETTINGS.conf,
+			this.eventConfigurationFunctions,
+		);
+		this.SHIP_SETTINGS.conf = this.readConfigurationFunctions(
+			this.SHIP_SETTINGS.conf,
+			this.eventConfigurationFunctions,
+		);
+		this.AIRSHIP_SETTINGS.conf = this.readConfigurationFunctions(
+			this.AIRSHIP_SETTINGS.conf,
+			this.eventConfigurationFunctions,
+		);
+
+		//Texture.DEFAULT_ANISOTROPIC_FILTERING_LEVEL=0;
+	},
+
+	updateParameters(){
+		this.updateRenderDist();
+		this.updateFov();
+		this.callFeatures('updateParameters');
+	},
+	updateRenderDist(){
+		if(this.camera.mode===mod_babylon["n" /* ORTHOGRAPHIC_CAMERA */]){
+			this.camera.maxZ=this.renderDist;
+			this.camera.minZ=-this.renderDist;
+		}else{
+			this.camera.maxZ=this.renderDist;
+			this.camera.minZ=0.1;
+		}
+	},
+	updateFov(){
+		const dist = this.blendCameraDist.currentValue()||0.1;
+		const frustrumHeight = this.getFrustrumHeight(dist,Object(util["i" /* degtorad */])(this.FOV));
+		const fov = this.getFovForDist(dist,frustrumHeight/this.blendCameraZoom.currentValue());
+		this.camera.fov=fov;
+	},
+});
+
+Object.defineProperties(mv3d["a" /* default */],{
+	AMBIENT_COLOR:{
+		get(){ return mv3d["a" /* default */].featureEnabled('dynamicShadows')?0x888888:0xffffff; }
+	},
+	renderDist:{
+		get(){ return Math.min(this.RENDER_DIST, mv3d["a" /* default */].blendFogFar.currentValue()+7.5); }
+	},
+});
+// CONCATENATED MODULE: ./src/blenders.js
+
+
+
+
+
+const raycastPredicate=mesh=>{
+	if(!mesh.isEnabled() || !mesh.isVisible || !mesh.isPickable || mesh.character){ return false; }
+	return true;
+}
+
+Object.assign(mv3d["a" /* default */],{
+
+	cameraTargets:[],
+	getCameraTarget(){
+		return this.cameraTargets[0];
+	},
+	setCameraTarget(char,time){
+		if(!char){ this.cameraTargets.length=0; return; }
+		this.cameraTargets.unshift(char);
+		if(this.cameraTargets.length>2){ this.cameraTargets.length=2; }
+		this.saveData('cameraTarget',this.getTargetString(char));
+		this.blendCameraTransition.value=1;
+		this.blendCameraTransition.setValue(0,time);
+	},
+	clearCameraTarget(){
+		this.cameraTargets.length=0;
+	},
+	resetCameraTarget(){
+		this.clearCameraTarget();
+		this.setCameraTarget($gamePlayer,0);
+	},
+	rememberCameraTarget(){
+		const target = this.loadData('cameraTarget');
+		if(target){
+			this.setCameraTarget(this.targetChar(target),0);
+		}
+	},
+
+	setupBlenders(){
+		this.blendFogColor = new ColorBlender('fogColor',this.FOG_COLOR);
+		this.blendFogNear = new blenders_Blender('fogNear',this.FOG_NEAR);
+		this.blendFogFar = new blenders_Blender('fogFar',this.FOG_FAR);
+		this.blendCameraRoll = new blenders_Blender('cameraRoll',0);
+		this.blendCameraRoll.cycle=360;
+		this.blendCameraYaw = new blenders_Blender('cameraYaw',0);
+		this.blendCameraYaw.cycle=360;
+		this.blendCameraPitch = new blenders_Blender('cameraPitch',60);
+		this.blendCameraPitch.min=0;
+		this.blendCameraPitch.max=180;
+		this.blendCameraDist = new blenders_Blender('cameraDist',10);
+		this.blendCameraZoom = new blenders_Blender('cameraZoom',1);
+		this.blendCameraDist.min=0;
+		this.blendCameraHeight = new blenders_Blender('cameraHeight',0.7);
+		this.blendAmbientColor = new ColorBlender('ambientColor',this.AMBIENT_COLOR);
+		this.blendPanX = new blenders_Blender('panX',0);
+		this.blendPanY = new blenders_Blender('panY',0);
+		this.blendCameraTransition = new blenders_Blender('cameraTransition',0);
+	},
+
+    updateBlenders(reorient){
+		this.updateCameraMode();
+		// camera target & pan
+		if(!this.cameraTargets.length){
+			if($gamePlayer){
+				this.cameraTargets[0]=$gamePlayer;
+			}
+		}
+		if(this.blendCameraTransition.update() && this.cameraTargets.length>=2){
+			const t = this.blendCameraTransition.currentValue();
+			let char1=this.cameraTargets[0];
+			//if(char1===$gamePlayer&&$gamePlayer.isInVehicle()){ char1=$gamePlayer.vehicle(); }
+			let char2=this.cameraTargets[1];
+			//if(char2===$gamePlayer&&$gamePlayer.isInVehicle()){ char2=$gamePlayer.vehicle(); }
+			this.cameraStick.x = char1._realX*(1-t) + char2._realX*t;
+			this.cameraStick.y = char1._realY*(1-t) + char2._realY*t;
+			if(char1.mv3d_sprite&&char2.mv3d_sprite){
+				this.cameraStick.z = char1.mv3d_sprite.z*(1-t) + char2.mv3d_sprite.z*t;
+			}else if(char1.mv3d_sprite){
+				this.cameraStick.z=char1.mv3d_sprite.z;
+			}
+		}else if(this.cameraTargets.length){
+			let char = this.getCameraTarget();
+			//if(char===$gamePlayer&&$gamePlayer.isInVehicle()){ char=$gamePlayer.vehicle(); }
+			this.cameraStick.x=char._realX;
+			this.cameraStick.y=char._realY;
+			if(char.mv3d_sprite){
+				this.cameraStick.z=char.mv3d_sprite.z;
+			}
+		}
+		this.blendPanX.update();
+		this.blendPanY.update();
+		this.cameraStick.x+=this.blendPanX.currentValue();
+		this.cameraStick.y+=this.blendPanY.currentValue();
+
+		// camera yaw, pitch, dist & height
+		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()|this.blendCameraRoll.update()
+		|this.blendCameraDist.update()|this.blendCameraHeight.update()|this.blendCameraZoom.update()
+		|$gameScreen._shake!==0
+		|(mv3d["a" /* default */].CAMERA_COLLISION&&$gamePlayer.mv3d_positionUpdated)){
+			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
+			this.cameraNode.yaw = this.blendCameraYaw.currentValue();
+			this.cameraNode.roll = this.blendCameraRoll.currentValue();
+			this.cameraNode.position.set(0,0,0);
+			let dist = this.blendCameraDist.currentValue();
+			if(mv3d["a" /* default */].CAMERA_COLLISION){
+				const raycastOrigin = new mod_babylon["z" /* Vector3 */]().copyFrom(this.cameraStick.position);
+				raycastOrigin.y+=this.blendCameraHeight.currentValue()+0.1;
+				const ray = new mod_babylon["s" /* Ray */](raycastOrigin, mod_babylon["z" /* Vector3 */].TransformCoordinates(mv3d["a" /* default */].camera.getTarget().negate(),mv3d["a" /* default */].getRotationMatrix(mv3d["a" /* default */].camera)),dist);
+				const intersections = mv3d["a" /* default */].scene.multiPickWithRay(ray,raycastPredicate);
+				for (const intersection of intersections){
+					if(!intersection.hit){ continue; }
+					let material = intersection.pickedMesh.material; if(!material){ continue; }
+					if(material.subMaterials){
+						material = material.subMaterials[intersection.pickedMesh.subMeshes[intersection.subMeshId].materialIndex];
+					}
+					if(material.mv3d_through){ continue; }
+					dist=intersection.distance;
+					break;
+				}
+				if(this.camera.dist==null){this.camera.dist=dist;}
+				this.camera.dist=this.camera.dist+(dist-this.camera.dist)/2;
+				dist=this.camera.dist;
+			}
+			this.cameraNode.translate(util["d" /* ZAxis */],-dist,mod_babylon["i" /* LOCALSPACE */]);
+			if(this.camera.mode===mod_babylon["n" /* ORTHOGRAPHIC_CAMERA */]){
+				const fieldSize = this.getFieldSize();
+				this.camera.orthoLeft=-fieldSize.width/2;
+				this.camera.orthoRight=fieldSize.width/2;
+				this.camera.orthoTop=fieldSize.height/2;
+				this.camera.orthoBottom=-fieldSize.height/2;
+			}else{
+				if(this.cameraNode.z<0){ this.cameraNode.z=0; }
+			}
+			this.cameraNode.z += this.blendCameraHeight.currentValue();
+			this.cameraNode.translate(util["b" /* XAxis */],-$gameScreen._shake/48,mod_babylon["i" /* LOCALSPACE */]);
+			this.updateDirection();
+			this.updateFov();
+		}
+
+		//fog
+		if(reorient|this.blendFogColor.update()|this.blendFogNear.update()|this.blendFogFar.update()){
+			if(mv3d["a" /* default */].hasAlphaFog){
+				this.scene.fogStart=this.blendFogNear.currentValue();
+				this.scene.fogEnd=this.blendFogFar.currentValue();
+			}else{
+				this.scene.fogStart=Math.min(mv3d["a" /* default */].RENDER_DIST-1,this.blendFogNear.currentValue());
+				this.scene.fogEnd=Math.min(mv3d["a" /* default */].RENDER_DIST,this.blendFogFar.currentValue());
+			}
+			this.scene.fogColor.copyFromFloats(
+				this.blendFogColor.r.currentValue()/255,
+				this.blendFogColor.g.currentValue()/255,
+				this.blendFogColor.b.currentValue()/255,
+			);
+			mv3d["a" /* default */].updateClearColor();
+			mv3d["a" /* default */].updateRenderDist();
+		}
+
+		//light
+		if(reorient|this.blendAmbientColor.update()){
+			this.scene.ambientColor.copyFromFloats(
+				this.blendAmbientColor.r.currentValue()/255,
+				this.blendAmbientColor.g.currentValue()/255,
+				this.blendAmbientColor.b.currentValue()/255,
+			);
+		}
+
+		this.callFeatures('blend',reorient);
+	},
+
+	updateClearColor(){
+		if($gameMap.parallaxName()||mv3d["a" /* default */].hasSkybox){
+			if(mv3d["a" /* default */].hasAlphaFog){
+				mv3d["a" /* default */].scene.clearColor.set(...mv3d["a" /* default */].blendFogColor.currentComponents(),0);
+			}else{
+				mv3d["a" /* default */].scene.clearColor.set(0,0,0,0);
+			}
+		}else{
+			mv3d["a" /* default */].scene.clearColor.set(...mv3d["a" /* default */].blendFogColor.currentComponents(),1);
+		}
+	},
+
+});
+
+const _changeParallax = Game_Map.prototype.changeParallax;
+Game_Map.prototype.changeParallax = function() {
+	_changeParallax.apply(this,arguments);
+	mv3d["a" /* default */].updateClearColor();
+};
+
+
+class blenders_Blender{
+	constructor(key,dfault){
+		this.key=key;
+		this.dfault=mv3d["a" /* default */].loadData(key,dfault);
+		this.value=dfault;
+		this.speed=1;
+		this.max=Infinity;
+		this.min=-Infinity;
+		this.cycle=false;
+		this.changed=false;
+	}
+	setValue(target,time=0){
+		target = Math.min(this.max,Math.max(this.min,target));
+		let diff = target - this.value;
+		if(!diff){ return; }
+		this.saveValue(this.key,target);
+		if(!time){ this.changed=true; this.value=target; }
+		if(this.cycle){
+			while ( Math.abs(diff)>this.cycle/2 ){
+				this.value += Math.sign(diff)*this.cycle;
+				diff = target - this.value;
+			}
+		}
+		this.speed = Math.abs(diff)/(60*time);
+	}
+	currentValue(){ return this.value; }
+	targetValue(){ return this.loadValue(this.key); }
+	defaultValue(){ return this.dfault; }
+	update(){
+		const target = this.targetValue();
+		if(this.value===target){ 
+			if(this.changed){
+				this.changed=false;
+				return true;
+			}else{
+				return false;
+			}
+		}
+		const diff = target - this.value;
+		if(this.speed > Math.abs(diff)){
+			this.value=target;
+		}else{
+			this.value+=this.speed*Math.sign(diff);
+		}
+		return true;
+	}
+	storageLocation(){
+		if(!$gameVariables){
+			console.warn(`MV3D: Couldn't get Blend storage location.`);
+			return {};
+		}
+		if(!$gameVariables.mv3d){ $gameVariables.mv3d = {}; }
+		return $gameVariables.mv3d;
+	}
+	loadValue(key){
+		const storage = this.storageLocation();
+		if(!(key in storage)){ return this.dfault; }
+		return storage[key];
+	}
+	saveValue(key,value){
+		const storage = this.storageLocation();
+		storage[key]=value;
+	}
+}
+
+class ColorBlender{
+	constructor(key,dfault){
+		this.dfault=dfault;
+		this.r=new blenders_Blender(`${key}_r`,dfault>>16);
+		this.g=new blenders_Blender(`${key}_g`,dfault>>8&0xff);
+		this.b=new blenders_Blender(`${key}_b`,dfault&0xff);
+	}
+	setValue(color,time){
+		this.r.setValue(color>>16,time);
+		this.g.setValue(color>>8&0xff,time);
+		this.b.setValue(color&0xff,time);
+	}
+	currentValue(){
+		return this.r.value<<16|this.g.value<<8|this.b.value;
+	}
+	targetValue(){
+		return this.r.targetValue()<<16|this.g.targetValue()<<8|this.b.targetValue();
+	}
+	defaultValue(){ return this.dfault; }
+	update(){
+		let ret=0;
+		ret|=this.r.update();
+		ret|=this.g.update();
+		ret|=this.b.update();
+		return Boolean(ret);
+	}
+	get storageLocation(){ return this.r.storageLocation; }
+	set storageLocation(v){
+		this.r.storageLocation=v;
+		this.g.storageLocation=v;
+		this.b.storageLocation=v;
+	}
+	currentComponents(){
+		return [this.r.currentValue()/255,this.g.currentValue()/255,this.b.currentValue()/255];
+	}
+	targetComponents(){
+		return [this.r.targetValue()/255,this.g.targetValue()/255,this.b.targetValue()/255];
+	}
+}
+
+mv3d["a" /* default */].Blender=blenders_Blender;
+mv3d["a" /* default */].ColorBlender=ColorBlender;
+// CONCATENATED MODULE: ./src/blendModes.js
+
+
+mv3d["a" /* default */].blendModes={
+	[PIXI.BLEND_MODES.NORMAL]: BABYLON.Engine.ALPHA_COMBINE,
+	[PIXI.BLEND_MODES.ADD]: BABYLON.Engine.ALPHA_ADD,
+	[PIXI.BLEND_MODES.MULTIPLY]: BABYLON.Engine.ALPHA_MULTIPLY,
+	[PIXI.BLEND_MODES.SCREEN]: BABYLON.Engine.ALPHA_SCREENMODE,
+	
+	NORMAL:BABYLON.Engine.ALPHA_COMBINE,
+	ADD:BABYLON.Engine.ALPHA_ADD,
+	MULTIPLY:BABYLON.Engine.ALPHA_MULTIPLY,
+	SCREEN:BABYLON.Engine.ALPHA_SCREENMODE,
+};
+// EXTERNAL MODULE: ./src/features.js
+var features = __webpack_require__(3);
+
+// CONCATENATED MODULE: ./src/input.js
+
+
+
+
+let _is1stPerson = false;
+
+Object.assign(mv3d["a" /* default */],{
+	updateInput(){
+		const is1stPerson = mv3d["a" /* default */].is1stPerson();
+		if(_is1stPerson !== is1stPerson){
+			Input.clear();
+			_is1stPerson = is1stPerson;
+		}
+		mv3d["a" /* default */].updateInputCamera();
+	},
+
+	updateInputCamera(){
+		if(this.isDisabled()||this.loadData('cameraLocked')){ return; }
+		const is1stPerson = this.is1stPerson();
+		if( this.loadData('allowRotation',mv3d["a" /* default */].KEYBOARD_TURN) || is1stPerson ){
+			const leftKey=mv3d["a" /* default */].getTurnKey('left'), rightKey=mv3d["a" /* default */].getTurnKey('right');
+			if(mv3d["a" /* default */].TURN_INCREMENT>1){
+				const turning = this.blendCameraYaw.currentValue()!==this.blendCameraYaw.targetValue();
+				const yawSpeed = mv3d["a" /* default */].TURN_INCREMENT / mv3d["a" /* default */].YAW_SPEED;
+				if(Input.isTriggered(leftKey)||Input.isPressed(leftKey)&&!turning){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d["a" /* default */].TURN_INCREMENT,yawSpeed);
+				}else if(Input.isTriggered(rightKey)||Input.isPressed(rightKey)&&!turning){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-mv3d["a" /* default */].TURN_INCREMENT,yawSpeed);
+				}
+			}else{
+				const increment = mv3d["a" /* default */].YAW_SPEED / 60;
+				if(Input.isPressed(leftKey)&&Input.isPressed(rightKey)){
+					// do nothing
+				}else if(Input.isPressed(leftKey)){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+increment,0.1);
+				}else if(Input.isPressed(rightKey)){
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-increment,0.1);
+				}
+			}
+		}
+		if( this.loadData('allowPitch',mv3d["a" /* default */].KEYBOARD_PITCH) ){
+			const increment = mv3d["a" /* default */].PITCH_SPEED / 60;
+			if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
+				// do nothing
+			}else if(Input.isPressed('pageup')){
+				this.blendCameraPitch.setValue(Math.min(179,this.blendCameraPitch.targetValue()+increment),0.1);
+			}else if(Input.isPressed('pagedown')){
+				this.blendCameraPitch.setValue(Math.max(1,this.blendCameraPitch.targetValue()-increment),0.1);
+			}
+		}
+	},
+
+	getStrafeKey(keyname){
+		if(mv3d["a" /* default */].is1stPerson()){
+			switch(mv3d["a" /* default */].KEYBOARD_STRAFE){
+				case 'QE': return 'rot'+keyname;
+				case 'AD': return keyname;
+				default: return false;
+			}
+		}else{
+			switch(mv3d["a" /* default */].KEYBOARD_TURN){
+				case 'QE': return keyname;
+				case 'AD': return 'rot'+keyname;
+				default: return keyname;
+			}
+		}
+	},
+
+	getTurnKey(keyname){
+		if(mv3d["a" /* default */].is1stPerson()){
+			switch(mv3d["a" /* default */].KEYBOARD_STRAFE){
+				case 'QE': return keyname;
+				case 'AD': return 'rot'+keyname;
+				default: return keyname;
+			}
+		}else{
+			switch(mv3d["a" /* default */].KEYBOARD_TURN){
+				case 'QE': return 'rot'+keyname;
+				case 'AD': return keyname;
+				default: return 'rot'+keyname;
+			}
+		}
+	},
+});
+
+Object(util["q" /* override */])(Input,'_signX',o=>function _signX(){
+	if(!mv3d["a" /* default */].KEYBOARD_STRAFE && mv3d["a" /* default */].is1stPerson()){ return 0; }
+	const leftKey=mv3d["a" /* default */].getStrafeKey('left'), rightKey=mv3d["a" /* default */].getStrafeKey('right');
+
+	let x = 0;
+	if (this.isPressed(leftKey)) { --x; }
+	if (this.isPressed(rightKey)) { ++x; }
+	return x;
+});
+
+mv3d["a" /* default */].setupInput=function(){
+	if(!mv3d["a" /* default */].WASD){ return; }
+	Object.assign(Input.keyMapper,{
+		81:'rotleft',  // Q
+		69:'rotright', // E
+		87:'up',       // W
+		65:'left',     // A
+		83:'down',     // S
+		68:'right',    // D
+	});
+	const descriptors={
+		rotleft:getInputDescriptor('pageup','rotleft', 'rotleft'),
+		rotright:getInputDescriptor('pagedown','rotright', 'rotright'),
+	}
+	Object.defineProperties(Input.keyMapper,{
+		81:descriptors.rotleft, //Q
+		69:descriptors.rotright,//E
+	});
+}
+
+function getInputDescriptor(menumode,p3mode,p1mode){
+	let assignedValue=undefined;
+	return {
+		configurable:true,
+		get(){
+			if(assignedValue!=undefined){ return assignedValue; }
+			if(!(SceneManager._scene instanceof Scene_Map)){ return menumode; }
+			if(mv3d["a" /* default */].isDisabled()){ return p3mode; }
+			if(mv3d["a" /* default */].is1stPerson()){ return p1mode; }
+			return p3mode;
+		},
+		set(v){ assignedValue=v; },
+	};
+}
+
+const _getInputDirection = Game_Player.prototype.getInputDirection;
+Game_Player.prototype.getInputDirection = function() {
+	if (mv3d["a" /* default */].isDisabled()){ 
+		if(mv3d["a" /* default */].DIR8MOVE && mv3d["a" /* default */].DIR8_2D) { return Input.dir8; }
+		return _getInputDirection.apply(this,arguments);
+	 }
+	return mv3d["a" /* default */].getInputDirection();
+};
+
+mv3d["a" /* default */].getInputDirection=function(){
+	let dir = mv3d["a" /* default */].DIR8MOVE ? Input.dir8 : Input.dir4;
+	return mv3d["a" /* default */].transformDirection(dir,mv3d["a" /* default */].blendCameraYaw.currentValue());
+}
+
+const input_raycastPredicate=mesh=>{
+	if(!mesh.isEnabled() || !mesh.isVisible || !mesh.isPickable){ return false; }
+	if(mesh.character){
+		if(mesh.character.isFollower||mesh.character.isPlayer){ return false; }
+	}
+	return true;
+}
+
+const _process_map_touch = Scene_Map.prototype.processMapTouch;
+Scene_Map.prototype.processMapTouch = function() {
+	if (mv3d["a" /* default */].isDisabled()){ return _process_map_touch.apply(this,arguments); }
+	if (TouchInput.isTriggered() || this._touchCount > 0) {
+		if (TouchInput.isPressed()) {
+			if (this._touchCount === 0 || this._touchCount >= 15) {
+				
+				const intersection = mv3d["a" /* default */].scene.pick(TouchInput.x*mv3d["a" /* default */].RES_SCALE,TouchInput.y*mv3d["a" /* default */].RES_SCALE,input_raycastPredicate);
+				if(intersection.hit){
+					mv3d["a" /* default */].processMapTouch(intersection);
+				}
+
+			}
+			this._touchCount++;
+		} else {
+			this._touchCount = 0;
+		}
+	}
+};
+
+mv3d["a" /* default */].processMapTouch=function(intersection){
+	const point = {x:intersection.pickedPoint.x, y:-intersection.pickedPoint.z};
+	const mesh = intersection.pickedMesh;
+	if(mesh.character){
+		point.x=mesh.character.x;
+		point.y=mesh.character.y;
+	}
+	mv3d["a" /* default */].setDestination(point.x,point.y);
+};
+
+mv3d["a" /* default */].setDestination=function(x,y){
+	$gameTemp.setDestination(Math.round(x), Math.round(y));
+};
+
+const _player_findDirectionTo=Game_Player.prototype.findDirectionTo;
+Game_Player.prototype.findDirectionTo=function(){
+	const dir = _player_findDirectionTo.apply(this,arguments);
+	if(mv3d["a" /* default */].isDisabled()){ return dir; }
+	if(mv3d["a" /* default */].is1stPerson() && dir){
+		let yaw = mv3d["a" /* default */].dirToYaw(dir);
+
+		mv3d["a" /* default */].blendCameraYaw.setValue(yaw,0.25);
+	}
+	return dir;
+}
+
+
+
+
+
+
+// CONCATENATED MODULE: ./src/input_directions.js
+
+
+
+
+Object.assign(mv3d["a" /* default */],{
+	
+	playerFaceYaw(){
+		let dir = this.yawToDir(mv3d["a" /* default */].blendCameraYaw.targetValue(),true);
+		$gamePlayer.mv3d_setDirection(dir);
+	},
+
+	yawToDir(yaw=mv3d["a" /* default */].blendCameraYaw.targetValue(),dir8=mv3d["a" /* default */].DIR8){
+		const divisor = dir8?45:90;
+		yaw=Math.round(yaw/divisor)*divisor;
+		while(yaw<0){yaw+=360;} while(yaw>=360){yaw-=360;}
+		switch(yaw){
+			case 0: return 8;
+			case 45: return 7;
+			case 90: return 4;
+			case 135: return 1;
+			case 180: return 2;
+			case 225: return 3;
+			case 270: return 6;
+			case 315: return 9;
+			default: return 0;
+		}
+	},
+
+	dirToYaw(dir){
+		switch(dir){
+			case 3: return -135;
+			case 6: return -90;
+			case 9: return -45;
+			case 8: return 0;
+			case 7: return 45;
+			case 4: return 90;
+			case 1: return 135;
+			case 2: return 180;
+			default: return NaN;
+		}
+	},
+	
+	transformDirection(dir,yaw=this.blendCameraYaw.currentValue(),dir8=mv3d["a" /* default */].DIR8MOVE){
+		return mv3d["a" /* default */].yawToDir(mv3d["a" /* default */].dirToYaw(dir)+yaw,dir8);
+	},
+
+	transformFacing(dir,yaw=this.blendCameraYaw.currentValue(),dir8=false){
+		return mv3d["a" /* default */].yawToDir(mv3d["a" /* default */].dirToYaw(dir)-yaw,dir8);
+	},
+
+	updateDirection(){
+		if ( mv3d["a" /* default */].is1stPerson() ) {
+			mv3d["a" /* default */].playerFaceYaw();
+		}
+	},
+});
+
+let _oldDir=0;
+Object(util["q" /* override */])(Game_Player.prototype,'update',o=>function update(){
+	o.apply(this,arguments);
+	if(this._direction!==_oldDir){
+		mv3d["a" /* default */].updateDirection();
+		_oldDir=this._direction;
+	}
+});
+
+Object(util["q" /* override */])(Game_Player.prototype,'moveStraight',o=>function moveStraight(){
+	o.apply(this,arguments);
+	mv3d["a" /* default */].updateDirection();
+});
+
+Object(util["q" /* override */])(Game_Player.prototype,'direction',o=>function direction(){
+	if(mv3d["a" /* default */].is1stPerson() && this.isMoving() && !this.isDirectionFixed()){
+		return mv3d["a" /* default */].yawToDir(mv3d["a" /* default */].blendCameraYaw.targetValue(),false);
+	}else{
+		return o.apply(this,arguments);
+	}
+});
+
+
+const _setDirection=Game_CharacterBase.prototype.setDirection;
+Game_CharacterBase.prototype.setDirection=function(){
+	_setDirection.apply(this,arguments);
+	this._mv3d_direction=this._direction;
+};
+Game_CharacterBase.prototype.mv3d_setDirection=function(d){
+	if( this.isDirectionFixed() ){ return; }
+	this._direction=mv3d["a" /* default */].yawToDir(mv3d["a" /* default */].dirToYaw(d),false);
+	if(mv3d["a" /* default */].DIR8MOVE){
+		this._mv3d_direction=d;
+	}else{
+		this._mv3d_direction=this._direction;
+	}
+};
+Game_CharacterBase.prototype.mv3d_direction=function(){
+	return this._mv3d_direction||this.direction();
+};
+
+Object(util["q" /* override */])(Game_CharacterBase.prototype,'copyPosition',o=>function(character) {
+	o.apply(this,arguments);
+	this._mv3d_direction = character._mv3d_direction;
+});
+
+Object(util["q" /* override */])(Game_Player.prototype,'processMoveCommand',o=>function processMoveCommand(command){
+	o.apply(this,arguments);
+	const  gc = Game_Character;
+	switch(command.code){
+		case gc.ROUTE_TURN_DOWN:
+		case gc.ROUTE_TURN_LEFT:
+		case gc.ROUTE_TURN_RIGHT:
+		case gc.ROUTE_TURN_UP:
+		case gc.ROUTE_TURN_90D_R:
+		case gc.ROUTE_TURN_90D_L:
+		case gc.ROUTE_TURN_180D:
+		case gc.ROUTE_TURN_90D_R_L:
+		case gc.ROUTE_TURN_RANDOM:
+		case gc.ROUTE_TURN_TOWARD:
+		case gc.ROUTE_TURN_AWAY:
+			let yaw = mv3d["a" /* default */].dirToYaw(this._direction);
+			mv3d["a" /* default */].blendCameraYaw.setValue(yaw,0.25);
+	}
+},()=>!mv3d["a" /* default */].isDisabled()&&mv3d["a" /* default */].is1stPerson());
+
+
+// CONCATENATED MODULE: ./src/configuration.js
+
+
+
+
+class ConfigurationFunction{
+	constructor(parameters,func){
+		this.groups = parameters.match(/\[?[^[\]|]+\]?/g);
+		this.labels={};
+		for(let i=0;i<this.groups.length;++i){
+			while(this.groups[i]&&this.groups[i][0]==='['){
+				this.labels[this.groups[i].slice(1,-1)]=i;
+				this.groups.splice(i,1);
+			}
+			if( i > this.groups.length ){ break; }
+			this.groups[i]=this.groups[i].split(',').map(s=>s.trim());
+		}
+		this.func=func;
+	}
+	run(conf,rawparams){
+		const r=/([,|]+)? *(?:(\w+) *: *)?([^,|\r\n]+)/g
+		let match;
+		let i=0;
+		let gi=0;
+		const params={};
+		for(let _gi=0;_gi<this.groups.length;++_gi){
+			params[`group${_gi+1}`]=[];
+		}
+		while(match=r.exec(rawparams)){
+			if(match[1])for(const delimiter of match[1]){
+				if(delimiter===','){ ++i; }
+				if(delimiter==='|'||i>=this.groups[gi].length){
+					i=0; ++gi;
+				}
+			}
+			if(match[2]){
+				if(match[2] in this.labels){
+					gi=this.labels[match[2]];
+				}else{
+					let foundMatch=false;
+					grouploop:for(let _gi=0;_gi<this.groups.length;++_gi) for(let _i=0;_i<this.groups[_gi].length;++_i){
+						if(this.groups[_gi][_i]===match[2]){
+							foundMatch=true;
+							gi=_gi; i=_i;
+							break grouploop;
+						}
+					}
+					if(!foundMatch){ break; }
+				}
+			}
+			if(gi>this.groups.length){ break; }
+			params[this.groups[gi][i]]=params[`group${gi+1}`][i]=match[3].trim();
+		}
+		this.func(conf,params);
+	}
+}
+mv3d["a" /* default */].ConfigurationFunction=ConfigurationFunction;
+
+function TextureConfigurator(name,extraParams='',apply){
+	const paramlist = `img,x,y,w,h|${extraParams}|alpha|glow[anim]animx,animy`;
+	return new ConfigurationFunction(paramlist,function(conf,params){
+		if(params.group1.length===5){
+			const [img,x,y,w,h] = params.group1;
+			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,1,0);
+			conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
+		}else if(params.group1.length===3){
+			const [img,x,y] = params.group1;
+			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,x,y);
+		}else if(params.group1.length===2){
+			const [x,y] = params.group1;
+			conf[`${name}_offset`] = new mod_babylon["y" /* Vector2 */](Number(x),Number(y));
+		}
+		if(params.animx&&params.animy){
+			conf[`${name}_animData`]={ animX:Number(params.animx), animY:Number(params.animy) };
+		}
+		if(params.alpha){
+			conf[`${name}_alpha`]=Number(params.alpha);
+		}
+		if(params.glow){
+			if(isNaN(params.glow)){
+				conf[`${name}_glow`] = Object(util["n" /* makeColor */])(params.glow);
+			}else{
+				conf[`${name}_glow`] = new mod_babylon["c" /* Color4 */](Number(params.glow),Number(params.glow),Number(params.glow),1);
+			}
+		}
+		if(apply){
+			apply.call(this,conf,params);
+		}
+	});
+}
+
+Object.assign(mv3d["a" /* default */],{
+	tilesetConfigurations:{},
+	loadTilesetSettings(){
+		//tileset
+		this.tilesetConfigurations={};
+		const lines = this.readConfigurationBlocks($gameMap.tileset().note)
+		+'\n'+this.readConfigurationBlocks($dataMap.note,'mv3d-tiles');
+		//const readLines = /^\s*([abcde]\d?\s*,\s*\d+\s*,\s*\d+)\s*:(.*)$/gmi;
+		const readLines = /^\s*([abcde]\d?)\s*,\s*(\d+(?:-\d+)?)\s*,\s*(\d+(?:-\d+)?)\s*:(.*)$/gmi;
+		let match;
+		while(match = readLines.exec(lines)){
+			const conf = this.readConfigurationFunctions(match[4],this.tilesetConfigurationFunctions);
+			const range1 = match[2].split('-').map(s=>Number(s));
+			const range2 = match[3].split('-').map(s=>Number(s));
+			for(let kx=range1[0];kx<=range1[range1.length-1];++kx)
+			for(let ky=range2[0];ky<=range2[range2.length-1];++ky){
+				const key = `${match[1]},${kx},${ky}`;
+				const tileId=this.constructTileId(...key.split(','));
+				if(!(tileId in this.tilesetConfigurations)){
+					this.tilesetConfigurations[tileId]={};
+				}
+				Object.assign(this.tilesetConfigurations[tileId],conf);
+			}
+
+		}
+	},
+	mapConfigurations:{},
+	loadMapSettings(){
+		//map
+		const mapconf=this.mapConfigurations={};
+		this.readConfigurationFunctions(
+			this.readConfigurationBlocks($dataMap.note),
+			this.mapConfigurationFunctions,
+			mapconf,
+		);
+		this._REGION_DATA_MAP={};
+		const regionBlocks=this.readConfigurationBlocks($dataMap.note,'mv3d-regions');
+		if(regionBlocks){
+			const readLines = /^\s*(\d+)\s*:(.*)$/gm;
+			let match;
+			while(match = readLines.exec(regionBlocks)){
+				if(!(match[1] in this._REGION_DATA_MAP)){
+					if(match[1] in this._REGION_DATA){
+						this._REGION_DATA_MAP[match[1]]=JSON.parse(JSON.stringify(this._REGION_DATA[match[1]]));
+					}else{
+						this._REGION_DATA_MAP[match[1]]={};
+					}
+				}
+				this.readConfigurationFunctions(
+					match[2],
+					mv3d["a" /* default */].tilesetConfigurationFunctions,
+					this._REGION_DATA_MAP[match[1]],
+				);
+			}
+		}
+	},
+	applyMapSettings(){
+		const mapconf = this.mapConfigurations;
+		if('fog' in mapconf){
+			const fog = mapconf.fog;
+			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
+			if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
+			if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
+			this.blendFogColor.update();
+		}
+		if('light' in mapconf){
+			this.blendAmbientColor.setValue(mapconf.light.color,0);
+			//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
+		}
+		if('cameraDist' in mapconf){
+			this.blendCameraDist.setValue(mapconf.cameraDist,0);
+		}
+		if ('cameraHeight' in mapconf){
+			this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
+		}
+		if('cameraMode' in mapconf){
+			this.cameraMode=mapconf.cameraMode;
+		}
+		if('cameraPitch' in mapconf){
+			this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
+		}
+		if('cameraYaw' in mapconf){
+			this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
+		}
+		mv3d["a" /* default */].updateClearColor();
+
+		this.callFeatures('applyMapSettings',mapconf);
+	},
+    
+
+	getMapConfig(key,dfault){
+		if(key in this.mapConfigurations){
+			return this.mapConfigurations[key];
+		}
+		return dfault;
+	},
+
+	getCeilingConfig(){
+		let conf={};
+		for (const key in this.mapConfigurations){
+			if(key.startsWith('ceiling_')){
+				conf[key.replace('ceiling_','bottom_')]=this.mapConfigurations[key];
+			}
+		}
+		conf.bottom_id = this.getMapConfig('ceiling_id',0);
+		conf.height = this.getMapConfig('ceiling_height',this.CEILING_HEIGHT);
+		conf.skylight = this.getMapConfig('ceiling_skylight',true);
+		conf.backfaceCulling = true;
+		conf.isCeiling = true;
+		return conf;
+	},
+
+	readConfigurationBlocksAndTags(note,tag='mv3d'){
+		return this.readConfigurationBlocks(note,tag)+this.readConfigurationTags(note,tag);
+	},
+
+	readConfigurationBlocks(note,tag='mv3d'){
+		const findBlocks = new RegExp(`<${tag}>([\\s\\S]*?)</${tag}>`,'gi');
+		let contents = '';
+		let match;
+		while(match = findBlocks.exec(note)){
+			contents += match[1]+'\n';
+		}
+		return contents;
+	},
+
+	readConfigurationTags(note,tag='mv3d'){
+		const findTags = new RegExp(`<${tag}:([\\s\\S]*?)>`,'gi');
+		let contents='';
+		let match;
+		while(match = findTags.exec(note)){
+			contents+=match[1]+'\n';
+		}
+		return contents;
+	},
+
+	readConfigurationFunctions(line,functionset=mv3d["a" /* default */].tilesetConfigurationFunctions,conf={}){
+		const readConfigurations = /(\w+)\((.*?)\)/g
+		let match;
+		while(match = readConfigurations.exec(line)){
+			const key = match[1].toLowerCase();
+			if(key in functionset){
+				//functionset[key](conf, ...match[2].split('|').map(s=>s?s.split(','):[]) );
+				if(functionset[key] instanceof ConfigurationFunction){
+					functionset[key].run(conf,match[2]);
+				}else{
+					const args = match[2].split(',');
+					if(args.length===1 && args[0]===''){ args.length=0; }
+					functionset[key](conf, ...args);
+				}
+			}
+		}
+		return conf;
+	},
+	get configurationSides(){ return this.enumSides; },
+	get configurationShapes(){ return this.enumShapes; },
+	get configurationPassage(){ return this.enumPassage; },
+	enumSides:{
+		front:mod_babylon["g" /* FRONTSIDE */],
+		back:mod_babylon["a" /* BACKSIDE */],
+		double:mod_babylon["d" /* DOUBLESIDE */],
+	},
+	enumShapes:{
+		FLAT:1,
+		TREE:2,
+		SPRITE:3,
+		FENCE:4,
+		WALL:4,
+		CROSS:5,
+		XCROSS:6,
+		SLOPE:7,
+	},
+	enumPassage:{
+		WALL:0,
+		FLOOR:1,
+		THROUGH:2,
+	},
+	enumRenderGroups:{
+		BACK:0,
+		MAIN:1,
+		FRONT:2,
+	},
+    
+
+	tilesetConfigurationFunctions:{
+		height(conf,n){ conf.height=Number(n); },
+		depth(conf,n){ conf.depth=Number(n); },
+		fringe(conf,n){ conf.fringe=Number(n); },
+		float(conf,n){ conf.float=Number(n); },
+		slope(conf,n=1,d=null){
+			conf.shape=mv3d["a" /* default */].enumShapes.SLOPE;
+			conf.slopeHeight=Number(n);
+			if(d){ conf.slopeDirection=({n:2, s:8, e:4, w:6})[d.toLowerCase()[0]]; }
+		},
+		top:TextureConfigurator('top'),
+		side:TextureConfigurator('side'),
+		inside:TextureConfigurator('inside'),
+		bottom:TextureConfigurator('bottom'),
+		texture:Object.assign(TextureConfigurator('hybrid'),{
+			func(conf,params){
+				mv3d["a" /* default */].tilesetConfigurationFunctions.top.func(conf,params);
+				mv3d["a" /* default */].tilesetConfigurationFunctions.side.func(conf,params);
+			}
+		}),
+		shape(conf,name,data){
+			conf.shape=mv3d["a" /* default */].enumShapes[name.toUpperCase()];
+			if(conf.shape===mv3d["a" /* default */].enumShapes.SLOPE && data||!('slopeHeight' in conf)){ conf.slopeHeight=Number(data)||1; }
+			if(data){
+				if(conf.shape===mv3d["a" /* default */].enumShapes.FENCE){ conf.fencePosts=Object(util["f" /* booleanString */])(data); }
+			}
+		},
+		alpha(conf,n){
+			conf.transparent=true;
+			conf.alpha=Number(n);
+		},
+		glow(conf,n,a=1){
+			if(isNaN(n)){
+				conf.glow = Object(util["n" /* makeColor */])(n);
+			}else{
+				conf.glow = new mod_babylon["c" /* Color4 */](Number(n),Number(n),Number(n),1);
+			}
+			conf.glow.a=Object(util["e" /* booleanNumber */])(a);
+		},
+		pass(conf,s=''){
+			s=Object(util["l" /* falseString */])(s.toLowerCase());
+			if(!s || s[0]==='x'){
+				conf.pass=mv3d["a" /* default */].enumPassage.WALL;
+			}else if(s[0]==='o'){
+				conf.pass=mv3d["a" /* default */].enumPassage.FLOOR;
+			}else{
+				conf.pass=mv3d["a" /* default */].enumPassage.THROUGH;
+			}
+		},
+		shadow(conf,b=true){
+			conf.shadow=Object(util["f" /* booleanString */])(b);
+		},
+	},
+	eventConfigurationFunctions:{
+		height(conf,n){
+			const height = Number(n);
+			if(height<0){
+				conf.zoff=height;
+			}else{
+				conf.height=height;
+			}
+			console.warn('event config height() is deprecated. Use elevation(), offset(), or zoff() instead.');
+		},
+		elevation(conf,n){ conf.height=Number(n); },
+		z(conf,n){ conf.zlock=Number(n); },
+		x(conf,n){ conf.xoff=Number(n); console.warn('event config x() is deprecated. Use offset() or xoff() instead.'); },
+		y(conf,n){ conf.yoff=Number(n); console.warn('event config y() is deprecated. Use offset() or yoff() instead.'); },
+		xoff(conf,n){ conf.xoff=Number(n); },
+		yoff(conf,n){ conf.yoff=Number(n); },
+		zoff(conf,n){ conf.zoff=Number(n); },
+		offset:new ConfigurationFunction('x,y,z',function(conf,params){
+			if(params.x)conf.xoff=Number(params.x);
+			if(params.y)conf.yoff=Number(params.y);
+			if(params.z)conf.zoff=Number(params.z);
+		}),
+		pos:new ConfigurationFunction('x,y',function(conf,params){
+			if(!conf.pos){conf.pos={};}
+			if(params.x){ conf.pos.x=params.x; }
+			if(params.y){ conf.pos.y=params.y; }
+		}),
+		scale(conf,x,y=x){ conf.scale = new mod_babylon["y" /* Vector2 */](Number(x),Number(y)); },
+		rot(conf,n){ conf.rot=Number(n); },
+		yaw(conf,n){ conf.yaw=Number(n); },
+		pitch(conf,n){ conf.pitch=Number(n); },
+		bush(conf,bool){ conf.bush = Object(util["f" /* booleanString */])(bool); },
+		shadow:new ConfigurationFunction('size,dist|3d',function(conf,params){
+			let {size,dist,'3d':dyn} = params;
+			if(dyn==null){ dyn=size!=null?size:true; }
+			conf.dynShadow = dyn = Object(util["f" /* booleanString */])(dyn);
+			if(size!=null){ conf.shadow = Object(util["e" /* booleanNumber */])(size); }
+			if(dist!=null){ conf.shadowDist=Number(dist); }
+		}),
+		shape(conf,name){
+			conf.shape=mv3d["a" /* default */].enumShapes[name.toUpperCase()];
+		},
+		lamp:new ConfigurationFunction('color,intensity,range',function(conf,params){
+			const {color='white',intensity=1,range=mv3d["a" /* default */].LIGHT_DIST} = params;
+			conf.lamp={color:Object(util["n" /* makeColor */])(color).toNumber(),intensity:Number(intensity),distance:Number(range)};
+		}),
+		flashlight:new ConfigurationFunction('color,intensity,range,angle[dir]yaw,pitch',function(conf,params){
+			const {color='white',intensity=1,range=mv3d["a" /* default */].LIGHT_DIST,angle=mv3d["a" /* default */].LIGHT_ANGLE} = params;
+			conf.flashlight={color:Object(util["n" /* makeColor */])(color).toNumber(),intensity:Number(intensity),distance:Number(range),angle:Number(angle)};
+			if(params.yaw){ conf.flashlightYaw=params.yaw; }
+			if(params.pitch){ conf.flashlightPitch=Number(params.pitch); }
+		}),
+		flashlightpitch(conf,deg='90'){ conf.flashlightPitch=Number(deg); },
+		flashlightyaw(conf,deg='+0'){ conf.flashlightYaw=deg; },
+		lightheight(conf,n=1){ this.lampheight(conf,n); this.flashlightheight(conf,n); },
+		lightoffset(conf,x=0,y=0){ this.lampoffset(conf,x,y); this.flashlightoffset(conf,x,y); },
+		lampheight(conf,n=1){ conf.lampHeight = Number(n); },
+		lampoffset(conf,x=0,y=0){ conf.lampOffset = {x:+x,y:+y}; },
+		flashlightheight(conf,n=1){ conf.flashlightHeight = Number(n); },
+		flashlightoffset(conf,x=0,y=0){ conf.flashlightOffset = {x:+x,y:+y}; },
+		alpha(conf,n){
+			conf.alpha=Number(n);
+		},
+		glow(conf,n,a=1){
+			if(isNaN(n)){
+				conf.glow = Object(util["n" /* makeColor */])(n);
+			}else{
+				conf.glow = new mod_babylon["c" /* Color4 */](Number(n),Number(n),Number(n),1);
+			}
+			conf.glow.a=Object(util["e" /* booleanNumber */])(a);
+		},
+		dirfix(conf,b){
+			conf.dirfix=Object(util["f" /* booleanString */])(b);
+		},
+		gravity(conf,b){
+			conf.gravity=Object(util["e" /* booleanNumber */])(b);
+		},
+		platform(conf,b){
+			conf.platform=Object(util["f" /* booleanString */])(b);
+		},
+		collide(conf,n){ conf.collide=Object(util["e" /* booleanNumber */])(n); },
+		trigger(conf,up,down=0){
+			conf.trigger={
+				up:Number(up),
+				down:Number(down),
+			}
+		},
+		pass(conf,s=''){
+			s=Object(util["l" /* falseString */])(s.toLowerCase());
+			if(!s || s[0]==='x'){
+				conf.platform=false;
+				conf.collide=true;
+			}else if(s[0]==='o'){
+				conf.platform=true;
+			}else{
+				conf.platform=false;
+				conf.collide=false;
+			}
+		},
+	},
+	mapConfigurationFunctions:{
+		get ambient(){ return this.light; },
+		light(conf,color){
+			if(color.toLowerCase()==='default'){ color=mv3d["a" /* default */].AMBIENT_COLOR; }
+			else{ color=Object(util["n" /* makeColor */])(color).toNumber(); }
+			conf.light={color:color};
+		},
+		fog:new ConfigurationFunction('color|near,far',function(conf,params){
+			const {color,near,far} = params;
+			if(!conf.fog){ conf.fog={}; }
+			if(color){ conf.fog.color=Object(util["n" /* makeColor */])(color).toNumber(); }
+			if(near){ conf.fog.near=Number(near); }
+			if(far){ conf.fog.far=Number(far); }
+		}),
+		camera:new ConfigurationFunction('yaw,pitch|dist|height|mode',function(conf,params){
+			const {yaw,pitch,dist,height,mode}=params;
+			if(yaw){ conf.cameraYaw=Number(yaw); }
+			if(pitch){ conf.cameraPitch=Number(pitch) }
+			if(dist){ conf.cameraDist=Number(dist); }
+			if(height){ conf.cameraHeight=Number(height); }
+			if(mode){ conf.cameraMode=mode; }
+		}),
+		ceiling:TextureConfigurator('ceiling','height,backface',function(conf,params){
+			if(params.height){
+				conf[`ceiling_height`]=Number(params.height);
+			}
+			if(params.backface){
+				conf[`ceiling_skylight`]=!Object(util["f" /* booleanString */])(params.backface);
+			}
+		}),
+		edge(conf,b,data){
+			b=b.toLowerCase();
+			switch(b){
+				case 'clamp':
+					conf.edgeData=data==null?1:Number(data);
+					conf.edge=b;
+					break;
+				default:
+					conf.edge=Object(util["f" /* booleanString */])(b);
+			}
+		},
+		disable(conf,b=true){
+			conf.disabled=Object(util["f" /* booleanString */])(b);
+		},
+		enable(conf,b=true){
+			conf.disabled=!Object(util["f" /* booleanString */])(b);
+		},
+	},
+
+});
+
+// event config
+const _event_setupPage = Game_Event.prototype.setupPage;
+Game_Event.prototype.setupPage = function() {
+	_event_setupPage.apply(this,arguments);
+	if(this.mv3d_sprite){
+		this.mv3d_needsConfigure=true;
+		this.mv3d_sprite.eventConfigure();
+	}
+};
+
+const _event_init = Game_Event.prototype.initialize;
+Game_Event.prototype.initialize = async function() {
+	_event_init.apply(this,arguments);
+	const event = this.event();
+	let config = {};
+	mv3d["a" /* default */].readConfigurationFunctions(
+		mv3d["a" /* default */].readConfigurationTags(event.note),
+		mv3d["a" /* default */].eventConfigurationFunctions,
+		config,
+	);
+	if('pos' in config){
+		this.locate(
+			Object(util["t" /* relativeNumber */])(event.x,config.pos.x),
+			Object(util["t" /* relativeNumber */])(event.y,config.pos.y),
+		);
+	}
+	if(!this.mv3d_blenders){
+		this.mv3d_blenders={};
+	}
+	if('lamp' in config){
+		this.mv3d_blenders.lampColor_r=config.lamp.color>>16;
+		this.mv3d_blenders.lampColor_g=config.lamp.color>>8&0xff;
+		this.mv3d_blenders.lampColor_b=config.lamp.color&0xff;
+		this.mv3d_blenders.lampIntensity=config.lamp.intensity;
+		this.mv3d_blenders.lampDistance=config.lamp.distance
+	}
+	if('flashlight' in config){
+		this.mv3d_blenders.flashlightColor_r=config.flashlight.color>>16;
+		this.mv3d_blenders.flashlightColor_g=config.flashlight.color>>8&0xff;
+		this.mv3d_blenders.flashlightColor_b=config.flashlight.color&0xff;
+		this.mv3d_blenders.flashlightIntensity=config.flashlight.intensity;
+		this.mv3d_blenders.flashlightDistance=config.flashlight.distance;
+		this.mv3d_blenders.flashlightAngle=config.flashlight.angle;
+	}
+	if('flashlightPitch' in config){
+		this.mv3d_blenders.flashlightPitch=Number(config.flashlightPitch);
+	}
+	if('flashlightYaw' in config){
+		this.mv3d_blenders.flashlightYaw=config.flashlightYaw;
+	}
+	this.mv3d_needsConfigure=true;
+
+	await Object(util["v" /* sleep */])();
+	if(mv3d["a" /* default */].mapLoaded){
+		mv3d["a" /* default */].createCharacterFor(this);
+	}
+};
+// CONCATENATED MODULE: ./src/plugin_commands.js
+
+
+
+const _pluginCommand = Game_Interpreter.prototype.pluginCommand;
+Game_Interpreter.prototype.pluginCommand = function(command, args) {
+	if(command.toLowerCase() !== 'mv3d'){
+		return _pluginCommand.apply(this,arguments);
+	}
+	const pc = new mv3d["a" /* default */].PluginCommand();
+	pc.INTERPRETER=this;
+	pc.FULL_COMMAND=[command,...args].join(' ');
+	args=args.filter(v=>v);
+	pc.CHAR=$gameMap.event(this._eventId);
+	if(args[0]){
+		const firstChar = args[0][0];
+		if(firstChar==='@'||firstChar==='＠'){
+			pc.CHAR = pc.TARGET_CHAR(args.shift());
+		}
+	}
+
+	const com = args.shift().toLowerCase();
+	if(com in pc){
+		pc[com](...args);
+	}
+};
+
+mv3d["a" /* default */].PluginCommand=class{
+	async animation(id,...a){
+		const char = (await this.AWAIT_CHAR(this.CHAR)).char;
+		char.requestAnimation(id);
+		if(mv3d["a" /* default */].isDisabled()){ return; }
+		let depth=true, scale=1;
+		for(let i=0;i<a.length;++i){
+			switch(a[i].toLowerCase()){
+				case 'depth': if(a[i+1]!=null)depth=Object(util["f" /* booleanString */])(a[i+1]); break;
+				case 'scale': if(a[i+1]!=null)scale=Number(a[i+1]); break;
+			}
+		}
+		char._mv3d_animationSettings={depth,scale};
+	}
+	async camera(...a){
+		var time=this._TIME(a[2]);
+		switch(a[0].toLowerCase()){
+			case 'pitch'    : this.pitch (a[1],time); return;
+			case 'yaw'      : this.yaw   (a[1],time); return;
+			case 'roll'     : this.roll  (a[1],time); return;
+			case 'dist'     :
+			case 'distance' : this.dist  (a[1],time); return;
+			case 'zoom'     : this.zoom  (a[1],time); return;
+			case 'height'   : this.height(a[1],time); return;
+			case 'mode'     : this.cameramode(a[1]); return;
+			case 'target'   : this._cameraTarget(a[1],time); return;
+			case 'pan'      : this.pan(a[1],a[2],a[3]); return;
+		}
+	}
+	yaw(deg,time=1){
+		this._RELATIVE_BLEND(mv3d["a" /* default */].blendCameraYaw,deg,time);
+		if ( mv3d["a" /* default */].is1stPerson() ) { mv3d["a" /* default */].playerFaceYaw(); }
+	}
+	pitch(deg,time=1){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendCameraPitch,deg,time); }
+	roll(deg,time=1){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendCameraRoll,deg,time); }
+	dist(n,time=1){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendCameraDist,n,time); }
+	zoom(n,time=1){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendCameraZoom,n,time); }
+	height(n,time=1){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendCameraHeight,n,time); }
+	_cameraTarget(target,time){
+		mv3d["a" /* default */].setCameraTarget(this.TARGET_CHAR(target), time);
+	}
+	pan(x,y,time=1){
+		console.log(x,y,time);
+		time=this._TIME(time);
+		this._RELATIVE_BLEND(mv3d["a" /* default */].blendPanX,x,time);
+		this._RELATIVE_BLEND(mv3d["a" /* default */].blendPanY,y,time);
+	}
+
+	get rotationmode(){ return this.allowrotation; }
+	get pitchmode(){ return this.allowpitch; }
+
+	allowrotation(b){ mv3d["a" /* default */].saveData('allowRotation',Object(util["f" /* booleanString */])(b)); }
+	allowpitch(b){ mv3d["a" /* default */].saveData('allowPitch',Object(util["f" /* booleanString */])(b)); }
+	lockcamera(b){ mv3d["a" /* default */].saveData('cameraLocked',Object(util["f" /* booleanString */])(b)); }
+
+	_VEHICLE(vehicle,data,value){
+		data=data.toLowerCase();
+		const key = `${Vehicle}_${data}`;
+		if(data==='big'){ value=Object(util["f" /* booleanString */])(value); }
+		else{ value=Object(util["t" /* relativeNumber */])(mv3d["a" /* default */].loadData(key,0),value); }
+		mv3d["a" /* default */].saveData(key,value);
+	}
+	boat(d,v){ this._VEHICLE('boat',d,v); }
+	ship(d,v){ this._VEHICLE('ship',d,v); }
+	airship(d,v){ this._VEHICLE('airship',d,v); }
+	cameramode(mode){ mv3d["a" /* default */].cameraMode=mode; }
+	fog(...a){
+		var time=this._TIME(a[2]);
+		switch(a[0].toLowerCase()){
+			case 'color': this._fogColor(a[1],time); return;
+			case 'near': this._fogNear(a[1],time); return;
+			case 'far': this._fogFar(a[1],time); return;
+			case 'dist': case 'distance':
+				time=this._TIME(a[3]);
+				this._fogNear(a[1],time);
+				this._fogFar(a[2],time);
+				return;
+		}
+		time=this._TIME(a[3]);
+		this._fogColor(a[0],time);
+		this._fogNear(a[1],time);
+		this._fogFar(a[2],time);
+	}
+	_fogColor(color,time){ mv3d["a" /* default */].blendFogColor.setValue(Object(util["n" /* makeColor */])(color).toNumber(),time); }
+	_fogNear(n,time){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendFogNear,n,time); }
+	_fogFar(n,time){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendFogFar,n,time); }
+	get ambient(){ return this.light; }
+	light(...a){
+		var time=this._TIME(a[2]);
+		switch(a[0].toLowerCase()){
+			case 'color'    : this._lightColor    (a[1],time); return;
+			//case 'intensity': this._lightIntensity(a[1],time); return;
+		}
+		time=this._TIME(a[1]);
+		this._lightColor(a[0],time);
+		//this._lightintensity(a[0],time);
+	}
+	_lightColor(color,time=1){ mv3d["a" /* default */].blendAmbientColor.setValue(Object(util["n" /* makeColor */])(color).toNumber(),time); }
+	//_lightIntensity(n,time=1){ this._RELATIVE_BLEND(mv3d.blendLightIntensity,n,time); }
+	async lamp(...a){
+		const char = await this.AWAIT_CHAR(this.CHAR);
+		char.setupLamp();
+		var time=this._TIME(a[2]);
+		switch(a[0].toLowerCase()){
+			case 'color'    : this._lampColor    (char,a[1],time); return;
+			case 'intensity': this._lampIntensity(char,a[1],time); return;
+			case 'dist'     :
+			case 'distance' : this._lampDistance (char,a[1],time); return;
+		}
+		time=this._TIME(a[3]);
+		this._lampColor(char,a[0],time);
+		this._lampIntensity(char,a[1],time);
+		this._lampDistance(char,a[2],time);
+	}
+	_lampColor(char,color,time=1){ char.blendLampColor.setValue(Object(util["n" /* makeColor */])(color).toNumber(),time); }
+	_lampIntensity(char,n,time=1){ this._RELATIVE_BLEND(char.blendLampIntensity,n,time); }
+	_lampDistance(char,n,time=1){ this._RELATIVE_BLEND(char.blendLampDistance,n,time); }
+	async flashlight(...a){
+		const char = await this.AWAIT_CHAR(this.CHAR);
+		char.setupFlashlight();
+		var time=this._TIME(a[2]);
+		switch(a[0].toLowerCase()){
+			case 'color'    : this._flashlightColor    (char,a[1],time); return;
+			case 'intensity': this._flashlightIntensity(char,a[1],time); return;
+			case 'dist'     :
+			case 'distance' : this._flashlightDistance (char,a[1],time); return;
+			case 'angle'    : this._flashlightAngle    (char,a[1],time); return;
+			case 'yaw'      : this._flashlightYaw      (char,a[1]); return;
+			case 'pitch'    : this._flashlightPitch    (char,a[1],time); return;
+		}
+		time=this._TIME(a[4]);
+		this._flashlightColor(char,a[0],time);
+		this._flashlightIntensity(char,a[1],time);
+		this._flashlightDistance(char,a[2],time);
+		this._flashlightAngle(char,a[3],time);
+	}
+	_flashlightColor(char,color,time){ char.blendFlashlightColor.setValue(Object(util["n" /* makeColor */])(color).toNumber(),time); }
+	_flashlightIntensity(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightIntensity,n,time); }
+	_flashlightDistance(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightDistance,n,time); }
+	_flashlightAngle(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightAngle,n,time); }
+	_flashlightPitch(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightPitch,n,time); }
+	_flashlightYaw(char,yaw){ this.configure(`flashlightYaw(${yaw})`); }
+	async elevation(...a){
+		const char = await this.AWAIT_CHAR(this.CHAR);
+		let time=this._TIME(a[1]);
+		this._RELATIVE_BLEND(char.blendElevation,a[0],time);
+	}
+	async configure(...a){
+		const char = await this.AWAIT_CHAR(this.CHAR);
+		mv3d["a" /* default */].readConfigurationFunctions(
+			a.join(' '),
+			mv3d["a" /* default */].eventConfigurationFunctions,
+			char.settings,
+		);
+		char.pageConfigure(char.settings);
+	}
+	disable(fadeType){ mv3d["a" /* default */].disable(fadeType); }
+	enable(fadeType){ mv3d["a" /* default */].enable(fadeType); }
+	_RELATIVE_BLEND(blender,n,time){ blender.setValue(Object(util["t" /* relativeNumber */])(blender.targetValue(),n),Number(time)); }
+	_TIME(time){
+		if(typeof time==='number'){ return time; }
+		time=Number(time);
+		if(Number.isNaN(time)){ return 1; }
+		return time;
+	}
+	ERROR_CHAR(){
+		console.warn(`MV3D: Plugin command \`${this.FULL_COMMAND}\` failed because target character was invalid.`);
+		//console.log(this.CHAR);
+	}
+	async AWAIT_CHAR(char){
+		if(!char){ return this.ERROR_CHAR(); }
+		let w=0;
+		while(!char.mv3d_sprite){
+			await Object(util["v" /* sleep */])(100);
+			if(++w>10){ return this.ERROR_CHAR(); }
+		}
+		return char.mv3d_sprite;
+	}
+	TARGET_CHAR(target){
+		return mv3d["a" /* default */].targetChar(target,$gameMap.event(this.INTERPRETER._eventId),this.CHAR);
+	}
+};
+
+mv3d["a" /* default */].targetChar=function(target,self=null,dfault=null){
+	if(!target){ return dfault; }
+	let m=target.toLowerCase().match(/[a-z]+/);
+	const mode=m?m[0]:'e';
+	m=target.match(/\d+/);
+	const id=m?Number(m[0]):0;
+	switch(mode[0]){
+		case 's': return self;
+		case 'p': return $gamePlayer;
+		case 'e':
+			if(!id){ return self; }
+			return $gameMap.event(id);
+		case 'v':
+			return $gameMap.vehicle(id);
+		case 'f':
+			return $gamePlayer.followers()._data[id];
+	}
+	return char;
+}
+mv3d["a" /* default */].getTargetString=function(char){
+	if( char instanceof Game_Player){
+		return `@p`;
+	}
+	if( char instanceof Game_Event ){
+		return `@e${char._eventId}`;
+	}
+	if( char instanceof Game_Follower){
+		return `@f${$gamePlayer._followers._data.indexOf(char)}`;
+	}
+	if( char instanceof Game_Vehicle){
+		return `@v${$gameMap._vehicles.indexOf(char)}`;
+	}
+}
+
+Game_CharacterBase.prototype.mv3d_requestAnimation = function(id,opts={}) {
+	this.requestAnimation(id);
+	this._mv3d_animationSettings=opts;
+};
+
+Game_Character.prototype.mv3d_configure = function(data){
+	mv3d["a" /* default */].readConfigurationFunctions(
+		data,
+		mv3d["a" /* default */].eventConfigurationFunctions,
+		this.mv3d_settings,
+	);
+	if(this.mv3d_sprite){
+		this.mv3d_sprite.pageConfigure(this.mv3d_settings);
+	}
+};
+// CONCATENATED MODULE: ./src/MapCellBuilder.js
+
+
+
+
+class MapCellBuilder_CellMeshBuilder{
+	constructor(){
+		this.submeshBuilders={};
+	}
+	build(){
+		const submeshBuildersArray=Object.values(this.submeshBuilders);
+		if(!submeshBuildersArray.length){ return null; }
+		const submeshes = submeshBuildersArray.map(builder=>builder.build());
+		const totalVertices = submeshes.reduce((total,mesh)=>{
+			if(typeof total!=='number'){ total=total.getTotalVertices(); }
+			return total+mesh.getTotalVertices();
+		});
+		const mesh = mod_babylon["k" /* Mesh */].MergeMeshes(submeshes,true,totalVertices>65536,undefined,false,true);
+		return mesh;
+	}
+	getBuilder(material){
+		if(!(material.name in this.submeshBuilders)){
+			this.submeshBuilders[material.name] = new MapCellBuilder_SubMeshBuilder(material);
+		}
+		return this.submeshBuilders[material.name];
+	}
+	addWallFace(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+		const builder = this.getBuilder(material);
+		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		builder.addWallFace(x,y,z,w,h,rot,uvRect,options);
+		if(options.double){
+			options.flip=!options.flip;
+			builder.addWallFace(x,y,z,w,h,rot,uvRect,options);
+		}
+	}
+	addFloorFace(material,tx,ty,tw,th,x,y,z,w,h,options={}){
+		const builder = this.getBuilder(material);
+		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		builder.addFloorFace(x,y,z,w,h,uvRect,options);
+		if(options.double){
+			options.flip=!options.flip;
+			builder.addFloorFace(x,y,z,w,h,uvRect,options);
+		}
+	}
+	addSlopeFace(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+		const builder = this.getBuilder(material);
+		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		builder.addSlopeFace(x,y,z,w,h,rot,uvRect,options);
+		if(options.double){
+			options.flip=!options.flip;
+			builder.addSlopeFace(x,y,z,w,h,rot,uvRect,options);
+		}
+	}
+	addSlopeSide(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+		const builder = this.getBuilder(material);
+		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		builder.addSlopeSide(x,y,z,w,h,rot,uvRect,options);
+		if(options.double){
+			options.flip=!options.flip;
+			builder.addSlopeSide(x,y,z,w,h,rot,uvRect,options);
+		}
+	}
+}
+
+class MapCellBuilder_SubMeshBuilder{
+	constructor(material){
+		this.material=material;
+		this.positions=[];
+		this.indices=[];
+		this.normals=[];
+		this.uvs=[];
+	}
+	build(){
+		const mesh = new mod_babylon["k" /* Mesh */]('cell mesh', mv3d["a" /* default */].scene);
+		//VertexData.ComputeNormals(this.positions,this.indices,this.normals);
+		const vdata = new mod_babylon["A" /* VertexData */]();
+		vdata.positions=this.positions;
+		vdata.indices=this.indices;
+		vdata.normals=this.normals;
+		vdata.uvs=this.uvs;
+		vdata.applyToMesh(mesh);
+		mesh.material=this.material;
+		return mesh;
+	}
+	addWallFace(x,z,y,w,h,rot,uvr,options){
+		z=-z;y=y;
+		const xf=Object(util["g" /* cos */])(rot);
+		const zf=Object(util["u" /* sin */])(rot);
+		const ww=w/2, hh=h/2;
+		const positions = [
+			x-ww*xf, y+hh, z+ww*zf,
+			x+ww*xf, y+hh, z-ww*zf,
+			x-ww*xf, y-hh, z+ww*zf,
+			x+ww*xf, y-hh, z-ww*zf,
+		];
+		let normals = [ -zf,0,-xf, -zf,0,-xf, -zf,0,-xf, -zf,0,-xf ];
+		const uvs = MapCellBuilder_SubMeshBuilder.getDefaultUvs(uvr);
+		const indices=MapCellBuilder_SubMeshBuilder.getDefaultIndices();
+		if(options.flip){ MapCellBuilder_SubMeshBuilder.flipFace(indices,normals); }
+		if(options.abnormal){ normals=[ 0,1,0, 0,1,0, 0,1,0, 0,1,0]; }
+		this.pushNewData(positions,indices,normals,uvs);
+	}
+	addFloorFace(x,z,y,w,h,uvr,options){
+		z=-z;y=y;
+		//const f=Boolean(options.flip)*-2+1;
+		//const ww=f*w/2, hh=h/2;
+		const ww=w/2, hh=h/2;
+		const positions = [
+			x-ww, y, z+hh,
+			x+ww, y, z+hh,
+			x-ww, y, z-hh,
+			x+ww, y, z-hh,
+		];
+		//const normals=[ 0,f,0, 0,f,0, 0,f,0, 0,f,0 ];
+		const normals=[ 0,1,0, 0,1,0, 0,1,0, 0,1,0 ];
+		const uvs = MapCellBuilder_SubMeshBuilder.getDefaultUvs(uvr);
+		const indices=MapCellBuilder_SubMeshBuilder.getDefaultIndices();
+		if(options.flip){ MapCellBuilder_SubMeshBuilder.flipFace(indices,normals); }
+		this.pushNewData(positions,indices,normals,uvs);
+	}
+	addSlopeFace(x,z,y,w,h,rot,uvr,options){
+		z=-z;y=y;
+		const xf=Object(util["g" /* cos */])(rot);
+		const zf=Object(util["u" /* sin */])(rot);
+		const ww=w/2, hh=h/2;
+		const positions = options.autotile ? [
+			x-ww, y+hh+hh*Math.round(Object(util["u" /* sin */])(-rot+util["a" /* PI */]*1/4)), z+ww,
+			x+ww, y+hh+hh*Math.round(Object(util["u" /* sin */])(-rot+util["a" /* PI */]*3/4)), z+ww,
+			x-ww, y+hh+hh*Math.round(Object(util["u" /* sin */])(-rot+util["a" /* PI */]*7/4)), z-ww,
+			x+ww, y+hh+hh*Math.round(Object(util["u" /* sin */])(-rot+util["a" /* PI */]*5/4)), z-ww,
+		] : [
+			x-ww*xf+ww*zf, y+h, z+ww*zf+ww*xf,
+			x+ww*xf+ww*zf, y+h, z-ww*zf+ww*xf,
+			x-ww*xf-ww*zf, y, z+ww*zf-ww*xf,
+			x+ww*xf-ww*zf, y, z-ww*zf-ww*xf,
+		];
+		const hn=Math.pow(2,-h);
+		const ihn=1-hn;
+		const normals=[ -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn, -zf*ihn,hn,-xf*ihn ];
+		let uvs = MapCellBuilder_SubMeshBuilder.getDefaultUvs(uvr);
+		const indices=MapCellBuilder_SubMeshBuilder.getDefaultIndices();
+		if(options.flip){ MapCellBuilder_SubMeshBuilder.flipFace(indices,normals); }
+		this.pushNewData(positions,indices,normals,uvs);
+	}
+	addSlopeSide(x,z,y,w,h,rot,uvr,options){
+		z=-z;y=y;
+		const xf=Object(util["g" /* cos */])(rot);
+		const zf=Object(util["u" /* sin */])(rot);
+		const ww=w/2, hh=h/2;
+		const positions = [
+			x-ww*xf, y+h, z+ww*zf,
+			x-ww*xf, y, z+ww*zf,
+			x+ww*xf, y, z-ww*zf,
+		];
+		const normals=[ -zf,0,-xf, -zf,0,-xf, -zf,0,-xf ];
+		const uvs = [
+			uvr.x1,uvr.y1,
+			uvr.x1,uvr.y2,
+			uvr.x2,uvr.y2,
+		];
+		const indices=[0,1,2];
+		if(options.flip){ MapCellBuilder_SubMeshBuilder.flipFace(indices,normals); }
+		this.pushNewData(positions,indices,normals,uvs);
+	}
+	pushNewData(positions,indices,normals,uvs){
+		this.indices.push(...indices.map(i=>i+this.positions.length/3));
+		this.positions.push(...positions);
+		this.normals.push(...normals);
+		this.uvs.push(...uvs);
+	}
+	static getUvRect(tsTexture,x,y,w,h){
+		const { width, height } = tsTexture.getBaseSize();
+		if(mv3d["a" /* default */].EDGE_FIX){ x+=mv3d["a" /* default */].EDGE_FIX;y+=mv3d["a" /* default */].EDGE_FIX;w-=mv3d["a" /* default */].EDGE_FIX*2;h-=mv3d["a" /* default */].EDGE_FIX*2; }
+		return {
+			x1:x/width,
+			y1:(height-y)/height,
+			x2:(x+w)/width,
+			y2:(height-y-h)/height,
+		};
+	}
+	static getDefaultUvs(uvr){
+		return [
+			uvr.x1,uvr.y1,
+			uvr.x2,uvr.y1,
+			uvr.x1,uvr.y2,
+			uvr.x2,uvr.y2,
+		];
+	}
+	static getDefaultIndices(){ return [1,0,2,1,2,3]; }
+	static flipFace(indices,normals){
+		indices.reverse();
+		for(let i=0;i<normals.length;++i){ normals[i]*=-1; }
+	}
+}
+// CONCATENATED MODULE: ./src/mapCell.js
+
+
+
+
+
+const SOURCEPLANE_GROUND = new mod_babylon["p" /* Plane */](0, 1, -Math.pow(0.1,100), 0);
+const SOURCEPLANE_WALL = new mod_babylon["p" /* Plane */](0,0,-1,0);
+
+class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
+	constructor(cx,cy){
+		const key = [cx,cy].toString();
+		super(`MapCell[${key}]`,mv3d["a" /* default */].scene);
+		this.parent=mv3d["a" /* default */].map;
+		//mv3d.cells[key]=this;
+		this.cx=cx; this.cy=cy;
+		this.ox=cx*mv3d["a" /* default */].CELL_SIZE; this.oy=cy*mv3d["a" /* default */].CELL_SIZE;
+		this.x=this.ox; this.y=this.oy;
+		this.key=key;
+		this.characters=[];
+
+		//this.load();
+	}
+	update(){
+		const loopPos = mv3d["a" /* default */].loopCoords((this.cx+0.5)*mv3d["a" /* default */].CELL_SIZE,(this.cy+0.5)*mv3d["a" /* default */].CELL_SIZE);
+		this.x=loopPos.x-mv3d["a" /* default */].CELL_SIZE/2;
+		this.y=loopPos.y-mv3d["a" /* default */].CELL_SIZE/2;
+	}
+	async load(){
+		const shapes = mv3d["a" /* default */].enumShapes;
+		this.builder = new MapCellBuilder_CellMeshBuilder();
+		// load all tiles in mesh
+		let cellWidth=mv3d["a" /* default */].CELL_SIZE,cellHeight=mv3d["a" /* default */].CELL_SIZE;
+		if(mv3d["a" /* default */].getMapConfig('edge')!=='clamp'){
+			cellWidth = Math.min(mv3d["a" /* default */].CELL_SIZE,$gameMap.width()-this.cx*mv3d["a" /* default */].CELL_SIZE);
+			cellHeight = Math.min(mv3d["a" /* default */].CELL_SIZE,$gameMap.height()-this.cy*mv3d["a" /* default */].CELL_SIZE);
+		}
+		const ceiling = mv3d["a" /* default */].getCeilingConfig();
+		for (let y=0; y<cellHeight; ++y)
+		for (let x=0; x<cellWidth; ++x){
+			ceiling.cull=false;
+			const tileData = mv3d["a" /* default */].getTileData(this.ox+x,this.oy+y);
+			let lastZ=Infinity;
+			const cullHeight = mv3d["a" /* default */].getCullingHeight(this.ox+x,this.oy+y);
+			for (let l=3; l>=0; --l){
+				if(mv3d["a" /* default */].isTileEmpty(tileData[l])){ continue; }
+				let z = mv3d["a" /* default */].getStackHeight(this.ox+x,this.oy+y,l);
+				const tileConf = mv3d["a" /* default */].getTileTextureOffsets(tileData[l],this.ox+x,this.oy+y,l);
+				const shape = tileConf.shape;
+				tileConf.realId = tileData[l];
+				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
+				//tileConf.isFringe = mv3d.isStarTile(tileData[l]);
+				//tileConf.isTable = mv3d.isTableTile(tileData[l]);
+				let wallHeight = mv3d["a" /* default */].getTileHeight(this.ox+x,this.oy+y,l)||tileConf.height||0;
+				let pitCull = false;
+				if(lastZ<z){ pitCull=true; }
+				if(!mv3d["a" /* default */].getTileFringe(this.ox+x,this.oy+y,l)){
+					lastZ=z;
+				}
+				//z+=tileConf.fringe;
+				//if(mv3d.isStarTile(tileData[l])){ z+=tileConf.fringeHeight; }
+				if(!shape||shape===shapes.FLAT||shape===shapes.SLOPE){
+					const hasWall=wallHeight||l===0;
+					const hasBottom=wallHeight>0&&z-wallHeight>cullHeight||tileConf.fringe>0;
+					if(!shape||shape===shapes.FLAT){
+						if(!pitCull){
+							await this.loadTile(tileConf,x,y,z+l*mv3d["a" /* default */].LAYER_DIST*!hasWall,l);
+						}
+						if(hasWall){
+							await this.loadWalls(tileConf,x,y,z,l,wallHeight);
+						}
+						if(hasBottom){
+							await this.loadTile(tileConf,x,y,z-wallHeight,l,true);
+						}
+					}else if(shape===shapes.SLOPE){
+						const slopeHeight = tileConf.slopeHeight||1;
+						wallHeight -= slopeHeight;
+						await this.loadSlope(tileConf,x,y,z,l,slopeHeight);
+						if(hasWall){
+							await this.loadWalls(tileConf,x,y,z-slopeHeight,l,wallHeight);
+						}
+						if(hasBottom){
+							await this.loadTile(tileConf,x,y,z-slopeHeight-Math.max(0,wallHeight),l,true);
+						}
+					}
+					if(z>=ceiling.height){ ceiling.cull=true; }
+				}
+				if(shape===shapes.FENCE){
+					await this.loadFence(tileConf,x,y,z,l,wallHeight);
+				}else if(shape===shapes.CROSS||shape===shapes.XCROSS){
+					await this.loadCross(tileConf,x,y,z,l,wallHeight);
+				}
+			}
+			if(!mv3d["a" /* default */].isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
+				await this.loadTile(ceiling,x,y,ceiling.height,0,true,!ceiling.skylight);
+			}
+
+			//if(mv3d.mapReady){ await sleep(); }
+			//if(!mv3d.mapLoaded){ this.earlyExit(); return; }
+		}
+		
+		this.mesh=this.builder.build();
+		if(this.mesh){
+			this.mesh.isPickable=false;
+			Object(util["v" /* sleep */])(10).then(()=>this.mesh.isPickable=true);
+			this.mesh.parent=this;
+			this.mesh.alphaIndex=0;
+			this.mesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
+			mv3d["a" /* default */].callFeatures('createCellMesh',this.mesh);
+		}
+		delete this.builder
+	}
+	dispose(){
+		super.dispose(...arguments);
+		if(this.mesh){
+			mv3d["a" /* default */].callFeatures('destroyCellMesh',this.mesh);
+		}
+	}
+	async loadTile(tileConf,x,y,z,l,ceiling=false,double=false){
+		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;
+		if(mv3d["a" /* default */].isTileEmpty(tileId)){ return; }
+		const configRect = ceiling?tileConf.bottom_rect:tileConf.top_rect;
+		const isAutotile = Tilemap.isAutotile(tileId)&&!configRect;
+		let rects;
+		if(configRect){
+			rects=[configRect];
+		}else{
+			rects = mv3d["a" /* default */].getTileRects(tileId);
+		}
+		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,ceiling?'bottom':'top');
+		for (const rect of rects){
+			this.builder.addFloorFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+				x + (rect.ox|0)/Object(util["x" /* tileSize */])() - 0.25*isAutotile,
+				y + (rect.oy|0)/Object(util["x" /* tileSize */])() - 0.25*isAutotile,
+				z,
+				1-isAutotile/2, 1-isAutotile/2, {flip:ceiling,double:double}
+			);
+		}
+	}
+	async loadWalls(tileConf,x,y,z,l,wallHeight){
+		for (const np of mapCell_MapCell.neighborPositions){
+			await this.loadWall(tileConf,x,y,z,l,wallHeight,np);
+		}
+	}
+	async loadWall(tileConf,x,y,z,l,wallHeight,np){
+		const isFringe = mv3d["a" /* default */].isStarTile(tileConf.realId)||tileConf.fringe>0;
+		// don't render walls on edge of map (unless it loops)
+		if( !mv3d["a" /* default */].getMapConfig('edge',true) )
+		if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
+		||(this.oy+y+np.y>=$dataMap.height||this.oy+y+np.y<0)&&!$gameMap.isLoopVertical()){
+			return;
+		}
+
+		let neededHeight=wallHeight;
+		let tileId=tileConf.side_id,configRect,texture_side='side';
+		if(mv3d["a" /* default */].isTileEmpty(tileId)){ return; }
+		
+		const neighborHeight = mv3d["a" /* default */].getCullingHeight(this.ox+x+np.x,this.oy+y+np.y,tileConf.depth>0?3:l,{
+			ignorePits:!(tileConf.depth>0),
+			dir:Input._makeNumpadDirection(np.x,np.y),
+		});
+		neededHeight = z-neighborHeight;
+		if(neededHeight>0&&(l>0||isFringe)){ neededHeight=Math.min(wallHeight,neededHeight); }
+
+		if(tileConf.depth>0&&neededHeight<0){
+			if(mv3d["a" /* default */].tileHasPit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
+			//if(mv3d.isTilePit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
+			neededHeight = Math.max(neededHeight,-tileConf.depth);
+			if(tileConf.hasInsideConf){
+				texture_side='inside';
+			}
+		}
+		else if(neededHeight<=0){ return; }
+
+		if(texture_side==='inside'){
+			tileId=tileConf.inside_id;
+			if(tileConf.inside_rect){ configRect = tileConf.inside_rect; }
+		}else{
+			if(tileConf.side_rect){ configRect = tileConf.side_rect; }
+		}
+
+		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,texture_side);
+
+		const wallPos = new mod_babylon["z" /* Vector3 */]( x+np.x/2, y+np.y/2, z );
+		const rot = -Math.atan2(np.x, np.y);
+		if(configRect || !Tilemap.isAutotile(tileId)){
+			const rect = configRect ? configRect : mv3d["a" /* default */].getTileRects(tileId)[0];
+			const builderOptions={};
+			if(neededHeight<0){ builderOptions.flip=true; }
+			this.builder.addWallFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+				wallPos.x,
+				wallPos.y,
+				z - neededHeight/2,
+				1,Math.abs(neededHeight), rot, builderOptions
+			);
+		}else{ // Autotile
+			//const npl=MapCell.neighborPositions[(+ni-1).mod(4)];
+			//const npr=MapCell.neighborPositions[(+ni+1).mod(4)];
+			const npl=new mod_babylon["y" /* Vector2 */](-np.y,np.x);
+			const npr=new mod_babylon["y" /* Vector2 */](np.y,-np.x);
+			const leftHeight = mv3d["a" /* default */].getCullingHeight(this.ox+x+npl.x,this.oy+y+npl.y,l,{dir:Input._makeNumpadDirection(npl.x,npl.y)});
+			const rightHeight = mv3d["a" /* default */].getCullingHeight(this.ox+x+npr.x,this.oy+y+npr.y,l,{dir:Input._makeNumpadDirection(npr.x,npr.y)});
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
+			let partHeight=Math.abs(neededHeight/wallParts);
+			let sw = Object(util["x" /* tileSize */])()/2;
+			let sh = Object(util["x" /* tileSize */])()/2;
+			if(mv3d["a" /* default */].isTableTile(tileConf.realId)){
+				sh=Object(util["x" /* tileSize */])()/3;
+				wallParts=1;
+				partHeight=wallHeight;
+				//partHeight=neededHeight;
+			}
+			for (let ax=-1; ax<=1; ax+=2){
+				for(let az=0;az<wallParts;++az){
+					let hasLeftEdge,hasRightEdge;
+					if(mv3d["a" /* default */].isTableTile(tileConf.realId)){
+						hasLeftEdge = leftHeight!=z;
+						hasRightEdge = rightHeight!=z;
+					}else{
+						hasLeftEdge = leftHeight<z-az*partHeight;
+						hasRightEdge = rightHeight<z-az*partHeight;
+					}
+					let sx,sy;
+					sx=bx*Object(util["x" /* tileSize */])();
+					sy=by*Object(util["x" /* tileSize */])();
+					sx=(bx+(ax>0?0.5+hasRightEdge:1-hasLeftEdge))*Object(util["x" /* tileSize */])();
+					if(mv3d["a" /* default */].isWaterfallTile(tileId)){
+						sy=(by+az%2/2)*Object(util["x" /* tileSize */])();
+					}else if(mv3d["a" /* default */].isTableTile(tileId)){
+						sy=(by+5/3)*Object(util["x" /* tileSize */])();
+					}else{
+						sy=(by+(az===0?0:az===wallParts-1?1.5:1-az%2*0.5))*Object(util["x" /* tileSize */])();
+					}
+					const builderOptions={};
+					if(neededHeight<0){ builderOptions.flip=true; }
+					this.builder.addWallFace(tsMaterial,sx,sy,sw,sh,
+						wallPos.x+0.25*ax*Math.cos(rot),
+						wallPos.y+0.25*ax*Math.sin(rot),
+						z - neededHeight*(neededHeight<0) - partHeight/2 - partHeight*az,
+						0.5,partHeight, rot, builderOptions
+					);
+				}
+			}
+		}
+	}
+	async loadFence(tileConf,x,y,z,l,wallHeight){
+		const tileId = tileConf.side_id;
+		if(mv3d["a" /* default */].isTileEmpty(tileId)){ return; }
+		const configRect = tileConf.side_rect;
+		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,'side');
+		const isAutotile = Tilemap.isAutotile(tileId);
+		const edges = [];
+		const fenceposts = tileConf.fencePosts==null?true:tileConf.fencePosts;
+		for (let ni=0; ni<mapCell_MapCell.neighborPositions.length; ++ni){
+			const np = mapCell_MapCell.neighborPositions[ni];
+			const neighborHeight = mv3d["a" /* default */].getTileHeight(this.ox+x+np.x,this.oy+y+np.y,l);
+			if(neighborHeight!==wallHeight){ edges.push(ni); }
+		}
+		for (let ni=0; ni<mapCell_MapCell.neighborPositions.length; ++ni){
+			const np = mapCell_MapCell.neighborPositions[ni];
+
+			let edge = edges.includes(ni);
+			if(!isAutotile||!fenceposts){
+				let connect = !(edge&&edges.length<4);
+				if(edges.length===3 && !edges.includes((ni+2)%4)){ connect=true; }
+				if(!connect){ continue; }
+			}
+
+			const rightSide = np.x>0||np.y<0;
+			let rot = Math.atan2(np.x, np.y)+Math.PI/2;
+			if(rightSide){
+				rot-=Math.PI;
+			}
+
+			if(isAutotile&&!configRect){
+				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+				for (let az=0;az<=1;++az){
+					this.builder.addWallFace(tsMaterial,
+						(edge ? (bx+rightSide*1.5) : (bx+1-rightSide*0.5) )*Object(util["y" /* tileWidth */])(),
+						(by+az*1.5)*Object(util["w" /* tileHeight */])(),
+						Object(util["y" /* tileWidth */])()/2, Object(util["w" /* tileHeight */])()/2,
+						x+np.x/4,
+						y+np.y/4,
+						z-wallHeight/4-az*wallHeight/2,
+						0.5,wallHeight/2, -rot, {double:true, abnormal:mv3d["a" /* default */].ABNORMAL}
+					);
+				}
+			}else{
+				const rect = configRect ? configRect : mv3d["a" /* default */].getTileRects(tileId)[0];
+				this.builder.addWallFace(tsMaterial,
+					rect.x+rect.width/2*(np.x>0||np.y>0),
+					rect.y,
+					rect.width/2, rect.height,
+					x+np.x/4,
+					y+np.y/4,
+					z-wallHeight/2,
+					0.5,wallHeight, rot, {double:true}
+				);
+			}
+		}
+	}
+	async loadCross(tileConf,x,y,z,l,wallHeight){
+		const tileId = tileConf.side_id;
+		if(mv3d["a" /* default */].isTileEmpty(tileId)){ return; }
+		const configRect = tileConf.side_rect;
+		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,'side');
+		const isAutotile = Tilemap.isAutotile(tileId);
+		let rects;
+		if(configRect){
+			rects=[configRect];
+		}else{
+			rects = mv3d["a" /* default */].getTileRects(tileId);
+		}
+		const rot = tileConf.shape===mv3d["a" /* default */].enumShapes.XCROSS ? Math.PI/4 : 0;
+		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
+		for (let i=0; i<=1; ++i){
+			for (const rect of rects){
+				const irot = -Math.PI/2*i+rot;
+				const trans= -0.25*isAutotile+(rect.ox|0)/Object(util["y" /* tileWidth */])();
+				this.builder.addWallFace(tsMaterial,
+					rect.x,rect.y,rect.width,rect.height,
+					x+trans*Math.cos(irot),
+					y+trans*Math.sin(irot),
+					z - (rect.oy|0)/Object(util["w" /* tileHeight */])()*wallHeight - partHeight/2,
+					1-isAutotile/2,partHeight, irot, {double:true, abnormal:mv3d["a" /* default */].ABNORMAL}
+				);
+			}
+		}
+	}
+	async loadSlope(tileConf,x,y,z,l,slopeHeight){
+		//const rot = Math.random()*Math.PI*2;
+		//const rot = Math.round((Math.random()*Math.PI*2)/(Math.PI/2))*Math.PI/2;
+		const {dir,rot} = mv3d["a" /* default */].getSlopeDirection(this.ox+x,this.oy+y,l,true);
+		const n1=new mod_babylon["y" /* Vector2 */](-Object(util["u" /* sin */])(rot+Math.PI),Object(util["g" /* cos */])(rot+Math.PI));
+		if(mv3d["a" /* default */].getCullingHeight(this.ox+x+n1.x,this.oy+y+n1.y,l)<z){
+			await this.loadWall(tileConf,x,y,z,l+1,slopeHeight,n1);
+		}
+		const n2=new mod_babylon["y" /* Vector2 */](n1.y,-n1.x);
+		const n2x=this.ox+x+n2.x, n2y=this.oy+y+n2.y;
+		if(mv3d["a" /* default */].getCullingHeight(n2x,n2y,l)<z){
+			let otherslope = mv3d["a" /* default */].isRampAt(n2x,n2y,z);
+			if(!otherslope||otherslope.z2!==z||otherslope.z1!==z-slopeHeight
+			||dir!=mv3d["a" /* default */].getSlopeDirection(n2x,n2y,otherslope.l,true).dir){
+				await this.loadSlopeSide(tileConf,x+n2.x/2,y+n2.y/2,z,l,slopeHeight,rot+Math.PI/2);
+			}
+		}
+		const n3=new mod_babylon["y" /* Vector2 */](-n1.y,n1.x);
+		const n3x=this.ox+x+n3.x, n3y=this.oy+y+n3.y;
+		if(mv3d["a" /* default */].getCullingHeight(n3x,n3y,l)<z){
+			let otherslope = mv3d["a" /* default */].isRampAt(n3x,n3y,z);
+			if(!otherslope||otherslope.z2!==z||otherslope.z1!==z-slopeHeight
+			||dir!=mv3d["a" /* default */].getSlopeDirection(n3x,n3y,otherslope.l,true).dir){
+				await this.loadSlopeSide(tileConf,x+n3.x/2,y+n3.y/2,z,l,slopeHeight,rot+Math.PI/2,{flip:true});
+			}
+		}
+		await this.loadSlopeTop(tileConf,x,y,z,l,slopeHeight,rot);
+	}
+	async loadSlopeTop(tileConf,x,y,z,l,slopeHeight,rot){
+		const tileId=tileConf.top_id;
+		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,'top');
+		const isAutotile = Tilemap.isAutotile(tileId)&&!tileConf.top_rect;
+		if(isAutotile){
+			const rects = mv3d["a" /* default */].getTileRects(tileId);
+			for (let i=0;i<rects.length;++i){
+				const rect = rects[i];
+				const ix=(i+1)%2*-2+1, iy=(Math.floor(i/2)+1)%2*2-1;
+				const hx=Math.max(0,Object(util["u" /* sin */])(rot)*ix)*slopeHeight/2;
+				const hy=Math.max(0,Object(util["g" /* cos */])(rot)*iy)*slopeHeight/2;
+				this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+					x + rect.ox/Object(util["x" /* tileSize */])() - 0.25,
+					y + rect.oy/Object(util["x" /* tileSize */])() - 0.25,
+					z - slopeHeight + hx + hy,
+					0.5, slopeHeight/2, rot, {autotile:true}
+				);
+			}
+		}else{
+			const rect = tileConf.top_rect?tileConf.top_rect:mv3d["a" /* default */].getTileRects(tileId)[0];
+			this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+				x, y, z - slopeHeight,
+				1, slopeHeight, rot, {}
+			);
+		}
+	}
+	async loadSlopeSide(tileConf,x,y,z,l,slopeHeight,rot,options={}){
+		const tileId=tileConf.side_id;
+		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,'side');
+		const isAutotile = Tilemap.isAutotile(tileId)&&!tileConf.side_rect;
+		let rect;
+		if(isAutotile){
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+			rect={x:(bx+0.5)*Object(util["y" /* tileWidth */])(),y:(by+0.5)*Object(util["w" /* tileHeight */])(),width:Object(util["y" /* tileWidth */])(),height:Object(util["w" /* tileHeight */])()};
+		}else{
+			rect = tileConf.side_rect?tileConf.side_rect:mv3d["a" /* default */].getTileRects(tileId)[0];
+		}
+		this.builder.addSlopeSide(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+			x, y, z - slopeHeight,
+			1, slopeHeight, rot, options
+		);
+	}
+	getAutotileCorner(tileId,realId=tileId,excludeTop=true){
+		const kind = Tilemap.getAutotileKind(tileId);
+		let tx = kind%8;
+		let ty = Math.floor(kind / 8);
+		if(tileId===realId && mv3d["a" /* default */].isWallTile(tileId)==1){ ++ty; }
+		var bx,by;
+		bx=tx*2;
+		by=ty;
+		if(Tilemap.isTileA1(tileId)){
+			if(kind<4){
+				bx=6*Math.floor(kind/2);
+				by=3*(kind%2) + excludeTop;
+			}else{
+				bx=8*Math.floor(tx/4) + (kind%2)*6;
+				by=ty*6 + Math.floor(tx%4/2)*3 + excludeTop*!(tx%2);
+				//if(excludeTop&&!(kind%2)){ by+=1; }
+			}
+			if(excludeTop&&kind>=4&&!(kind%2)){ by+=1; }
+		}else if(Tilemap.isTileA2(tileId)){
+			by=(ty-2)*3 + excludeTop;
+		}else if (Tilemap.isTileA3(tileId)){
+			by=(ty-6)*2;
+		}else if (Tilemap.isTileA4(tileId)){
+			if(excludeTop){
+				by=Math.ceil((ty-10)*2.5+0.5);
+			}else{
+				by=(ty-10)*2.5+(ty%2?0.5:0);
+			}
+		}
+		return {x:bx,y:by};
+	}
+}
+mapCell_MapCell.neighborPositions = [
+	new mod_babylon["y" /* Vector2 */]( 0, 1),
+	new mod_babylon["y" /* Vector2 */]( 1, 0),
+	new mod_babylon["y" /* Vector2 */]( 0,-1),
+	new mod_babylon["y" /* Vector2 */](-1, 0),
+];
+mapCell_MapCell.meshCache={};
+
+class MapCellFinalized {
+	
+}
+
+class MapCellBuilder {
+
+}
+
+
+
+// CONCATENATED MODULE: ./src/tileData.js
+
+
+
+
+Object.assign(mv3d["a" /* default */],{
+
+	_tilemap:null,
+	getTilemap(){
+		if(SceneManager._scene&&SceneManager._scene._spriteset){
+			this._tilemap = SceneManager._scene._spriteset._tilemap;
+		}
+		return this._tilemap;
+	},
+	getDataMap(){
+		if($dataMap){ this._dataMap=$dataMap }
+		return this._dataMap;
+	},
+
+	getRegion(x,y){
+		return this.getTileId(x,y,5);
+	},
+
+	getSetNumber(id){
+		if(Tilemap.isAutotile(id)){
+			return Tilemap.isTileA1(id)?0
+				: Tilemap.isTileA2(id)?1 : Tilemap.isTileA3(id)?2 : 3;
+		}else{
+			return Tilemap.isTileA5(id)?4:5+Math.floor(id/256);
+		}
+	},
+
+	getShadowBits(x,y){
+		return this.getTileId(x,y,4);
+	},
+
+	getTerrainTag(tileId){
+		return $gameMap.tilesetFlags()[tileId]>>12;
+	},
+
+	getTilePassage:Object(util["p" /* overload */])({
+		1(tileId){ return this.getTilePassage(tileId,this.getTileConfig(tileId)); },
+		2(tileId,conf){
+			if('pass' in conf){
+				return conf.pass;
+			}
+			const flag = $gameMap.tilesetFlags()[tileId];
+			if( (flag&0x10) ){ return this.enumPassage.THROUGH; }
+			if( (flag&0x0f)===0x0f ){ return this.enumPassage.WALL; }
+			else{ return this.enumPassage.FLOOR; }
+		},
+		3(x,y,l){
+			const tileId=this.getTileId(x,y,l);
+			return this.getTilePassage(tileId,this.getTileConfig(tileId,x,y,l));
+		},
+		default(tileId,x,y,l){
+			return this.getTilePassage(tileId,this.getTileConfig(tileId,x,y,l));
+		}
+	}),
+
+	getMaterialOptions(conf,side){
+		const options={};
+		if ('pass' in conf){ options.through=conf.pass===this.enumPassage.THROUGH; }
+		if ('alpha' in conf){ options.alpha=conf.alpha; }
+		if ('glow' in conf){ options.glow=conf.glow; }
+		if ('shadow' in conf){ options.shadow=conf.shadow; }
+		if(side){
+			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
+			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
+			if(`${side}_shadow` in conf){ options.shadow=conf[`${side}_shadow`]; }
+		}
+		if(conf.isCeiling){
+			options.backfaceCulling=conf.backfaceCulling;
+			options.through = conf.skylight;
+		}
+		if('alpha' in options){ options.transparent=true; }
+		return options;
+	},
+
+	getTileAnimationData(tileConf,side){
+		const tileId=tileConf[`${side}_id`];
+		if(`${side}_animData` in tileConf){
+			return tileConf[`${side}_animData`];
+		}
+		const animData={animX:0,animY:0};
+		if(Tilemap.isTileA1(tileId)){
+			const kind = Tilemap.getAutotileKind(tileId);
+			animData.animX=kind<=1?2:kind<=3?0:kind%2?0:2;
+			animData.animY=kind<=3?0:kind%2?1:0; 
+		}
+		return animData;
+	},
+
+	getTileConfig:Object(util["p" /* overload */])({
+		3(x,y,l){ return this.getTileConfig(this.getTileData(x,y)[l],x,y,l); },
+		default(tileId,x,y,l){
+			const conf = {};
+			if(!this.isTileEmpty(tileId)){
+				const ttag = this.getTerrainTag(tileId);
+				if(ttag && ttag in this.TTAG_DATA){
+					Object.assign(conf,this.TTAG_DATA[ttag]);
+				}
+				const ts_conf = this.tilesetConfigurations[this.normalizeAutotileId(tileId)];
+				if(ts_conf){
+					Object.assign(conf,ts_conf);
+				}
+			}
+			if(l===0){
+				const region = this.getRegion(x,y);
+				if(region && region in mv3d["a" /* default */].REGION_DATA){
+					Object.assign(conf,this.REGION_DATA[region]);
+				}
+			}
+			return conf;
+		},
+	}),
+
+	getTileTextureOffsets(tileId,x,y,l){
+		const conf = this.getTileConfig(tileId,x,y,l);
+		const tileRange = Tilemap.isAutotile(tileId)?48:1;
+		conf.hasInsideConf=Boolean(conf.inside_offset||conf.rectInside||('inside_id' in conf));
+		conf.hasBottomConf=Boolean(conf.bottom_offset||conf.rectBottom||('bottom_id' in conf));
+		if(conf.top_id==null){ 
+			conf.top_id=tileId;
+			if(conf.top_offset){
+				conf.top_id = tileId+conf.top_offset.x*tileRange+conf.top_offset.y*tileRange*8;
+			}
+		 }
+		if(conf.side_id==null){
+			conf.side_id=tileId;
+			if(conf.side_offset){
+				conf.side_id = tileId+conf.side_offset.x*tileRange+conf.side_offset.y*tileRange*8;
+			}
+		}
+		if(conf.inside_id==null){ 
+			conf.inside_id=conf.side_id;
+			if(conf.inside_offset){
+				conf.inside_id=tileId+conf.inside_offset.x*tileRange+conf.inside_offset.y*tileRange*8;
+			}
+		}
+		if(conf.bottom_id==null){
+			conf.bottom_id=conf.top_id;
+			if(conf.bottom_offset){
+				conf.bottom_id=tileId+conf.bottom_offset.x*tileRange+conf.bottom_offset.y*tileRange*8;
+			}
+		}
+		if(!('pass' in conf)){
+			conf.pass = this.getTilePassage(tileId,conf);
+		}
+		return conf;
+	},
+
+	getTileId(x,y,l=0){
+		const dataMap = this.getDataMap();
+		if($gameMap.isLoopHorizontal()){ x=x.mod(dataMap.width); }
+		if($gameMap.isLoopVertical()){ y=y.mod(dataMap.height); }
+		if(x<0||x>=dataMap.width||y<0||y>=dataMap.height){
+			if(this.getMapConfig('edge')==='clamp'){
+				const clamp = this.getMapConfig('edgeData',1);
+				if(x>=dataMap.width){ x=dataMap.width+(x-dataMap.width).mod(clamp)-clamp; }
+				else if(x<0){x=x.mod(clamp);}
+				if(y>=dataMap.height){ y=dataMap.height+(y-dataMap.height).mod(clamp)-clamp; }
+				else if(y<0){y=y.mod(clamp);}
+			}else{
+				return 0; 
+			}
+		}
+		return dataMap.data[(l * dataMap.height + y) * dataMap.width + x] || 0
+	},
+
+	getTileData(x,y){
+		if(!$dataMap || !$dataMap.data){ return [0,0,0,0]; }
+		const data = $dataMap.data;
+		const width = $dataMap.width;
+		const height = $dataMap.height;
+		if($gameMap.isLoopHorizontal()){
+			x=x.mod(width);
+		}
+		if($gameMap.isLoopVertical()){
+			y=y.mod(height);
+		}
+		if(x<0||x>=width||y<0||y>=height){
+			if(this.getMapConfig('edge')==='clamp'){
+				const clamp = this.getMapConfig('edgeData',1);
+				if(x>=width){ x=width+(x-width).mod(clamp)-clamp; }
+				else if(x<0){x=x.mod(clamp);}
+				if(y>=height){ y=height+(y-height).mod(clamp)-clamp; }
+				else if(y<0){y=y.mod(clamp);}
+			}else{
+				return [0,0,0,0]; 
+			}
+		}
+		if(x<0||x>=width||y<0||y>=height){ return [0,0,0,0]; }
+		const tileData=[];
+		for (let z=0;z<4;++z){//4 tile layers. Ignore shadow bits.
+			tileData[z] = data[(z * height + y) * width + x] || 0;
+		}
+		return tileData;
+	},
+
+
+	getTileHeight(x,y,l=0){
+		if(!$dataMap){ return 0; }
+
+		if($gameMap.isLoopHorizontal()){ x=x.mod($dataMap.width); }
+		if($gameMap.isLoopVertical()){ y=y.mod($dataMap.height); }
+
+		const tileId=this.getTileData(x,y)[l];
+		if(this.isTileEmpty(tileId)&&l>0){ return 0; }
+		// finge tiles don't stack normally. fringeHeight property should be used when drawing them.
+		//if(this.isStarTile(tileId)){ return 0; }
+
+		const shapes=this.enumShapes;
+		const conf =this.getTileConfig(tileId,x,y,l);
+		let height = 0;
+		if('height' in conf){
+			height = conf.height;
+		}else if(this.isWallTile(tileId)){
+			height = this.WALL_HEIGHT;
+		}else if(this.isTableTile(tileId)){
+			height = this.TABLE_HEIGHT;
+		}else if(this.isSpecialShape(conf.shape)){
+			switch(conf.shape){
+				case shapes.SLOPE: height=0; break;
+				default: height=1; break;
+			}
+		}
+		if('depth' in conf){
+			height -= conf.depth;
+		}
+		if(conf.shape===shapes.SLOPE){
+			height += conf.slopeHeight||1;
+		}
+		return height;
+	},
+
+	getStackHeight(x,y,layerId=3){
+		let height=0;
+		for(let l=0; l<=layerId; ++l){
+			height += this.getTileFringe(x,y,l);
+			height += this.getTileHeight(x,y,l);
+		}
+		return height;
+	},
+
+	getSlopeDirection(x,y,l,fullData=false){
+		const stackHeight = this.getStackHeight(x,y,l);
+		const tileId = this.getTileData(x,y)[l];
+		const conf = this.getTileConfig(tileId,x,y,l);
+		const slopeHeight = conf.slopeHeight||1;
+		const neighborPositions = mapCell_MapCell.neighborPositions;
+		const flag = $gameMap.tilesetFlags()[tileId];
+		const shadowBits = this.getShadowBits(x,y);
+		const shadowBitDirections=[0,0b0011,0b1010,0b0101,0b1100];
+		//const shadowBitDirections=[0,0b1100,0b0101,0b1010,0b0011];
+		let direction;
+		for(let i=0;i<neighborPositions.length;++i){
+			const n=neighborPositions[i];
+			const d={neighbor: n,favor:0};
+			d.dir = 5-3*n.y+n.x;
+			const nHeights = this.getCollisionHeights(x+n.x,y+n.y,{slopeMax:true});
+			const oHeights = this.getCollisionHeights(x-n.x,y-n.y,{slopeMin:true});
+			if(nHeights.some(c=>Math.abs(stackHeight-slopeHeight-c.z2)<=mv3d["a" /* default */].STAIR_THRESH)){ d.favor+=1; }
+			if(oHeights.some(c=>Math.abs(stackHeight-c.z2)<=mv3d["a" /* default */].STAIR_THRESH)){ d.favor+=1; }
+			if(flag&(1<<(d.dir/2-1))){ d.favor=-2; }
+			if(flag&(1<<((10-d.dir)/2-1))){ d.favor=-1; }
+			if((shadowBits&shadowBitDirections[d.dir/2])===shadowBitDirections[d.dir/2]){ d.favor=30; }
+			if(conf.slopeDirection===d.dir){ d.favor=100; }
+			if(!direction||d.favor>direction.favor){ direction=d; }
+		}
+		direction.rot=Object(util["i" /* degtorad */])(180-this.dirToYaw(direction.dir));
+		if(fullData){ return direction; }
+		return direction.rot;
+	},
+
+	getWalkHeight(x,y){
+		// get top height at x,y. Used for jumping and initializing z.
+		const heights = this.getCollisionHeights(x,y);
+		return heights[heights.length-1].z2;
+	},
+
+	getSlopeHeight(x,y,l,data=null){
+		const rx=Math.round(x), ry=Math.round(y);
+		if(data==null){ data = this.getTileConfig(this.getTileData(rx,ry)[l],rx,ry,l); }
+		const rot=this.getSlopeDirection(rx,ry,l);
+		const xf=Object(util["u" /* sin */])(rot), yf=-Object(util["g" /* cos */])(rot);
+		let px=(x+0.5)%1, py=(y+0.5)%1;
+		if(Math.sign(xf<0)){ px=1-px; }
+		if(Math.sign(yf<0)){ py=1-py; }
+		const sf=Math.abs(xf)*px + Math.abs(yf)*py;
+		return (data.slopeHeight||1)*sf;
+	},
+
+	getCollisionHeights(x,y,opts={}){
+		const rx=Math.round(x),ry=Math.round(y);
+		let z = 0;
+		const collisions=[{z1:-Infinity,z2:0}];
+		if(opts.layers){ collisions.layers=[]; }
+		const tileData=this.getTileData(rx,ry);
+		for(let l=0; l<=3; ++l){
+			let h = this.getTileHeight(rx,ry,l);
+			const tileId=tileData[l];
+			const conf = this.getTileConfig(tileId,rx,ry,l);
+			const shape = conf.shape;
+			const passage = this.getTilePassage(tileId,conf);
+			let skip = false;
+			if(passage===this.enumPassage.THROUGH){
+				h=0; skip=true;
+			}else if(shape===this.enumShapes.SLOPE){
+				if(opts.slopeMax){
+					h = h;
+				}else if(opts.slopeMin){
+					h = h-(conf.slopeHeight||1);
+				}else{
+					h = h-(conf.slopeHeight||1)+this.getSlopeHeight(x,y,l,conf);
+				}
+			}
+			const fringe = this.getTileFringe(rx,ry,l);
+			z+=fringe;
+			if(skip){ continue; }
+			if(h<0){
+				if(fringe+h<0){
+					collisions[collisions.length-1].z2+=fringe+h;
+				}
+			}else if(l===0){
+				collisions[0].z2=z+h;
+			}else{
+				collisions.push({z1:z,z2:z+h});
+			}
+			z+=h;
+			if(opts.layers){ collisions.layers[l]=collisions[collisions.length-1]; }
+			if(shape===this.enumShapes.SLOPE){ collisions[collisions.length-1].isSlope=true; }
+		}
+		return collisions;
+	},
+
+	getTileLayers(x,y,z,gte=true){
+		let closest_diff = Infinity;
+		let layers = [0];
+		let h=0;
+		//const tileData = this.getTileData(x,y);
+		for (let l=0; l<=3; ++l){
+			//if($gameMap.tilesetFlags()[tileData[l]]&0x10){ continue; }
+			if(this.getTilePassage(x,y,l)===this.enumPassage.THROUGH){ continue; }
+			const fringe=this.getTileFringe(x,y,l);
+			const height=this.getTileHeight(x,y,l);
+			const conf = this.getTileConfig(x,y,l);
+			h+=fringe+height;
+			const isSlope=conf.shape===this.enumShapes.SLOPE;
+			if(isSlope){
+				h-=conf.slopeHeight||1;
+			}
+			const diff = z-h;
+			if( gte ? z>=h : z>h ){
+				if(diff<closest_diff||isSlope&&diff<=closest_diff){
+					layers=[l];
+					closest_diff=diff;
+				}else if(diff===closest_diff){
+					layers.push(l);
+				}
+			}
+		}
+		return layers;
+	},
+
+	getFloatHeight(x,y,z=null,gte=true){
+		const tileData=this.getTileData(x,y);
+		const layers = z==null?[0,1,2,3]:this.getTileLayers(x,y,z,gte);
+		let float=0;
+		for(const l of layers){
+			const tileId=tileData[l];
+			if(this.isTileEmpty(tileId)){ continue; }
+			const conf = this.getTileConfig(tileId,x,y,l);
+			if(conf && 'float' in conf){
+				float += conf.float;
+			}
+		}
+		return float;
+	},
+
+	getStackFringeHeight(x,y,l=3){
+		return this.getStackHeight(x,y,l);
+	},
+
+	getTileFringe(x,y,l){
+		const tileId=this.getTileData(x,y)[l];
+		if(this.isTileEmpty(tileId)){ return 0; }
+		const conf = this.getTileConfig(tileId,x,y,l);
+		if(conf && 'fringe' in conf){ return conf.fringe; }
+		if(this.isStarTile(tileId)){
+			return this.FRINGE_HEIGHT;
+		}
+		return 0;
+	},
+
+	getCullingHeight(x,y,layerId=3,opts={}){
+		const dataMap=this.getDataMap();
+		if( !this.getMapConfig('edge',true) &&
+			(!$gameMap.isLoopHorizontal()&&(x<0||x>=dataMap.width)
+			||!$gameMap.isLoopVertical()&&(y<0||y>=dataMap.height))
+			){ return Infinity; }
+		const tileData=this.getTileData(x,y);
+		let height=0;
+		for(let l=0; l<=layerId; ++l){
+			if(this.getTileFringe(x,y,l)){ return height; }
+			const tileId=tileData[l];
+			const data = this.getTileConfig(tileId,x,y,l);
+			const shape = data.shape;
+			if(this.isSpecialShape(shape)){
+				if(shape===this.enumShapes.SLOPE){
+					height+=this.getTileHeight(x,y,l);
+					if(!opts.dir||opts.dir!==this.getSlopeDirection(x,y,l,true).dir){
+						height-=data.slopeHeight||1;
+					}
+				}
+				return height;
+			}
+			if(opts.ignorePits&&data.depth>0){
+				height+=data.depth;
+			}
+			height+=this.getTileHeight(x,y,l);
+		}
+		return height;
+	},
+
+	tileHasPit(x,y,layerId=3){
+		const tileData=this.getTileData(x,y);
+		for(let l=0; l<=layerId; ++l){
+			const tileId=tileData[l];
+			const conf = this.getTileConfig(tileId,x,y,l);
+			if(conf.depth>0){ return true; }
+		}
+		return false;
+	},
+
+	isTilePit(x,y,l){
+		const tileId=this.getTileData(x,y)[l];
+		const conf = this.getTileConfig(tileId,x,y,l);
+		return conf.depth>0;
+	},
+
+	getTileRects(tileId){
+		const rects = [];
+		const tilemap=this.getTilemap();
+		const isTable=tilemap._isTableTile(tileId);
+		tilemap._drawTile({addRect:(sheetId,sx,sy,dx,dy,width,height,animX,animY)=>{
+			rects.push({setN:sheetId,x:sx,y:sy,width:width,height:height,ox:dx,oy:dy});
+		}}, tileId, 0,0);
+		if (isTable) for (let i=rects.length-1;i>=0;--i){
+			if(rects[i].oy>Object(util["x" /* tileSize */])()/2){
+				rects[i-1].y+=Object(util["x" /* tileSize */])()*2/3;
+				rects.splice(i,1);
+			}
+		}
+		return rects;
+	},
+
+	isTileEmpty(tileId){
+		return !tileId||tileId===1544;
+	},
+
+	isWallTile(tileId){
+		const kind = Tilemap.getAutotileKind(tileId);
+		const ty = Math.floor(kind / 8);
+		const isWall = Tilemap.isTileA3(tileId) || Tilemap.isTileA4(tileId);
+		if (isWall && ty%2){ return 2; }
+		return isWall;
+	},
+
+	isTableTile(tileId){
+		return Boolean(Tilemap.isTileA2(tileId) && ($gameMap.tilesetFlags()[tileId] & 0x80));
+	},
+
+	isStarTile(tileId){
+		return Boolean($gameMap.tilesetFlags()[tileId] & 0x10);
+	},
+
+	isWaterfallTile(tileId){
+		const kind = Tilemap.getAutotileKind(tileId);
+		return Tilemap.isTileA1(tileId)&&kind>=4&&kind%2;
+	},
+
+	isSpecialShape(shape){
+		const shapes = mv3d["a" /* default */].enumShapes;
+		return shape===shapes.FENCE||shape===shapes.CROSS||shape===shapes.XCROSS||shape===shapes.SLOPE;
+	},
+	isPlatformShape(shape){
+		const shapes = mv3d["a" /* default */].enumShapes;
+		return shape==null||shape===shapes.FLAT||shape===shapes.SLOPE;
+	},
+
+	constructTileId(img,x,y){
+		const key = `TILE_ID_${img.toUpperCase()}`
+		let tileId = key in Tilemap ? Tilemap[key] : 0;
+		const tileRange = Tilemap.isAutotile(tileId) ? 48 : 1;
+		tileId += Number(x)*tileRange + Number(y)*tileRange*8;
+		return tileId;
+	},
+	normalizeAutotileId(tileId){
+		if(!Tilemap.isAutotile(tileId)){ return tileId; }
+		const kind = Tilemap.getAutotileKind(tileId);
+		return Tilemap.TILE_ID_A1 + kind*48;
+	},
+
+});
+// CONCATENATED MODULE: ./src/loadMap.js
+
+
+
+
+
+Object.assign(mv3d["a" /* default */],{
+
+	mapLoaded: false,
+	mapReady: false,
+	clearMap(){
+		this.mapLoaded=false;
+		this.clearMapCells();
+		for (let i=this.characters.length-1; i>=0; --i){
+			this.characters[i].dispose(false,true);
+		}
+		this.characters.length=0;
+		this.resetCameraTarget();
+
+		this.callFeatures('clearMap');
+	},
+	clearMapCells(){
+		// clear materials and textures
+		for (const key in this.textureCache){
+			this.textureCache[key].dispose();
+		}
+		for (const key in this.materialCache){
+			this.materialCache[key].dispose();
+		}
+		this.animatedTextures.length=0;
+		this.textureCache={};
+		this.materialCache={};
+		// clear map cells
+		for (const key in this.cells){
+			this.cells[key].dispose(false,true);
+		}
+		this.cells={};
+	},
+	reloadMap(){
+		this.clearMapCells();
+		if(mv3d["a" /* default */].mapReady) { this.updateMap(); }
+		this.callFeatures('reloadMap');
+	},
+
+	loadMap(){
+		//this.cameraStick.x=$gamePlayer._realX;
+		//this.cameraStick.y=$gamePlayer._realY;
+		this.updateBlenders();
+		this.updateMap();
+		this.createCharacters();
+		this.rememberCameraTarget();
+
+		this.callFeatures('loadMap');
+	},
+
+	async updateMap(){
+		if(this.mapUpdating){ return; }
+		this.mapLoaded=true;
+		this.mapUpdating=true;
+		// unload Far cells
+		for (const key in this.cells){
+			this.cells[key].unload=true;
+		}
+		// get range of cells based on render distance
+		const bounds = {
+			left:Math.floor((this.cameraStick.x-this.renderDist)/this.CELL_SIZE),
+			right:Math.floor((this.cameraStick.x+this.renderDist)/this.CELL_SIZE),
+			top:Math.floor((this.cameraStick.y-this.renderDist)/this.CELL_SIZE),
+			bottom:Math.floor((this.cameraStick.y+this.renderDist)/this.CELL_SIZE),
+		}
+		//clamp cell range to map
+		if(this.getMapConfig('edge')!=='clamp'){
+			if(!$gameMap.isLoopHorizontal()){
+				bounds.left=Math.max(0,bounds.left);
+				bounds.right=Math.min(bounds.right,Math.ceil($gameMap.width()/mv3d["a" /* default */].CELL_SIZE)-1);
+			}
+			if(!$gameMap.isLoopVertical()){
+				bounds.top=Math.max(0,bounds.top);
+				bounds.bottom=Math.min(bounds.bottom,Math.ceil($gameMap.height()/mv3d["a" /* default */].CELL_SIZE)-1);
+			}
+		}
+		const cellsToLoad=[];
+		for (let ix=bounds.left;ix<=bounds.right;++ix)
+		for (let iy=bounds.top;iy<=bounds.bottom;++iy){
+			let cx=ix, cy=iy;
+			if($gameMap.isLoopHorizontal()){ cx = cx.mod(Math.ceil($gameMap.width()/mv3d["a" /* default */].CELL_SIZE)); }
+			if($gameMap.isLoopVertical()){ cy = cy.mod(Math.ceil($gameMap.height()/mv3d["a" /* default */].CELL_SIZE)); }
+			const key = [cx,cy].toString();
+			if(key in this.cells){
+				this.cells[key].unload=false;
+			}else{
+				cellsToLoad.push(new mod_babylon["y" /* Vector2 */](cx,cy));
+			}
+		}
+		for (const key in this.cells){
+			if(mv3d["a" /* default */].UNLOAD_CELLS && this.cells[key].unload){
+				this.cells[key].dispose();
+				delete this.cells[key];
+			}
+		}
+		const cameraCellPos = new mod_babylon["y" /* Vector2 */](Math.round(this.cameraStick.x/this.CELL_SIZE-0.5),Math.round(this.cameraStick.y/this.CELL_SIZE-0.5));
+		cellsToLoad.sort((a,b)=>mod_babylon["y" /* Vector2 */].DistanceSquared(a,cameraCellPos)-mod_babylon["y" /* Vector2 */].DistanceSquared(b,cameraCellPos));
+		if(this.mapReady){
+			cellsToLoad.length=Math.min(25,cellsToLoad.length);
+		}
+		for (const cellpos of cellsToLoad){
+			let {x:cx,y:cy} = cellpos;
+			await this.loadMapCell(cx,cy);
+			if(this.mapReady){ await Object(util["v" /* sleep */])(10); }
+			if(!this.mapLoaded){ this.endMapUpdate(); return; }
+		}
+		this.endMapUpdate();
+	},
+
+	endMapUpdate(){
+		this.mapUpdating=false;
+		this.mapReady=true;
+	},
+
+	async loadMapCell(cx,cy){
+		const key = [cx,cy].toString();
+		if(key in this.cells){ return; }
+		const cell = new mapCell_MapCell(cx,cy);
+		this.cells[key]=cell;
+		await cell.load();
+	},
+
+	_cellsNeedingIntensiveUpdate:[],
+	intensiveUpdate(){
+		if(this._cellsNeedingIntensiveUpdate.length===0){ return; }
+		const now = performance.now();
+		let cell,index=null;
+		for (cell of this._cellsNeedingIntensiveUpdate){
+			if(now-cell._lastIntensiveUpdate<=300){ continue; }
+			index=this._cellsNeedingIntensiveUpdate.indexOf(cell);
+			break;
+		}
+		if(index==null||index<0){ return; }
+		this._cellsNeedingIntensiveUpdate.splice(index,1);
+		cell._lastIntensiveUpdate=now;
+		cell._needsIntensiveUpdate=false;
+		for(let character of cell.characters){
+			character.intensiveUpdate();
+		}
+		mv3d["a" /* default */].scene.sortLightsByPriority();
+	}
+
+});
+// CONCATENATED MODULE: ./src/assets.js
+
+
+
+
+Object.assign(mv3d["a" /* default */],{
+
+	animatedTextures:[],
+	textureCache:{},
+	materialCache:{},
+
+	async createTexture(url){
+		const textureUrl = await this.getTextureUrl(url);
+		const texture = new BABYLON.Texture(textureUrl,mv3d["a" /* default */].scene,!mv3d["a" /* default */].MIPMAP,true,BABYLON.Texture.NEAREST_SAMPLINGMODE);
+		return texture;
+	},
+
+	async getTextureUrl(url){
+		const bitmap = ImageManager.loadNormalBitmap(encodeURI(url));
+		if(Decrypter.hasEncryptedImages){
+			await mv3d["a" /* default */].waitBitmapLoaded(bitmap);
+			return bitmap.canvas.toDataURL();
+		}else{
+			return bitmap._image.src;
+		}
+	},
+
+	waitTextureLoaded(texture){return new Promise((resolve,reject)=>{
+		if(texture.isReady()){ resolve(); }
+		texture.onLoadObservable.addOnce(()=>{
+			resolve();
+		});
+	})},
+
+	waitBitmapLoaded(bitmap){
+		return new Promise(resolve=>bitmap.addLoadListener(resolve));
+	},
+
+	async getCachedTilesetTexture(setN,animX=0,animY=0){
+		const key = `TS:${setN}|${animX},${animY}`;
+		if(key in this.textureCache){
+			return this.textureCache[key];
+		}
+		const tsName = $gameMap.tileset().tilesetNames[setN];
+		if(!tsName){
+			return await this.getErrorTexture();
+		}
+		//const textureSrc=`img/tilesets/${tsName}.png`;
+		const textureSrc=ImageManager.loadTileset(tsName)._url;
+		const texture = await this.createTexture(textureSrc);
+		texture.hasAlpha=true;
+		this.textureCache[key]=texture;
+
+		await this.waitTextureLoaded(texture);
+
+		if(this.textureCache[key]!==texture){ return await this.getErrorTexture(); }
+		texture.updateSamplingMode(1);
+		if(animX||animY){
+			const { width, height } = texture.getBaseSize();
+			texture.frameData={x:0,y:0,w:width,h:height};
+			texture.animX = animX;
+			texture.animY = animY;
+			this.animatedTextures.push(texture);
+		}
+		return texture;
+		
+	},
+
+	async getErrorTexture(){
+		if(this.errorTexture){ return this.errorTexture; }
+		this.errorTexture = await this.createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/errorTexture.png`);
+		this.errorTexture.isError=true;
+		this.errorTexture.dispose=()=>{};
+		return this.errorTexture;
+	},
+
+	async getBushAlphaTexture(){
+		if(this.bushAlphaTexture){ return this.bushAlphaTexture; }
+		this.getBushAlphaTexture.getting=true;
+		this.bushAlphaTexture = await this.createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/bushAlpha.png`);
+		this.bushAlphaTexture.getAlphaFromRGB=true;
+		this.bushAlphaTexture.dispose=()=>{};
+		this.getBushAlphaTexture.getting=false;
+		return this.bushAlphaTexture;
+	},
+	getBushAlphaTextureSync(){
+		if(this.bushAlphaTexture){ return this.bushAlphaTexture; }
+		if(!this.getBushAlphaTexture.getting){
+			this.getBushAlphaTexture();
+		}
+		return null;
+	},
+
+	async getCachedTilesetMaterial(setN,animX=0,animY=0,options={}){
+		this.processMaterialOptions(options);
+		const key = `TS:${setN}|${animX},${animY}|${this.getExtraBit(options)}`;
+		if(key in this.materialCache){
+			return this.materialCache[key];
+		}
+		const texture = await this.getCachedTilesetTexture(setN,animX,animY);
+		const material = new mod_babylon["v" /* StandardMaterial */](key, this.scene);
+		material.diffuseTexture=texture;
+		if(options.transparent){
+			material.opacityTexture=texture;
+			material.alpha=options.alpha;
+		}
+		if(options.through){
+			material.mv3d_through=true;
+		}
+		material.mv3d_noShadow=!options.shadow;
+		material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
+		material.ambientColor.set(1,1,1);
+		material.mv3d_glowColor=options.glow;
+		material.emissiveColor.copyFrom(options.glow);
+		material.specularColor.set(0,0,0);
+		material.backFaceCulling=options.backfaceCulling;
+		if(!isNaN(this.LIGHT_LIMIT)){ material.maxSimultaneousLights=this.LIGHT_LIMIT; }
+		this.materialCache[key]=material;
+		return material;
+	},
+
+	async getCachedTilesetMaterialForTile(tileConf,side){
+		const setN = mv3d["a" /* default */].getSetNumber(tileConf[`${side}_id`]);
+		const options = mv3d["a" /* default */].getMaterialOptions(tileConf,side);
+		const animData = mv3d["a" /* default */].getTileAnimationData(tileConf,side);
+		//console.log(options);
+		return await mv3d["a" /* default */].getCachedTilesetMaterial(setN,animData.animX,animData.animY,options);
+	},
+
+	processMaterialOptions(options){
+		if('alpha' in options){
+			options.alpha = Math.round(options.alpha*7)/7;
+			if(options.alph<1){
+				options.transparent=true;
+			}
+		}else{ options.alpha=1; }
+		if('glow' in options){
+			options.glow.r = Object(util["z" /* unround */])(options.glow.r,255);
+			options.glow.g = Object(util["z" /* unround */])(options.glow.g,255);
+			options.glow.b = Object(util["z" /* unround */])(options.glow.b,255);
+			options.glow.a = Object(util["z" /* unround */])(options.glow.a,7);
+		}else{ options.glow=new mod_babylon["c" /* Color4 */](0,0,0,0); }
+		if(!('shadow' in options)){options.shadow=true;}
+		if(!('backfaceCulling' in options)){ options.backfaceCulling = mv3d["a" /* default */].BACKFACE_CULLING; }
+	},
+
+	getExtraBit(options){
+		let extra = 0;
+		extra|=Boolean(options.transparent)<<0;
+		extra|=7-options.alpha*7<<1;
+		extra|=(!options.shadow)<<4;
+		extra|=options.glow.a*7<<5;
+		extra|=options.glow.toNumber()<<8;
+		//out of bits.
+		let string = extra.toString(36);
+		extra = 0;
+		extra|=Boolean(options.through)<<0;
+		extra|=(!options.backfaceCulling)<<1;
+		string += ','+extra.toString(36);
+		return string;
+	},
+
+	// animations
+
+	lastAnimUpdate:0,
+	animXFrame:0,
+	animYFrame:0,
+	animDirection:1,
+	updateAnimations(){
+		if( performance.now()-this.lastAnimUpdate <= this.ANIM_DELAY){ return; }
+		this.lastAnimUpdate=performance.now();
+
+		if(this.animXFrame<=0){
+			this.animDirection=1;
+		}else if(this.animXFrame>=2){
+			this.animDirection=-1;
+		}
+		this.animXFrame += this.animDirection;
+		this.animYFrame=(this.animYFrame+1)%3;
+		for (const texture of this.animatedTextures){
+			texture.crop(
+				texture.frameData.x+texture.animX*this.animXFrame*Object(util["y" /* tileWidth */])(),
+				texture.frameData.y+texture.animY*this.animYFrame*Object(util["w" /* tileHeight */])(),
+				texture.frameData.w,
+				texture.frameData.h,
+				true
+			);
+		}
+	},
+
+});
+// CONCATENATED MODULE: ./src/characters.js
+
+
+
+
+
+Object.assign(mv3d["a" /* default */],{
+	createCharacters(){
+		const events = $gameMap.events();
+		for (const event of events){
+			this.createCharacterFor(event,0);
+		}
+		const vehicles = $gameMap.vehicles();
+		for (const vehicle of vehicles){
+			this.createCharacterFor(vehicle,1);
+		}
+		const followers = $gamePlayer.followers()._data;
+		for (let f=followers.length-1; f>=0; --f){
+			this.createCharacterFor(followers[f],29-f);
+		}
+		this.createCharacterFor($gamePlayer,30);
+	},
+
+	createCharacterFor(char,order){
+		if(!char.mv3d_sprite){
+			const sprite = new characters_Character(char,order);
+			Object.defineProperty(char,'mv3d_sprite',{
+				value:sprite,
+				configurable:true,
+			});
+			this.characters.push(sprite);
+			return sprite;
+		}
+		return char.mv3d_sprite;
+	},
+
+	updateCharacters(){
+		for (let i=this.characters.length-1; i>=0; --i){
+			this.characters[i].update();
+		}
+	},
+
+	setupSpriteMeshes(){
+		this.Meshes = characters_Sprite.Meshes = {};
+		characters_Sprite.Meshes.BASIC=mod_babylon["l" /* MeshBuilder */].CreatePlane('sprite mesh',{ sideOrientation: mod_babylon["d" /* DOUBLESIDE */]},mv3d["a" /* default */].scene);
+		characters_Sprite.Meshes.FLAT=mod_babylon["k" /* Mesh */].MergeMeshes([characters_Sprite.Meshes.BASIC.clone().rotate(util["b" /* XAxis */],Math.PI/2,mod_babylon["B" /* WORLDSPACE */])]);
+		characters_Sprite.Meshes.SPRITE=mod_babylon["k" /* Mesh */].MergeMeshes([characters_Sprite.Meshes.BASIC.clone().translate(util["c" /* YAxis */],0.5,mod_babylon["B" /* WORLDSPACE */])]);
+		characters_Sprite.Meshes.CROSS=mod_babylon["k" /* Mesh */].MergeMeshes([
+			characters_Sprite.Meshes.SPRITE.clone(),
+			characters_Sprite.Meshes.SPRITE.clone().rotate(util["c" /* YAxis */],Math.PI/2,mod_babylon["B" /* WORLDSPACE */]),
+		]);
+		for (const key in characters_Sprite.Meshes){
+			characters_Sprite.Meshes[key].renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
+			mv3d["a" /* default */].scene.removeMesh(characters_Sprite.Meshes[key]);
+		}
+	},
+
+	async getShadowMaterial(){
+		if(this._shadowMaterial){ return this._shadowMaterial; }
+		const shadowTexture = await mv3d["a" /* default */].createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/shadow.png`);
+		const shadowMaterial = new mod_babylon["v" /* StandardMaterial */]('shadow material', mv3d["a" /* default */].scene);
+		this._shadowMaterial=shadowMaterial;
+		shadowMaterial.diffuseTexture=shadowTexture;
+		shadowMaterial.opacityTexture=shadowTexture;
+		shadowMaterial.specularColor.set(0,0,0);
+		shadowMaterial.dispose=()=>{};
+		return shadowMaterial;
+	},
+	async getShadowMesh(){
+		let shadowMesh;
+		while(this.getShadowMesh.getting){ await Object(util["v" /* sleep */])(100); }
+		if(this._shadowMesh){ shadowMesh=this._shadowMesh}
+		else{
+			this.getShadowMesh.getting=true;
+			shadowMesh=characters_Sprite.Meshes.FLAT.clone('shadow mesh');
+			shadowMesh.material=await this.getShadowMaterial();
+			this._shadowMesh=shadowMesh;
+			mv3d["a" /* default */].scene.removeMesh(shadowMesh);
+			this.getShadowMesh.getting=false;
+		}
+		return shadowMesh.clone();
+	},
+
+	ACTOR_SETTINGS: [],
+});
+
+class characters_Sprite extends mod_babylon["x" /* TransformNode */]{
+	constructor(){
+		super('sprite',mv3d["a" /* default */].scene);
+		this.spriteOrigin = new mod_babylon["x" /* TransformNode */]('sprite origin',mv3d["a" /* default */].scene);
+		this.spriteOrigin.parent=this;
+		this.mesh = characters_Sprite.Meshes.FLAT.clone();
+		this.mesh.parent = this.spriteOrigin;
+		this.textureLoaded=false;
+	}
+	async setMaterial(src){
+		let newTexture;
+		if(src==='error'){
+			newTexture = await mv3d["a" /* default */].getErrorTexture();
+		}else{
+			newTexture = await mv3d["a" /* default */].createTexture(src);
+		}
+		await this.waitTextureLoaded(newTexture);
+		this.disposeMaterial();
+		this.texture = newTexture;
+		this.texture.hasAlpha=true;
+		this.onTextureLoaded();
+		this.material = new mod_babylon["v" /* StandardMaterial */]('sprite material',mv3d["a" /* default */].scene);
+		this.material.diffuseTexture=this.texture;
+		this.material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
+		this.material.ambientColor.set(1,1,1);
+		this.material.specularColor.set(0,0,0);
+		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
+		this.mesh.material=this.material;
+	}
+	async waitTextureLoaded(texture=this.texture){
+		await mv3d["a" /* default */].waitTextureLoaded(texture);
+	}
+	onTextureLoaded(){
+		this.texture.updateSamplingMode(1);
+		this.textureLoaded=true;
+	}
+	disposeMaterial(){
+		if(this.material){
+			this.material.dispose();
+			this.texture.dispose();
+			this.material=null;
+			this.texture=null;
+		}
+	}
+	dispose(...args){
+		this.disposeMaterial();
+		super.dispose(...args);
+	}
+}
+
+const z_descriptor = {
+	configurable: true,
+	get(){ return this._mv3d_z; },
+	set(v){
+		this._mv3d_z=v;
+		if(this.mv3d_sprite){ this.mv3d_sprite.position.y=v; }
+	}
+}
+const z_descriptor2 = {
+	configurable: true,
+	get(){ return this.char._mv3d_z; },
+	set(v){
+		this.char._mv3d_z=v;
+		this.position.y=v;
+	}
+}
+
+class characters_Character extends characters_Sprite{
+	constructor(char,order){
+		super();
+		this.order=order;
+		this.mesh.order=this.order;
+		this.mesh.character=this;
+		this._character=this.char=char;
+		this.charName='';
+		this.charIndex=0;
+		
+		if(this.char.mv_sprite){
+			this.char.mv_sprite.updateBitmap();
+		}
+
+		if(!this.char.mv3d_settings){ this.char.mv3d_settings={}; }
+		if(!this.char.mv3d_blenders){ this.char.mv3d_blenders={}; }
+
+		this.isVehicle = this.char instanceof Game_Vehicle;
+		this.isBoat = this.isVehicle && this.char.isBoat();
+		this.isShip = this.isVehicle && this.char.isShip();
+		this.isAirship = this.isVehicle && this.char.isAirship();
+		this.isEvent = this.char instanceof Game_Event;
+		this.isPlayer = this.char instanceof Game_Player;
+		this.isFollower = this.char instanceof Game_Follower;
+
+		this.updateCharacter();
+		this.updateShape();
+
+		if(!('_mv3d_z' in this.char)){
+			this.char._mv3d_z = mv3d["a" /* default */].getWalkHeight(this.char.x,this.char.y);
+		}
+		Object.defineProperty(this.char,'z',z_descriptor);
+		Object.defineProperty(this,'z',z_descriptor2);
+		this.z=this.z;
+		this.platformHeight = this.z;
+		this.targetElevation = this.z;
+		this.prevZ = this.z;
+		this.needsPositionUpdate=true;
+		this.needsMaterialUpdate=true;
+		//this.elevation = 0;
+
+		mv3d["a" /* default */].getShadowMesh().then(shadow=>{
+			this.shadow = shadow;
+			this.shadow.parent = this;
+		});
+
+		this.blendElevation = this.makeBlender('elevation',0);
+
+		this.lightOrigin = new mod_babylon["x" /* TransformNode */]('light origin',mv3d["a" /* default */].scene);
+		this.lightOrigin.parent=this;
+		this.setupLights();
+		
+		if(this.isEvent){
+			this.eventConfigure();
+		}else{
+			this.initialConfigure();
+			this.needsMaterialUpdate=true;
+		}
+
+		this.intensiveUpdate();
+	}
+
+	get settings(){ return this.char.mv3d_settings; }
+
+	isBitmapReady(){
+		return Boolean(this.bitmap && this.bitmap.isReady() && !this._waitingForBitmap);
+	}
+
+	isTextureReady(){
+		return Boolean(
+			this.texture && this.texture.isReady() && this.isBitmapReady()
+		);
+	}
+
+	get mv_sprite(){
+		return this.char.mv_sprite||{};
+	}
+	get bitmap(){
+		return this.mv_sprite.bitmap;
+	}
+
+	setTileMaterial(){
+		const setN = mv3d["a" /* default */].getSetNumber(this._tileId);
+		const tsName = $gameMap.tileset().tilesetNames[setN];
+		if(tsName){
+			//const textureSrc=`img/tilesets/${tsName}.png`;
+			const textureSrc=ImageManager.loadTileset(tsName)._url;
+			this.setMaterial(textureSrc);
+		}else{
+			this.setMaterial("error");
+		}
+	}
+
+	async waitBitmapLoaded(){
+		if(!this.char.mv_sprite){
+			await Object(util["v" /* sleep */])();
+			if(!this.char.mv_sprite){
+				console.warn('mv_sprite is undefined');
+				return;
+			}
+		}
+		this._waitingForBitmap=true;
+		this.char.mv_sprite.updateBitmap();
+		await mv3d["a" /* default */].waitBitmapLoaded(this.char.mv_sprite.bitmap);
+		this._waitingForBitmap=false;
+	}
+
+	async waitTextureLoaded(texture=this.texture){
+		await this.waitBitmapLoaded();
+		await super.waitTextureLoaded(texture);
+	}
+
+	onTextureLoaded(){
+		super.onTextureLoaded();
+		//this.updateFrame();
+		this.updateScale();
+		this.needsMaterialUpdate=true;
+	}
+
+	isImageChanged(){
+		return (this._tilesetId !== $gameMap.tilesetId()
+		||this._tileId !== this._character.tileId()
+		||this._characterName !== this._character.characterName()
+		//||this._characterIndex !== this._character.characterIndex()
+		);
+	}
+	updateCharacter(){
+		this.needsPositionUpdate=true;
+		this._tilesetId = $gameMap.tilesetId();
+		this._tileId = this._character.tileId();
+		this._characterName = this._character.characterName();
+		this._characterIndex = this._character.characterIndex();
+		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
+		this.isEmpty=false;
+		this.mesh.setEnabled(true);
+		if(this._tileId>0){
+			this.setTileMaterial(this._tileId);
+		}else if(this._characterName){
+			this.setMaterial(`img/characters/${this._characterName}.png`);
+		}else{
+			this.isEmpty=true;
+			this.textureLoaded=false;
+			this.disposeMaterial();
+			this.mesh.setEnabled(false);
+			this.spriteWidth=1;
+			this.spriteHeight=1;
+			this.updateScale();
+		}
+	}
+	setFrame(x,y,w,h){
+		if(!this.isTextureReady()){ return; }
+		this.texture.crop(x,y,w,h,this._tileId>0);
+	}
+
+	async updateScale(){
+		if(this.isEmpty){
+			this.spriteWidth=1;
+			this.spriteHeight=1;
+			this.mesh.scaling.set(1,1,1);
+			return;
+		}
+		if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
+		this.mv_sprite.updateBitmap();
+		const configScale = this.getConfig('scale',new mod_babylon["y" /* Vector2 */](1,1));
+		this.spriteWidth=this.mv_sprite.patternWidth()/Object(util["x" /* tileSize */])() * configScale.x;
+		this.spriteHeight=this.mv_sprite.patternHeight()/Object(util["x" /* tileSize */])() * configScale.y;
+		const xscale = this.spriteWidth;
+		const yscale = this.spriteHeight;
+
+		this.mesh.scaling.set(xscale,yscale,yscale);
+	}
+
+	getDefaultConfigObject(){
+		if(this.isVehicle){
+			return mv3d["a" /* default */][`${this.char._type.toUpperCase()}_SETTINGS`].conf;
+		}
+		if(this.char.isTile()){
+			return mv3d["a" /* default */].EVENT_TILE_SETTINGS;
+		}else if(this.isEvent && this.char.isObjectCharacter()){
+			return mv3d["a" /* default */].EVENT_OBJ_SETTINGS;
+		}else{
+			return mv3d["a" /* default */].EVENT_CHAR_SETTINGS;
+		}
+	}
+
+	getActorConfigObject(){
+		const id = $gameParty._actors[ this.isFollower ? this.char._memberIndex : 0 ];
+		if(!id){ return {}; }
+		if(!(id in mv3d["a" /* default */].ACTOR_SETTINGS)){
+			const data = $dataActors[id];
+			mv3d["a" /* default */].ACTOR_SETTINGS[id]=mv3d["a" /* default */].readConfigurationFunctions(
+				mv3d["a" /* default */].readConfigurationBlocksAndTags(data.note),
+				mv3d["a" /* default */].eventConfigurationFunctions
+			);
+		}
+		return mv3d["a" /* default */].ACTOR_SETTINGS[id];
+	}
+
+	getConfig(key,dfault=undefined){
+		if(key in this.settings){ return this.settings[key]; }
+		if(this.isEvent){
+			if(this.settings_event_page && key in this.settings_event_page){
+				return this.settings_event_page[key];
+			}else if(this.settings_event && key in this.settings_event){
+				return this.settings_event[key];
+			}
+		}else if(this.isPlayer||this.isFollower){
+			const ACTOR_SETTINGS = this.getActorConfigObject();
+			if(key in ACTOR_SETTINGS){
+				return ACTOR_SETTINGS[key];
+			}
+		}
+		const EVENT_SETTINGS = this.getDefaultConfigObject();
+		if(key in EVENT_SETTINGS){
+			return EVENT_SETTINGS[key];
+		}
+		return dfault;
+	}
+	hasConfig(key){
+		return key in this.settings
+		||this.isEvent &&
+			(this.settings_event_page && key in this.settings_event_page
+			|| this.settings_event && key in this.settings_event)
+		|| (this.isPlayer||this.isFollower) && key in this.getActorConfigObject()
+		|| key in this.getDefaultConfigObject();
+	}
+
+	eventConfigure(){
+		if(!this.settings_event){
+			this.settings_event={};
+			const note = this.char.event().note;
+			mv3d["a" /* default */].readConfigurationFunctions(
+				mv3d["a" /* default */].readConfigurationTags(note),
+				mv3d["a" /* default */].eventConfigurationFunctions,
+				this.settings_event,
+			);
+
+			this.initialConfigure();
+		}
+		this.settings_event_page={};
+		const page = this.char.page();
+		if(!page){ return; }
+		let comments = '';
+		for (const command of page.list){
+			if(command.code===108||command.code===408){
+				comments+=command.parameters[0];
+			}
+		}
+		mv3d["a" /* default */].readConfigurationFunctions(
+			mv3d["a" /* default */].readConfigurationTags(comments),
+			mv3d["a" /* default */].eventConfigurationFunctions,
+			this.settings_event_page,
+		);
+		this.updateScale();
+		this.updateShape();
+
+		if(this.char.mv3d_needsConfigure){
+			this.char.mv3d_needsConfigure=false;
+			this.needsPositionUpdate=true;
+		}else{ return; }
+
+		this.pageConfigure();
+
+	}
+
+	initialConfigure(){
+		this.configureHeight();
+	}
+
+	pageConfigure(settings=this.settings_event_page){
+		const transient = settings===this.settings;
+		if('pos' in settings){
+			const event=this.char.event();
+			const pos = settings;
+			this.char.locate(
+				Object(util["t" /* relativeNumber */])(event.x,pos.x),
+				Object(util["t" /* relativeNumber */])(event.y,pos.y),
+			);
+			if(transient)delete settings.pos;
+		}
+		this.setupEventLights();
+
+		if(this.lamp){
+			if('lamp' in settings){
+				const lampConfig = this.getConfig('lamp');
+				this.blendLampColor.setValue(lampConfig.color,0.5);
+				this.blendLampIntensity.setValue(lampConfig.intensity,0.5);
+				this.blendLampDistance.setValue(lampConfig.distance,0.5);
+			}
+			if(transient)delete settings.lamp;
+		}
+		if(this.flashlight){
+			if('flashlight' in settings){
+				const flashlightConfig = this.getConfig('flashlight');
+				this.blendFlashlightColor.setValue(flashlightConfig.color,0.5);
+				this.blendFlashlightIntensity.setValue(flashlightConfig.intensity,0.5);
+				this.blendFlashlightDistance.setValue(flashlightConfig.distance,0.5);
+				this.blendFlashlightAngle.setValue(flashlightConfig.angle,0.5);
+				if(transient)delete settings.flashlight;
+			}
+			if('flashlightPitch' in settings){
+				this.blendFlashlightPitch.setValue(this.getConfig('flashlightPitch',90),0.25);
+				if(transient)delete settings.flashlightPitch;
+			}
+		}
+		if('height' in settings || this.isAbove!==(this.char._priorityType===2)){
+			this.configureHeight();
+			if(transient)delete settings.height;
+		}
+
+		this.updateScale();
+		this.updateShape();
+		this.needsMaterialUpdate=true;
+		this.updateLightOffsets();
+	}
+
+	updateEmissive(){
+		if(!this.material){ return; }
+		const emissiveColor = this.material.emissiveColor;
+		const glow = this.getConfig('glow', new mod_babylon["c" /* Color4 */](0,0,0,0));
+		this.material.mv3d_glowColor=glow;
+		if(this.lamp){
+			const lampColor=this.lamp.diffuse;
+			const intensity = Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));
+			emissiveColor.set(
+				Math.max(glow.r,lampColor.r*intensity),
+				Math.max(glow.g,lampColor.g*intensity),
+				Math.max(glow.b,lampColor.b*intensity)
+			);
+		}else{
+			emissiveColor.set(glow.r,glow.g,glow.b);
+		}
+		const blendColor = this.mv_sprite._blendColor;
+		const blendAlpha=blendColor[3]/255;
+		emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
+		emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
+		emissiveColor.b+=(2-emissiveColor.b)*Math.pow(blendColor[2]/255*blendAlpha,0.5);
+
+		this.material.mv3d_noShadow=!this.getConfig('dynShadow',true);
+	}
+
+	configureHeight(){
+		this.isAbove = this.char._priorityType===2;
+		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('zlock')?mv3d["a" /* default */].EVENT_HEIGHT:0) );
+		this.blendElevation.setValue(height,0);
+		this.z = this.platformHeight + height;
+	}
+
+	setupMesh(){
+		if(!this.mesh.mv3d_isSetup){
+			mv3d["a" /* default */].callFeatures('createCharMesh',this.mesh);
+			this.mesh.parent = this.spriteOrigin;
+			this.mesh.character=this;
+			this.mesh.order=this.order;
+			if(this.material){
+				this.mesh.material=this.material;
+			}
+			if(this.isEmpty){
+				this.mesh.setEnabled(false);
+			}else{
+				this.mesh.setEnabled(true);
+			}
+			this.mesh.mv3d_isSetup=true;
+		}
+		if(this.flashlight){
+			this.flashlight.excludedMeshes.splice(0,Infinity);
+			this.flashlight.excludedMeshes.push(this.mesh);
+		}
+	}
+
+	dirtyNearbyCells(){
+		if(!this.cell){ return; }
+		characters_Character.dirtyNearbyCells(this.cell.cx,this.cell.cy);
+	}
+	static dirtyNearbyCells(cx,cy){
+		for(let ix=cx-1; ix<=cx+1; ++ix)
+		for(let iy=cy-1; iy<=cy+1; ++iy){
+			let x=ix, y=iy;
+			if($gameMap.isLoopHorizontal()){ x=x.mod(Math.ceil($gameMap.width()/mv3d["a" /* default */].CELL_SIZE)); }
+			if($gameMap.isLoopVertical()){ y=y.mod(Math.ceil($gameMap.height()/mv3d["a" /* default */].CELL_SIZE)); }
+			const cell = mv3d["a" /* default */].cells[[x,y]];
+			if(!cell){ continue; }
+			if(!cell._needsIntensiveUpdate){
+				cell._needsIntensiveUpdate=true;
+				mv3d["a" /* default */]._cellsNeedingIntensiveUpdate.push(cell);
+			}
+		}
+	}
+
+	intensiveUpdate(){
+		this.setupLightInclusionLists();
+	}
+
+	setupLightInclusionLists(){
+		if(this.flashlight){
+			this.flashlight.includedOnlyMeshes.splice(0,Infinity);
+			this.flashlight.includedOnlyMeshes.push(...this.getMeshesInRangeOfLight(this.flashlight));
+		}
+		if(this.lamp){
+			this.lamp.includedOnlyMeshes.splice(0,Infinity);
+			this.lamp.includedOnlyMeshes.push(...this.getMeshesInRangeOfLight(this.lamp));
+		}
+	}
+
+	getMeshesInRangeOfLight(light){
+		if(!this.cell){ return []; }
+		const pos = mod_babylon["z" /* Vector3 */].TransformCoordinates(light.position,light.getWorldMatrix());
+		const meshes=[];
+		for(let _cx=this.cell.cx-1; _cx<=this.cell.cx+1; ++_cx)
+		for(let _cy=this.cell.cy-1; _cy<=this.cell.cy+1; ++_cy){
+			let cx=_cx, cy=_cy;
+			if($gameMap.isLoopHorizontal()){ cx=cx.mod(Math.ceil($gameMap.width()/mv3d["a" /* default */].CELL_SIZE)); }
+			if($gameMap.isLoopVertical()){ cy=cy.mod(Math.ceil($gameMap.height()/mv3d["a" /* default */].CELL_SIZE)); }
+			const cell = mv3d["a" /* default */].cells[[cx,cy]];
+			if(!cell||!cell.mesh){ continue; }
+			const sphere = cell.mesh.getBoundingInfo().boundingSphere;
+			const dist = mod_babylon["z" /* Vector3 */].Distance(pos,sphere.centerWorld);
+			if(dist>=sphere.radiusWorld+light.range){ continue; }
+			meshes.push(cell.mesh);
+			for(let character of cell.characters){
+				const sphere = character.mesh.getBoundingInfo().boundingSphere;
+				const dist = mod_babylon["z" /* Vector3 */].Distance(pos,sphere.centerWorld);
+				if(dist>=sphere.radiusWorld+light.range){ continue; }
+				meshes.push(character.mesh);
+			}
+		}
+		return meshes;
+	}
+
+	setupEventLights(){
+		const flashlightConfig = this.getConfig('flashlight');
+		const lampConfig = this.getConfig('lamp');
+		if(flashlightConfig && !this.flashlight){
+			this.setupFlashlight();
+		}
+		if(lampConfig && !this.lamp){
+			this.setupLamp();
+		}
+	}
+	setupLights(){
+		if('flashlightColor' in this.char.mv3d_blenders){
+			this.setupFlashlight();
+		}
+		if('lampColor' in this.char.mv3d_blenders){
+			this.setupLamp();
+		}
+	}
+
+	setupFlashlight(){
+		if(this.flashlight){ return; }
+		const config = this.getConfig('flashlight',{
+			color:0xffffff,
+			intensity:1,
+			distance:mv3d["a" /* default */].LIGHT_DIST,
+			angle:mv3d["a" /* default */].LIGHT_ANGLE,
+		});
+		this.blendFlashlightColor = this.makeColorBlender('flashlightColor',config.color);
+		this.blendFlashlightIntensity = this.makeBlender('flashlightIntensity',config.intensity);
+		this.blendFlashlightDistance = this.makeBlender('flashlightDistance',config.distance);
+		const lightDist = this.blendFlashlightDistance.targetValue();
+		this.blendFlashlightDistance.setValue(0,0); this.blendFlashlightDistance.setValue(lightDist,0.25);
+		this.blendFlashlightAngle = this.makeBlender('flashlightAngle',config.angle);
+		this.flashlight = new mod_babylon["u" /* SpotLight */]('flashlight',mod_babylon["z" /* Vector3 */].Zero(),mod_babylon["z" /* Vector3 */].Zero(),
+			Object(util["i" /* degtorad */])(this.blendFlashlightAngle.targetValue()+mv3d["a" /* default */].FLASHLIGHT_EXTRA_ANGLE),0,mv3d["a" /* default */].scene);
+		this.flashlight.renderPriority=2;
+		this.updateFlashlightExp();
+		this.flashlight.range = this.blendFlashlightDistance.targetValue();
+		this.flashlight.intensity=this.blendFlashlightIntensity.targetValue()*mv3d["a" /* default */].FLASHLIGHT_INTENSITY_MULTIPLIER;
+		this.flashlight.diffuse.set(...this.blendFlashlightColor.targetComponents());
+		//this.flashlight.projectionTexture = mv3d.getFlashlightTexture();
+		this.flashlight.direction.y=-1;
+		this.flashlightOrigin=new mod_babylon["x" /* TransformNode */]('flashlight origin',mv3d["a" /* default */].scene);
+		this.flashlightOrigin.parent=this.lightOrigin;
+		this.flashlight.parent=this.flashlightOrigin;
+		this.blendFlashlightPitch = this.makeBlender('flashlightPitch',90);
+		this.blendFlashlightYaw = this.makeBlender('flashlightYaw', 0);
+		this.blendFlashlightYaw.cycle=360;
+		this.updateFlashlightDirection();
+		this.setupMesh();
+		this.updateLightOffsets();
+	}
+
+	updateFlashlightExp(){
+		this.flashlight.exponent = 64800*Math.pow(this.blendFlashlightAngle.currentValue(),-2);
+	}
+
+	setupLamp(){
+		if(this.lamp){ return; }
+		const config = this.getConfig('lamp',{
+			color:0xffffff,
+			intensity:1,
+			distance:mv3d["a" /* default */].LIGHT_DIST,
+		});
+		this.blendLampColor = this.makeColorBlender('lampColor',config.color);
+		this.blendLampIntensity = this.makeBlender('lampIntensity',config.intensity);
+		this.blendLampDistance = this.makeBlender('lampDistance',config.distance);
+		const lightDist = this.blendLampDistance.targetValue();
+		this.blendLampDistance.setValue(0,0); this.blendLampDistance.setValue(lightDist,0.25);
+		this.lamp = new mod_babylon["q" /* PointLight */]('lamp',mod_babylon["z" /* Vector3 */].Zero(),mv3d["a" /* default */].scene);
+		this.lamp.renderPriority=1;
+		this.lamp.diffuse.set(...this.blendLampColor.targetComponents());
+		this.lamp.intensity=this.blendLampIntensity.targetValue();
+		this.lamp.range=this.blendLampDistance.targetValue();
+		this.lampOrigin=new mod_babylon["x" /* TransformNode */]('lamp origin',mv3d["a" /* default */].scene);
+		this.lampOrigin.parent = this.lightOrigin;
+		this.lamp.parent=this.lampOrigin;
+		this.updateLightOffsets();
+	}
+
+	updateFlashlightDirection(){
+		this.flashlightOrigin.yaw=this.blendFlashlightYaw.currentValue();
+		this.flashlightOrigin.pitch=-this.blendFlashlightPitch.currentValue();
+		//this.flashlightOrigin.position.set(0,0,0);
+		//let flashlightOffset = Math.tan(degtorad(90-this.blendFlashlightAngle.currentValue()-Math.max(90,this.blendFlashlightPitch.currentValue())+90))*mv3d.LIGHT_HEIGHT;
+		//flashlightOffset = Math.max(0,Math.min(1,flashlightOffset));
+		//this.flashlight.range+=flashlightOffset;
+		//this.flashlightOrigin.translate(YAxis,flashlightOffset,LOCALSPACE);
+	}
+
+	updateLights(){
+		if(this.flashlight){
+			const flashlightYaw = 180+Object(util["t" /* relativeNumber */])( mv3d["a" /* default */].dirToYaw( this.char.mv3d_direction(),mv3d["a" /* default */].DIR8MOVE ), this.getConfig('flashlightYaw','+0'));
+			if(flashlightYaw !== this.blendFlashlightYaw.targetValue()){
+				this.blendFlashlightYaw.setValue(flashlightYaw,0.25);
+			}
+			if(this.blendFlashlightColor.update()|this.blendFlashlightIntensity.update()
+			|this.blendFlashlightDistance.update()|this.blendFlashlightAngle.update()
+			|this.blendFlashlightYaw.update()|this.blendFlashlightPitch.update()){
+				this.flashlight.diffuse.set(...this.blendFlashlightColor.currentComponents());
+				this.flashlight.intensity=this.blendFlashlightIntensity.currentValue()*mv3d["a" /* default */].FLASHLIGHT_INTENSITY_MULTIPLIER;
+				this.flashlight.range=this.blendFlashlightDistance.currentValue();
+				this.flashlight.angle=Object(util["i" /* degtorad */])(this.blendFlashlightAngle.currentValue()+mv3d["a" /* default */].FLASHLIGHT_EXTRA_ANGLE);
+				this.updateFlashlightExp();
+				this.updateFlashlightDirection();
+			}
+		}
+		if(this.lamp){
+			if(this.blendLampColor.update()|this.blendLampIntensity.update()|this.blendLampDistance.update()){
+				this.lamp.diffuse.set(...this.blendLampColor.currentComponents());
+				this.lamp.intensity=this.blendLampIntensity.currentValue();
+				this.lamp.range=this.blendLampDistance.currentValue();
+				this.needsMaterialUpdate=true;
+			}
+		}
+	}
+
+	makeBlender(key,dfault,clazz=blenders_Blender){
+		if(key in this.char.mv3d_blenders){
+			dfault = this.char.mv3d_blenders[key];
+		}else{
+			this.char.mv3d_blenders[key]=dfault;
+		}
+		const blender=new clazz(key,dfault);
+		blender.storageLocation=()=>this.char.mv3d_blenders;
+		return blender;
+	}
+	makeColorBlender(key,dfault){
+		return this.makeBlender(key,dfault,ColorBlender);
+	}
+
+	hasBush(){
+		if(this.platformChar){ return false; }
+		return this.getConfig('bush',!(
+			this.char.isTile() || this.isVehicle
+			|| this.isEvent && this.char.isObjectCharacter()
+		))&&!(this.blendElevation.currentValue()||this.falling);
+	}
+
+	getShape(){
+		return this.getConfig('shape', mv3d["a" /* default */].enumShapes.SPRITE );
+	}
+	updateShape(){
+		const newshape = this.getShape();
+		if(this.shape === newshape){ return; }
+		this.shape=newshape;
+		//let backfaceCulling=true;
+		let geometry = characters_Sprite.Meshes.SPRITE;
+		const shapes = mv3d["a" /* default */].enumShapes;
+		switch(this.shape){
+		case shapes.FLAT:
+			geometry = characters_Sprite.Meshes.FLAT;
+			//if(this.char._priorityType===2||this.hasConfig('height')||this.hasConfig('z')){
+			//	backfaceCulling=false;
+			//}
+			break;
+		case shapes.XCROSS:
+		case shapes.CROSS:
+			geometry = characters_Sprite.Meshes.CROSS;
+			//backfaceCulling=false;
+			break;
+		case shapes.WALL:
+		case shapes.FENCE:
+			//backfaceCulling=false;
+			break;
+		}
+		mv3d["a" /* default */].callFeatures('destroyCharMesh',this.mesh);
+		this.mesh.dispose();
+		this.mesh=geometry.clone();
+		//this.material.backfaceCulling=backfaceCulling;
+		this.setupMesh();
+		this.spriteOrigin.rotation.set(0,0,0);
+		this.dirtyNearbyCells();
+	}
+
+	update(){
+		if(this.char._erased){
+			this.dispose();
+		}
+
+
+		this.visible=this.mv_sprite.visible;
+		if(typeof this.char.isVisible === 'function'){
+			this.visible=this.visible&&this.char.isVisible();
+		}
+		const inRenderDist = this.char.mv3d_inRenderDist();
+		this.disabled=!this.visible;
+		if(this.char.isTransparent() || !inRenderDist
+		|| (this.char._characterName||this.char._tileId)&&!this.textureLoaded){
+			this.visible=false;
+		}
+		if(!this._isEnabled){
+			if(this.visible){ this.setEnabled(true); this.needsPositionUpdate=true; }
+		}else{
+			if(!this.visible){ this.setEnabled(false); }
+		}
+
+		if(this.isImageChanged()){
+			this.updateCharacter();
+		}
+		//if(this.patternChanged()){
+		//	this.updateFrame();
+		//}
+
+		if(!inRenderDist){
+			//this.updateAnimations();
+			return;
+		}
+
+		if(this.blendElevation.update()){
+			this.needsPositionUpdate=true;
+		}else if(this.x!==this.char._realX || this.y!==this.char._realY
+		|| this.falling || this.prevZ !== this.z
+		|| this.platformChar&&this.platformChar.needsPositionUpdate
+		|| this.isPlayer || this.char===$gamePlayer.vehicle()
+		){
+			this.needsPositionUpdate=true;
+			this.prevZ = this.z;
+		}
+
+		if(this.material && this._isEnabled){
+			this.updateNormal();
+		}else{
+			this.updateEmpty();
+		}
+		this.updateAnimations();
+		if(this.needsMaterialUpdate){
+			this.updateEmissive();
+			this.needsMaterialUpdate=false;
+		}
+		this.char.mv3d_positionUpdated=this.needsPositionUpdate;
+		this.needsPositionUpdate=false;
+		//this.mesh.renderOutline=true;
+		//this.mesh.outlineWidth=1;
+	}
+	//get needsPositionUpdate(){return this._needsPositionUpdate; }
+	//set needsPositionUpdate(v){ this._needsPositionUpdate=v; }
+
+	updateNormal(){
+		const shapes = mv3d["a" /* default */].enumShapes;
+		if(this.shape===shapes.SPRITE){
+			this.mesh.pitch = mv3d["a" /* default */].blendCameraPitch.currentValue()-90;
+			this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
+		}else if(this.shape===shapes.TREE){
+			this.spriteOrigin.pitch=this.getConfig('pitch',0);
+			this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
+		}else{
+			this.mesh.yaw=this.getConfig('rot',0);
+			this.spriteOrigin.pitch=this.getConfig('pitch',0);
+			this.spriteOrigin.yaw=this.getConfig('yaw',0);
+			if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
+		}
+
+		if(this.isPlayer){
+			this.mesh.visibility = +!mv3d["a" /* default */].is1stPerson(true);
+		}
+
+		this.updateAlpha();
+
+		this.updatePosition();
+		this.updateElevation();
+		if(this.shadow){ this.updateShadow(); }
+		this.updateLights();
+	}
+
+	updateEmpty(){
+		this.updatePosition();
+		this.updateElevation();
+		this.updateLights();
+		if(this.shadow&&this.shadow._isEnabled){ this.shadow.setEnabled(false); }
+	}
+
+	updateAlpha(){
+		let hasAlpha=this.hasConfig('alpha')||this.char.opacity()<255;
+		this.bush = Boolean(this.char.bushDepth());
+		const blendMode = mv3d["a" /* default */].blendModes[this.char.blendMode()];
+		if(this.material.alphaMode!==blendMode){
+			this.material.alphaMode=blendMode;
+		}
+		if(blendMode!==mv3d["a" /* default */].blendModes.NORMAL){
+			hasAlpha=true;
+		}else if(this.bush && this.hasBush()){
+			if(!this.material.opacityTexture){
+				const bushAlpha = mv3d["a" /* default */].getBushAlphaTextureSync();
+				if(bushAlpha&&bushAlpha.isReady()){
+					this.material.opacityTexture=bushAlpha;
+				}
+			}
+		}else{
+			if(this.material.opacityTexture){
+				this.material.opacityTexture=null;
+			}
+		}
+		if(hasAlpha||this.material.opacityTexture){
+			this.material.useAlphaFromDiffuseTexture=true;
+			this.material.alpha=this.getConfig('alpha',1)*this.char.opacity()/255;
+		}else{
+			this.material.useAlphaFromDiffuseTexture=false;
+			this.material.alpha=1;
+		}
+	}
+
+	updateLightOffsets(){
+		if(this.lamp){
+			const height = this.getConfig('lampHeight',mv3d["a" /* default */].LAMP_HEIGHT);
+			const offset = this.getConfig('lampOffset',null);
+			this.lampOrigin.position.set(0,0,0);
+			this.lampOrigin.z=height;
+			if(offset){
+				this.lampOrigin.x=offset.x;
+				this.lampOrigin.y=offset.y;
+			}
+		}
+		if(this.flashlight){
+			const height = this.getConfig('flashlightHeight',mv3d["a" /* default */].FLASHLIGHT_HEIGHT);
+			const offset = this.getConfig('flashlightOffset',null);
+			this.flashlightOrigin.position.set(0,0,0);
+			this.flashlightOrigin.z=height;
+			if(offset){
+				this.flashlightOrigin.x=offset.x;
+				this.flashlightOrigin.y=offset.y;
+			}
+		}
+	}
+
+	updatePositionOffsets(){
+		this.spriteOrigin.position.set(0,0,0);
+		if(this.shape===mv3d["a" /* default */].enumShapes.FLAT){
+			this.spriteOrigin.z = mv3d["a" /* default */].LAYER_DIST*4;
+		}else if(this.shape===mv3d["a" /* default */].enumShapes.SPRITE){
+			this.spriteOrigin.z = mv3d["a" /* default */].LAYER_DIST*4 * (1-Math.max(0,Math.min(90,mv3d["a" /* default */].blendCameraPitch.currentValue()))/90);
+		}else{
+			this.spriteOrigin.z = 0;
+		}
+
+		const billboardOffset = new mod_babylon["y" /* Vector2 */](Math.sin(-mv3d["a" /* default */].cameraNode.rotation.y),Math.cos(mv3d["a" /* default */].cameraNode.rotation.y));
+		this.billboardOffset=billboardOffset;
+		if(this.shape===mv3d["a" /* default */].enumShapes.SPRITE){
+			this.spriteOrigin.x=billboardOffset.x*mv3d["a" /* default */].SPRITE_OFFSET;
+			this.spriteOrigin.y=billboardOffset.y*mv3d["a" /* default */].SPRITE_OFFSET;
+			this.lightOrigin.x=this.spriteOrigin.x;
+			this.lightOrigin.y=this.spriteOrigin.y;
+		}else{
+			this.lightOrigin.x=0;
+			this.lightOrigin.y=0;
+		}
+
+		this.spriteOrigin.x += this.getConfig('xoff',0);
+		this.spriteOrigin.y += this.getConfig('yoff',0);
+		this.spriteOrigin.z += this.getConfig('zoff',0);
+	}
+
+	updatePosition(){
+		this.updatePositionOffsets();
+
+		const loopPos = mv3d["a" /* default */].loopCoords(this.char._realX,this.char._realY);
+		this.x = loopPos.x;
+		this.y = loopPos.y;
+
+		if(!this.needsPositionUpdate) { return; }
+
+		const cellX=Math.floor(Math.round(this.char._realX)/mv3d["a" /* default */].CELL_SIZE);
+		const cellY=Math.floor(Math.round(this.char._realY)/mv3d["a" /* default */].CELL_SIZE);
+		const cell = mv3d["a" /* default */].cells[[cellX,cellY]];
+		if(this.cell&&this.cell!==cell){
+			this.removeFromCell();
+		}
+		if(cell&&!this.cell){
+			this.cell=cell;
+			cell.characters.push(this);
+		}
+		this.dirtyNearbyCells();
+	}
+
+	updateElevation(){
+		if(!this.needsPositionUpdate) { return; }
+
+		//don't update when moving on tile corners
+		if(this.char.isMoving() && !((this.x-0.5)%1)&&!((this.y-0.5)%1)){ return; }
+
+		this.falling=false;
+
+		if(this.isPlayer){
+			const vehicle = this.char.vehicle();
+			if(vehicle){
+			//if(vehicle&&vehicle._driving){
+				this.z = vehicle.z;
+				this.targetElevation = vehicle.targetElevation;
+				this.platformChar = vehicle.platformChar;
+				this.platformHeight = vehicle.platformHeight;
+				if(vehicle._driving){ return; }
+			}
+		}
+
+		if(this.hasConfig('zlock')){
+			this.z=this.getConfig('zlock',0);
+			this.z += this.blendElevation.currentValue();
+			return;
+		}
+		
+		const platform = this.getPlatform(this.char._realX,this.char._realY);
+		this.platform = platform;
+		this.platformHeight = platform.z2;
+		this.platformChar = platform.char;
+		this.targetElevation = this.platformHeight+this.blendElevation.currentValue();
+		let gravity = this.getConfig('gravity',mv3d["a" /* default */].GRAVITY)/60;
+
+		this.hasFloat = this.isVehicle || (this.isPlayer||this.isFollower)&&$gamePlayer.vehicle();
+		if(this.hasFloat && !this.platformChar){
+			this.targetElevation += mv3d["a" /* default */].getFloatHeight(Math.round(this.char._realX),Math.round(this.char._realY),this.z+this.spriteHeight);
+		}
+
+		if(this.isAirship && $gamePlayer.vehicle()===this.char){
+			this.targetElevation += mv3d["a" /* default */].loadData('airship_height',mv3d["a" /* default */].AIRSHIP_SETTINGS.height)*this.char._altitude/this.char.maxAltitude();
+		}
+
+		if(this.char.isJumping()){
+			let jumpProgress = 1-(this.char._jumpCount/(this.char._jumpPeak*2));
+			let jumpHeight = Math.pow(jumpProgress-0.5,2)*-4+1;
+			let jumpDiff = Math.abs(this.char.mv3d_jumpHeightEnd - this.char.mv3d_jumpHeightStart);
+			this.z = this.char.mv3d_jumpHeightStart*(1-jumpProgress)
+			+ this.char.mv3d_jumpHeightEnd*jumpProgress + jumpHeight*jumpDiff/2
+			+this.char.jumpHeight()/Object(util["x" /* tileSize */])();
+		}else if(gravity){
+			const gap = Math.abs(this.targetElevation-this.z);
+			if(gap<gravity){ gravity=gap; }
+			//if(this.z>this.targetElevation||this.z<this.platformHeight){
+			if(this.z<this.platformHeight){
+				this.z=this.platformHeight;
+			}
+			if(this.z>this.targetElevation){
+				this.z-=gravity;
+				if(mv3d["a" /* default */].tileCollision(this,this.char._realX,this.char._realY,false,false)){
+					this.z=this.platformHeight;
+				}
+			}else if(this.z<this.targetElevation){
+				this.z+=gravity
+				if(mv3d["a" /* default */].tileCollision(this,this.char._realX,this.char._realY,false,false)){
+					this.z-=gravity;
+				}
+			}
+			this.falling=this.z>this.targetElevation;
+		}
+		return;
+	}
+
+	getPlatform(x=this.char._realX,y=this.char._realY,opts={}){
+		return mv3d["a" /* default */].getPlatformForCharacter(this,x,y,opts);
+	}
+
+	getPlatformFloat(x=this.char._realX,y=this.char._realY,opts={}){
+		if(!opts.platform){ opts.platform = this.getPlatform(x,y,opts); }
+		const platform = opts.platform;
+		let z = platform.z2;
+		if(this.hasFloat&&!platform.char){
+			const cHeight = this.getCHeight();
+			z += mv3d["a" /* default */].getFloatHeight(Math.round(x),Math.round(y),this.z+Math.max(cHeight,mv3d["a" /* default */].STAIR_THRESH),mv3d["a" /* default */].STAIR_THRESH>=cHeight);
+		}
+		return z;
+	}
+
+	updateShadow(){
+		let shadowVisible = Boolean(this.getConfig('shadow', this.shape!=mv3d["a" /* default */].enumShapes.FLAT ));
+
+		if(shadowVisible&&(this.isPlayer||this.isFollower)){
+			const myIndex = mv3d["a" /* default */].characters.indexOf(this);
+			if(myIndex>=0)
+			for (let i=myIndex+1; i<mv3d["a" /* default */].characters.length; ++i){
+				const other = mv3d["a" /* default */].characters[i];
+				if(!other.shadow||!other.visible){ continue; }
+				if(other.char._realX===this.char._realX&&other.char._realY===this.char._realY){
+					shadowVisible=false;
+					break;
+				}
+			}
+		}
+		if(!this.shadow._isEnabled){
+			if(shadowVisible){ this.shadow.setEnabled(true); }
+		}else{
+			if(!shadowVisible){ this.shadow.setEnabled(false); }
+		}
+		if(!shadowVisible){ return; }
+
+		const shadowDist = Math.max(this.z - this.platformHeight, 0);
+		const shadowFadeDist = this.getConfig('shadowDist',4);
+		const shadowStrength = Math.max(0,1-Math.abs(shadowDist)/shadowFadeDist);
+		this.shadow.z = -shadowDist + mv3d["a" /* default */].LAYER_DIST*3.5;
+		this.shadow.x=this.spriteOrigin.x;this.shadow.y=this.spriteOrigin.y;
+		const shadowScale = this.getConfig('shadow',1);
+		this.shadow.scaling.setAll(shadowScale*shadowStrength);
+		if(!this.shadow.isAnInstance){
+			this.shadow.visibility=shadowStrength-0.5*this.bush;//visibility doesn't work with instancing
+		}
+	}
+
+	updateAnimations(){
+		if(this.char.isBalloonPlaying()){
+			if(!this._balloon){
+				this._balloon=mv3d["a" /* default */].showBalloon(this);
+			}
+			this._balloon.update();
+		}else{
+			this.disposeBalloon();
+		}
+		for(const animation of this.char.mv_sprite._animationSprites){
+			if(animation.mv3d_animation){
+				animation.mv3d_animation.update();
+			}
+		}
+		if(this.char.mv_sprite._animationSprites.length){
+			this.needsMaterialUpdate=true;
+		}
+	}
+
+	disposeBalloon(){
+		if(this._balloon){
+			this._balloon.dispose();
+			this._balloon=null;
+		}
+	}
+
+	dispose(...args){
+		super.dispose(...args);
+		delete this.char.mv3d_sprite;
+		const index = mv3d["a" /* default */].characters.indexOf(this);
+		mv3d["a" /* default */].characters.splice(index,1);
+		this.disposeBalloon();
+		this.removeFromCell();
+	}
+
+	removeFromCell(){
+		if(this.cell){
+			const index = this.cell.characters.indexOf(this);
+			if(index>=0){ this.cell.characters.splice(index,1); }
+			this.cell=null;
+		}
+	}
+
+	getCHeight(){
+		let collide = this.getConfig('collide',this.shape===mv3d["a" /* default */].enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+		return collide===true ? this.spriteHeight : Number(collide);
+	}
+
+	getCollider(){
+		if(this._collider){ return this._collider; }
+		const collider = {char:this};
+		this._collider=collider;
+		Object.defineProperties(collider,{
+			z1:{get:()=>this.z },
+			z2:{get:()=>{
+				return Math.max(this.z,this.z+this.getCHeight());
+			}}
+		});
+		return collider;
+	}
+	getTriggerCollider(){
+		if(this._triggerCollider){ return this._triggerCollider; }
+		const collider = {};
+		this._triggerCollider=collider;
+		Object.defineProperties(collider,{
+			z1:{get:()=>{
+				const trigger = this.getConfig('trigger');
+				if(trigger){
+					return this.z-trigger.down;
+				}else if(mv3d["a" /* default */].TRIGGER_INFINITE || this.isEmpty){
+					return -Infinity;
+				}else{
+					return this.getCollider().z1;
+				}
+			}},
+			z2:{get:()=>{
+				const trigger = this.getConfig('trigger');
+				if(trigger){
+					return this.z-trigger.up;
+				}else if(mv3d["a" /* default */].TRIGGER_INFINITE || this.isEmpty){
+					return Infinity;
+				}else{
+					return this.getCollider().z2;
+				}
+			}}
+		});
+		return collider;
+	}
+
+	getCollisionHeight(z=this.z){
+		const cHeight=this.getCHeight();
+		return {z1:z, z2:z+cHeight, char:this};
+	}
+
+	getTriggerHeight(z=this.z){
+		const trigger = this.getConfig('trigger');
+		if(trigger){
+			return {z1:z-trigger.down, z2:z+trigger.up};
+		}else if(mv3d["a" /* default */].TRIGGER_INFINITE || this.isEmpty){
+			return {z1:-Infinity, z2: Infinity};
+		}else{
+			return this.getCollisionHeight();
+		}
+	}
+}
+
+Object(util["q" /* override */])(Sprite_Character.prototype,'characterPatternY',o=>function(){
+	const sprite = this._character.mv3d_sprite;
+	if(!sprite){ return o.apply(this,arguments); }
+	const dirfix = sprite.getConfig('dirfix', sprite.isEvent && sprite.char.isObjectCharacter());
+	const ddir=this._character.mv3d_direction();
+	const useDiagonal = !this._isBigCharacter&&this._characterIndex<4&&this._characterName.includes(mv3d["a" /* default */].DIAG_SYMBOL);
+	let dir;
+	if(dirfix||mv3d["a" /* default */].isDisabled()){
+		if(useDiagonal){ dir=ddir; }
+		else{ dir=this._character.direction(); }
+	}else if(useDiagonal){
+		dir = mv3d["a" /* default */].transformFacing(ddir,mv3d["a" /* default */].blendCameraYaw.currentValue(),true);
+	}else{
+		dir = mv3d["a" /* default */].transformFacing(ddir,mv3d["a" /* default */].blendCameraYaw.currentValue(),false);
+	}
+	if(dir%2){
+		return diagRow[dir];
+	}else{
+		return dir/2-1;
+	}
+},()=> !mv3d["a" /* default */].isDisabled() || mv3d["a" /* default */].DIR8MOVE&&mv3d["a" /* default */].DIR8_2D);
+const diagRow={
+	3:4,
+	1:5,
+	9:6,
+	7:7,
+};
+
+Object(util["q" /* override */])(Sprite_Character.prototype,'setFrame',o=>function(x, y, width, height){
+	o.apply(this,arguments);
+	const sprite = this._character.mv3d_sprite; if(!sprite){ return; }
+	if(sprite.isImageChanged()){ return; }
+	sprite.setFrame(x,y,this.patternWidth(),this.patternHeight());
+});
+
+Object(util["q" /* override */])(Sprite_Character.prototype,'setBlendColor',o=>function(){
+	o.apply(this,arguments);
+	const sprite = this._character.mv3d_sprite; if(!sprite){ return; }
+	sprite.needsMaterialUpdate=true;
+});
+
+mv3d["a" /* default */].Sprite = characters_Sprite;
+mv3d["a" /* default */].Character = characters_Character;
+
+
+const _isOnBush = Game_CharacterBase.prototype.isOnBush;
+Game_CharacterBase.prototype.isOnBush = function() {
+	if(mv3d["a" /* default */].isDisabled()||!this.mv3d_sprite){ return _isOnBush.apply(this,arguments); }
+	const rx=Math.round(this._realX), ry=Math.round(this._realY);
+	const tileData=mv3d["a" /* default */].getTileData(rx,ry);
+	const layers = mv3d["a" /* default */].getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight(),false);
+	const flags = $gameMap.tilesetFlags();
+	for( const l of layers ){
+		if( (flags[tileData[l]] & 0x40) !== 0 ){ return true; }
+	}
+	return false;
+};
+// CONCATENATED MODULE: ./src/animations.js
+
+
+
+
+Object.assign(mv3d["a" /* default */],{
+	showAnimation(char){
+		if(!char){ char=$gamePlayer.mv3d_sprite; }
+	},
+	showBalloon(char){
+		if(!char){ char=$gamePlayer.mv3d_sprite; }
+		return new animations_Balloon(char);
+	}
+});
+
+class animations_AnimSprite extends mod_babylon["x" /* TransformNode */]{
+	constructor(src,w,h,smooth){
+		super('animSprite',mv3d["a" /* default */].scene);
+		this.cellWidth=w; this.cellHeight=h;
+		this.cellIndex=0;
+		this.isSmooth=smooth;
+		this.mesh = mv3d["a" /* default */].Meshes.BASIC.clone();
+		this.mesh.isPickable=false;
+		this.mesh.parent=this;
+		this.mesh.setEnabled(false);
+		this.material = new mod_babylon["v" /* StandardMaterial */]('anim material',mv3d["a" /* default */].scene);
+		this.mesh.material=this.material;
+		this.material.useAlphaFromDiffuseTexture=true;
+		//this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
+		this.material.alphaCutOff = 0;
+		this.material.disableLighting=true;
+		this.material.emissiveColor.set(1,1,1);
+		this.material.ambientColor.set(1,1,1);
+		this.material.specularColor.set(0,0,0);
+		this.loadTexture(src)
+	}
+	async loadTexture(src){
+		this.texture = await mv3d["a" /* default */].createTexture(src);
+		this.texture.hasAlpha=true;
+		this.material.diffuseTexture=this.texture;
+		await mv3d["a" /* default */].waitTextureLoaded(this.texture);
+		this.texture.updateSamplingMode( this.isSmooth
+			? mod_babylon["w" /* Texture */].BILINEAR_SAMPLINGMODE
+			: mod_babylon["w" /* Texture */].NEAREST_SAMPLINGMODE
+		);
+		this.textureLoaded=true;
+		const size = this.texture.getBaseSize();
+		this.cellCols = Math.floor(size.width/this.cellWidth);
+	}
+	update(){
+		if(!this.textureLoaded){ return; }
+		if(!this.mesh.isEnabled()){ this.mesh.setEnabled(true); }
+		this.pitch = mv3d["a" /* default */].blendCameraPitch.currentValue()-90;
+		this.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
+		this.texture.crop(
+			this.cellIndex%this.cellCols*this.cellWidth,
+			Math.floor(this.cellIndex/this.cellCols)*this.cellHeight,
+			this.cellWidth, this.cellHeight, true
+		);
+	}
+	dispose(){
+		super.dispose(false,true);
+	}
+}
+
+// Balloons
+class animations_Balloon extends animations_AnimSprite{
+	constructor(char){
+		super('img/system/Balloon.png',48,48,false);
+		this.char=char;
+	}
+	update(){
+		if(!this.char){ return; }
+		const pos = transformVectorForCharacter(new mod_babylon["z" /* Vector3 */](0,0.5+this.char.spriteHeight,0),this.char);
+		this.position.copyFrom(pos);
+		const bs = this.char.char.mv_sprite._balloonSprite;
+		if(!bs){ return; }
+		this.cellIndex = (bs._balloonId-1)*8 + Math.max(0,bs.frameIndex());
+		super.update();
+	}
+}
+
+// depth animations
+
+class animations_DepthAnimation{
+	constructor(animation){
+		this.animation=animation;
+		this.spriteList=[];
+		this.char = this.animation._target._character.mv3d_sprite;
+	}
+	resetSpriteList(){
+		for(const animationSprite of this.spriteList ){
+			animationSprite.unused=true;
+		}
+	}
+	clearUnusedSprites(){
+		for(let i=this.spriteList.length-1;i>=0;--i){
+			const animationSprite = this.spriteList[i];
+			if(animationSprite.unused){
+				animationSprite.setEnabled(false);
+			}
+		}
+	}
+	update(){
+		const char = this.char;
+		if(!char){ return; }
+		const cameraDirection = mv3d["a" /* default */].camera.getDirection(mv3d["a" /* default */].camera.getTarget());
+		this.resetSpriteList();
+		const frameData = this.animation._animation.frames[this.animation.currentFrameIndex()];
+		if(frameData)
+		for(let i=0; i<Math.min(this.animation._cellSprites.length); ++i){
+			const cell = this.animation._cellSprites[i];
+			if(!cell.visible || !cell.bitmap){ continue; }
+			const anim = this.getAnimationSprite(cell.bitmap._url);
+			anim.material.alphaMode = mv3d["a" /* default */].blendModes[cell.blendMode];
+
+			anim.mesh.roll=Object(util["s" /* radtodeg */])(cell.rotation);
+			const scale = this.animation._mv3d_animationSettings.scale||1;
+			anim.mesh.scaling.x=4*cell.scale.x*scale;
+			anim.mesh.scaling.y=4*cell.scale.y*scale;
+			anim.material.alpha=cell.opacity/255;
+
+			const offsetVector = new mod_babylon["z" /* Vector3 */](
+				cell.position.x/48*scale,
+				getAnimationOffset(this.animation)-cell.position.y/48*scale,
+				0);
+			const animationOrigin = transformVectorForCharacter(offsetVector,char);
+			anim.position.copyFrom(animationOrigin);
+			const scale2=Math.pow(scale,2);
+			anim.mesh.position.set(
+				-cameraDirection.x*0.1*(i+1)*scale2,
+				-cameraDirection.y*0.1*(i+1)*scale2,
+				-cameraDirection.z*0.1*(i+1)*scale2
+			);
+
+			const pattern = frameData[i][0];
+			anim.cellIndex=pattern;
+			anim.update();
+			//console.log(anim.isVisible);
+		}
+		//console.log(this.spriteList.length);
+		this.clearUnusedSprites();
+	}
+	getAnimationSprite(url){
+		let sprite;
+		for(const animationSprite of this.spriteList ){
+			if(animationSprite._mv3d_sprite_url===url
+			&&animationSprite.unused){
+				//console.log("Found reusable sprite!", animationSprite);
+				animationSprite.unused=false;
+				animationSprite.setEnabled(true);
+				sprite=animationSprite;
+				break;
+			}
+		}
+		if(!sprite){
+			sprite = new animations_AnimSprite(url,192,192,true);
+			this.spriteList.push(sprite);
+			sprite._mv3d_sprite_url=url;
+			//sprite.parent=this.char.spriteOrigin;
+			const settings = this.animation._mv3d_animationSettings
+			if(settings.depth==false&&settings.depth!=null){
+				sprite.mesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.FRONT;
+			}
+		}
+		return sprite;
+	}
+	remove(){
+		for(const animationSprite of this.spriteList ){
+			animationSprite.dispose();
+		}
+		this.spriteList.length=0;
+	}
+}
+
+function transformVectorForCharacter(vector,char){
+	if(!char.isEmpty&&char.shape===mv3d["a" /* default */].enumShapes.SPRITE){
+		return mod_babylon["z" /* Vector3 */].TransformCoordinates(vector,mv3d["a" /* default */].getUnscaledMatrix(char.mesh));
+	}else{
+		return mod_babylon["z" /* Vector3 */].TransformCoordinates(vector,mv3d["a" /* default */].getTranslationMatrix(char.mesh));
+	}
+}
+
+
+// mod animations
+
+const _start_animation = Sprite_Character.prototype.startAnimation;
+Sprite_Character.prototype.startAnimation = function(){
+	_start_animation.apply(this,arguments);
+	if(mv3d["a" /* default */].mapDisabled||!(SceneManager._scene instanceof Scene_Map)){ return; }
+	const animationSprite = this._animationSprites[this._animationSprites.length-1];
+	animationSprite._mv3d_animationSettings=this._character._mv3d_animationSettings;
+	delete this._character._mv3d_animationSettings;
+	if(animationSprite._mv3d_animationSettings){
+		animationSprite.mv3d_animation=new animations_DepthAnimation(animationSprite);
+		mv3d["a" /* default */].pixiContainer.addChild(animationSprite._screenFlashSprite);
+		return;
+	}
+	mv3d["a" /* default */].pixiContainer.addChild(animationSprite);
+};
+
+const _animation_remove = Sprite_Animation.prototype.remove;
+Sprite_Animation.prototype.remove=function(){
+	if(!mv3d["a" /* default */].mapDisabled && this.mv3d_animation){
+		if(this._screenFlashSprite){
+			this.addChild(this._screenFlashSprite);
+		}
+		this.mv3d_animation.remove();
+	}
+	_animation_remove.apply(this,arguments);
+};
+
+
+const _animation_updateScreenFlash=Sprite_Animation.prototype.updateScreenFlash;
+Sprite_Animation.prototype.updateScreenFlash = function() {
+	_animation_updateScreenFlash.apply(this,arguments);
+	if(!mv3d["a" /* default */].mapDisabled&&(SceneManager._scene instanceof Scene_Map)){
+		this._screenFlashSprite.x = 0;
+		this._screenFlashSprite.y = 0;
+	}
+};
+
+function getAnimationOffset(animation){
+	const p = animation._animation.position;
+	const offset = p===3?0:1-p/2;
+	const char = animation._target._character;
+	if(!char.mv3d_sprite){ return offset; }
+	return offset * char.mv3d_sprite.spriteHeight;
+}
+
+const _update_animation_sprites = Sprite_Character.prototype.updateAnimationSprites;
+Sprite_Character.prototype.updateAnimationSprites = function() {
+	_update_animation_sprites.apply(this,arguments);
+	if(mv3d["a" /* default */].mapDisabled||!this._animationSprites.length||!(SceneManager._scene instanceof Scene_Map)){ return; }
+	if(!this._character.mv3d_sprite){ return; }
+	for (const animationSprite of this._animationSprites){
+		if(animationSprite.mv3d_animation){ continue; }
+		if(animationSprite._animation.position===3){
+			animationSprite.update();
+			continue;
+		}
+
+		const offsetVector = new mod_babylon["z" /* Vector3 */](0, getAnimationOffset(animationSprite), 0);
+		const animationOrigin = transformVectorForCharacter(offsetVector,this._character.mv3d_sprite);
+		const pos = mv3d["a" /* default */].getScreenPosition(animationOrigin);
+		const dist = mod_babylon["z" /* Vector3 */].Distance(mv3d["a" /* default */].camera.globalPosition,animationOrigin);
+		const scale = mv3d["a" /* default */].camera.mode===mod_babylon["n" /* ORTHOGRAPHIC_CAMERA */] ? mv3d["a" /* default */].getScaleForDist() : mv3d["a" /* default */].getScaleForDist(dist);
+
+		animationSprite.behindCamera = pos.behindCamera;
+		animationSprite.update();
+		animationSprite.x=pos.x;
+		animationSprite.y=pos.y;
+		animationSprite.scale.set(scale,scale);
+	}
+};
+
+const _update_cell = Sprite_Animation.prototype.updateCellSprite;
+Sprite_Animation.prototype.updateCellSprite = function(sprite,cell) {
+	_update_cell.apply(this,arguments);
+	if(this.behindCamera){ sprite.visible=false; }
+};
+// CONCATENATED MODULE: ./src/parallax.js
+
+
+
+Object(util["q" /* override */])(Game_Map.prototype,'setupParallax',o=>function(){
+	o.apply(this,arguments);
+	this.mv3d_parallaxX=0;
+	this.mv3d_parallaxY=0;
+});
+
+Object(util["q" /* override */])(Game_Map.prototype,'changeParallax',o=>function(name, loopX, loopY, sx, sy){
+	if (this._parallaxLoopX && !loopX || this._parallaxSx && !sx) {
+		this.mv3d_parallaxX=0;
+	}
+	if (this._parallaxLoopY && !loopY || this._parallaxSy && !sy) {
+		this.mv3d_parallaxY=0;
+	}
+	o.apply(this,arguments);
+});
+
+Object(util["q" /* override */])(Game_Map.prototype,'updateParallax',o=>function(){
+	if (this._parallaxLoopX) {
+		this.mv3d_parallaxX += this._parallaxSx / 8;
+	}
+	if (this._parallaxLoopY) {
+		this.mv3d_parallaxY += this._parallaxSy / 8;
+	}
+});
+
+Object(util["q" /* override */])(Game_Map.prototype,'parallaxOx',o=>function(){
+	let ox = this.mv3d_parallaxX;
+	if(this._parallaxLoopX){
+		return ox - mv3d["a" /* default */].blendCameraYaw.currentValue()*816/90;
+	}
+	return ox;
+});
+
+Object(util["q" /* override */])(Game_Map.prototype,'parallaxOy',o=>function(){
+	let oy = this.mv3d_parallaxY;
+	if(this._parallaxLoopY){
+		return oy - mv3d["a" /* default */].blendCameraPitch.currentValue()*816/90;
+	}
+	return 0;
+});
+
+/*
+['setDisplayPos','scrollUp','scrollDown','scrollLeft','scrollRight'].forEach(method=>{
+	const _oldMethod=Game_Map.prototype[method];
+	Game_Map.prototype[method]=function(){
+		if (mv3d.isDisabled()){ _oldMethod.apply(this,arguments); }
+	}
+});
+const _updateScroll = Game_Map.prototype.updateScroll;
+Game_Map.prototype.updateScroll = function() {
+	if (mv3d.mapDisabled){ return _updateScroll.apply(this,arguments); }
+	this._displayX = -mv3d.blendCameraYaw.currentValue()*816/3600;
+	this._displayY = -mv3d.blendCameraPitch.currentValue()*816/3600;
+};
+*/
+
+Game_CharacterBase.prototype.mv3d_inRenderDist=function(){
+	const loopPos = mv3d["a" /* default */].loopCoords(this.x,this.y);
+	return Math.abs(loopPos.x - mv3d["a" /* default */].cameraStick.x)<=mv3d["a" /* default */].renderDist
+	&& Math.abs(loopPos.y - mv3d["a" /* default */].cameraStick.y)<=mv3d["a" /* default */].renderDist;
+};
+
+Object(util["q" /* override */])(Game_CharacterBase.prototype,'isNearTheScreen',o=>function(){
+	if(!mv3d["a" /* default */].EVENTS_UPDATE_NEAR){ return o.apply(this,arguments); }
+	return this.mv3d_inRenderDist() || o.apply(this,arguments);
+});
+
+
+Object(util["q" /* override */])(Game_Screen.prototype,'shake',o=>function(){
+	return 0;
+},()=> !mv3d["a" /* default */].isDisabled() && SceneManager._scene instanceof Scene_Map );
+
+Object(util["q" /* override */])(Game_CharacterBase.prototype,'screenX',o=>function screenX(){
+	const sprite = this.mv3d_sprite;
+	if(!sprite){ return o.apply(this,arguments); }
+	if(SceneManager.isNextScene(Scene_Battle) && this===$gamePlayer){
+		return Graphics.width/2;
+	}
+	return mv3d["a" /* default */].getScreenPosition(sprite).x;
+});
+
+Object(util["q" /* override */])(Game_CharacterBase.prototype,'screenY',o=>function screenY(){
+	const sprite = this.mv3d_sprite;
+	if(!sprite){ return o.apply(this,arguments); }
+	if(SceneManager.isNextScene(Scene_Battle) && this===$gamePlayer){
+		return Graphics.height/2;
+	}
+	return mv3d["a" /* default */].getScreenPosition(sprite).y;
+});
+// CONCATENATED MODULE: ./src/data.js
+
+
+const isPlaytest = Utils.isOptionValid('test');
+
+const saveFile=async(fileName,fileData)=>{
+	const fs=__webpack_require__(4);
+	const path=__webpack_require__(5);
+	const filePath = path.resolve(global.__dirname,fileName);
+	await ensureDirectory(path.dirname(filePath));
+	await new Promise((resolve,reject)=>{
+		fs.writeFile(filePath,fileData,err=>{
+			if(err){ reject(err); return; }
+			resolve();
+		});
+	});
+}
+
+const ensureDirectory=(dirName)=>new Promise((resolve,reject)=>{
+	const fs=__webpack_require__(4);
+	const path=__webpack_require__(5);
+	fs.mkdir(path.resolve(global.__dirname,dirName),{recursive:true},err=>{
+		if(err&&err.code!=='EEXIST'){ reject(err); return; }
+		resolve();
+	});
+});
+
+const _loadDataFile = DataManager.loadDataFile;
+DataManager.loadDataFile = function(name, src) {
+	if(src.startsWith('Test_mv3d_')){
+		src=src.replace('Test_mv3d_','mv3d_')
+	}
+	_loadDataFile.call(this,name,src);
+};
+
+class DataProxy{
+	constructor(varName,fileName,defaultData={}){
+		this.varName=varName;
+		this.fileName=fileName;
+		if(isPlaytest){
+			const fs = __webpack_require__(4);
+			const path = __webpack_require__(5);
+			const filePath = path.resolve(nw.__dirname,'data',fileName);
+			if(!fs.existsSync(filePath)) {
+				fs.writeFileSync(filePath,JSON.stringify(typeof defaultData==='function'?defaultData():defaultData));
+			}
+		}
+		DataManager._databaseFiles.push({name:varName,src:fileName});
+
+		this._dirty=false;
+		this._data_handler={
+			get:(target,key)=>{
+				if(target[key]&&typeof target[key]==='object'){
+					return new Proxy(target[key],data_handler);
+				}else{
+					return target[key];
+				}
+			},
+			set:(target,key,value)=>{
+				this._dirty=true;
+				target[key]=value;
+			},
+			deleteProperty:(target,key)=>{
+				this._dirty=true;
+				delete target[key];
+			},
+		}
+		this.writing=false;
+		DataProxy.list.push(this);
+	}
+	setup(){
+		this._data=window[this.varName];
+		if(isPlaytest){
+			window[this.varName]=new Proxy(this._data,this._data_handler);
+		}
+	}
+	async update(){
+		if(!isPlaytest){ return; }
+		if(this._dirty&&!this.writing){
+			this.writing=true;
+			this._dirty=false;
+			await saveFile(`data/${this.fileName}`,JSON.stringify(this._data));
+			this.writing=false;
+		}
+	}
+}
+DataProxy.list=[];
+mv3d["a" /* default */].DataProxy=DataProxy;
+
+const _onBoot = Scene_Boot.prototype.start;
+Scene_Boot.prototype.start=function(){
+	_onBoot.apply(this,arguments);
+	mv3d["a" /* default */].setupData();
+}
+
+Object.assign(mv3d["a" /* default */],{
+	setupData(){
+		for (const dataProxy of DataProxy.list){
+			dataProxy.setup();
+		}
+	},
+	updateData(){
+		for (const dataProxy of DataProxy.list){
+			dataProxy.update();
+		}
+	}
+});
+
+new DataProxy('mv3d_data','mv3d_data.json',()=>({
+	id:crypto.getRandomValues(new Uint32Array(1))[0],
+}));
+// EXTERNAL MODULE: ./src/plugin_support/plugin_support.js
+var plugin_support = __webpack_require__(6);
+
+// CONCATENATED MODULE: ./src/index.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//features
+//import './feature-dynamicShadows.js';
+
+/***/ })
+/******/ ]);
 //# sourceMappingURL=mv3d.js.map

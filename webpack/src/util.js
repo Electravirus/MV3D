@@ -81,8 +81,8 @@ export const minmax=(min,max,v)=>Math.min(max,Math.max(min,v));
 export const tileSize=()=>tileWidth();
 export const tileWidth=()=>Game_Map.prototype.tileWidth();
 export const tileHeight=()=>Game_Map.prototype.tileHeight();
-export const viewWidth=()=>Graphics.width/48;
-export const viewHeight=()=>Graphics.height/48;
+export const optimalFrustrumWidth=()=>Graphics.width/48;
+export const optimalFrustrumHeight=()=>Graphics.height/48;
 
 export const file=(folder=mv3d.MV3D_FOLDER,name)=>{
 	if(name.startsWith('/')){ return '.'+name; }
@@ -145,7 +145,7 @@ export const override=(obj,methodName,getNewMethod,condition=_override_default_c
 const util = {
 	makeColor,hexNumber,relativeNumber,booleanString,falseString,booleanNumber,
 	sleep,degtorad,radtodeg,sin,cos,unround,
-	tileSize,tileWidth,tileHeight,viewWidth,viewHeight,
+	tileSize,tileWidth,tileHeight,optimalFrustrumWidth,optimalFrustrumHeight,
 	pointtorad,pointtodeg,minmax,
 	dirtov,dirtoh,hvtodir,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,

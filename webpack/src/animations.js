@@ -192,10 +192,10 @@ Sprite_Character.prototype.startAnimation = function(){
 	delete this._character._mv3d_animationSettings;
 	if(animationSprite._mv3d_animationSettings){
 		animationSprite.mv3d_animation=new DepthAnimation(animationSprite);
-		mv3d.pixiSprite.addChild(animationSprite._screenFlashSprite);
+		mv3d.pixiContainer.addChild(animationSprite._screenFlashSprite);
 		return;
 	}
-	mv3d.pixiSprite.addChild(animationSprite);
+	mv3d.pixiContainer.addChild(animationSprite);
 };
 
 const _animation_remove = Sprite_Animation.prototype.remove;

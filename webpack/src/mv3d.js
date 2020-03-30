@@ -1,5 +1,5 @@
 import { Engine, Scene, TransformNode, FreeCamera, Node, Matrix, Vector2, Vector3, Color3, FOGMODE_LINEAR, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods, Quaternion } from "./mod_babylon.js";
-import util, { degtorad, viewHeight } from "./util.js";
+import util, { degtorad, optimalFrustrumHeight } from "./util.js";
 
 
 const mv3d = {
@@ -195,7 +195,7 @@ const mv3d = {
 	getScaleForDist(dist=mv3d.blendCameraDist.currentValue()){
 		return Graphics.height/this.getFieldSize(dist).height/48;
 	},
-	getFovForDist(dist=mv3d.blendCameraDist.currentValue(),height=viewHeight()){
+	getFovForDist(dist=mv3d.blendCameraDist.currentValue(),height=optimalFrustrumHeight()){
 		return 2*Math.atan(height/2/dist);
 	},
 	getFrustrumHeight(dist=mv3d.blendCameraDist.currentValue(),fov=mv3d.camera.fov){
