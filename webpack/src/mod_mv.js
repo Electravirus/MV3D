@@ -83,10 +83,10 @@ Scene_Map.prototype.onMapLoaded=function(){
 	if(mv3d.needClearMap){
 		mv3d.clearMap();
 		mv3d.needClearMap=false;
-	}else if(mv3d.needReloadMap){
+	}else if(mv3d.needReloadMap&&mv3d.mapLoaded){
 		mv3d.reloadMap();
-		mv3d.needReloadMap=false;
 	}
+	mv3d.needReloadMap=false;
 	tilesetLoaded = false;
 	mv3d.loadMapSettings();
 	_onMapLoaded.apply(this,arguments);

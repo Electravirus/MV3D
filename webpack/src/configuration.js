@@ -94,7 +94,7 @@ Object.assign(mv3d,{
 		//tileset
 		this.tilesetConfigurations={};
 		const lines = this.readConfigurationBlocks($gameMap.tileset().note)
-		+'\n'+this.readConfigurationBlocks($dataMap.note,'mv3d-tiles');
+		+'\n'+this.readConfigurationBlocks(this.getDataMap().note,'mv3d-tiles');
 		//const readLines = /^\s*([abcde]\d?\s*,\s*\d+\s*,\s*\d+)\s*:(.*)$/gmi;
 		const readLines = /^\s*([abcde]\d?)\s*,\s*(\d+(?:-\d+)?)\s*,\s*(\d+(?:-\d+)?)\s*:(.*)$/gmi;
 		let match;
@@ -116,15 +116,16 @@ Object.assign(mv3d,{
 	},
 	mapConfigurations:{},
 	loadMapSettings(){
+		const dataMap = this.getDataMap();
 		//map
 		const mapconf=this.mapConfigurations={};
 		this.readConfigurationFunctions(
-			this.readConfigurationBlocks($dataMap.note),
+			this.readConfigurationBlocks(dataMap.note),
 			this.mapConfigurationFunctions,
 			mapconf,
 		);
 		this._REGION_DATA_MAP={};
-		const regionBlocks=this.readConfigurationBlocks($dataMap.note,'mv3d-regions');
+		const regionBlocks=this.readConfigurationBlocks(dataMap.note,'mv3d-regions');
 		if(regionBlocks){
 			const readLines = /^\s*(\d+)\s*:(.*)$/gm;
 			let match;

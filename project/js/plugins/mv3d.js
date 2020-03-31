@@ -1389,13 +1389,13 @@ const mv3d = {
 	},
 
 	loopCoords(x,y){
-		if($gameMap.isLoopHorizontal()){
-			const mapWidth=$gameMap.width();
+		if(this.loopHorizontal()){
+			const mapWidth=mv3d.mapWidth();
 			const ox = this.cameraStick.x - mapWidth/2;
 			x=(x-ox).mod(mapWidth)+ox;
 		}
-		if($gameMap.isLoopVertical()){
-			const mapHeight=$gameMap.height();
+		if(this.loopVertical()){
+			const mapHeight=mv3d.mapHeight();
 			const oy = this.cameraStick.y - mapHeight/2;
 			y=(y-oy).mod(mapHeight)+oy;
 		}
@@ -1465,6 +1465,11 @@ const mv3d = {
 		const qrot=new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Quaternion */ "r"]();
 		matrix.decompose(null,qrot,null);
 		return _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Matrix */ "j"].Compose(_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].One(),qrot,_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].Zero());
+	},
+
+	globalPosition(node){
+		const matrix = node.parent ? node.parent.getWorldMatrix() : _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Matrix */ "j"].Identity();
+		return _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].TransformCoordinates(node.position,matrix);
 	},
 
 }
@@ -3316,10 +3321,10 @@ Scene_Map.prototype.onMapLoaded=function(){
 	if(mv3d["a" /* default */].needClearMap){
 		mv3d["a" /* default */].clearMap();
 		mv3d["a" /* default */].needClearMap=false;
-	}else if(mv3d["a" /* default */].needReloadMap){
+	}else if(mv3d["a" /* default */].needReloadMap&&mv3d["a" /* default */].mapLoaded){
 		mv3d["a" /* default */].reloadMap();
-		mv3d["a" /* default */].needReloadMap=false;
 	}
+	mv3d["a" /* default */].needReloadMap=false;
 	tilesetLoaded = false;
 	mv3d["a" /* default */].loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
@@ -3703,19 +3708,30 @@ Object.assign(mv3d["a" /* default */],{
 			this.cameraNode.position.set(0,0,0);
 			let dist = this.blendCameraDist.currentValue();
 			if(mv3d["a" /* default */].CAMERA_COLLISION){
-				const raycastOrigin = new mod_babylon["z" /* Vector3 */]().copyFrom(this.cameraStick.position);
-				raycastOrigin.y+=this.blendCameraHeight.currentValue()+0.1;
-				const ray = new mod_babylon["s" /* Ray */](raycastOrigin, mod_babylon["z" /* Vector3 */].TransformCoordinates(mv3d["a" /* default */].camera.getTarget().negate(),mv3d["a" /* default */].getRotationMatrix(mv3d["a" /* default */].camera)),dist);
-				const intersections = mv3d["a" /* default */].scene.multiPickWithRay(ray,raycastPredicate);
-				for (const intersection of intersections){
-					if(!intersection.hit){ continue; }
-					let material = intersection.pickedMesh.material; if(!material){ continue; }
-					if(material.subMaterials){
-						material = material.subMaterials[intersection.pickedMesh.subMeshes[intersection.subMeshId].materialIndex];
+				let doCollide = true;
+				if(mv3d["a" /* default */].CAMERA_COLLISION>1){
+					this.cameraNode.translate(util["d" /* ZAxis */],-dist,mod_babylon["i" /* LOCALSPACE */]);
+					const gpos = mv3d["a" /* default */].globalPosition(this.cameraNode);
+					this.cameraNode.position.set(0,0,0);
+					const z = mv3d["a" /* default */].getWalkHeight(gpos.x,-gpos.z);
+					if(gpos.y>z){doCollide=false;}
+					//if(Date.now()%10===0)console.log(gpos,z);
+				}
+				if(doCollide){
+					const raycastOrigin = new mod_babylon["z" /* Vector3 */]().copyFrom(this.cameraStick.position);
+					raycastOrigin.y+=this.blendCameraHeight.currentValue()+0.1;
+					const ray = new mod_babylon["s" /* Ray */](raycastOrigin, mod_babylon["z" /* Vector3 */].TransformCoordinates(mv3d["a" /* default */].camera.getTarget().negate(),mv3d["a" /* default */].getRotationMatrix(mv3d["a" /* default */].camera)),dist);
+					const intersections = mv3d["a" /* default */].scene.multiPickWithRay(ray,raycastPredicate);
+					for (const intersection of intersections){
+						if(!intersection.hit){ continue; }
+						let material = intersection.pickedMesh.material; if(!material){ continue; }
+						if(material.subMaterials){
+							material = material.subMaterials[intersection.pickedMesh.subMeshes[intersection.subMeshId].materialIndex];
+						}
+						if(material.mv3d_through){ continue; }
+						dist=intersection.distance;
+						break;
 					}
-					if(material.mv3d_through){ continue; }
-					dist=intersection.distance;
-					break;
 				}
 				if(this.camera.dist==null){this.camera.dist=dist;}
 				this.camera.dist=this.camera.dist+(dist-this.camera.dist)/2;
@@ -3810,7 +3826,7 @@ class blenders_Blender{
 	setValue(target,time=0){
 		target = Math.min(this.max,Math.max(this.min,target));
 		let diff = target - this.value;
-		if(!diff){ return; }
+		if(diff===0){ return; }
 		this.saveValue(this.key,target);
 		if(!time){ this.changed=true; this.value=target; }
 		if(this.cycle){
@@ -4346,7 +4362,7 @@ Object.assign(mv3d["a" /* default */],{
 		//tileset
 		this.tilesetConfigurations={};
 		const lines = this.readConfigurationBlocks($gameMap.tileset().note)
-		+'\n'+this.readConfigurationBlocks($dataMap.note,'mv3d-tiles');
+		+'\n'+this.readConfigurationBlocks(this.getDataMap().note,'mv3d-tiles');
 		//const readLines = /^\s*([abcde]\d?\s*,\s*\d+\s*,\s*\d+)\s*:(.*)$/gmi;
 		const readLines = /^\s*([abcde]\d?)\s*,\s*(\d+(?:-\d+)?)\s*,\s*(\d+(?:-\d+)?)\s*:(.*)$/gmi;
 		let match;
@@ -4368,15 +4384,16 @@ Object.assign(mv3d["a" /* default */],{
 	},
 	mapConfigurations:{},
 	loadMapSettings(){
+		const dataMap = this.getDataMap();
 		//map
 		const mapconf=this.mapConfigurations={};
 		this.readConfigurationFunctions(
-			this.readConfigurationBlocks($dataMap.note),
+			this.readConfigurationBlocks(dataMap.note),
 			this.mapConfigurationFunctions,
 			mapconf,
 		);
 		this._REGION_DATA_MAP={};
-		const regionBlocks=this.readConfigurationBlocks($dataMap.note,'mv3d-regions');
+		const regionBlocks=this.readConfigurationBlocks(dataMap.note,'mv3d-regions');
 		if(regionBlocks){
 			const readLines = /^\s*(\d+)\s*:(.*)$/gm;
 			let match;
@@ -5272,8 +5289,8 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		// load all tiles in mesh
 		let cellWidth=mv3d["a" /* default */].CELL_SIZE,cellHeight=mv3d["a" /* default */].CELL_SIZE;
 		if(mv3d["a" /* default */].getMapConfig('edge')!=='clamp'){
-			cellWidth = Math.min(mv3d["a" /* default */].CELL_SIZE,$gameMap.width()-this.cx*mv3d["a" /* default */].CELL_SIZE);
-			cellHeight = Math.min(mv3d["a" /* default */].CELL_SIZE,$gameMap.height()-this.cy*mv3d["a" /* default */].CELL_SIZE);
+			cellWidth = Math.min(mv3d["a" /* default */].CELL_SIZE,mv3d["a" /* default */].mapWidth()-this.cx*mv3d["a" /* default */].CELL_SIZE);
+			cellHeight = Math.min(mv3d["a" /* default */].CELL_SIZE,mv3d["a" /* default */].mapHeight()-this.cy*mv3d["a" /* default */].CELL_SIZE);
 		}
 		const ceiling = mv3d["a" /* default */].getCeilingConfig();
 		for (let y=0; y<cellHeight; ++y)
@@ -5386,8 +5403,8 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		const isFringe = mv3d["a" /* default */].isStarTile(tileConf.realId)||tileConf.fringe>0;
 		// don't render walls on edge of map (unless it loops)
 		if( !mv3d["a" /* default */].getMapConfig('edge',true) )
-		if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
-		||(this.oy+y+np.y>=$dataMap.height||this.oy+y+np.y<0)&&!$gameMap.isLoopVertical()){
+		if((this.ox+x+np.x>=mv3d["a" /* default */].mapWidth()||this.ox+x+np.x<0)&&!mv3d["a" /* default */].loopHorizontal()
+		||(this.oy+y+np.y>=mv3d["a" /* default */].mapHeight()||this.oy+y+np.y<0)&&!mv3d["a" /* default */].loopVertical()){
 			return;
 		}
 
@@ -5706,6 +5723,10 @@ Object.assign(mv3d["a" /* default */],{
 		if($dataMap){ this._dataMap=$dataMap }
 		return this._dataMap;
 	},
+	mapWidth(){ return this.getDataMap().width; },
+	mapHeight(){ return this.getDataMap().height; },
+	loopHorizontal(){ return this.getDataMap().scrollType&2; },
+	loopVertical(){ return this.getDataMap().scrollType&1; },
 
 	getRegion(x,y){
 		return this.getTileId(x,y,5);
@@ -5841,32 +5862,31 @@ Object.assign(mv3d["a" /* default */],{
 	},
 
 	getTileId(x,y,l=0){
-		const dataMap = this.getDataMap();
-		if($gameMap.isLoopHorizontal()){ x=x.mod(dataMap.width); }
-		if($gameMap.isLoopVertical()){ y=y.mod(dataMap.height); }
-		if(x<0||x>=dataMap.width||y<0||y>=dataMap.height){
+		const dataMap = this.getDataMap(); if(!dataMap){ return 0; }
+		const {data,width,height} = dataMap;
+		if(this.loopHorizontal()){ x=x.mod(width); }
+		if(this.loopVertical()){ y=y.mod(height); }
+		if(x<0||x>=width||y<0||y>=height){
 			if(this.getMapConfig('edge')==='clamp'){
 				const clamp = this.getMapConfig('edgeData',1);
-				if(x>=dataMap.width){ x=dataMap.width+(x-dataMap.width).mod(clamp)-clamp; }
+				if(x>=width){ x=width+(x-width).mod(clamp)-clamp; }
 				else if(x<0){x=x.mod(clamp);}
-				if(y>=dataMap.height){ y=dataMap.height+(y-dataMap.height).mod(clamp)-clamp; }
+				if(y>=height){ y=height+(y-height).mod(clamp)-clamp; }
 				else if(y<0){y=y.mod(clamp);}
 			}else{
 				return 0; 
 			}
 		}
-		return dataMap.data[(l * dataMap.height + y) * dataMap.width + x] || 0
+		return data[(l * height + y) * width + x] || 0
 	},
 
 	getTileData(x,y){
-		if(!$dataMap || !$dataMap.data){ return [0,0,0,0]; }
-		const data = $dataMap.data;
-		const width = $dataMap.width;
-		const height = $dataMap.height;
-		if($gameMap.isLoopHorizontal()){
+		const dataMap = this.getDataMap(); if(!dataMap){ return [0,0,0,0]; }
+		const {data,width,height} = dataMap;
+		if(this.loopHorizontal()){
 			x=x.mod(width);
 		}
-		if($gameMap.isLoopVertical()){
+		if(this.loopVertical()){
 			y=y.mod(height);
 		}
 		if(x<0||x>=width||y<0||y>=height){
@@ -5890,10 +5910,9 @@ Object.assign(mv3d["a" /* default */],{
 
 
 	getTileHeight(x,y,l=0){
-		if(!$dataMap){ return 0; }
 
-		if($gameMap.isLoopHorizontal()){ x=x.mod($dataMap.width); }
-		if($gameMap.isLoopVertical()){ y=y.mod($dataMap.height); }
+		if(this.loopHorizontal()){ x=x.mod(this.mapWidth()); }
+		if(this.loopVertical()){ y=y.mod(this.mapHeight()); }
 
 		const tileId=this.getTileData(x,y)[l];
 		if(this.isTileEmpty(tileId)&&l>0){ return 0; }
@@ -6086,8 +6105,8 @@ Object.assign(mv3d["a" /* default */],{
 	getCullingHeight(x,y,layerId=3,opts={}){
 		const dataMap=this.getDataMap();
 		if( !this.getMapConfig('edge',true) &&
-			(!$gameMap.isLoopHorizontal()&&(x<0||x>=dataMap.width)
-			||!$gameMap.isLoopVertical()&&(y<0||y>=dataMap.height))
+			(!this.loopHorizontal()&&(x<0||x>=dataMap.width)
+			||!this.loopVertical()&&(y<0||y>=dataMap.height))
 			){ return Infinity; }
 		const tileData=this.getTileData(x,y);
 		let height=0;
@@ -6265,21 +6284,21 @@ Object.assign(mv3d["a" /* default */],{
 		}
 		//clamp cell range to map
 		if(this.getMapConfig('edge')!=='clamp'){
-			if(!$gameMap.isLoopHorizontal()){
+			if(!this.loopHorizontal()){
 				bounds.left=Math.max(0,bounds.left);
-				bounds.right=Math.min(bounds.right,Math.ceil($gameMap.width()/mv3d["a" /* default */].CELL_SIZE)-1);
+				bounds.right=Math.min(bounds.right,Math.ceil(this.mapWidth()/this.CELL_SIZE)-1);
 			}
-			if(!$gameMap.isLoopVertical()){
+			if(!this.loopVertical()){
 				bounds.top=Math.max(0,bounds.top);
-				bounds.bottom=Math.min(bounds.bottom,Math.ceil($gameMap.height()/mv3d["a" /* default */].CELL_SIZE)-1);
+				bounds.bottom=Math.min(bounds.bottom,Math.ceil(this.mapHeight()/this.CELL_SIZE)-1);
 			}
 		}
 		const cellsToLoad=[];
 		for (let ix=bounds.left;ix<=bounds.right;++ix)
 		for (let iy=bounds.top;iy<=bounds.bottom;++iy){
 			let cx=ix, cy=iy;
-			if($gameMap.isLoopHorizontal()){ cx = cx.mod(Math.ceil($gameMap.width()/mv3d["a" /* default */].CELL_SIZE)); }
-			if($gameMap.isLoopVertical()){ cy = cy.mod(Math.ceil($gameMap.height()/mv3d["a" /* default */].CELL_SIZE)); }
+			if(this.loopHorizontal()){ cx = cx.mod(Math.ceil(this.mapWidth()/this.CELL_SIZE)); }
+			if(this.loopVertical()){ cy = cy.mod(Math.ceil(this.mapHeight()/this.CELL_SIZE)); }
 			const key = [cx,cy].toString();
 			if(key in this.cells){
 				this.cells[key].unload=false;
@@ -7063,8 +7082,8 @@ class characters_Character extends characters_Sprite{
 		for(let ix=cx-1; ix<=cx+1; ++ix)
 		for(let iy=cy-1; iy<=cy+1; ++iy){
 			let x=ix, y=iy;
-			if($gameMap.isLoopHorizontal()){ x=x.mod(Math.ceil($gameMap.width()/mv3d["a" /* default */].CELL_SIZE)); }
-			if($gameMap.isLoopVertical()){ y=y.mod(Math.ceil($gameMap.height()/mv3d["a" /* default */].CELL_SIZE)); }
+			if(mv3d["a" /* default */].loopHorizontal()){ x=x.mod(Math.ceil(mv3d["a" /* default */].mapWidth()/mv3d["a" /* default */].CELL_SIZE)); }
+			if(mv3d["a" /* default */].loopVertical()){ y=y.mod(Math.ceil(mv3d["a" /* default */].mapHeight()/mv3d["a" /* default */].CELL_SIZE)); }
 			const cell = mv3d["a" /* default */].cells[[x,y]];
 			if(!cell){ continue; }
 			if(!cell._needsIntensiveUpdate){
@@ -7096,8 +7115,8 @@ class characters_Character extends characters_Sprite{
 		for(let _cx=this.cell.cx-1; _cx<=this.cell.cx+1; ++_cx)
 		for(let _cy=this.cell.cy-1; _cy<=this.cell.cy+1; ++_cy){
 			let cx=_cx, cy=_cy;
-			if($gameMap.isLoopHorizontal()){ cx=cx.mod(Math.ceil($gameMap.width()/mv3d["a" /* default */].CELL_SIZE)); }
-			if($gameMap.isLoopVertical()){ cy=cy.mod(Math.ceil($gameMap.height()/mv3d["a" /* default */].CELL_SIZE)); }
+			if(mv3d["a" /* default */].loopHorizontal()){ cx=cx.mod(Math.ceil(mv3d["a" /* default */].mapWidth()/mv3d["a" /* default */].CELL_SIZE)); }
+			if(mv3d["a" /* default */].loopVertical()){ cy=cy.mod(Math.ceil(mv3d["a" /* default */].mapHeight()/mv3d["a" /* default */].CELL_SIZE)); }
 			const cell = mv3d["a" /* default */].cells[[cx,cy]];
 			if(!cell||!cell.mesh){ continue; }
 			const sphere = cell.mesh.getBoundingInfo().boundingSphere;

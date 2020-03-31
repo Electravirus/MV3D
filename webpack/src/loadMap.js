@@ -69,21 +69,21 @@ Object.assign(mv3d,{
 		}
 		//clamp cell range to map
 		if(this.getMapConfig('edge')!=='clamp'){
-			if(!$gameMap.isLoopHorizontal()){
+			if(!this.loopHorizontal()){
 				bounds.left=Math.max(0,bounds.left);
-				bounds.right=Math.min(bounds.right,Math.ceil($gameMap.width()/mv3d.CELL_SIZE)-1);
+				bounds.right=Math.min(bounds.right,Math.ceil(this.mapWidth()/this.CELL_SIZE)-1);
 			}
-			if(!$gameMap.isLoopVertical()){
+			if(!this.loopVertical()){
 				bounds.top=Math.max(0,bounds.top);
-				bounds.bottom=Math.min(bounds.bottom,Math.ceil($gameMap.height()/mv3d.CELL_SIZE)-1);
+				bounds.bottom=Math.min(bounds.bottom,Math.ceil(this.mapHeight()/this.CELL_SIZE)-1);
 			}
 		}
 		const cellsToLoad=[];
 		for (let ix=bounds.left;ix<=bounds.right;++ix)
 		for (let iy=bounds.top;iy<=bounds.bottom;++iy){
 			let cx=ix, cy=iy;
-			if($gameMap.isLoopHorizontal()){ cx = cx.mod(Math.ceil($gameMap.width()/mv3d.CELL_SIZE)); }
-			if($gameMap.isLoopVertical()){ cy = cy.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
+			if(this.loopHorizontal()){ cx = cx.mod(Math.ceil(this.mapWidth()/this.CELL_SIZE)); }
+			if(this.loopVertical()){ cy = cy.mod(Math.ceil(this.mapHeight()/this.CELL_SIZE)); }
 			const key = [cx,cy].toString();
 			if(key in this.cells){
 				this.cells[key].unload=false;

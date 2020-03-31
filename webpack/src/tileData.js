@@ -15,6 +15,10 @@ Object.assign(mv3d,{
 		if($dataMap){ this._dataMap=$dataMap }
 		return this._dataMap;
 	},
+	mapWidth(){ return this.getDataMap().width; },
+	mapHeight(){ return this.getDataMap().height; },
+	loopHorizontal(){ return this.getDataMap().scrollType&2; },
+	loopVertical(){ return this.getDataMap().scrollType&1; },
 
 	getRegion(x,y){
 		return this.getTileId(x,y,5);
@@ -150,32 +154,31 @@ Object.assign(mv3d,{
 	},
 
 	getTileId(x,y,l=0){
-		const dataMap = this.getDataMap();
-		if($gameMap.isLoopHorizontal()){ x=x.mod(dataMap.width); }
-		if($gameMap.isLoopVertical()){ y=y.mod(dataMap.height); }
-		if(x<0||x>=dataMap.width||y<0||y>=dataMap.height){
+		const dataMap = this.getDataMap(); if(!dataMap){ return 0; }
+		const {data,width,height} = dataMap;
+		if(this.loopHorizontal()){ x=x.mod(width); }
+		if(this.loopVertical()){ y=y.mod(height); }
+		if(x<0||x>=width||y<0||y>=height){
 			if(this.getMapConfig('edge')==='clamp'){
 				const clamp = this.getMapConfig('edgeData',1);
-				if(x>=dataMap.width){ x=dataMap.width+(x-dataMap.width).mod(clamp)-clamp; }
+				if(x>=width){ x=width+(x-width).mod(clamp)-clamp; }
 				else if(x<0){x=x.mod(clamp);}
-				if(y>=dataMap.height){ y=dataMap.height+(y-dataMap.height).mod(clamp)-clamp; }
+				if(y>=height){ y=height+(y-height).mod(clamp)-clamp; }
 				else if(y<0){y=y.mod(clamp);}
 			}else{
 				return 0; 
 			}
 		}
-		return dataMap.data[(l * dataMap.height + y) * dataMap.width + x] || 0
+		return data[(l * height + y) * width + x] || 0
 	},
 
 	getTileData(x,y){
-		if(!$dataMap || !$dataMap.data){ return [0,0,0,0]; }
-		const data = $dataMap.data;
-		const width = $dataMap.width;
-		const height = $dataMap.height;
-		if($gameMap.isLoopHorizontal()){
+		const dataMap = this.getDataMap(); if(!dataMap){ return [0,0,0,0]; }
+		const {data,width,height} = dataMap;
+		if(this.loopHorizontal()){
 			x=x.mod(width);
 		}
-		if($gameMap.isLoopVertical()){
+		if(this.loopVertical()){
 			y=y.mod(height);
 		}
 		if(x<0||x>=width||y<0||y>=height){
@@ -199,10 +202,9 @@ Object.assign(mv3d,{
 
 
 	getTileHeight(x,y,l=0){
-		if(!$dataMap){ return 0; }
 
-		if($gameMap.isLoopHorizontal()){ x=x.mod($dataMap.width); }
-		if($gameMap.isLoopVertical()){ y=y.mod($dataMap.height); }
+		if(this.loopHorizontal()){ x=x.mod(this.mapWidth()); }
+		if(this.loopVertical()){ y=y.mod(this.mapHeight()); }
 
 		const tileId=this.getTileData(x,y)[l];
 		if(this.isTileEmpty(tileId)&&l>0){ return 0; }
@@ -395,8 +397,8 @@ Object.assign(mv3d,{
 	getCullingHeight(x,y,layerId=3,opts={}){
 		const dataMap=this.getDataMap();
 		if( !this.getMapConfig('edge',true) &&
-			(!$gameMap.isLoopHorizontal()&&(x<0||x>=dataMap.width)
-			||!$gameMap.isLoopVertical()&&(y<0||y>=dataMap.height))
+			(!this.loopHorizontal()&&(x<0||x>=dataMap.width)
+			||!this.loopVertical()&&(y<0||y>=dataMap.height))
 			){ return Infinity; }
 		const tileData=this.getTileData(x,y);
 		let height=0;

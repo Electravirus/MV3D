@@ -153,13 +153,13 @@ const mv3d = {
 	},
 
 	loopCoords(x,y){
-		if($gameMap.isLoopHorizontal()){
-			const mapWidth=$gameMap.width();
+		if(this.loopHorizontal()){
+			const mapWidth=mv3d.mapWidth();
 			const ox = this.cameraStick.x - mapWidth/2;
 			x=(x-ox).mod(mapWidth)+ox;
 		}
-		if($gameMap.isLoopVertical()){
-			const mapHeight=$gameMap.height();
+		if(this.loopVertical()){
+			const mapHeight=mv3d.mapHeight();
 			const oy = this.cameraStick.y - mapHeight/2;
 			y=(y-oy).mod(mapHeight)+oy;
 		}
@@ -229,6 +229,11 @@ const mv3d = {
 		const qrot=new Quaternion();
 		matrix.decompose(null,qrot,null);
 		return Matrix.Compose(Vector3.One(),qrot,Vector3.Zero());
+	},
+
+	globalPosition(node){
+		const matrix = node.parent ? node.parent.getWorldMatrix() : Matrix.Identity();
+		return Vector3.TransformCoordinates(node.position,matrix);
 	},
 
 }

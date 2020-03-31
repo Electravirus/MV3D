@@ -528,8 +528,8 @@ class Character extends Sprite{
 		for(let ix=cx-1; ix<=cx+1; ++ix)
 		for(let iy=cy-1; iy<=cy+1; ++iy){
 			let x=ix, y=iy;
-			if($gameMap.isLoopHorizontal()){ x=x.mod(Math.ceil($gameMap.width()/mv3d.CELL_SIZE)); }
-			if($gameMap.isLoopVertical()){ y=y.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
+			if(mv3d.loopHorizontal()){ x=x.mod(Math.ceil(mv3d.mapWidth()/mv3d.CELL_SIZE)); }
+			if(mv3d.loopVertical()){ y=y.mod(Math.ceil(mv3d.mapHeight()/mv3d.CELL_SIZE)); }
 			const cell = mv3d.cells[[x,y]];
 			if(!cell){ continue; }
 			if(!cell._needsIntensiveUpdate){
@@ -561,8 +561,8 @@ class Character extends Sprite{
 		for(let _cx=this.cell.cx-1; _cx<=this.cell.cx+1; ++_cx)
 		for(let _cy=this.cell.cy-1; _cy<=this.cell.cy+1; ++_cy){
 			let cx=_cx, cy=_cy;
-			if($gameMap.isLoopHorizontal()){ cx=cx.mod(Math.ceil($gameMap.width()/mv3d.CELL_SIZE)); }
-			if($gameMap.isLoopVertical()){ cy=cy.mod(Math.ceil($gameMap.height()/mv3d.CELL_SIZE)); }
+			if(mv3d.loopHorizontal()){ cx=cx.mod(Math.ceil(mv3d.mapWidth()/mv3d.CELL_SIZE)); }
+			if(mv3d.loopVertical()){ cy=cy.mod(Math.ceil(mv3d.mapHeight()/mv3d.CELL_SIZE)); }
 			const cell = mv3d.cells[[cx,cy]];
 			if(!cell||!cell.mesh){ continue; }
 			const sphere = cell.mesh.getBoundingInfo().boundingSphere;

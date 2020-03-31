@@ -104,19 +104,30 @@ Object.assign(mv3d,{
 			this.cameraNode.position.set(0,0,0);
 			let dist = this.blendCameraDist.currentValue();
 			if(mv3d.CAMERA_COLLISION){
-				const raycastOrigin = new Vector3().copyFrom(this.cameraStick.position);
-				raycastOrigin.y+=this.blendCameraHeight.currentValue()+0.1;
-				const ray = new Ray(raycastOrigin, Vector3.TransformCoordinates(mv3d.camera.getTarget().negate(),mv3d.getRotationMatrix(mv3d.camera)),dist);
-				const intersections = mv3d.scene.multiPickWithRay(ray,raycastPredicate);
-				for (const intersection of intersections){
-					if(!intersection.hit){ continue; }
-					let material = intersection.pickedMesh.material; if(!material){ continue; }
-					if(material.subMaterials){
-						material = material.subMaterials[intersection.pickedMesh.subMeshes[intersection.subMeshId].materialIndex];
+				let doCollide = true;
+				if(mv3d.CAMERA_COLLISION>1){
+					this.cameraNode.translate(ZAxis,-dist,LOCALSPACE);
+					const gpos = mv3d.globalPosition(this.cameraNode);
+					this.cameraNode.position.set(0,0,0);
+					const z = mv3d.getWalkHeight(gpos.x,-gpos.z);
+					if(gpos.y>z){doCollide=false;}
+					//if(Date.now()%10===0)console.log(gpos,z);
+				}
+				if(doCollide){
+					const raycastOrigin = new Vector3().copyFrom(this.cameraStick.position);
+					raycastOrigin.y+=this.blendCameraHeight.currentValue()+0.1;
+					const ray = new Ray(raycastOrigin, Vector3.TransformCoordinates(mv3d.camera.getTarget().negate(),mv3d.getRotationMatrix(mv3d.camera)),dist);
+					const intersections = mv3d.scene.multiPickWithRay(ray,raycastPredicate);
+					for (const intersection of intersections){
+						if(!intersection.hit){ continue; }
+						let material = intersection.pickedMesh.material; if(!material){ continue; }
+						if(material.subMaterials){
+							material = material.subMaterials[intersection.pickedMesh.subMeshes[intersection.subMeshId].materialIndex];
+						}
+						if(material.mv3d_through){ continue; }
+						dist=intersection.distance;
+						break;
 					}
-					if(material.mv3d_through){ continue; }
-					dist=intersection.distance;
-					break;
 				}
 				if(this.camera.dist==null){this.camera.dist=dist;}
 				this.camera.dist=this.camera.dist+(dist-this.camera.dist)/2;
@@ -211,7 +222,7 @@ export class Blender{
 	setValue(target,time=0){
 		target = Math.min(this.max,Math.max(this.min,target));
 		let diff = target - this.value;
-		if(!diff){ return; }
+		if(diff===0){ return; }
 		this.saveValue(this.key,target);
 		if(!time){ this.changed=true; this.value=target; }
 		if(this.cycle){

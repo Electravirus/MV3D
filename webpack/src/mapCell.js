@@ -31,8 +31,8 @@ export class MapCell extends TransformNode{
 		// load all tiles in mesh
 		let cellWidth=mv3d.CELL_SIZE,cellHeight=mv3d.CELL_SIZE;
 		if(mv3d.getMapConfig('edge')!=='clamp'){
-			cellWidth = Math.min(mv3d.CELL_SIZE,$gameMap.width()-this.cx*mv3d.CELL_SIZE);
-			cellHeight = Math.min(mv3d.CELL_SIZE,$gameMap.height()-this.cy*mv3d.CELL_SIZE);
+			cellWidth = Math.min(mv3d.CELL_SIZE,mv3d.mapWidth()-this.cx*mv3d.CELL_SIZE);
+			cellHeight = Math.min(mv3d.CELL_SIZE,mv3d.mapHeight()-this.cy*mv3d.CELL_SIZE);
 		}
 		const ceiling = mv3d.getCeilingConfig();
 		for (let y=0; y<cellHeight; ++y)
@@ -145,8 +145,8 @@ export class MapCell extends TransformNode{
 		const isFringe = mv3d.isStarTile(tileConf.realId)||tileConf.fringe>0;
 		// don't render walls on edge of map (unless it loops)
 		if( !mv3d.getMapConfig('edge',true) )
-		if((this.ox+x+np.x>=$dataMap.width||this.ox+x+np.x<0)&&!$gameMap.isLoopHorizontal()
-		||(this.oy+y+np.y>=$dataMap.height||this.oy+y+np.y<0)&&!$gameMap.isLoopVertical()){
+		if((this.ox+x+np.x>=mv3d.mapWidth()||this.ox+x+np.x<0)&&!mv3d.loopHorizontal()
+		||(this.oy+y+np.y>=mv3d.mapHeight()||this.oy+y+np.y<0)&&!mv3d.loopVertical()){
 			return;
 		}
 
