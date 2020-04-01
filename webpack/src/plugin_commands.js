@@ -186,6 +186,13 @@ mv3d.PluginCommand=class{
 		);
 		char.pageConfigure(char.settings);
 	}
+	set(key,...a){
+		key=key.toLowerCase();
+		const value=a.join(' ');
+		if(key in mv3d.attributes){
+			mv3d.attributes[key]=value;
+		}
+	}
 	disable(fadeType){ mv3d.disable(fadeType); }
 	enable(fadeType){ mv3d.enable(fadeType); }
 	_RELATIVE_BLEND(blender,n,time){ blender.setValue(relativeNumber(blender.targetValue(),n),Number(time)); }
