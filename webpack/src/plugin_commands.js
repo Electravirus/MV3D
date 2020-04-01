@@ -38,8 +38,14 @@ mv3d.PluginCommand=class{
 		}
 		char._mv3d_animationSettings={depth,scale};
 	}
-	async camera(...a){
-		var time=this._TIME(a[2]);
+	resolution(...a){
+		let i=0;
+		if(a[i].toLowerCase()==='scale'){ ++i; }
+		let time=this._TIME(a[2]);
+		this._RELATIVE_BLEND(mv3d.blendResolutionScale,a[1],time);
+	}
+	camera(...a){
+		let time=this._TIME(a[2]);
 		switch(a[0].toLowerCase()){
 			case 'pitch'    : this.pitch (a[1],time); return;
 			case 'yaw'      : this.yaw   (a[1],time); return;

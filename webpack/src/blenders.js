@@ -239,9 +239,11 @@ export class Blender{
 		const target = this.targetValue();
 		if(this.value===target){ 
 			if(this.changed){
+				this.updated=true;
 				this.changed=false;
 				return true;
 			}else{
+				this.updated=false;
 				return false;
 			}
 		}
@@ -251,6 +253,7 @@ export class Blender{
 		}else{
 			this.value+=this.speed*Math.sign(diff);
 		}
+		this.updated=true;
 		return true;
 	}
 	storageLocation(){

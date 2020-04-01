@@ -3843,9 +3843,11 @@ class blenders_Blender{
 		const target = this.targetValue();
 		if(this.value===target){ 
 			if(this.changed){
+				this.updated=true;
 				this.changed=false;
 				return true;
 			}else{
+				this.updated=false;
 				return false;
 			}
 		}
@@ -3855,6 +3857,7 @@ class blenders_Blender{
 		}else{
 			this.value+=this.speed*Math.sign(diff);
 		}
+		this.updated=true;
 		return true;
 	}
 	storageLocation(){
@@ -4842,8 +4845,14 @@ mv3d["a" /* default */].PluginCommand=class{
 		}
 		char._mv3d_animationSettings={depth,scale};
 	}
-	async camera(...a){
-		var time=this._TIME(a[2]);
+	resolution(...a){
+		let i=0;
+		if(a[i].toLowerCase()==='scale'){ ++i; }
+		let time=this._TIME(a[2]);
+		this._RELATIVE_BLEND(mv3d["a" /* default */].blendResolutionScale,a[1],time);
+	}
+	camera(...a){
+		let time=this._TIME(a[2]);
 		switch(a[0].toLowerCase()){
 			case 'pitch'    : this.pitch (a[1],time); return;
 			case 'yaw'      : this.yaw   (a[1],time); return;
