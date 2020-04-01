@@ -54,6 +54,7 @@ Sprite_Character.prototype.setCharacter = function(character) {
 	Object.defineProperty(character,'mv_sprite',{
 		value:this,
 		configurable:true,
+		enumerable:false,
 	});
 };
 

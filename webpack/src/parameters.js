@@ -1,6 +1,7 @@
 import mv3d from './mv3d.js';
-import { hexNumber,booleanString,falseString, makeColor, degtorad, tileSize } from './util.js';
-import { Vector2, Texture, ORTHOGRAPHIC_CAMERA } from './mod_babylon.js';
+import { booleanString,falseString, makeColor, degtorad, tileSize, assign } from './util.js';
+import { ORTHOGRAPHIC_CAMERA } from './mod_babylon.js';
+import { Attribute } from './attributes.js';
 
 let pluginName = 'mv3d';
 if(!PluginManager._scripts.includes("mv3d")){
@@ -22,7 +23,7 @@ Object.assign(mv3d,{
 	}
 });
 
-Object.assign(mv3d,{
+assign(mv3d,{
 	CAMERA_MODE:"PERSPECTIVE",
 	ORTHOGRAPHIC_DIST:100,
 	MV3D_FOLDER:"img/MV3D",
@@ -49,6 +50,8 @@ Object.assign(mv3d,{
 	RENDER_DIST: Number(parameters.renderDist),
 	MIPMAP:booleanString(parameters.mipmap),
 
+	get renderDist(){ return Math.min(this.RENDER_DIST, mv3d.blendFogFar.currentValue()+7.5); },
+
 	OPTION_MIPMAP:booleanString(parameters.mipmapOption),
 	OPTION_RENDER_DIST: parameter('renderDistOption',true,booleanString),
 	OPTION_FOV: parameter('fovOption',false,booleanString),
@@ -66,6 +69,7 @@ Object.assign(mv3d,{
 	FOG_NEAR: Number(parameters.fogNear),
 	FOG_FAR: Number(parameters.fogFar), 
 	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
+	get AMBIENT_COLOR(){ return mv3d.featureEnabled('dynamicShadows')?0x888888:0xffffff; },
 
 	LIGHT_LIMIT: Number(parameters.lightLimit),
 	LIGHT_HEIGHT: 0.5,
@@ -114,7 +118,17 @@ Object.assign(mv3d,{
 	TRIGGER_INFINITE: !booleanString(parameters.heightTrigger),
 
 	BACKFACE_CULLING: parameter('backfaceCulling',true,booleanString),
-	CAMERA_COLLISION: parameter('cameraCollision',true,booleanString),
+	cameraCollision: new Attribute('cameraCollision',String(parameters.cameraCollision),function(v){
+		if(typeof v === 'string'){
+			const values=v.split(' '); v=values[0];
+			const ret = {type:!booleanString(v)?0:Number((v.match(/\d+/)||'1')[0])};
+			for (let v of values)if(v.toUpperCase().includes("SMOOTH")){ ret.smooth=true; }
+			return ret;
+		}else if(typeof v == 'object'){
+			return Object.assign(this.get(),v);
+		}
+		const ret = this.get(); ret.type=Number(v); return ret;
+	}),
 
 	DIAG_SYMBOL: parameter('diagSymbol','{d}',String),
 
@@ -196,14 +210,5 @@ Object.assign(mv3d,{
 		const frustrumHeight = this.getFrustrumHeight(dist,degtorad(this.FOV));
 		const fov = this.getFovForDist(dist,frustrumHeight/this.blendCameraZoom.currentValue());
 		this.camera.fov=fov;
-	},
-});
-
-Object.defineProperties(mv3d,{
-	AMBIENT_COLOR:{
-		get(){ return mv3d.featureEnabled('dynamicShadows')?0x888888:0xffffff; }
-	},
-	renderDist:{
-		get(){ return Math.min(this.RENDER_DIST, mv3d.blendFogFar.currentValue()+7.5); }
 	},
 });

@@ -138,7 +138,22 @@ export const override=(obj,methodName,getNewMethod,condition=_override_default_c
 	Object.defineProperty(newMethod,'name',{value:`${methodName}<mv3d>`});
 	overrider.oldMethod=oldMethod; overrider.newMethod=newMethod;
 	return obj[methodName] = overrider;
-}
+};
+
+// assign
+export const assign=(obj,methods)=>{
+	for (const key in methods){
+		const descriptor = Object.getOwnPropertyDescriptor(methods,key);
+		if (descriptor.get||descriptor.set){
+			Object.defineProperty(obj,key,descriptor);
+		}else if(methods[key] instanceof mv3d.Attribute){
+			const attribute = methods[key];
+			Object.defineProperty(obj,key,attribute.descriptor);
+		}else{
+			obj[key]=methods[key];
+		}
+	}
+};
 
 
 //
@@ -149,6 +164,6 @@ const util = {
 	pointtorad,pointtodeg,minmax,
 	dirtov,dirtoh,hvtodir,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
-	overload, override, file
+	overload, override, file, assign,
 };
 export default util;

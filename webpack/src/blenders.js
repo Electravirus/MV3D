@@ -1,6 +1,5 @@
 import mv3d from './mv3d.js';
-import { hexNumber, ZAxis, XAxis } from "./util.js";
-import parameters from './parameters.js';
+import { ZAxis, XAxis } from "./util.js";
 import { ORTHOGRAPHIC_CAMERA, LOCALSPACE, Ray, Vector3 } from './mod_babylon.js';
 
 const raycastPredicate=mesh=>{
@@ -97,15 +96,15 @@ Object.assign(mv3d,{
 		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()|this.blendCameraRoll.update()
 		|this.blendCameraDist.update()|this.blendCameraHeight.update()|this.blendCameraZoom.update()
 		|$gameScreen._shake!==0
-		|(mv3d.CAMERA_COLLISION&&$gamePlayer.mv3d_positionUpdated)){
+		|(mv3d.cameraCollision.type&&$gamePlayer.mv3d_positionUpdated)){
 			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
 			this.cameraNode.yaw = this.blendCameraYaw.currentValue();
 			this.cameraNode.roll = this.blendCameraRoll.currentValue();
 			this.cameraNode.position.set(0,0,0);
 			let dist = this.blendCameraDist.currentValue();
-			if(mv3d.CAMERA_COLLISION){
+			if(mv3d.cameraCollision.type){
 				let doCollide = true;
-				if(mv3d.CAMERA_COLLISION>1){
+				if(mv3d.cameraCollision.type>1){
 					this.cameraNode.translate(ZAxis,-dist,LOCALSPACE);
 					const gpos = mv3d.globalPosition(this.cameraNode);
 					this.cameraNode.position.set(0,0,0);
@@ -129,6 +128,8 @@ Object.assign(mv3d,{
 						break;
 					}
 				}
+			}
+			if(this.cameraCollision.smooth){
 				if(this.camera.dist==null){this.camera.dist=dist;}
 				this.camera.dist=this.camera.dist+(dist-this.camera.dist)/2;
 				dist=this.camera.dist;

@@ -120,10 +120,10 @@ override(Game_CharacterBase.prototype,'collider',o=>function collider(){
 	if(!this.mv3d_sprite){ return collider; }
 	if(!collider.mv3d_collider){
 		Object.defineProperty(collider,'mv3d_collider',{
-			configurable:true, value: this.mv3d_sprite.getCollider(),
+			configurable:true,enumerable:false, value: this.mv3d_sprite.getCollider(),
 		});
 		Object.defineProperty(collider,'mv3d_triggerCollider',{
-			configurable:true, value: this.mv3d_sprite.getTriggerCollider(),
+			configurable:true,enumerable:false, value: this.mv3d_sprite.getTriggerCollider(),
 		});
 	}
 	return collider;

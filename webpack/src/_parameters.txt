@@ -128,8 +128,13 @@
 @param cameraCollision
 @text Camera Collision
 @parent graphics
-@type Boolean
-@default true
+@type Combo
+@option Off
+@option Type1
+@option Type2
+@option Type1 Smoothed
+@option Type2 Smoothed
+@default Type2 Smoothed
 
 @param resScale
 @text Resolution Scale

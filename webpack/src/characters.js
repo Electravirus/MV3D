@@ -25,6 +25,7 @@ Object.assign(mv3d,{
 			const sprite = new Character(char,order);
 			Object.defineProperty(char,'mv3d_sprite',{
 				value:sprite,
+				enumerable:false,
 				configurable:true,
 			});
 			this.characters.push(sprite);
@@ -135,6 +136,7 @@ class Sprite extends TransformNode{
 
 const z_descriptor = {
 	configurable: true,
+	enumerable:false,
 	get(){ return this._mv3d_z; },
 	set(v){
 		this._mv3d_z=v;
@@ -143,6 +145,7 @@ const z_descriptor = {
 }
 const z_descriptor2 = {
 	configurable: true,
+	enumerable:false,
 	get(){ return this.char._mv3d_z; },
 	set(v){
 		this.char._mv3d_z=v;

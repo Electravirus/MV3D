@@ -725,8 +725,13 @@ player upgrade their airship's height and speed.
 @param cameraCollision
 @text Camera Collision
 @parent graphics
-@type Boolean
-@default true
+@type Combo
+@option Off
+@option Type1
+@option Type2
+@option Type1 Smoothed
+@option Type2 Smoothed
+@default Type2 Smoothed
 
 @param resScale
 @text Resolution Scale
@@ -1239,7 +1244,7 @@ there may be z-fighting issues. (default: 0.0100)
 
 
 const mv3d = {
-	util:_util_js__WEBPACK_IMPORTED_MODULE_1__[/* default */ "h"],
+	util:_util_js__WEBPACK_IMPORTED_MODULE_1__[/* default */ "i"],
 
 	setup(){
 		this.setupParameters();
@@ -1260,7 +1265,7 @@ const mv3d = {
 		this.cameraNode.parent=this.cameraStick;
 		this.camera = new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* FreeCamera */ "h"]("camera",new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"](0,0,0),this.scene);
 		this.camera.parent=this.cameraNode;
-		this.camera.fov=Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "i"])(mv3d.FOV);
+		this.camera.fov=Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "j"])(mv3d.FOV);
 		/*
 		this.camera.orthoLeft=-Graphics.width/2/tileSize();
 		this.camera.orthoRight=Graphics.width/2/tileSize();
@@ -1431,7 +1436,7 @@ const mv3d = {
 	getScaleForDist(dist=mv3d.blendCameraDist.currentValue()){
 		return Graphics.height/this.getFieldSize(dist).height/48;
 	},
-	getFovForDist(dist=mv3d.blendCameraDist.currentValue(),height=Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* optimalFrustrumHeight */ "o"])()){
+	getFovForDist(dist=mv3d.blendCameraDist.currentValue(),height=Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* optimalFrustrumHeight */ "p"])()){
 		return 2*Math.atan(height/2/dist);
 	},
 	getFrustrumHeight(dist=mv3d.blendCameraDist.currentValue(),fov=mv3d.camera.fov){
@@ -1455,8 +1460,8 @@ const mv3d = {
 	getTranslationMatrix(mesh){
 		const matrix = mesh.getWorldMatrix();
 		const vrot=_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].Zero(), vtrans=new _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"]();
-		vrot.y=-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "i"])(mv3d.blendCameraYaw.currentValue());
-		vrot.x=-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "i"])(mv3d.blendCameraPitch.currentValue()-90);
+		vrot.y=-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "j"])(mv3d.blendCameraYaw.currentValue());
+		vrot.x=-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* degtorad */ "j"])(mv3d.blendCameraPitch.currentValue()-90);
 		matrix.decompose(null,null,vtrans);
 		return _mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Matrix */ "j"].Compose(_mod_babylon_js__WEBPACK_IMPORTED_MODULE_0__[/* Vector3 */ "z"].One(),vrot.toQuaternion(),vtrans);
 	},
@@ -1481,30 +1486,30 @@ window.mv3d=mv3d;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return makeColor; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return makeColor; });
 /* unused harmony export hexNumber */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "t", function() { return relativeNumber; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return booleanNumber; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return booleanString; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return falseString; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "v", function() { return sleep; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return degtorad; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "s", function() { return radtodeg; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "u", function() { return relativeNumber; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return booleanNumber; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return booleanString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return falseString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "w", function() { return sleep; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return degtorad; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "t", function() { return radtodeg; });
 /* unused harmony export pointtorad */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "r", function() { return pointtodeg; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "u", function() { return sin; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return cos; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "z", function() { return unround; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "s", function() { return pointtodeg; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "v", function() { return sin; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return cos; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "A", function() { return unround; });
 /* unused harmony export minmax */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "x", function() { return tileSize; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "y", function() { return tileWidth; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "w", function() { return tileHeight; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "y", function() { return tileSize; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "z", function() { return tileWidth; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "x", function() { return tileHeight; });
 /* unused harmony export optimalFrustrumWidth */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "o", function() { return optimalFrustrumHeight; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return optimalFrustrumHeight; });
 /* unused harmony export file */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return dirtoh; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return dirtov; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "m", function() { return hvtodir; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return dirtoh; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "l", function() { return dirtov; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "n", function() { return hvtodir; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return XAxis; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return YAxis; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return ZAxis; });
@@ -1512,8 +1517,9 @@ window.mv3d=mv3d;
 /* unused harmony export v3origin */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return PI; });
 /* unused harmony export PI2 */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "p", function() { return overload; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return override; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "q", function() { return overload; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "r", function() { return override; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return assign; });
 /* harmony import */ var _mv3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 
 
@@ -1655,7 +1661,22 @@ const override=(obj,methodName,getNewMethod,condition=_override_default_conditio
 	Object.defineProperty(newMethod,'name',{value:`${methodName}<mv3d>`});
 	overrider.oldMethod=oldMethod; overrider.newMethod=newMethod;
 	return obj[methodName] = overrider;
-}
+};
+
+// assign
+const assign=(obj,methods)=>{
+	for (const key in methods){
+		const descriptor = Object.getOwnPropertyDescriptor(methods,key);
+		if (descriptor.get||descriptor.set){
+			Object.defineProperty(obj,key,descriptor);
+		}else if(methods[key] instanceof _mv3d__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].Attribute){
+			const attribute = methods[key];
+			Object.defineProperty(obj,key,attribute.descriptor);
+		}else{
+			obj[key]=methods[key];
+		}
+	}
+};
 
 
 //
@@ -1666,9 +1687,9 @@ const util = {
 	pointtorad,pointtodeg,minmax,
 	dirtov,dirtoh,hvtodir,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
-	overload, override, file
+	overload, override, file, assign,
 };
-/* harmony default export */ __webpack_exports__["h"] = (util);
+/* harmony default export */ __webpack_exports__["i"] = (util);
 
 /***/ }),
 /* 2 */
@@ -1845,16 +1866,16 @@ const _mixin_xyz = {
 };
 const _mixin_angles = {
 	pitch:{
-		get(){ return this.rotation?-Object(util["s" /* radtodeg */])(this.rotation.x):undefined; },
-		set(v){ if(this.rotation){ this.rotation.x=-Object(util["i" /* degtorad */])(v); } },
+		get(){ return this.rotation?-Object(util["t" /* radtodeg */])(this.rotation.x):undefined; },
+		set(v){ if(this.rotation){ this.rotation.x=-Object(util["j" /* degtorad */])(v); } },
 	},
 	yaw:{
-		get(){ return this.rotation?-Object(util["s" /* radtodeg */])(this.rotation.y):undefined; },
-		set(v){  if(this.rotation){ this.rotation.y=-Object(util["i" /* degtorad */])(v); } },
+		get(){ return this.rotation?-Object(util["t" /* radtodeg */])(this.rotation.y):undefined; },
+		set(v){  if(this.rotation){ this.rotation.y=-Object(util["j" /* degtorad */])(v); } },
 	},
 	roll:{
-		get(){ return this.rotation?-Object(util["s" /* radtodeg */])(this.rotation.z):undefined; },
-		set(v){  if(this.rotation){ this.rotation.z=-Object(util["i" /* degtorad */])(v); } },
+		get(){ return this.rotation?-Object(util["t" /* radtodeg */])(this.rotation.z):undefined; },
+		set(v){  if(this.rotation){ this.rotation.z=-Object(util["j" /* degtorad */])(v); } },
 	},
 }
 Object.defineProperties(Node.prototype,_mixin_xyz);
@@ -2048,7 +2069,8 @@ Window_Options.prototype.statusText = function(index) {
 Object.defineProperty(ConfigManager, 'mv3d-options', {
 	get(){ return undefined; },
 	set(v){ SceneManager.push(Scene_3D_Options); },
-	configurable: true
+	configurable: true,
+	enumerable:false,
 });
 
 const _config_makeData=ConfigManager.makeData;
@@ -2091,7 +2113,7 @@ class Window_3D_Options extends Window_Options{
 	}
 }
 
-if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ENABLE_3D_OPTIONS===1) Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Scene_Options.prototype,'terminate',o=>function(){
+if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ENABLE_3D_OPTIONS===1) Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Scene_Options.prototype,'terminate',o=>function(){
 	o.apply(this,arguments);
 	_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].updateParameters();
 },true);
@@ -2123,7 +2145,7 @@ Window_Options.prototype._mv3d_cursor=function(wrap,direction){
 }
 
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'statusText',o=>function(index){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Window_Options.prototype,'statusText',o=>function(index){
     const symbol = this.commandSymbol(index);
     if(!this._is_mv3d_option(symbol)){ return o.apply(this,arguments); }
     const value = this.getConfigValue(symbol);
@@ -2136,14 +2158,14 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options
     return String(value);
 },true);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'setConfigValue',o=>function(symbol, value){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Window_Options.prototype,'setConfigValue',o=>function(symbol, value){
     if(!this._is_mv3d_option(symbol)){ return o.apply(this,arguments); }
     _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]['option-store'][symbol]=value;
     const option = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[symbol];
     if(option.apply){ option.apply(value); }
 },true);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'getConfigValue',o=>function(symbol){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Window_Options.prototype,'getConfigValue',o=>function(symbol){
     if(!this._is_mv3d_option(symbol)){ return o.apply(this,arguments); }
     const option = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options[symbol];
     let value = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]['option-store'][symbol];
@@ -2151,7 +2173,7 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options
     return value;
 },true);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'cursorLeft',o=>function(wrap){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Window_Options.prototype,'cursorLeft',o=>function(wrap){
     const symbol = this.commandSymbol(this.index());
     if(this._is_mv3d_option(symbol)){
         return this._mv3d_cursor(wrap,-1);
@@ -2160,7 +2182,7 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options
     }
 },true);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'cursorRight',o=>function(wrap){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Window_Options.prototype,'cursorRight',o=>function(wrap){
     const symbol = this.commandSymbol(this.index());
     if(this._is_mv3d_option(symbol)){
         return this._mv3d_cursor(wrap,1);
@@ -2169,7 +2191,7 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options
     }
 },true);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Window_Options.prototype,'processOk',o=>function(){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Window_Options.prototype,'processOk',o=>function(){
     const index = this.index();
     const symbol = this.commandSymbol(index);
     if(!this._is_mv3d_option(symbol)){
@@ -2360,7 +2382,7 @@ Game_CharacterBase.prototype.jump = function(xPlus, yPlus) {
 	_charBase_jump.apply(this,arguments);
 };
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Map.prototype,'allTiles',o=>function(x,y){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Map.prototype,'allTiles',o=>function(x,y){
 	return this.layeredTiles(x, y);
 });
 
@@ -2377,11 +2399,11 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'update',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(ColliderManager,'update',o=>function(){
 	this.hide();
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager.container,'update',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(ColliderManager.container,'update',o=>function(){
 	if(this.visible){ o.apply(this,arguments); }
 },true);
 
@@ -2399,7 +2421,7 @@ function mv3d_makeTileCollider(x,y,zcollider,extra){
 
 const infiniteHeightCollider={z1:-Infinity,z2:Infinity};
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototype,'setupMapColliders',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Map.prototype,'setupMapColliders',o=>function(){
 	this._tileCounter = 0;
 	_tileColliders={};
 	for (let x = 0; x < this.width(); x++)
@@ -2467,7 +2489,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototyp
 	}
 },true);
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototype,'makeTileCollider',o=>function(x,y,flag,boxData,index){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Map.prototype,'makeTileCollider',o=>function(x,y,flag,boxData,index){
 	const collider = o.apply(this,arguments);
 	if(boxData.mv3d_collider){
 		if(boxData.isRegionCollider){
@@ -2490,15 +2512,15 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototyp
 	return collider;
 },true);
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBase.prototype,'collider',o=>function collider(){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_CharacterBase.prototype,'collider',o=>function collider(){
 	const collider = o.apply(this,arguments);
 	if(!this.mv3d_sprite){ return collider; }
 	if(!collider.mv3d_collider){
 		Object.defineProperty(collider,'mv3d_collider',{
-			configurable:true, value: this.mv3d_sprite.getCollider(),
+			configurable:true,enumerable:false, value: this.mv3d_sprite.getCollider(),
 		});
 		Object.defineProperty(collider,'mv3d_triggerCollider',{
-			configurable:true, value: this.mv3d_sprite.getTriggerCollider(),
+			configurable:true,enumerable:false, value: this.mv3d_sprite.getTriggerCollider(),
 		});
 	}
 	return collider;
@@ -2516,7 +2538,7 @@ function zCollidersOverlap(c1,c2){
 	return false;
 }
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collider, only, debug){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(ColliderManager,'getCollidersNear',o=>function getCollidersNear(collider, only, debug){
 	// Q colliders
 	let isBreak=false;
 	const near = o.call(this,collider,c=>{
@@ -2588,7 +2610,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'
 			}
 			// collide ledges
 			else if(!_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].WALK_OFF_EDGE && !char.char._mv3d_isFlying() && (!char.platform||!char.platform.isSlope)
-			&& Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* unround */ "z"])(Math.abs(char.getPlatformFloat(tx,ty,opts)-char.targetElevation))>_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].STAIR_THRESH){
+			&& Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* unround */ "A"])(Math.abs(char.getPlatformFloat(tx,ty,opts)-char.targetElevation))>_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].STAIR_THRESH){
 				shouldCollide=true;
 			}
 			
@@ -2618,7 +2640,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'
 	return near;
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'getCharactersNear',o=>function(collider, only){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(ColliderManager,'getCharactersNear',o=>function(collider, only){
 	return o.call(this,collider,char=>{
 		const sprite = char.mv3d_sprite; if(!sprite){ return true; }
 		const c1 = collider.mv3d_collider;
@@ -2630,7 +2652,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(ColliderManager,'
 	});
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'startMapEvent',o=>function(x,y,triggers,normal){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Player.prototype,'startMapEvent',o=>function(x,y,triggers,normal){
 	$gameTemp._mv3d_Q_getCharactersTriggerHeight=true;
 	o.apply(this,arguments);
 	$gameTemp._mv3d_Q_getCharactersTriggerHeight=false;
@@ -2701,29 +2723,29 @@ const _QMoveVH=o=>function(dir) {
 	}
 	
 };
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveInputHorizontal',_QMoveVH);
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveInputVertical',_QMoveVH);
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveInputDiagonal',_QMoveVH);
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Player.prototype,'moveInputHorizontal',_QMoveVH);
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Player.prototype,'moveInputVertical',_QMoveVH);
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Player.prototype,'moveInputDiagonal',_QMoveVH);
 
 Game_Player.prototype.mv3d_QMoveRadian=function(dir,dist=this.moveTiles()){
-	this.moveRadian(-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* degtorad */ "i"])(_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].blendCameraYaw.currentValue()+90+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].dirToYaw(dir)),dist);
+	this.moveRadian(-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* degtorad */ "j"])(_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].blendCameraYaw.currentValue()+90+_mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].dirToYaw(dir)),dist);
 	//this.mv3d_setDirection(mv3d.transformDirection(dir));
 };
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Character.prototype,'moveRadian',o=>function(radian, dist){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Character.prototype,'moveRadian',o=>function(radian, dist){
 	o.apply(this,arguments);
-	const d = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].yawToDir(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* radtodeg */ "s"])(-radian)-90,true);
+	const d = _mv3d__WEBPACK_IMPORTED_MODULE_1__[/* default */ "a"].yawToDir(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* radtodeg */ "t"])(-radian)-90,true);
 	this.mv3d_setDirection(d);
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 	o.apply(this,arguments);
-	const d = Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* hvtodir */ "m"])(h,v);
+	const d = Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* hvtodir */ "n"])(h,v);
 	this.mv3d_setDirection(d);
 });
 
 if(Game_Follower.prototype.updateMoveList)
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Follower.prototype,'updateMoveList',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Follower.prototype,'updateMoveList',o=>function(){
 	const move = this._moveList[0];
 	o.apply(this,arguments);
 	if(!move){ return; }
@@ -2739,7 +2761,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
 
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveByInput',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Player.prototype,'moveByInput',o=>function(){
 	$gameTemp._mv3d_altimit_moveByInput=true;
 	o.apply(this,arguments);
 	$gameTemp._mv3d_altimit_moveByInput=false;
@@ -2750,12 +2772,12 @@ mv3d.getInputDirection=function(){
 	return dir;
 };
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'moveVector',o=>function(vx,vy){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Player.prototype,'moveVector',o=>function(vx,vy){
 	if($gameTemp._mv3d_altimit_moveByInput && !this._touchTarget){
 		const _vx=vx,_vy=vy;
-		const yaw = Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* degtorad */ "i"])(mv3d.blendCameraYaw.currentValue());
-		vx=Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* cos */ "g"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* sin */ "u"])(yaw)*_vy;
-		vy=-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* sin */ "u"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* cos */ "g"])(yaw)*_vy;
+		const yaw = Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* degtorad */ "j"])(mv3d.blendCameraYaw.currentValue());
+		vx=Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* cos */ "h"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* sin */ "v"])(yaw)*_vy;
+		vy=-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* sin */ "v"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* cos */ "h"])(yaw)*_vy;
 		//console.log(_vx,_vy,vx,vy);
 	}
 	if(this.mv3d_sprite && this.mv3d_sprite.platform && this.mv3d_sprite.platform.isSlope){
@@ -2775,11 +2797,11 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.proto
 	o.call(this,vx,vy);
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBase.prototype,'setDirectionVector',o=>function(vx,vy){
-	this.mv3d_setDirection(mv3d.yawToDir(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* pointtodeg */ "r"])(vx,vy),true));
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_CharacterBase.prototype,'setDirectionVector',o=>function(vx,vy){
+	this.mv3d_setDirection(mv3d.yawToDir(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* pointtodeg */ "s"])(vx,vy),true));
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBase.prototype,'moveVectorMap',o=>function(owner, collider, bboxTests, move, vx, vy){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_CharacterBase.prototype,'moveVectorMap',o=>function(owner, collider, bboxTests, move, vx, vy){
 	o.apply(this,arguments);
 	const sprite = owner.mv3d_sprite;
 	if(!sprite){ return; }
@@ -2815,7 +2837,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBas
 			else if(mv3d.tileCollision(this,tx,ty,true,true)){ collided=true; }
 			else if(!mv3d.WALK_OFF_EDGE){
 				const platformz = mv3d.getPlatformFloatForCharacter(this,tx,ty);
-				if(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* unround */ "z"])(Math.abs(platformz-sprite.targetElevation))>mv3d.STAIR_THRESH){
+				if(Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* unround */ "A"])(Math.abs(platformz-sprite.targetElevation))>mv3d.STAIR_THRESH){
 					collided=true;
 				}
 			}
@@ -2827,7 +2849,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBas
 	}
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_CharacterBase.prototype,'moveVectorCharacters',o=>function(owner, collider, characters, loopMap, move){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_CharacterBase.prototype,'moveVectorCharacters',o=>function(owner, collider, characters, loopMap, move){
 	const spr1=this.mv3d_sprite; if(!spr1){ return o.apply(this,arguments); }
 	const zcol1=spr1.getCollisionHeight();
 	characters=characters.filter(character=>{
@@ -2904,7 +2926,7 @@ function zCollidersOverlap(s1,s2){
 	return s1.z1<s2.z2&&s1.z2>s2.z1;
 }
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototype,'events',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Map.prototype,'events',o=>function(){
 	const events = o.apply(this,arguments);
 	if(!$gameTemp._mv3d_altimit_eventsHeightFilter){ return events; }
 	delete $gameTemp._mv3d_altimit_eventsHeightFilter;
@@ -2917,7 +2939,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Map.prototyp
 	});
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Event.prototype,'checkEventTriggerTouch',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Event.prototype,'checkEventTriggerTouch',o=>function(){
 	const sprite = this.mv3d_sprite, player=$gamePlayer.mv3d_sprite;
 	if(sprite&&player){
 		if(!zCollidersOverlap(sprite,player)){ return false; }
@@ -2929,8 +2951,8 @@ const _eventsHeightFilter=o=>function(){
 	$gameTemp._mv3d_altimit_eventsHeightFilter=true;
 	return o.apply(this,arguments);
 };
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'checkEventTriggerHere',_eventsHeightFilter);
-Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "q"])(Game_Player.prototype,'checkEventTriggerThere',_eventsHeightFilter);
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Player.prototype,'checkEventTriggerHere',_eventsHeightFilter);
+Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_Player.prototype,'checkEventTriggerThere',_eventsHeightFilter);
 
 /***/ }),
 /* 12 */
@@ -2969,18 +2991,18 @@ const _isCollidedWithEvents=o=>function(x,y){
 	return charCollidesWithChars(this,$gameMap.eventsXyNt(x,y),x,y);
 };
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'isCollidedWithEvents',_isCollidedWithEvents);
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_CharacterBase.prototype,'isCollidedWithEvents',_isCollidedWithEvents);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Event.prototype,'isCollidedWithEvents',_isCollidedWithEvents);
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Event.prototype,'isCollidedWithEvents',_isCollidedWithEvents);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Event.prototype,'isCollidedWithPlayerCharacters',o=>function(x,y){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Event.prototype,'isCollidedWithPlayerCharacters',o=>function(x,y){
 	if($gamePlayer.isThrough()){ return false; }
 	const chars = [$gamePlayer,...$gamePlayer.followers()._data.filter(f=>f.isVisible()&&f.mv3d_sprite&&f.mv3d_sprite.visible)]
 	.filter(char=>char.pos(x,y));
 	return charCollidesWithChars(this,chars,x,y);
 });
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'isCollidedWithVehicles',o=>function(x,y){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_CharacterBase.prototype,'isCollidedWithVehicles',o=>function(x,y){
 	const boat=$gameMap.boat(), ship=$gameMap.ship();
 	return boat.posNt(x,y)&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,boat,boat._mv3d_isPlatform(),true) || ship.posNt(x,y)&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,ship,ship._mv3d_isPlatform(),true);
 });
@@ -3015,7 +3037,7 @@ const _isMapPassable=o=>function(x,y,d){
 		if(sprite.falling){ return false; }
 		if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].WALK_OFF_EDGE){
 			const platformz = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformFloatForCharacter(this,x2,y2);
-			if(Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* unround */ "z"])(Math.abs(platformz-sprite.targetElevation))>_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH){
+			if(Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* unround */ "A"])(Math.abs(platformz-sprite.targetElevation))>_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH){
 				return false; 
 			}
 		}
@@ -3023,11 +3045,11 @@ const _isMapPassable=o=>function(x,y,d){
 	return true;
 };
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'isMapPassable',_isMapPassable);
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_CharacterBase.prototype,'isMapPassable',_isMapPassable);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Vehicle.prototype,'isMapPassable',_isMapPassable);
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Vehicle.prototype,'isMapPassable',_isMapPassable);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Player.prototype,'startMapEvent',o=>function(x,y,triggers,normal){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Player.prototype,'startMapEvent',o=>function(x,y,triggers,normal){
 	if ($gameMap.isEventRunning()) { return; }
 	$gameMap.eventsXy(x,y)
 	.filter(event=>_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].charCollision(this,event,false,false,false,true))
@@ -3076,7 +3098,7 @@ Game_Map.prototype.checkPassage = function(x, y, bit) {
 
 const _dir8Condition=()=> !_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isDisabled() || _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8MOVE&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8_2D;
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Player.prototype,'moveStraight',o=>function(d){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Player.prototype,'moveStraight',o=>function(d){
 	if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8MOVE){ return o.apply(this,arguments); }
 	switch(d){
 		case 1: this.moveDiagonally(4, 2); break;
@@ -3088,7 +3110,7 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Player.pr
 	
 },_dir8Condition);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 	o.apply(this,arguments);
 
 	let adjustDirection=false;
@@ -3106,13 +3128,13 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Character
 	}
 
 	if(adjustDirection){
-		const d = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* hvtodir */ "m"])(h,v);
+		const d = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* hvtodir */ "n"])(h,v);
 		this.mv3d_setDirection(d);
 	}
 
 },_dir8Condition);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'canPassDiagonally',o=>function(x,y,horz,vert){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_CharacterBase.prototype,'canPassDiagonally',o=>function(x,y,horz,vert){
     const x2 = $gameMap.roundXWithDirection(x, horz);
 	const y2 = $gameMap.roundYWithDirection(y, vert);
 	if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x,y2,true,true)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y,true,true)){
@@ -3127,10 +3149,10 @@ const _dontSnapRealXY=o=>function(){
 	if(Math.abs(realX-this._realX)>2||Math.abs(realY-this._realY)>2){ return;}
 	this._realX=realX; this._realY=realY;
 };
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Follower.prototype,'moveDiagonally',_dontSnapRealXY,_dir8Condition);
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Follower.prototype,'moveStraight',_dontSnapRealXY,_dir8Condition);
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Follower.prototype,'moveDiagonally',_dontSnapRealXY,_dir8Condition);
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Follower.prototype,'moveStraight',_dontSnapRealXY,_dir8Condition);
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_CharacterBase.prototype,'distancePerFrame',o=>function(){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_CharacterBase.prototype,'distancePerFrame',o=>function(){
 	const dist = o.apply(this,arguments);
 	if(this._mv3d_direction%2){
 		return dist * Math.SQRT1_2;
@@ -3140,11 +3162,11 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Character
 
 // triggering
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Player.prototype,'checkEventTriggerThere',o=>function(triggers){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Player.prototype,'checkEventTriggerThere',o=>function(triggers){
 	if (!this.canStartLocalEvents()) { return; }
 	const dir = this.mv3d_direction();
 	if(dir%2===0){ return o.apply(this,arguments); }
-	const horz = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* dirtoh */ "j"])(dir),vert = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* dirtov */ "k"])(dir);
+	const horz = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* dirtoh */ "k"])(dir),vert = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* dirtov */ "l"])(dir);
 	const x2 = $gameMap.roundXWithDirection(this.x, horz);
 	const y2 = $gameMap.roundYWithDirection(this.y, vert);
 	this.startMapEvent(x2, y2, triggers, true);
@@ -3206,7 +3228,7 @@ Game_Player.prototype.getOnVehicle = function(){
 };
 
 
-Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "q"])(Game_Vehicle.prototype,'isLandOk',o=>function(x,y,d){
+Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Vehicle.prototype,'isLandOk',o=>function(x,y,d){
 	$gameTemp._mv3d_collision_char = $gamePlayer.mv3d_sprite;
 	let landOk = o.apply(this,arguments);
 	delete $gameTemp._mv3d_collision_char;
@@ -3292,6 +3314,7 @@ Sprite_Character.prototype.setCharacter = function(character) {
 	Object.defineProperty(character,'mv_sprite',{
 		value:this,
 		configurable:true,
+		enumerable:false,
 	});
 };
 
@@ -3391,7 +3414,41 @@ SceneManager.preferableRendererType = function() {
         return 'auto';
     }
 };
+// CONCATENATED MODULE: ./src/attributes.js
+
+
+mv3d["a" /* default */].attributes={};
+
+class attributes_Attribute{
+	constructor(name,dfault,reader){
+		this.name=name.toLowerCase();
+		this.reader = reader?reader:v=>v;
+		this.default=this.reader(dfault);
+		this.descriptor={
+			get:()=>this.get(),
+			set:v=>this.set(this.reader(v)),
+		};
+		Object.defineProperty(mv3d["a" /* default */].attributes,this.name,this.descriptor);
+	}
+	get(){
+		const storage = attributes_Attribute.getStorageLocation();
+		if(!storage || !(this.name in storage)){ return this.default; }
+		return storage[this.name];
+	}
+	set(v){
+		const storage = attributes_Attribute.getStorageLocation();
+		if (!storage){console.warn(`MV3D: Couldn't get Attribute storage location.`); return;}
+		storage[this.name]=v;
+	}
+	static getStorageLocation(){
+		if(!$gameVariables){ return null; }
+		if(!$gameVariables.mv3d_attributes){ $gameVariables.mv3d_attributes = {}; }
+		return $gameVariables.mv3d_attributes;
+	}
+}
+mv3d["a" /* default */].Attribute = attributes_Attribute;
 // CONCATENATED MODULE: ./src/parameters.js
+
 
 
 
@@ -3416,7 +3473,7 @@ Object.assign(mv3d["a" /* default */],{
 	}
 });
 
-Object.assign(mv3d["a" /* default */],{
+Object(util["e" /* assign */])(mv3d["a" /* default */],{
 	CAMERA_MODE:"PERSPECTIVE",
 	ORTHOGRAPHIC_DIST:100,
 	MV3D_FOLDER:"img/MV3D",
@@ -3424,8 +3481,8 @@ Object.assign(mv3d["a" /* default */],{
 	ANIM_DELAY:Number(parameters.animDelay),
 	ALPHA_CUTOFF:Math.max(0.01,parameters.alphatest),
 
-	EDGE_FIX: Number(parameters.edgefix)*Object(util["x" /* tileSize */])()/48,
-	ANTIALIASING: Object(util["f" /* booleanString */])(parameters.antialiasing),
+	EDGE_FIX: Number(parameters.edgefix)*Object(util["y" /* tileSize */])()/48,
+	ANTIALIASING: Object(util["g" /* booleanString */])(parameters.antialiasing),
 	FOV:Number(parameters.fov),
 	RES_SCALE: parameter('resScale',1,Number)||1,
 
@@ -3435,31 +3492,34 @@ Object.assign(mv3d["a" /* default */],{
 	CEILING_HEIGHT:Number(parameters.ceilingHeight),
 	LAYER_DIST:Number(parameters.layerDist),
 
-	ENABLED_DEFAULT: Object(util["f" /* booleanString */])(parameters.enabledDefault),
-	EVENTS_UPDATE_NEAR: Object(util["f" /* booleanString */])(parameters.eventsUpdateNear),
+	ENABLED_DEFAULT: Object(util["g" /* booleanString */])(parameters.enabledDefault),
+	EVENTS_UPDATE_NEAR: Object(util["g" /* booleanString */])(parameters.eventsUpdateNear),
 
-	UNLOAD_CELLS: Object(util["f" /* booleanString */])(parameters.unloadCells),
+	UNLOAD_CELLS: Object(util["g" /* booleanString */])(parameters.unloadCells),
 	CELL_SIZE: Number(parameters.cellSize),
 	RENDER_DIST: Number(parameters.renderDist),
-	MIPMAP:Object(util["f" /* booleanString */])(parameters.mipmap),
+	MIPMAP:Object(util["g" /* booleanString */])(parameters.mipmap),
 
-	OPTION_MIPMAP:Object(util["f" /* booleanString */])(parameters.mipmapOption),
-	OPTION_RENDER_DIST: parameter('renderDistOption',true,util["f" /* booleanString */]),
-	OPTION_FOV: parameter('fovOption',false,util["f" /* booleanString */]),
+	get renderDist(){ return Math.min(this.RENDER_DIST, mv3d["a" /* default */].blendFogFar.currentValue()+7.5); },
+
+	OPTION_MIPMAP:Object(util["g" /* booleanString */])(parameters.mipmapOption),
+	OPTION_RENDER_DIST: parameter('renderDistOption',true,util["g" /* booleanString */]),
+	OPTION_FOV: parameter('fovOption',false,util["g" /* booleanString */]),
 	OPTION_RENDER_DIST_MIN: parameter('renderDistMin',10,Number),
 	OPTION_RENDER_DIST_MAX: parameter('renderDistMax',100,Number),
 	OPTION_FOV_MIN: parameter('fovMin',50,Number),
 	OPTION_FOV_MAX: parameter('fovMax',100,Number),
 
 	STAIR_THRESH: Number(parameters.stairThresh),
-	WALK_OFF_EDGE:Object(util["f" /* booleanString */])(parameters.walkOffEdge),
-	WALK_ON_EVENTS:Object(util["f" /* booleanString */])(parameters.walkOnEvents),
+	WALK_OFF_EDGE:Object(util["g" /* booleanString */])(parameters.walkOffEdge),
+	WALK_ON_EVENTS:Object(util["g" /* booleanString */])(parameters.walkOnEvents),
 	GRAVITY:Number(parameters.gravity),
 
-	FOG_COLOR: Object(util["n" /* makeColor */])(parameters.fogColor).toNumber(),
+	FOG_COLOR: Object(util["o" /* makeColor */])(parameters.fogColor).toNumber(),
 	FOG_NEAR: Number(parameters.fogNear),
 	FOG_FAR: Number(parameters.fogFar), 
 	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
+	get AMBIENT_COLOR(){ return mv3d["a" /* default */].featureEnabled('dynamicShadows')?0x888888:0xffffff; },
 
 	LIGHT_LIMIT: Number(parameters.lightLimit),
 	LIGHT_HEIGHT: 0.5,
@@ -3482,7 +3542,7 @@ Object.assign(mv3d["a" /* default */],{
 	SHIP_SETTINGS:JSON.parse(parameters.shipSettings),
 	AIRSHIP_SETTINGS:JSON.parse(parameters.airshipSettings),
 
-	ALLOW_GLIDE: Object(util["f" /* booleanString */])(parameters.allowGlide),
+	ALLOW_GLIDE: Object(util["g" /* booleanString */])(parameters.allowGlide),
 
 	SPRITE_OFFSET:Number(parameters.spriteOffset)/2,
 
@@ -3492,23 +3552,33 @@ Object.assign(mv3d["a" /* default */],{
 	TEXTURE_BUSHALPHA: parameters.alphaMask||'bushAlpha',
 	TEXTURE_ERROR: parameters.errorTexture||'errorTexture',
 
-	DIR8MOVE: Object(util["f" /* booleanString */])(parameters.dir8Movement),
+	DIR8MOVE: Object(util["g" /* booleanString */])(parameters.dir8Movement),
 	DIR8SMART: parameters.dir8Movement.includes("Smart"),
 	DIR8_2D: !parameters.dir8Movement.includes("3D"),
 	TURN_INCREMENT: Number(parameters.turnIncrement),
-	WASD: Object(util["f" /* booleanString */])(parameters.WASD),
+	WASD: Object(util["g" /* booleanString */])(parameters.WASD),
 
-	KEYBOARD_PITCH: Object(util["f" /* booleanString */])(parameters.keyboardPitch),
-	KEYBOARD_TURN: Object(util["l" /* falseString */])(parameters.keyboardTurn),
-	KEYBOARD_STRAFE: Object(util["l" /* falseString */])(parameters.keyboardStrafe),
+	KEYBOARD_PITCH: Object(util["g" /* booleanString */])(parameters.keyboardPitch),
+	KEYBOARD_TURN: Object(util["m" /* falseString */])(parameters.keyboardTurn),
+	KEYBOARD_STRAFE: Object(util["m" /* falseString */])(parameters.keyboardStrafe),
 
 	YAW_SPEED: Number(parameters.yawSpeed)||90,
 	PITCH_SPEED: Number(parameters.pitchSpeed)||90,
 
-	TRIGGER_INFINITE: !Object(util["f" /* booleanString */])(parameters.heightTrigger),
+	TRIGGER_INFINITE: !Object(util["g" /* booleanString */])(parameters.heightTrigger),
 
-	BACKFACE_CULLING: parameter('backfaceCulling',true,util["f" /* booleanString */]),
-	CAMERA_COLLISION: parameter('cameraCollision',true,util["f" /* booleanString */]),
+	BACKFACE_CULLING: parameter('backfaceCulling',true,util["g" /* booleanString */]),
+	cameraCollision: new attributes_Attribute('cameraCollision',String(parameters.cameraCollision),function(v){
+		if(typeof v === 'string'){
+			const values=v.split(' '); v=values[0];
+			const ret = {type:!Object(util["g" /* booleanString */])(v)?0:Number((v.match(/\d+/)||'1')[0])};
+			for (let v of values)if(v.toUpperCase().includes("SMOOTH")){ ret.smooth=true; }
+			return ret;
+		}else if(typeof v == 'object'){
+			return Object.assign(this.get(),v);
+		}
+		const ret = this.get(); ret.type=Number(v); return ret;
+	}),
 
 	DIAG_SYMBOL: parameter('diagSymbol','{d}',String),
 
@@ -3549,11 +3619,11 @@ Object.assign(mv3d["a" /* default */],{
 			this.eventConfigurationFunctions,
 		);
 
-		this.BOAT_SETTINGS.big=Object(util["f" /* booleanString */])(this.BOAT_SETTINGS.big);
-		this.SHIP_SETTINGS.big=Object(util["f" /* booleanString */])(this.SHIP_SETTINGS.big);
+		this.BOAT_SETTINGS.big=Object(util["g" /* booleanString */])(this.BOAT_SETTINGS.big);
+		this.SHIP_SETTINGS.big=Object(util["g" /* booleanString */])(this.SHIP_SETTINGS.big);
 		this.AIRSHIP_SETTINGS.height=Number(this.AIRSHIP_SETTINGS.height);
-		this.AIRSHIP_SETTINGS.big=Object(util["f" /* booleanString */])(this.AIRSHIP_SETTINGS.big);
-		this.AIRSHIP_SETTINGS.bushLanding=Object(util["f" /* booleanString */])(this.AIRSHIP_SETTINGS.bushLanding);
+		this.AIRSHIP_SETTINGS.big=Object(util["g" /* booleanString */])(this.AIRSHIP_SETTINGS.big);
+		this.AIRSHIP_SETTINGS.bushLanding=Object(util["g" /* booleanString */])(this.AIRSHIP_SETTINGS.bushLanding);
 
 		this.BOAT_SETTINGS.conf = this.readConfigurationFunctions(
 			this.BOAT_SETTINGS.conf,
@@ -3587,22 +3657,13 @@ Object.assign(mv3d["a" /* default */],{
 	},
 	updateFov(){
 		const dist = this.blendCameraDist.currentValue()||0.1;
-		const frustrumHeight = this.getFrustrumHeight(dist,Object(util["i" /* degtorad */])(this.FOV));
+		const frustrumHeight = this.getFrustrumHeight(dist,Object(util["j" /* degtorad */])(this.FOV));
 		const fov = this.getFovForDist(dist,frustrumHeight/this.blendCameraZoom.currentValue());
 		this.camera.fov=fov;
 	},
 });
 
-Object.defineProperties(mv3d["a" /* default */],{
-	AMBIENT_COLOR:{
-		get(){ return mv3d["a" /* default */].featureEnabled('dynamicShadows')?0x888888:0xffffff; }
-	},
-	renderDist:{
-		get(){ return Math.min(this.RENDER_DIST, mv3d["a" /* default */].blendFogFar.currentValue()+7.5); }
-	},
-});
 // CONCATENATED MODULE: ./src/blenders.js
-
 
 
 
@@ -3701,15 +3762,15 @@ Object.assign(mv3d["a" /* default */],{
 		if(reorient|this.blendCameraPitch.update()|this.blendCameraYaw.update()|this.blendCameraRoll.update()
 		|this.blendCameraDist.update()|this.blendCameraHeight.update()|this.blendCameraZoom.update()
 		|$gameScreen._shake!==0
-		|(mv3d["a" /* default */].CAMERA_COLLISION&&$gamePlayer.mv3d_positionUpdated)){
+		|(mv3d["a" /* default */].cameraCollision.type&&$gamePlayer.mv3d_positionUpdated)){
 			this.cameraNode.pitch = this.blendCameraPitch.currentValue()-90;
 			this.cameraNode.yaw = this.blendCameraYaw.currentValue();
 			this.cameraNode.roll = this.blendCameraRoll.currentValue();
 			this.cameraNode.position.set(0,0,0);
 			let dist = this.blendCameraDist.currentValue();
-			if(mv3d["a" /* default */].CAMERA_COLLISION){
+			if(mv3d["a" /* default */].cameraCollision.type){
 				let doCollide = true;
-				if(mv3d["a" /* default */].CAMERA_COLLISION>1){
+				if(mv3d["a" /* default */].cameraCollision.type>1){
 					this.cameraNode.translate(util["d" /* ZAxis */],-dist,mod_babylon["i" /* LOCALSPACE */]);
 					const gpos = mv3d["a" /* default */].globalPosition(this.cameraNode);
 					this.cameraNode.position.set(0,0,0);
@@ -3733,6 +3794,8 @@ Object.assign(mv3d["a" /* default */],{
 						break;
 					}
 				}
+			}
+			if(this.cameraCollision.smooth){
 				if(this.camera.dist==null){this.camera.dist=dist;}
 				this.camera.dist=this.camera.dist+(dist-this.camera.dist)/2;
 				dist=this.camera.dist;
@@ -4024,7 +4087,7 @@ Object.assign(mv3d["a" /* default */],{
 	},
 });
 
-Object(util["q" /* override */])(Input,'_signX',o=>function _signX(){
+Object(util["r" /* override */])(Input,'_signX',o=>function _signX(){
 	if(!mv3d["a" /* default */].KEYBOARD_STRAFE && mv3d["a" /* default */].is1stPerson()){ return 0; }
 	const leftKey=mv3d["a" /* default */].getStrafeKey('left'), rightKey=mv3d["a" /* default */].getStrafeKey('right');
 
@@ -4201,7 +4264,7 @@ Object.assign(mv3d["a" /* default */],{
 });
 
 let _oldDir=0;
-Object(util["q" /* override */])(Game_Player.prototype,'update',o=>function update(){
+Object(util["r" /* override */])(Game_Player.prototype,'update',o=>function update(){
 	o.apply(this,arguments);
 	if(this._direction!==_oldDir){
 		mv3d["a" /* default */].updateDirection();
@@ -4209,12 +4272,12 @@ Object(util["q" /* override */])(Game_Player.prototype,'update',o=>function upda
 	}
 });
 
-Object(util["q" /* override */])(Game_Player.prototype,'moveStraight',o=>function moveStraight(){
+Object(util["r" /* override */])(Game_Player.prototype,'moveStraight',o=>function moveStraight(){
 	o.apply(this,arguments);
 	mv3d["a" /* default */].updateDirection();
 });
 
-Object(util["q" /* override */])(Game_Player.prototype,'direction',o=>function direction(){
+Object(util["r" /* override */])(Game_Player.prototype,'direction',o=>function direction(){
 	if(mv3d["a" /* default */].is1stPerson() && this.isMoving() && !this.isDirectionFixed()){
 		return mv3d["a" /* default */].yawToDir(mv3d["a" /* default */].blendCameraYaw.targetValue(),false);
 	}else{
@@ -4241,12 +4304,12 @@ Game_CharacterBase.prototype.mv3d_direction=function(){
 	return this._mv3d_direction||this.direction();
 };
 
-Object(util["q" /* override */])(Game_CharacterBase.prototype,'copyPosition',o=>function(character) {
+Object(util["r" /* override */])(Game_CharacterBase.prototype,'copyPosition',o=>function(character) {
 	o.apply(this,arguments);
 	this._mv3d_direction = character._mv3d_direction;
 });
 
-Object(util["q" /* override */])(Game_Player.prototype,'processMoveCommand',o=>function processMoveCommand(command){
+Object(util["r" /* override */])(Game_Player.prototype,'processMoveCommand',o=>function processMoveCommand(command){
 	o.apply(this,arguments);
 	const  gc = Game_Character;
 	switch(command.code){
@@ -4347,7 +4410,7 @@ function TextureConfigurator(name,extraParams='',apply){
 		}
 		if(params.glow){
 			if(isNaN(params.glow)){
-				conf[`${name}_glow`] = Object(util["n" /* makeColor */])(params.glow);
+				conf[`${name}_glow`] = Object(util["o" /* makeColor */])(params.glow);
 			}else{
 				conf[`${name}_glow`] = new mod_babylon["c" /* Color4 */](Number(params.glow),Number(params.glow),Number(params.glow),1);
 			}
@@ -4567,7 +4630,7 @@ Object.assign(mv3d["a" /* default */],{
 			conf.shape=mv3d["a" /* default */].enumShapes[name.toUpperCase()];
 			if(conf.shape===mv3d["a" /* default */].enumShapes.SLOPE && data||!('slopeHeight' in conf)){ conf.slopeHeight=Number(data)||1; }
 			if(data){
-				if(conf.shape===mv3d["a" /* default */].enumShapes.FENCE){ conf.fencePosts=Object(util["f" /* booleanString */])(data); }
+				if(conf.shape===mv3d["a" /* default */].enumShapes.FENCE){ conf.fencePosts=Object(util["g" /* booleanString */])(data); }
 			}
 		},
 		alpha(conf,n){
@@ -4576,14 +4639,14 @@ Object.assign(mv3d["a" /* default */],{
 		},
 		glow(conf,n,a=1){
 			if(isNaN(n)){
-				conf.glow = Object(util["n" /* makeColor */])(n);
+				conf.glow = Object(util["o" /* makeColor */])(n);
 			}else{
 				conf.glow = new mod_babylon["c" /* Color4 */](Number(n),Number(n),Number(n),1);
 			}
-			conf.glow.a=Object(util["e" /* booleanNumber */])(a);
+			conf.glow.a=Object(util["f" /* booleanNumber */])(a);
 		},
 		pass(conf,s=''){
-			s=Object(util["l" /* falseString */])(s.toLowerCase());
+			s=Object(util["m" /* falseString */])(s.toLowerCase());
 			if(!s || s[0]==='x'){
 				conf.pass=mv3d["a" /* default */].enumPassage.WALL;
 			}else if(s[0]==='o'){
@@ -4593,7 +4656,7 @@ Object.assign(mv3d["a" /* default */],{
 			}
 		},
 		shadow(conf,b=true){
-			conf.shadow=Object(util["f" /* booleanString */])(b);
+			conf.shadow=Object(util["g" /* booleanString */])(b);
 		},
 	},
 	eventConfigurationFunctions:{
@@ -4627,12 +4690,12 @@ Object.assign(mv3d["a" /* default */],{
 		rot(conf,n){ conf.rot=Number(n); },
 		yaw(conf,n){ conf.yaw=Number(n); },
 		pitch(conf,n){ conf.pitch=Number(n); },
-		bush(conf,bool){ conf.bush = Object(util["f" /* booleanString */])(bool); },
+		bush(conf,bool){ conf.bush = Object(util["g" /* booleanString */])(bool); },
 		shadow:new ConfigurationFunction('size,dist|3d',function(conf,params){
 			let {size,dist,'3d':dyn} = params;
 			if(dyn==null){ dyn=size!=null?size:true; }
-			conf.dynShadow = dyn = Object(util["f" /* booleanString */])(dyn);
-			if(size!=null){ conf.shadow = Object(util["e" /* booleanNumber */])(size); }
+			conf.dynShadow = dyn = Object(util["g" /* booleanString */])(dyn);
+			if(size!=null){ conf.shadow = Object(util["f" /* booleanNumber */])(size); }
 			if(dist!=null){ conf.shadowDist=Number(dist); }
 		}),
 		shape(conf,name){
@@ -4640,11 +4703,11 @@ Object.assign(mv3d["a" /* default */],{
 		},
 		lamp:new ConfigurationFunction('color,intensity,range',function(conf,params){
 			const {color='white',intensity=1,range=mv3d["a" /* default */].LIGHT_DIST} = params;
-			conf.lamp={color:Object(util["n" /* makeColor */])(color).toNumber(),intensity:Number(intensity),distance:Number(range)};
+			conf.lamp={color:Object(util["o" /* makeColor */])(color).toNumber(),intensity:Number(intensity),distance:Number(range)};
 		}),
 		flashlight:new ConfigurationFunction('color,intensity,range,angle[dir]yaw,pitch',function(conf,params){
 			const {color='white',intensity=1,range=mv3d["a" /* default */].LIGHT_DIST,angle=mv3d["a" /* default */].LIGHT_ANGLE} = params;
-			conf.flashlight={color:Object(util["n" /* makeColor */])(color).toNumber(),intensity:Number(intensity),distance:Number(range),angle:Number(angle)};
+			conf.flashlight={color:Object(util["o" /* makeColor */])(color).toNumber(),intensity:Number(intensity),distance:Number(range),angle:Number(angle)};
 			if(params.yaw){ conf.flashlightYaw=params.yaw; }
 			if(params.pitch){ conf.flashlightPitch=Number(params.pitch); }
 		}),
@@ -4661,22 +4724,22 @@ Object.assign(mv3d["a" /* default */],{
 		},
 		glow(conf,n,a=1){
 			if(isNaN(n)){
-				conf.glow = Object(util["n" /* makeColor */])(n);
+				conf.glow = Object(util["o" /* makeColor */])(n);
 			}else{
 				conf.glow = new mod_babylon["c" /* Color4 */](Number(n),Number(n),Number(n),1);
 			}
-			conf.glow.a=Object(util["e" /* booleanNumber */])(a);
+			conf.glow.a=Object(util["f" /* booleanNumber */])(a);
 		},
 		dirfix(conf,b){
-			conf.dirfix=Object(util["f" /* booleanString */])(b);
+			conf.dirfix=Object(util["g" /* booleanString */])(b);
 		},
 		gravity(conf,b){
-			conf.gravity=Object(util["e" /* booleanNumber */])(b);
+			conf.gravity=Object(util["f" /* booleanNumber */])(b);
 		},
 		platform(conf,b){
-			conf.platform=Object(util["f" /* booleanString */])(b);
+			conf.platform=Object(util["g" /* booleanString */])(b);
 		},
-		collide(conf,n){ conf.collide=Object(util["e" /* booleanNumber */])(n); },
+		collide(conf,n){ conf.collide=Object(util["f" /* booleanNumber */])(n); },
 		trigger(conf,up,down=0){
 			conf.trigger={
 				up:Number(up),
@@ -4684,7 +4747,7 @@ Object.assign(mv3d["a" /* default */],{
 			}
 		},
 		pass(conf,s=''){
-			s=Object(util["l" /* falseString */])(s.toLowerCase());
+			s=Object(util["m" /* falseString */])(s.toLowerCase());
 			if(!s || s[0]==='x'){
 				conf.platform=false;
 				conf.collide=true;
@@ -4700,13 +4763,13 @@ Object.assign(mv3d["a" /* default */],{
 		get ambient(){ return this.light; },
 		light(conf,color){
 			if(color.toLowerCase()==='default'){ color=mv3d["a" /* default */].AMBIENT_COLOR; }
-			else{ color=Object(util["n" /* makeColor */])(color).toNumber(); }
+			else{ color=Object(util["o" /* makeColor */])(color).toNumber(); }
 			conf.light={color:color};
 		},
 		fog:new ConfigurationFunction('color|near,far',function(conf,params){
 			const {color,near,far} = params;
 			if(!conf.fog){ conf.fog={}; }
-			if(color){ conf.fog.color=Object(util["n" /* makeColor */])(color).toNumber(); }
+			if(color){ conf.fog.color=Object(util["o" /* makeColor */])(color).toNumber(); }
 			if(near){ conf.fog.near=Number(near); }
 			if(far){ conf.fog.far=Number(far); }
 		}),
@@ -4723,7 +4786,7 @@ Object.assign(mv3d["a" /* default */],{
 				conf[`ceiling_height`]=Number(params.height);
 			}
 			if(params.backface){
-				conf[`ceiling_skylight`]=!Object(util["f" /* booleanString */])(params.backface);
+				conf[`ceiling_skylight`]=!Object(util["g" /* booleanString */])(params.backface);
 			}
 		}),
 		edge(conf,b,data){
@@ -4734,14 +4797,14 @@ Object.assign(mv3d["a" /* default */],{
 					conf.edge=b;
 					break;
 				default:
-					conf.edge=Object(util["f" /* booleanString */])(b);
+					conf.edge=Object(util["g" /* booleanString */])(b);
 			}
 		},
 		disable(conf,b=true){
-			conf.disabled=Object(util["f" /* booleanString */])(b);
+			conf.disabled=Object(util["g" /* booleanString */])(b);
 		},
 		enable(conf,b=true){
-			conf.disabled=!Object(util["f" /* booleanString */])(b);
+			conf.disabled=!Object(util["g" /* booleanString */])(b);
 		},
 	},
 
@@ -4769,8 +4832,8 @@ Game_Event.prototype.initialize = async function() {
 	);
 	if('pos' in config){
 		this.locate(
-			Object(util["t" /* relativeNumber */])(event.x,config.pos.x),
-			Object(util["t" /* relativeNumber */])(event.y,config.pos.y),
+			Object(util["u" /* relativeNumber */])(event.x,config.pos.x),
+			Object(util["u" /* relativeNumber */])(event.y,config.pos.y),
 		);
 	}
 	if(!this.mv3d_blenders){
@@ -4799,7 +4862,7 @@ Game_Event.prototype.initialize = async function() {
 	}
 	this.mv3d_needsConfigure=true;
 
-	await Object(util["v" /* sleep */])();
+	await Object(util["w" /* sleep */])();
 	if(mv3d["a" /* default */].mapLoaded){
 		mv3d["a" /* default */].createCharacterFor(this);
 	}
@@ -4839,7 +4902,7 @@ mv3d["a" /* default */].PluginCommand=class{
 		let depth=true, scale=1;
 		for(let i=0;i<a.length;++i){
 			switch(a[i].toLowerCase()){
-				case 'depth': if(a[i+1]!=null)depth=Object(util["f" /* booleanString */])(a[i+1]); break;
+				case 'depth': if(a[i+1]!=null)depth=Object(util["g" /* booleanString */])(a[i+1]); break;
 				case 'scale': if(a[i+1]!=null)scale=Number(a[i+1]); break;
 			}
 		}
@@ -4888,15 +4951,15 @@ mv3d["a" /* default */].PluginCommand=class{
 	get rotationmode(){ return this.allowrotation; }
 	get pitchmode(){ return this.allowpitch; }
 
-	allowrotation(b){ mv3d["a" /* default */].saveData('allowRotation',Object(util["f" /* booleanString */])(b)); }
-	allowpitch(b){ mv3d["a" /* default */].saveData('allowPitch',Object(util["f" /* booleanString */])(b)); }
-	lockcamera(b){ mv3d["a" /* default */].saveData('cameraLocked',Object(util["f" /* booleanString */])(b)); }
+	allowrotation(b){ mv3d["a" /* default */].saveData('allowRotation',Object(util["g" /* booleanString */])(b)); }
+	allowpitch(b){ mv3d["a" /* default */].saveData('allowPitch',Object(util["g" /* booleanString */])(b)); }
+	lockcamera(b){ mv3d["a" /* default */].saveData('cameraLocked',Object(util["g" /* booleanString */])(b)); }
 
 	_VEHICLE(vehicle,data,value){
 		data=data.toLowerCase();
 		const key = `${Vehicle}_${data}`;
-		if(data==='big'){ value=Object(util["f" /* booleanString */])(value); }
-		else{ value=Object(util["t" /* relativeNumber */])(mv3d["a" /* default */].loadData(key,0),value); }
+		if(data==='big'){ value=Object(util["g" /* booleanString */])(value); }
+		else{ value=Object(util["u" /* relativeNumber */])(mv3d["a" /* default */].loadData(key,0),value); }
 		mv3d["a" /* default */].saveData(key,value);
 	}
 	boat(d,v){ this._VEHICLE('boat',d,v); }
@@ -4920,7 +4983,7 @@ mv3d["a" /* default */].PluginCommand=class{
 		this._fogNear(a[1],time);
 		this._fogFar(a[2],time);
 	}
-	_fogColor(color,time){ mv3d["a" /* default */].blendFogColor.setValue(Object(util["n" /* makeColor */])(color).toNumber(),time); }
+	_fogColor(color,time){ mv3d["a" /* default */].blendFogColor.setValue(Object(util["o" /* makeColor */])(color).toNumber(),time); }
 	_fogNear(n,time){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendFogNear,n,time); }
 	_fogFar(n,time){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendFogFar,n,time); }
 	get ambient(){ return this.light; }
@@ -4934,7 +4997,7 @@ mv3d["a" /* default */].PluginCommand=class{
 		this._lightColor(a[0],time);
 		//this._lightintensity(a[0],time);
 	}
-	_lightColor(color,time=1){ mv3d["a" /* default */].blendAmbientColor.setValue(Object(util["n" /* makeColor */])(color).toNumber(),time); }
+	_lightColor(color,time=1){ mv3d["a" /* default */].blendAmbientColor.setValue(Object(util["o" /* makeColor */])(color).toNumber(),time); }
 	//_lightIntensity(n,time=1){ this._RELATIVE_BLEND(mv3d.blendLightIntensity,n,time); }
 	async lamp(...a){
 		const char = await this.AWAIT_CHAR(this.CHAR);
@@ -4951,7 +5014,7 @@ mv3d["a" /* default */].PluginCommand=class{
 		this._lampIntensity(char,a[1],time);
 		this._lampDistance(char,a[2],time);
 	}
-	_lampColor(char,color,time=1){ char.blendLampColor.setValue(Object(util["n" /* makeColor */])(color).toNumber(),time); }
+	_lampColor(char,color,time=1){ char.blendLampColor.setValue(Object(util["o" /* makeColor */])(color).toNumber(),time); }
 	_lampIntensity(char,n,time=1){ this._RELATIVE_BLEND(char.blendLampIntensity,n,time); }
 	_lampDistance(char,n,time=1){ this._RELATIVE_BLEND(char.blendLampDistance,n,time); }
 	async flashlight(...a){
@@ -4973,7 +5036,7 @@ mv3d["a" /* default */].PluginCommand=class{
 		this._flashlightDistance(char,a[2],time);
 		this._flashlightAngle(char,a[3],time);
 	}
-	_flashlightColor(char,color,time){ char.blendFlashlightColor.setValue(Object(util["n" /* makeColor */])(color).toNumber(),time); }
+	_flashlightColor(char,color,time){ char.blendFlashlightColor.setValue(Object(util["o" /* makeColor */])(color).toNumber(),time); }
 	_flashlightIntensity(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightIntensity,n,time); }
 	_flashlightDistance(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightDistance,n,time); }
 	_flashlightAngle(char,n,time){ this._RELATIVE_BLEND(char.blendFlashlightAngle,n,time); }
@@ -4995,7 +5058,7 @@ mv3d["a" /* default */].PluginCommand=class{
 	}
 	disable(fadeType){ mv3d["a" /* default */].disable(fadeType); }
 	enable(fadeType){ mv3d["a" /* default */].enable(fadeType); }
-	_RELATIVE_BLEND(blender,n,time){ blender.setValue(Object(util["t" /* relativeNumber */])(blender.targetValue(),n),Number(time)); }
+	_RELATIVE_BLEND(blender,n,time){ blender.setValue(Object(util["u" /* relativeNumber */])(blender.targetValue(),n),Number(time)); }
 	_TIME(time){
 		if(typeof time==='number'){ return time; }
 		time=Number(time);
@@ -5010,7 +5073,7 @@ mv3d["a" /* default */].PluginCommand=class{
 		if(!char){ return this.ERROR_CHAR(); }
 		let w=0;
 		while(!char.mv3d_sprite){
-			await Object(util["v" /* sleep */])(100);
+			await Object(util["w" /* sleep */])(100);
 			if(++w>10){ return this.ERROR_CHAR(); }
 		}
 		return char.mv3d_sprite;
@@ -5155,8 +5218,8 @@ class MapCellBuilder_SubMeshBuilder{
 	}
 	addWallFace(x,z,y,w,h,rot,uvr,options){
 		z=-z;y=y;
-		const xf=Object(util["g" /* cos */])(rot);
-		const zf=Object(util["u" /* sin */])(rot);
+		const xf=Object(util["h" /* cos */])(rot);
+		const zf=Object(util["v" /* sin */])(rot);
 		const ww=w/2, hh=h/2;
 		const positions = [
 			x-ww*xf, y+hh, z+ww*zf,
@@ -5191,14 +5254,14 @@ class MapCellBuilder_SubMeshBuilder{
 	}
 	addSlopeFace(x,z,y,w,h,rot,uvr,options){
 		z=-z;y=y;
-		const xf=Object(util["g" /* cos */])(rot);
-		const zf=Object(util["u" /* sin */])(rot);
+		const xf=Object(util["h" /* cos */])(rot);
+		const zf=Object(util["v" /* sin */])(rot);
 		const ww=w/2, hh=h/2;
 		const positions = options.autotile ? [
-			x-ww, y+hh+hh*Math.round(Object(util["u" /* sin */])(-rot+util["a" /* PI */]*1/4)), z+ww,
-			x+ww, y+hh+hh*Math.round(Object(util["u" /* sin */])(-rot+util["a" /* PI */]*3/4)), z+ww,
-			x-ww, y+hh+hh*Math.round(Object(util["u" /* sin */])(-rot+util["a" /* PI */]*7/4)), z-ww,
-			x+ww, y+hh+hh*Math.round(Object(util["u" /* sin */])(-rot+util["a" /* PI */]*5/4)), z-ww,
+			x-ww, y+hh+hh*Math.round(Object(util["v" /* sin */])(-rot+util["a" /* PI */]*1/4)), z+ww,
+			x+ww, y+hh+hh*Math.round(Object(util["v" /* sin */])(-rot+util["a" /* PI */]*3/4)), z+ww,
+			x-ww, y+hh+hh*Math.round(Object(util["v" /* sin */])(-rot+util["a" /* PI */]*7/4)), z-ww,
+			x+ww, y+hh+hh*Math.round(Object(util["v" /* sin */])(-rot+util["a" /* PI */]*5/4)), z-ww,
 		] : [
 			x-ww*xf+ww*zf, y+h, z+ww*zf+ww*xf,
 			x+ww*xf+ww*zf, y+h, z-ww*zf+ww*xf,
@@ -5215,8 +5278,8 @@ class MapCellBuilder_SubMeshBuilder{
 	}
 	addSlopeSide(x,z,y,w,h,rot,uvr,options){
 		z=-z;y=y;
-		const xf=Object(util["g" /* cos */])(rot);
-		const zf=Object(util["u" /* sin */])(rot);
+		const xf=Object(util["h" /* cos */])(rot);
+		const zf=Object(util["v" /* sin */])(rot);
 		const ww=w/2, hh=h/2;
 		const positions = [
 			x-ww*xf, y+h, z+ww*zf,
@@ -5367,7 +5430,7 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		this.mesh=this.builder.build();
 		if(this.mesh){
 			this.mesh.isPickable=false;
-			Object(util["v" /* sleep */])(10).then(()=>this.mesh.isPickable=true);
+			Object(util["w" /* sleep */])(10).then(()=>this.mesh.isPickable=true);
 			this.mesh.parent=this;
 			this.mesh.alphaIndex=0;
 			this.mesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
@@ -5395,8 +5458,8 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,ceiling?'bottom':'top');
 		for (const rect of rects){
 			this.builder.addFloorFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
-				x + (rect.ox|0)/Object(util["x" /* tileSize */])() - 0.25*isAutotile,
-				y + (rect.oy|0)/Object(util["x" /* tileSize */])() - 0.25*isAutotile,
+				x + (rect.ox|0)/Object(util["y" /* tileSize */])() - 0.25*isAutotile,
+				y + (rect.oy|0)/Object(util["y" /* tileSize */])() - 0.25*isAutotile,
 				z,
 				1-isAutotile/2, 1-isAutotile/2, {flip:ceiling,double:double}
 			);
@@ -5468,10 +5531,10 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
 			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
 			let partHeight=Math.abs(neededHeight/wallParts);
-			let sw = Object(util["x" /* tileSize */])()/2;
-			let sh = Object(util["x" /* tileSize */])()/2;
+			let sw = Object(util["y" /* tileSize */])()/2;
+			let sh = Object(util["y" /* tileSize */])()/2;
 			if(mv3d["a" /* default */].isTableTile(tileConf.realId)){
-				sh=Object(util["x" /* tileSize */])()/3;
+				sh=Object(util["y" /* tileSize */])()/3;
 				wallParts=1;
 				partHeight=wallHeight;
 				//partHeight=neededHeight;
@@ -5487,15 +5550,15 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 						hasRightEdge = rightHeight<z-az*partHeight;
 					}
 					let sx,sy;
-					sx=bx*Object(util["x" /* tileSize */])();
-					sy=by*Object(util["x" /* tileSize */])();
-					sx=(bx+(ax>0?0.5+hasRightEdge:1-hasLeftEdge))*Object(util["x" /* tileSize */])();
+					sx=bx*Object(util["y" /* tileSize */])();
+					sy=by*Object(util["y" /* tileSize */])();
+					sx=(bx+(ax>0?0.5+hasRightEdge:1-hasLeftEdge))*Object(util["y" /* tileSize */])();
 					if(mv3d["a" /* default */].isWaterfallTile(tileId)){
-						sy=(by+az%2/2)*Object(util["x" /* tileSize */])();
+						sy=(by+az%2/2)*Object(util["y" /* tileSize */])();
 					}else if(mv3d["a" /* default */].isTableTile(tileId)){
-						sy=(by+5/3)*Object(util["x" /* tileSize */])();
+						sy=(by+5/3)*Object(util["y" /* tileSize */])();
 					}else{
-						sy=(by+(az===0?0:az===wallParts-1?1.5:1-az%2*0.5))*Object(util["x" /* tileSize */])();
+						sy=(by+(az===0?0:az===wallParts-1?1.5:1-az%2*0.5))*Object(util["y" /* tileSize */])();
 					}
 					const builderOptions={};
 					if(neededHeight<0){ builderOptions.flip=true; }
@@ -5542,9 +5605,9 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
 				for (let az=0;az<=1;++az){
 					this.builder.addWallFace(tsMaterial,
-						(edge ? (bx+rightSide*1.5) : (bx+1-rightSide*0.5) )*Object(util["y" /* tileWidth */])(),
-						(by+az*1.5)*Object(util["w" /* tileHeight */])(),
-						Object(util["y" /* tileWidth */])()/2, Object(util["w" /* tileHeight */])()/2,
+						(edge ? (bx+rightSide*1.5) : (bx+1-rightSide*0.5) )*Object(util["z" /* tileWidth */])(),
+						(by+az*1.5)*Object(util["x" /* tileHeight */])(),
+						Object(util["z" /* tileWidth */])()/2, Object(util["x" /* tileHeight */])()/2,
 						x+np.x/4,
 						y+np.y/4,
 						z-wallHeight/4-az*wallHeight/2,
@@ -5582,12 +5645,12 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		for (let i=0; i<=1; ++i){
 			for (const rect of rects){
 				const irot = -Math.PI/2*i+rot;
-				const trans= -0.25*isAutotile+(rect.ox|0)/Object(util["y" /* tileWidth */])();
+				const trans= -0.25*isAutotile+(rect.ox|0)/Object(util["z" /* tileWidth */])();
 				this.builder.addWallFace(tsMaterial,
 					rect.x,rect.y,rect.width,rect.height,
 					x+trans*Math.cos(irot),
 					y+trans*Math.sin(irot),
-					z - (rect.oy|0)/Object(util["w" /* tileHeight */])()*wallHeight - partHeight/2,
+					z - (rect.oy|0)/Object(util["x" /* tileHeight */])()*wallHeight - partHeight/2,
 					1-isAutotile/2,partHeight, irot, {double:true, abnormal:mv3d["a" /* default */].ABNORMAL}
 				);
 			}
@@ -5597,7 +5660,7 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		//const rot = Math.random()*Math.PI*2;
 		//const rot = Math.round((Math.random()*Math.PI*2)/(Math.PI/2))*Math.PI/2;
 		const {dir,rot} = mv3d["a" /* default */].getSlopeDirection(this.ox+x,this.oy+y,l,true);
-		const n1=new mod_babylon["y" /* Vector2 */](-Object(util["u" /* sin */])(rot+Math.PI),Object(util["g" /* cos */])(rot+Math.PI));
+		const n1=new mod_babylon["y" /* Vector2 */](-Object(util["v" /* sin */])(rot+Math.PI),Object(util["h" /* cos */])(rot+Math.PI));
 		if(mv3d["a" /* default */].getCullingHeight(this.ox+x+n1.x,this.oy+y+n1.y,l)<z){
 			await this.loadWall(tileConf,x,y,z,l+1,slopeHeight,n1);
 		}
@@ -5630,11 +5693,11 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 			for (let i=0;i<rects.length;++i){
 				const rect = rects[i];
 				const ix=(i+1)%2*-2+1, iy=(Math.floor(i/2)+1)%2*2-1;
-				const hx=Math.max(0,Object(util["u" /* sin */])(rot)*ix)*slopeHeight/2;
-				const hy=Math.max(0,Object(util["g" /* cos */])(rot)*iy)*slopeHeight/2;
+				const hx=Math.max(0,Object(util["v" /* sin */])(rot)*ix)*slopeHeight/2;
+				const hy=Math.max(0,Object(util["h" /* cos */])(rot)*iy)*slopeHeight/2;
 				this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
-					x + rect.ox/Object(util["x" /* tileSize */])() - 0.25,
-					y + rect.oy/Object(util["x" /* tileSize */])() - 0.25,
+					x + rect.ox/Object(util["y" /* tileSize */])() - 0.25,
+					y + rect.oy/Object(util["y" /* tileSize */])() - 0.25,
 					z - slopeHeight + hx + hy,
 					0.5, slopeHeight/2, rot, {autotile:true}
 				);
@@ -5654,7 +5717,7 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		let rect;
 		if(isAutotile){
 			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
-			rect={x:(bx+0.5)*Object(util["y" /* tileWidth */])(),y:(by+0.5)*Object(util["w" /* tileHeight */])(),width:Object(util["y" /* tileWidth */])(),height:Object(util["w" /* tileHeight */])()};
+			rect={x:(bx+0.5)*Object(util["z" /* tileWidth */])(),y:(by+0.5)*Object(util["x" /* tileHeight */])(),width:Object(util["z" /* tileWidth */])(),height:Object(util["x" /* tileHeight */])()};
 		}else{
 			rect = tileConf.side_rect?tileConf.side_rect:mv3d["a" /* default */].getTileRects(tileId)[0];
 		}
@@ -5757,7 +5820,7 @@ Object.assign(mv3d["a" /* default */],{
 		return $gameMap.tilesetFlags()[tileId]>>12;
 	},
 
-	getTilePassage:Object(util["p" /* overload */])({
+	getTilePassage:Object(util["q" /* overload */])({
 		1(tileId){ return this.getTilePassage(tileId,this.getTileConfig(tileId)); },
 		2(tileId,conf){
 			if('pass' in conf){
@@ -5810,7 +5873,7 @@ Object.assign(mv3d["a" /* default */],{
 		return animData;
 	},
 
-	getTileConfig:Object(util["p" /* overload */])({
+	getTileConfig:Object(util["q" /* overload */])({
 		3(x,y,l){ return this.getTileConfig(this.getTileData(x,y)[l],x,y,l); },
 		default(tileId,x,y,l){
 			const conf = {};
@@ -5985,7 +6048,7 @@ Object.assign(mv3d["a" /* default */],{
 			if(conf.slopeDirection===d.dir){ d.favor=100; }
 			if(!direction||d.favor>direction.favor){ direction=d; }
 		}
-		direction.rot=Object(util["i" /* degtorad */])(180-this.dirToYaw(direction.dir));
+		direction.rot=Object(util["j" /* degtorad */])(180-this.dirToYaw(direction.dir));
 		if(fullData){ return direction; }
 		return direction.rot;
 	},
@@ -6000,7 +6063,7 @@ Object.assign(mv3d["a" /* default */],{
 		const rx=Math.round(x), ry=Math.round(y);
 		if(data==null){ data = this.getTileConfig(this.getTileData(rx,ry)[l],rx,ry,l); }
 		const rot=this.getSlopeDirection(rx,ry,l);
-		const xf=Object(util["u" /* sin */])(rot), yf=-Object(util["g" /* cos */])(rot);
+		const xf=Object(util["v" /* sin */])(rot), yf=-Object(util["h" /* cos */])(rot);
 		let px=(x+0.5)%1, py=(y+0.5)%1;
 		if(Math.sign(xf<0)){ px=1-px; }
 		if(Math.sign(yf<0)){ py=1-py; }
@@ -6164,8 +6227,8 @@ Object.assign(mv3d["a" /* default */],{
 			rects.push({setN:sheetId,x:sx,y:sy,width:width,height:height,ox:dx,oy:dy});
 		}}, tileId, 0,0);
 		if (isTable) for (let i=rects.length-1;i>=0;--i){
-			if(rects[i].oy>Object(util["x" /* tileSize */])()/2){
-				rects[i-1].y+=Object(util["x" /* tileSize */])()*2/3;
+			if(rects[i].oy>Object(util["y" /* tileSize */])()/2){
+				rects[i-1].y+=Object(util["y" /* tileSize */])()*2/3;
 				rects.splice(i,1);
 			}
 		}
@@ -6328,7 +6391,7 @@ Object.assign(mv3d["a" /* default */],{
 		for (const cellpos of cellsToLoad){
 			let {x:cx,y:cy} = cellpos;
 			await this.loadMapCell(cx,cy);
-			if(this.mapReady){ await Object(util["v" /* sleep */])(10); }
+			if(this.mapReady){ await Object(util["w" /* sleep */])(10); }
 			if(!this.mapLoaded){ this.endMapUpdate(); return; }
 		}
 		this.endMapUpdate();
@@ -6505,10 +6568,10 @@ Object.assign(mv3d["a" /* default */],{
 			}
 		}else{ options.alpha=1; }
 		if('glow' in options){
-			options.glow.r = Object(util["z" /* unround */])(options.glow.r,255);
-			options.glow.g = Object(util["z" /* unround */])(options.glow.g,255);
-			options.glow.b = Object(util["z" /* unround */])(options.glow.b,255);
-			options.glow.a = Object(util["z" /* unround */])(options.glow.a,7);
+			options.glow.r = Object(util["A" /* unround */])(options.glow.r,255);
+			options.glow.g = Object(util["A" /* unround */])(options.glow.g,255);
+			options.glow.b = Object(util["A" /* unround */])(options.glow.b,255);
+			options.glow.a = Object(util["A" /* unround */])(options.glow.a,7);
 		}else{ options.glow=new mod_babylon["c" /* Color4 */](0,0,0,0); }
 		if(!('shadow' in options)){options.shadow=true;}
 		if(!('backfaceCulling' in options)){ options.backfaceCulling = mv3d["a" /* default */].BACKFACE_CULLING; }
@@ -6549,8 +6612,8 @@ Object.assign(mv3d["a" /* default */],{
 		this.animYFrame=(this.animYFrame+1)%3;
 		for (const texture of this.animatedTextures){
 			texture.crop(
-				texture.frameData.x+texture.animX*this.animXFrame*Object(util["y" /* tileWidth */])(),
-				texture.frameData.y+texture.animY*this.animYFrame*Object(util["w" /* tileHeight */])(),
+				texture.frameData.x+texture.animX*this.animXFrame*Object(util["z" /* tileWidth */])(),
+				texture.frameData.y+texture.animY*this.animYFrame*Object(util["x" /* tileHeight */])(),
 				texture.frameData.w,
 				texture.frameData.h,
 				true
@@ -6587,6 +6650,7 @@ Object.assign(mv3d["a" /* default */],{
 			const sprite = new characters_Character(char,order);
 			Object.defineProperty(char,'mv3d_sprite',{
 				value:sprite,
+				enumerable:false,
 				configurable:true,
 			});
 			this.characters.push(sprite);
@@ -6629,7 +6693,7 @@ Object.assign(mv3d["a" /* default */],{
 	},
 	async getShadowMesh(){
 		let shadowMesh;
-		while(this.getShadowMesh.getting){ await Object(util["v" /* sleep */])(100); }
+		while(this.getShadowMesh.getting){ await Object(util["w" /* sleep */])(100); }
 		if(this._shadowMesh){ shadowMesh=this._shadowMesh}
 		else{
 			this.getShadowMesh.getting=true;
@@ -6697,6 +6761,7 @@ class characters_Sprite extends mod_babylon["x" /* TransformNode */]{
 
 const z_descriptor = {
 	configurable: true,
+	enumerable:false,
 	get(){ return this._mv3d_z; },
 	set(v){
 		this._mv3d_z=v;
@@ -6705,6 +6770,7 @@ const z_descriptor = {
 }
 const z_descriptor2 = {
 	configurable: true,
+	enumerable:false,
 	get(){ return this.char._mv3d_z; },
 	set(v){
 		this.char._mv3d_z=v;
@@ -6807,7 +6873,7 @@ class characters_Character extends characters_Sprite{
 
 	async waitBitmapLoaded(){
 		if(!this.char.mv_sprite){
-			await Object(util["v" /* sleep */])();
+			await Object(util["w" /* sleep */])();
 			if(!this.char.mv_sprite){
 				console.warn('mv_sprite is undefined');
 				return;
@@ -6876,8 +6942,8 @@ class characters_Character extends characters_Sprite{
 		if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
 		this.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new mod_babylon["y" /* Vector2 */](1,1));
-		this.spriteWidth=this.mv_sprite.patternWidth()/Object(util["x" /* tileSize */])() * configScale.x;
-		this.spriteHeight=this.mv_sprite.patternHeight()/Object(util["x" /* tileSize */])() * configScale.y;
+		this.spriteWidth=this.mv_sprite.patternWidth()/Object(util["y" /* tileSize */])() * configScale.x;
+		this.spriteHeight=this.mv_sprite.patternHeight()/Object(util["y" /* tileSize */])() * configScale.y;
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
 
@@ -6987,8 +7053,8 @@ class characters_Character extends characters_Sprite{
 			const event=this.char.event();
 			const pos = settings;
 			this.char.locate(
-				Object(util["t" /* relativeNumber */])(event.x,pos.x),
-				Object(util["t" /* relativeNumber */])(event.y,pos.y),
+				Object(util["u" /* relativeNumber */])(event.x,pos.x),
+				Object(util["u" /* relativeNumber */])(event.y,pos.y),
 			);
 			if(transient)delete settings.pos;
 		}
@@ -7175,7 +7241,7 @@ class characters_Character extends characters_Sprite{
 		this.blendFlashlightDistance.setValue(0,0); this.blendFlashlightDistance.setValue(lightDist,0.25);
 		this.blendFlashlightAngle = this.makeBlender('flashlightAngle',config.angle);
 		this.flashlight = new mod_babylon["u" /* SpotLight */]('flashlight',mod_babylon["z" /* Vector3 */].Zero(),mod_babylon["z" /* Vector3 */].Zero(),
-			Object(util["i" /* degtorad */])(this.blendFlashlightAngle.targetValue()+mv3d["a" /* default */].FLASHLIGHT_EXTRA_ANGLE),0,mv3d["a" /* default */].scene);
+			Object(util["j" /* degtorad */])(this.blendFlashlightAngle.targetValue()+mv3d["a" /* default */].FLASHLIGHT_EXTRA_ANGLE),0,mv3d["a" /* default */].scene);
 		this.flashlight.renderPriority=2;
 		this.updateFlashlightExp();
 		this.flashlight.range = this.blendFlashlightDistance.targetValue();
@@ -7233,7 +7299,7 @@ class characters_Character extends characters_Sprite{
 
 	updateLights(){
 		if(this.flashlight){
-			const flashlightYaw = 180+Object(util["t" /* relativeNumber */])( mv3d["a" /* default */].dirToYaw( this.char.mv3d_direction(),mv3d["a" /* default */].DIR8MOVE ), this.getConfig('flashlightYaw','+0'));
+			const flashlightYaw = 180+Object(util["u" /* relativeNumber */])( mv3d["a" /* default */].dirToYaw( this.char.mv3d_direction(),mv3d["a" /* default */].DIR8MOVE ), this.getConfig('flashlightYaw','+0'));
 			if(flashlightYaw !== this.blendFlashlightYaw.targetValue()){
 				this.blendFlashlightYaw.setValue(flashlightYaw,0.25);
 			}
@@ -7243,7 +7309,7 @@ class characters_Character extends characters_Sprite{
 				this.flashlight.diffuse.set(...this.blendFlashlightColor.currentComponents());
 				this.flashlight.intensity=this.blendFlashlightIntensity.currentValue()*mv3d["a" /* default */].FLASHLIGHT_INTENSITY_MULTIPLIER;
 				this.flashlight.range=this.blendFlashlightDistance.currentValue();
-				this.flashlight.angle=Object(util["i" /* degtorad */])(this.blendFlashlightAngle.currentValue()+mv3d["a" /* default */].FLASHLIGHT_EXTRA_ANGLE);
+				this.flashlight.angle=Object(util["j" /* degtorad */])(this.blendFlashlightAngle.currentValue()+mv3d["a" /* default */].FLASHLIGHT_EXTRA_ANGLE);
 				this.updateFlashlightExp();
 				this.updateFlashlightDirection();
 			}
@@ -7563,7 +7629,7 @@ class characters_Character extends characters_Sprite{
 			let jumpDiff = Math.abs(this.char.mv3d_jumpHeightEnd - this.char.mv3d_jumpHeightStart);
 			this.z = this.char.mv3d_jumpHeightStart*(1-jumpProgress)
 			+ this.char.mv3d_jumpHeightEnd*jumpProgress + jumpHeight*jumpDiff/2
-			+this.char.jumpHeight()/Object(util["x" /* tileSize */])();
+			+this.char.jumpHeight()/Object(util["y" /* tileSize */])();
 		}else if(gravity){
 			const gap = Math.abs(this.targetElevation-this.z);
 			if(gap<gravity){ gravity=gap; }
@@ -7742,7 +7808,7 @@ class characters_Character extends characters_Sprite{
 	}
 }
 
-Object(util["q" /* override */])(Sprite_Character.prototype,'characterPatternY',o=>function(){
+Object(util["r" /* override */])(Sprite_Character.prototype,'characterPatternY',o=>function(){
 	const sprite = this._character.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
 	const dirfix = sprite.getConfig('dirfix', sprite.isEvent && sprite.char.isObjectCharacter());
@@ -7770,14 +7836,14 @@ const diagRow={
 	7:7,
 };
 
-Object(util["q" /* override */])(Sprite_Character.prototype,'setFrame',o=>function(x, y, width, height){
+Object(util["r" /* override */])(Sprite_Character.prototype,'setFrame',o=>function(x, y, width, height){
 	o.apply(this,arguments);
 	const sprite = this._character.mv3d_sprite; if(!sprite){ return; }
 	if(sprite.isImageChanged()){ return; }
 	sprite.setFrame(x,y,this.patternWidth(),this.patternHeight());
 });
 
-Object(util["q" /* override */])(Sprite_Character.prototype,'setBlendColor',o=>function(){
+Object(util["r" /* override */])(Sprite_Character.prototype,'setBlendColor',o=>function(){
 	o.apply(this,arguments);
 	const sprite = this._character.mv3d_sprite; if(!sprite){ return; }
 	sprite.needsMaterialUpdate=true;
@@ -7915,7 +7981,7 @@ class animations_DepthAnimation{
 			const anim = this.getAnimationSprite(cell.bitmap._url);
 			anim.material.alphaMode = mv3d["a" /* default */].blendModes[cell.blendMode];
 
-			anim.mesh.roll=Object(util["s" /* radtodeg */])(cell.rotation);
+			anim.mesh.roll=Object(util["t" /* radtodeg */])(cell.rotation);
 			const scale = this.animation._mv3d_animationSettings.scale||1;
 			anim.mesh.scaling.x=4*cell.scale.x*scale;
 			anim.mesh.scaling.y=4*cell.scale.y*scale;
@@ -8066,13 +8132,13 @@ Sprite_Animation.prototype.updateCellSprite = function(sprite,cell) {
 
 
 
-Object(util["q" /* override */])(Game_Map.prototype,'setupParallax',o=>function(){
+Object(util["r" /* override */])(Game_Map.prototype,'setupParallax',o=>function(){
 	o.apply(this,arguments);
 	this.mv3d_parallaxX=0;
 	this.mv3d_parallaxY=0;
 });
 
-Object(util["q" /* override */])(Game_Map.prototype,'changeParallax',o=>function(name, loopX, loopY, sx, sy){
+Object(util["r" /* override */])(Game_Map.prototype,'changeParallax',o=>function(name, loopX, loopY, sx, sy){
 	if (this._parallaxLoopX && !loopX || this._parallaxSx && !sx) {
 		this.mv3d_parallaxX=0;
 	}
@@ -8082,7 +8148,7 @@ Object(util["q" /* override */])(Game_Map.prototype,'changeParallax',o=>function
 	o.apply(this,arguments);
 });
 
-Object(util["q" /* override */])(Game_Map.prototype,'updateParallax',o=>function(){
+Object(util["r" /* override */])(Game_Map.prototype,'updateParallax',o=>function(){
 	if (this._parallaxLoopX) {
 		this.mv3d_parallaxX += this._parallaxSx / 8;
 	}
@@ -8091,7 +8157,7 @@ Object(util["q" /* override */])(Game_Map.prototype,'updateParallax',o=>function
 	}
 });
 
-Object(util["q" /* override */])(Game_Map.prototype,'parallaxOx',o=>function(){
+Object(util["r" /* override */])(Game_Map.prototype,'parallaxOx',o=>function(){
 	let ox = this.mv3d_parallaxX;
 	if(this._parallaxLoopX){
 		return ox - mv3d["a" /* default */].blendCameraYaw.currentValue()*816/90;
@@ -8099,7 +8165,7 @@ Object(util["q" /* override */])(Game_Map.prototype,'parallaxOx',o=>function(){
 	return ox;
 });
 
-Object(util["q" /* override */])(Game_Map.prototype,'parallaxOy',o=>function(){
+Object(util["r" /* override */])(Game_Map.prototype,'parallaxOy',o=>function(){
 	let oy = this.mv3d_parallaxY;
 	if(this._parallaxLoopY){
 		return oy - mv3d["a" /* default */].blendCameraPitch.currentValue()*816/90;
@@ -8128,17 +8194,17 @@ Game_CharacterBase.prototype.mv3d_inRenderDist=function(){
 	&& Math.abs(loopPos.y - mv3d["a" /* default */].cameraStick.y)<=mv3d["a" /* default */].renderDist;
 };
 
-Object(util["q" /* override */])(Game_CharacterBase.prototype,'isNearTheScreen',o=>function(){
+Object(util["r" /* override */])(Game_CharacterBase.prototype,'isNearTheScreen',o=>function(){
 	if(!mv3d["a" /* default */].EVENTS_UPDATE_NEAR){ return o.apply(this,arguments); }
 	return this.mv3d_inRenderDist() || o.apply(this,arguments);
 });
 
 
-Object(util["q" /* override */])(Game_Screen.prototype,'shake',o=>function(){
+Object(util["r" /* override */])(Game_Screen.prototype,'shake',o=>function(){
 	return 0;
 },()=> !mv3d["a" /* default */].isDisabled() && SceneManager._scene instanceof Scene_Map );
 
-Object(util["q" /* override */])(Game_CharacterBase.prototype,'screenX',o=>function screenX(){
+Object(util["r" /* override */])(Game_CharacterBase.prototype,'screenX',o=>function screenX(){
 	const sprite = this.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
 	if(SceneManager.isNextScene(Scene_Battle) && this===$gamePlayer){
@@ -8147,7 +8213,7 @@ Object(util["q" /* override */])(Game_CharacterBase.prototype,'screenX',o=>funct
 	return mv3d["a" /* default */].getScreenPosition(sprite).x;
 });
 
-Object(util["q" /* override */])(Game_CharacterBase.prototype,'screenY',o=>function screenY(){
+Object(util["r" /* override */])(Game_CharacterBase.prototype,'screenY',o=>function screenY(){
 	const sprite = this.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
 	if(SceneManager.isNextScene(Scene_Battle) && this===$gamePlayer){

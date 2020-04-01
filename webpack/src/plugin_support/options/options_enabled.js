@@ -25,7 +25,8 @@ Window_Options.prototype.statusText = function(index) {
 Object.defineProperty(ConfigManager, 'mv3d-options', {
 	get(){ return undefined; },
 	set(v){ SceneManager.push(Scene_3D_Options); },
-	configurable: true
+	configurable: true,
+	enumerable:false,
 });
 
 const _config_makeData=ConfigManager.makeData;
