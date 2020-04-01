@@ -705,7 +705,7 @@ class Character extends Sprite{
 		}else{
 			this.char.mv3d_blenders[key]=dfault;
 		}
-		const blender=new clazz(key,dfault);
+		const blender=new clazz(key,dfault,false);
 		blender.storageLocation=()=>this.char.mv3d_blenders;
 		return blender;
 	}

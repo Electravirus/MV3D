@@ -3324,6 +3324,7 @@ const _performTransfer=Game_Player.prototype.performTransfer;
 Game_Player.prototype.performTransfer = function() {
 	const newmap = this._newMapId !== $gameMap.mapId();
 	if(newmap){
+		transferNewMap=true;
 		if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
 		mv3d["a" /* default */].clearMap();
 		delete $gamePlayer._mv3d_z;
@@ -3337,6 +3338,7 @@ Game_Player.prototype.performTransfer = function() {
 // On Map Load
 
 let tilesetLoaded = false;
+let transferNewMap = false;
 
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
@@ -3348,12 +3350,12 @@ Scene_Map.prototype.onMapLoaded=function(){
 		mv3d["a" /* default */].reloadMap();
 	}
 	mv3d["a" /* default */].needReloadMap=false;
-	tilesetLoaded = false;
+	tilesetLoaded = false; transferNewMap=false;
 	mv3d["a" /* default */].loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
 	if(!tilesetLoaded){ mv3d["a" /* default */].loadTilesetSettings(); }
 	if(!mv3d["a" /* default */].mapLoaded){
-		mv3d["a" /* default */].applyMapSettings();
+		mv3d["a" /* default */].applyMapSettings(transferNewMap);
 		if(mv3d["a" /* default */].isDisabled()){
 			mv3d["a" /* default */].mapReady=true;
 		}else{
@@ -3876,7 +3878,7 @@ Game_Map.prototype.changeParallax = function() {
 
 
 class blenders_Blender{
-	constructor(key,dfault){
+	constructor(key,dfault,track=true){
 		this.key=key;
 		this.dfault=mv3d["a" /* default */].loadData(key,dfault);
 		this.value=dfault;
@@ -3885,6 +3887,9 @@ class blenders_Blender{
 		this.min=-Infinity;
 		this.cycle=false;
 		this.changed=false;
+		if(track){
+			blenders_Blender.list.push(this);
+		}
 	}
 	setValue(target,time=0){
 		target = Math.min(this.max,Math.max(this.min,target));
@@ -3915,6 +3920,7 @@ class blenders_Blender{
 			}
 		}
 		const diff = target - this.value;
+		if(isNaN(this.speed)){ this.speed=Infinity; }
 		if(this.speed > Math.abs(diff)){
 			this.value=target;
 		}else{
@@ -3940,14 +3946,20 @@ class blenders_Blender{
 		const storage = this.storageLocation();
 		storage[key]=value;
 	}
+	static reset(){
+		for (const blender of blenders_Blender.list){
+			blender.speed=Infinity;
+		}
+	}
 }
+blenders_Blender.list = [];
 
 class ColorBlender{
-	constructor(key,dfault){
+	constructor(key,dfault,track=true){
 		this.dfault=dfault;
-		this.r=new blenders_Blender(`${key}_r`,dfault>>16);
-		this.g=new blenders_Blender(`${key}_g`,dfault>>8&0xff);
-		this.b=new blenders_Blender(`${key}_b`,dfault&0xff);
+		this.r=new blenders_Blender(`${key}_r`,dfault>>16,track);
+		this.g=new blenders_Blender(`${key}_g`,dfault>>8&0xff,track);
+		this.b=new blenders_Blender(`${key}_b`,dfault&0xff,track);
 	}
 	setValue(color,time){
 		this.r.setValue(color>>16,time);
@@ -4335,6 +4347,7 @@ Object(util["r" /* override */])(Game_Player.prototype,'processMoveCommand',o=>f
 
 
 
+
 class ConfigurationFunction{
 	constructor(parameters,func){
 		this.groups = parameters.match(/\[?[^[\]|]+\]?/g);
@@ -4478,37 +4491,42 @@ Object.assign(mv3d["a" /* default */],{
 			}
 		}
 	},
-	applyMapSettings(){
+	applyMapSettings(newmap){
 		const mapconf = this.mapConfigurations;
-		if('fog' in mapconf){
-			const fog = mapconf.fog;
-			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
-			if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
-			if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
-			this.blendFogColor.update();
+		if(newmap){
+			if('fog' in mapconf){
+				const fog = mapconf.fog;
+				if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
+				if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
+				if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
+				this.blendFogColor.update();
+			}
+			if('light' in mapconf){
+				this.blendAmbientColor.setValue(mapconf.light.color,0);
+				//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
+			}
+			if('cameraDist' in mapconf){
+				this.blendCameraDist.setValue(mapconf.cameraDist,0);
+			}
+			if ('cameraHeight' in mapconf){
+				this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
+			}
+			if('cameraMode' in mapconf){
+				this.cameraMode=mapconf.cameraMode;
+			}
+			if('cameraPitch' in mapconf){
+				this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
+			}
+			if('cameraYaw' in mapconf){
+				this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
+			}
 		}
-		if('light' in mapconf){
-			this.blendAmbientColor.setValue(mapconf.light.color,0);
-			//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
-		}
-		if('cameraDist' in mapconf){
-			this.blendCameraDist.setValue(mapconf.cameraDist,0);
-		}
-		if ('cameraHeight' in mapconf){
-			this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
-		}
-		if('cameraMode' in mapconf){
-			this.cameraMode=mapconf.cameraMode;
-		}
-		if('cameraPitch' in mapconf){
-			this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
-		}
-		if('cameraYaw' in mapconf){
-			this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
-		}
+
+		blenders_Blender.reset();
+
 		mv3d["a" /* default */].updateClearColor();
 
-		this.callFeatures('applyMapSettings',mapconf);
+		this.callFeatures('applyMapSettings',mapconf,newmap);
 	},
     
 
@@ -5055,6 +5073,13 @@ mv3d["a" /* default */].PluginCommand=class{
 			char.settings,
 		);
 		char.pageConfigure(char.settings);
+	}
+	set(key,...a){
+		key=key.toLowerCase();
+		const value=a.join(' ');
+		if(key in mv3d["a" /* default */].attributes){
+			mv3d["a" /* default */].attributes[key]=value;
+		}
 	}
 	disable(fadeType){ mv3d["a" /* default */].disable(fadeType); }
 	enable(fadeType){ mv3d["a" /* default */].enable(fadeType); }
@@ -7330,7 +7355,7 @@ class characters_Character extends characters_Sprite{
 		}else{
 			this.char.mv3d_blenders[key]=dfault;
 		}
-		const blender=new clazz(key,dfault);
+		const blender=new clazz(key,dfault,false);
 		blender.storageLocation=()=>this.char.mv3d_blenders;
 		return blender;
 	}

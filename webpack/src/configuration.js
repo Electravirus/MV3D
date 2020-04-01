@@ -1,6 +1,7 @@
 import mv3d from './mv3d.js';
 import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2, Color3, Color4 } from './mod_babylon.js';
 import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep } from './util.js';
+import { Blender } from './blenders.js';
 
 class ConfigurationFunction{
 	constructor(parameters,func){
@@ -145,37 +146,42 @@ Object.assign(mv3d,{
 			}
 		}
 	},
-	applyMapSettings(){
+	applyMapSettings(newmap){
 		const mapconf = this.mapConfigurations;
-		if('fog' in mapconf){
-			const fog = mapconf.fog;
-			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
-			if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
-			if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
-			this.blendFogColor.update();
+		if(newmap){
+			if('fog' in mapconf){
+				const fog = mapconf.fog;
+				if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
+				if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
+				if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
+				this.blendFogColor.update();
+			}
+			if('light' in mapconf){
+				this.blendAmbientColor.setValue(mapconf.light.color,0);
+				//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
+			}
+			if('cameraDist' in mapconf){
+				this.blendCameraDist.setValue(mapconf.cameraDist,0);
+			}
+			if ('cameraHeight' in mapconf){
+				this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
+			}
+			if('cameraMode' in mapconf){
+				this.cameraMode=mapconf.cameraMode;
+			}
+			if('cameraPitch' in mapconf){
+				this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
+			}
+			if('cameraYaw' in mapconf){
+				this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
+			}
 		}
-		if('light' in mapconf){
-			this.blendAmbientColor.setValue(mapconf.light.color,0);
-			//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
-		}
-		if('cameraDist' in mapconf){
-			this.blendCameraDist.setValue(mapconf.cameraDist,0);
-		}
-		if ('cameraHeight' in mapconf){
-			this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
-		}
-		if('cameraMode' in mapconf){
-			this.cameraMode=mapconf.cameraMode;
-		}
-		if('cameraPitch' in mapconf){
-			this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
-		}
-		if('cameraYaw' in mapconf){
-			this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
-		}
+
+		Blender.reset();
+
 		mv3d.updateClearColor();
 
-		this.callFeatures('applyMapSettings',mapconf);
+		this.callFeatures('applyMapSettings',mapconf,newmap);
 	},
     
 

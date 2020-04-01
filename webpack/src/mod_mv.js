@@ -64,6 +64,7 @@ const _performTransfer=Game_Player.prototype.performTransfer;
 Game_Player.prototype.performTransfer = function() {
 	const newmap = this._newMapId !== $gameMap.mapId();
 	if(newmap){
+		transferNewMap=true;
 		if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
 		mv3d.clearMap();
 		delete $gamePlayer._mv3d_z;
@@ -77,6 +78,7 @@ Game_Player.prototype.performTransfer = function() {
 // On Map Load
 
 let tilesetLoaded = false;
+let transferNewMap = false;
 
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
@@ -88,12 +90,12 @@ Scene_Map.prototype.onMapLoaded=function(){
 		mv3d.reloadMap();
 	}
 	mv3d.needReloadMap=false;
-	tilesetLoaded = false;
+	tilesetLoaded = false; transferNewMap=false;
 	mv3d.loadMapSettings();
 	_onMapLoaded.apply(this,arguments);
 	if(!tilesetLoaded){ mv3d.loadTilesetSettings(); }
 	if(!mv3d.mapLoaded){
-		mv3d.applyMapSettings();
+		mv3d.applyMapSettings(transferNewMap);
 		if(mv3d.isDisabled()){
 			mv3d.mapReady=true;
 		}else{

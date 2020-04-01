@@ -210,7 +210,7 @@ Game_Map.prototype.changeParallax = function() {
 
 
 export class Blender{
-	constructor(key,dfault){
+	constructor(key,dfault,track=true){
 		this.key=key;
 		this.dfault=mv3d.loadData(key,dfault);
 		this.value=dfault;
@@ -219,6 +219,9 @@ export class Blender{
 		this.min=-Infinity;
 		this.cycle=false;
 		this.changed=false;
+		if(track){
+			Blender.list.push(this);
+		}
 	}
 	setValue(target,time=0){
 		target = Math.min(this.max,Math.max(this.min,target));
@@ -249,6 +252,7 @@ export class Blender{
 			}
 		}
 		const diff = target - this.value;
+		if(isNaN(this.speed)){ this.speed=Infinity; }
 		if(this.speed > Math.abs(diff)){
 			this.value=target;
 		}else{
@@ -274,14 +278,20 @@ export class Blender{
 		const storage = this.storageLocation();
 		storage[key]=value;
 	}
+	static reset(){
+		for (const blender of Blender.list){
+			blender.speed=Infinity;
+		}
+	}
 }
+Blender.list = [];
 
 export class ColorBlender{
-	constructor(key,dfault){
+	constructor(key,dfault,track=true){
 		this.dfault=dfault;
-		this.r=new Blender(`${key}_r`,dfault>>16);
-		this.g=new Blender(`${key}_g`,dfault>>8&0xff);
-		this.b=new Blender(`${key}_b`,dfault&0xff);
+		this.r=new Blender(`${key}_r`,dfault>>16,track);
+		this.g=new Blender(`${key}_g`,dfault>>8&0xff,track);
+		this.b=new Blender(`${key}_b`,dfault&0xff,track);
 	}
 	setValue(color,time){
 		this.r.setValue(color>>16,time);
