@@ -3826,7 +3826,6 @@ class blenders_Blender{
 	setValue(target,time=0){
 		target = Math.min(this.max,Math.max(this.min,target));
 		let diff = target - this.value;
-		if(diff===0){ return; }
 		this.saveValue(this.key,target);
 		if(!time){ this.changed=true; this.value=target; }
 		if(this.cycle){
