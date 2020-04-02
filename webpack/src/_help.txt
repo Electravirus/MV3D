@@ -371,8 +371,8 @@ The ceiling function sets a ceiling texture and height, and also supports
 all the other properties from the texture function like alpha and animation.  
 
 The backface parameter will force backfaces to be rendered on the ceiling. 
-This will also cause the ceiling to collide with the camera (if camera collision
-is on), and to cast shadows (if dynamic shadows is on).
+This will also cause the ceiling to collide with the camera (if camera 
+collision is on), and to cast shadows (if dynamic shadows is on).
 
 Parameter List:  
 img,x,y,w,h|height,backface|alpha|glow[anim]animx,animy  
@@ -451,6 +451,24 @@ interpolate to the new value.
 Prefix <n> with + to modify the current value instead of setting a new
 value.
 
+    mv3d camera zoom <n> <t>
+
+Changes the fov. n greater than 1 zooms in, n lower than 1 zooms out.
+
+---
+
+    mv3d camera target ＠t <t>
+
+Change the camera's target.
+Camera will transition to the new target over time <t>.
+
+---
+
+    mv3d camera pan <x> <y> <t>
+    mv3d pan <x> <y> <t>
+
+Pans the camera view, relative to current target.
+
 ---
 
     mv3d camera mode <mode>
@@ -509,20 +527,6 @@ Angle is beam width of the flashlight.
 
 ---
 
-    mv3d camera target ＠t <t>
-
-Change the camera's target.
-Camera will transition to the new target over time <t>.
-
----
-
-    mv3d camera pan <x> <y> <t>
-    mv3d pan <x> <y> <t>
-
-Pans the camera view, relative to current target.
-
----
-
     mv3d disable
     mv3d enable
 
@@ -536,13 +540,6 @@ Sets the elevation of the target character.
 
 ---
 
-    mv3d ＠t configure <functions>
-
-Configure the target with a list of configuration functions.
-Example: mv3d ＠p configure scale(2)
-
----
-
     mv3d ＠t animation <id>
     mv3d ＠t animation <id> depth <true/false> scale <n>
 
@@ -552,6 +549,28 @@ Animations played with this command will have depth by default
 They can also have a custom scale.  
 Examples:  
 mv3d ＠p animation 8 scale 0.25
+
+---
+
+    mv3d ＠t configure <functions>
+
+Configure the target with a list of configuration functions.
+Example: mv3d ＠p configure scale(2)
+
+---
+
+    mv3d set <setting> <value(s)>
+
+Change a setting.  
+Settings that also appear in the plugin parameters should use
+the same syntax.  
+
+valid settings:
+    cameraCollision
+
+Examples:
+
+    mv3d set cameraCollision Type2 Smooth
 
 ---
 
