@@ -1,6 +1,6 @@
 /*:
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
-version 0.5.4
+version 0.5.4.1
 @author Dread/Nyanak
 @help
 
@@ -3348,6 +3348,7 @@ Spriteset_Map.prototype.createTilemap=function(){
 	mv3d["a" /* default */].viewContainer=new PIXI.Container();
 	mv3d["a" /* default */].pixiContainer.addChild( mv3d["a" /* default */].viewContainer );
 	mv3d["a" /* default */].viewContainer.addChild( mv3d["a" /* default */].pixiSprite );
+	mv3d["a" /* default */].mv_baseSprite = this._baseSprite;
 	if(!mv3d["a" /* default */].mapDisabled){
 		this._tilemap.visible=false;
 		this._baseSprite.addChild( mv3d["a" /* default */].pixiContainer );
@@ -3401,7 +3402,7 @@ Scene_Map.prototype.onMapLoaded=function(){
 		mv3d["a" /* default */].afterMapLoad(newmap);
 		if(mv3d["a" /* default */].isDisabled()){
 			mv3d["a" /* default */].mapReady=true;
-			mv3d["a" /* default */].createCharacters();
+			//mv3d.createCharacters();
 		}else{
 			mv3d["a" /* default */].mapReady=false;
 			//mv3d.mapReady=true;
@@ -5152,6 +5153,9 @@ mv3d["a" /* default */].PluginCommand=class{
 		//console.log(this.CHAR);
 	}
 	async AWAIT_CHAR(char){
+		if(!mv3d["a" /* default */].characters.length){
+			mv3d["a" /* default */].createCharacters();
+		}
 		if(!char){ return this.ERROR_CHAR(); }
 		let w=0;
 		while(!char.mv3d_sprite){
@@ -8218,7 +8222,7 @@ Object(util["r" /* override */])(Game_Map.prototype,'setupParallax',o=>function(
 	o.apply(this,arguments);
 	this.mv3d_parallaxX=0;
 	this.mv3d_parallaxY=0;
-});
+},true);
 
 Object(util["r" /* override */])(Game_Map.prototype,'changeParallax',o=>function(name, loopX, loopY, sx, sy){
 	if (this._parallaxLoopX && !loopX || this._parallaxSx && !sx) {

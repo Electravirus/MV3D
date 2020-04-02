@@ -5,7 +5,7 @@ override(Game_Map.prototype,'setupParallax',o=>function(){
 	o.apply(this,arguments);
 	this.mv3d_parallaxX=0;
 	this.mv3d_parallaxY=0;
-});
+},true);
 
 override(Game_Map.prototype,'changeParallax',o=>function(name, loopX, loopY, sx, sy){
 	if (this._parallaxLoopX && !loopX || this._parallaxSx && !sx) {

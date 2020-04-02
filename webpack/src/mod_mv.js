@@ -43,6 +43,7 @@ Spriteset_Map.prototype.createTilemap=function(){
 	mv3d.viewContainer=new PIXI.Container();
 	mv3d.pixiContainer.addChild( mv3d.viewContainer );
 	mv3d.viewContainer.addChild( mv3d.pixiSprite );
+	mv3d.mv_baseSprite = this._baseSprite;
 	if(!mv3d.mapDisabled){
 		this._tilemap.visible=false;
 		this._baseSprite.addChild( mv3d.pixiContainer );
@@ -96,7 +97,7 @@ Scene_Map.prototype.onMapLoaded=function(){
 		mv3d.afterMapLoad(newmap);
 		if(mv3d.isDisabled()){
 			mv3d.mapReady=true;
-			mv3d.createCharacters();
+			//mv3d.createCharacters();
 		}else{
 			mv3d.mapReady=false;
 			//mv3d.mapReady=true;

@@ -207,6 +207,9 @@ mv3d.PluginCommand=class{
 		//console.log(this.CHAR);
 	}
 	async AWAIT_CHAR(char){
+		if(!mv3d.characters.length){
+			mv3d.createCharacters();
+		}
 		if(!char){ return this.ERROR_CHAR(); }
 		let w=0;
 		while(!char.mv3d_sprite){
