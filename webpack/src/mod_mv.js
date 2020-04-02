@@ -62,13 +62,6 @@ Sprite_Character.prototype.setCharacter = function(character) {
 
 const _performTransfer=Game_Player.prototype.performTransfer;
 Game_Player.prototype.performTransfer = function() {
-	const newmap = this._newMapId !== $gameMap.mapId();
-	if(newmap){
-		transferNewMap=true;
-		if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
-		mv3d.clearMap();
-		delete $gamePlayer._mv3d_z;
-	}
 	_performTransfer.apply(this,arguments);
 	if(mv3d.is1stPerson()){
 		mv3d.blendCameraYaw.setValue(mv3d.dirToYaw($gamePlayer.direction(),0));
@@ -78,24 +71,28 @@ Game_Player.prototype.performTransfer = function() {
 // On Map Load
 
 let tilesetLoaded = false;
-let transferNewMap = false;
 
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
+	const newmap = this._transfer && ( $gamePlayer._newMapId !== $gameMap.mapId() );
 	Input.clear();
-	if(mv3d.needClearMap){
+	if(newmap || mv3d.needClearMap){
 		mv3d.clearMap();
 		mv3d.needClearMap=false;
 	}else if(mv3d.needReloadMap&&mv3d.mapLoaded){
 		mv3d.reloadMap();
 	}
 	mv3d.needReloadMap=false;
-	tilesetLoaded = false; transferNewMap=false;
-	mv3d.loadMapSettings();
+	tilesetLoaded = false;
+	if(!mv3d.mapLoaded){
+		mv3d.beforeMapLoad(newmap);
+		mv3d.loadMapSettings();
+	}
 	_onMapLoaded.apply(this,arguments);
 	if(!tilesetLoaded){ mv3d.loadTilesetSettings(); }
 	if(!mv3d.mapLoaded){
-		mv3d.applyMapSettings(transferNewMap);
+		if(newmap){ mv3d.applyMapSettings(); }
+		mv3d.afterMapLoad(newmap);
 		if(mv3d.isDisabled()){
 			mv3d.mapReady=true;
 		}else{

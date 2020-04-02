@@ -1348,6 +1348,11 @@ const mv3d = {
 		if(!$gameVariables.mv3d){ $gameVariables.mv3d={}; }
 		$gameVariables.mv3d[key]=value;
 	},
+	clearData(key){
+		if(!$gameVariables){ return console.warn(`MV3D: Couldn't clear data ${key}`); }
+		if(!$gameVariables.mv3d){ return; }
+		delete $gameVariables.mv3d[key];
+	},
 
 	updateCameraMode(){
 		const mode = this.cameraMode;
@@ -3322,13 +3327,6 @@ Sprite_Character.prototype.setCharacter = function(character) {
 
 const _performTransfer=Game_Player.prototype.performTransfer;
 Game_Player.prototype.performTransfer = function() {
-	const newmap = this._newMapId !== $gameMap.mapId();
-	if(newmap){
-		transferNewMap=true;
-		if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
-		mv3d["a" /* default */].clearMap();
-		delete $gamePlayer._mv3d_z;
-	}
 	_performTransfer.apply(this,arguments);
 	if(mv3d["a" /* default */].is1stPerson()){
 		mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].dirToYaw($gamePlayer.direction(),0));
@@ -3338,24 +3336,28 @@ Game_Player.prototype.performTransfer = function() {
 // On Map Load
 
 let tilesetLoaded = false;
-let transferNewMap = false;
 
 const _onMapLoaded=Scene_Map.prototype.onMapLoaded;
 Scene_Map.prototype.onMapLoaded=function(){
+	const newmap = this._transfer && ( $gamePlayer._newMapId !== $gameMap.mapId() );
 	Input.clear();
-	if(mv3d["a" /* default */].needClearMap){
+	if(newmap || mv3d["a" /* default */].needClearMap){
 		mv3d["a" /* default */].clearMap();
 		mv3d["a" /* default */].needClearMap=false;
 	}else if(mv3d["a" /* default */].needReloadMap&&mv3d["a" /* default */].mapLoaded){
 		mv3d["a" /* default */].reloadMap();
 	}
 	mv3d["a" /* default */].needReloadMap=false;
-	tilesetLoaded = false; transferNewMap=false;
-	mv3d["a" /* default */].loadMapSettings();
+	tilesetLoaded = false;
+	if(!mv3d["a" /* default */].mapLoaded){
+		mv3d["a" /* default */].beforeMapLoad(newmap);
+		mv3d["a" /* default */].loadMapSettings();
+	}
 	_onMapLoaded.apply(this,arguments);
 	if(!tilesetLoaded){ mv3d["a" /* default */].loadTilesetSettings(); }
 	if(!mv3d["a" /* default */].mapLoaded){
-		mv3d["a" /* default */].applyMapSettings(transferNewMap);
+		if(newmap){ mv3d["a" /* default */].applyMapSettings(); }
+		mv3d["a" /* default */].afterMapLoad(newmap);
 		if(mv3d["a" /* default */].isDisabled()){
 			mv3d["a" /* default */].mapReady=true;
 		}else{
@@ -4491,42 +4493,52 @@ Object.assign(mv3d["a" /* default */],{
 			}
 		}
 	},
-	applyMapSettings(newmap){
+	applyMapSettings(){
 		const mapconf = this.mapConfigurations;
-		if(newmap){
-			if('fog' in mapconf){
-				const fog = mapconf.fog;
-				if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
-				if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
-				if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
-				this.blendFogColor.update();
-			}
-			if('light' in mapconf){
-				this.blendAmbientColor.setValue(mapconf.light.color,0);
-				//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
-			}
-			if('cameraDist' in mapconf){
-				this.blendCameraDist.setValue(mapconf.cameraDist,0);
-			}
-			if ('cameraHeight' in mapconf){
-				this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
-			}
-			if('cameraMode' in mapconf){
-				this.cameraMode=mapconf.cameraMode;
-			}
-			if('cameraPitch' in mapconf){
-				this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
-			}
-			if('cameraYaw' in mapconf){
-				this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
-			}
+		if('fog' in mapconf){
+			const fog = mapconf.fog;
+			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
+			if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
+			if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
+			this.blendFogColor.update();
+		}
+		if('light' in mapconf){
+			this.blendAmbientColor.setValue(mapconf.light.color,0);
+			//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
+		}
+		if('cameraDist' in mapconf){
+			this.blendCameraDist.setValue(mapconf.cameraDist,0);
+		}
+		if ('cameraHeight' in mapconf){
+			this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
+		}
+		if('cameraMode' in mapconf){
+			this.cameraMode=mapconf.cameraMode;
+		}
+		if('cameraPitch' in mapconf){
+			this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
+		}
+		if('cameraYaw' in mapconf){
+			this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
 		}
 
+		this.callFeatures('applyMapSettings',mapconf);
+	},
+
+	beforeMapLoad(newmap){
+		if(newmap){
+			if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
+			delete $gamePlayer._mv3d_z;
+		}
+		this.callFeatures('beforeMapLoad',newmap);
+	},
+
+	afterMapLoad(newmap){
 		blenders_Blender.reset();
 
 		mv3d["a" /* default */].updateClearColor();
 
-		this.callFeatures('applyMapSettings',mapconf,newmap);
+		this.callFeatures('afterMapLoad',newmap);
 	},
     
 

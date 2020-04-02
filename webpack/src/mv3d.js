@@ -107,6 +107,11 @@ const mv3d = {
 		if(!$gameVariables.mv3d){ $gameVariables.mv3d={}; }
 		$gameVariables.mv3d[key]=value;
 	},
+	clearData(key){
+		if(!$gameVariables){ return console.warn(`MV3D: Couldn't clear data ${key}`); }
+		if(!$gameVariables.mv3d){ return; }
+		delete $gameVariables.mv3d[key];
+	},
 
 	updateCameraMode(){
 		const mode = this.cameraMode;

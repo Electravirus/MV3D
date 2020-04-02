@@ -146,42 +146,52 @@ Object.assign(mv3d,{
 			}
 		}
 	},
-	applyMapSettings(newmap){
+	applyMapSettings(){
 		const mapconf = this.mapConfigurations;
-		if(newmap){
-			if('fog' in mapconf){
-				const fog = mapconf.fog;
-				if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
-				if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
-				if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
-				this.blendFogColor.update();
-			}
-			if('light' in mapconf){
-				this.blendAmbientColor.setValue(mapconf.light.color,0);
-				//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
-			}
-			if('cameraDist' in mapconf){
-				this.blendCameraDist.setValue(mapconf.cameraDist,0);
-			}
-			if ('cameraHeight' in mapconf){
-				this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
-			}
-			if('cameraMode' in mapconf){
-				this.cameraMode=mapconf.cameraMode;
-			}
-			if('cameraPitch' in mapconf){
-				this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
-			}
-			if('cameraYaw' in mapconf){
-				this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
-			}
+		if('fog' in mapconf){
+			const fog = mapconf.fog;
+			if('color' in fog){ this.blendFogColor.setValue(fog.color,0); }
+			if('near' in fog){ this.blendFogNear.setValue(fog.near,0); }
+			if('far' in fog){ this.blendFogFar.setValue(fog.far,0); }
+			this.blendFogColor.update();
+		}
+		if('light' in mapconf){
+			this.blendAmbientColor.setValue(mapconf.light.color,0);
+			//this.blendLightIntensity.setValue(mapconf.light.intensity,0);
+		}
+		if('cameraDist' in mapconf){
+			this.blendCameraDist.setValue(mapconf.cameraDist,0);
+		}
+		if ('cameraHeight' in mapconf){
+			this.blendCameraHeight.setValue(mapconf.cameraHeight,0);
+		}
+		if('cameraMode' in mapconf){
+			this.cameraMode=mapconf.cameraMode;
+		}
+		if('cameraPitch' in mapconf){
+			this.blendCameraPitch.setValue(mapconf.cameraPitch,0);
+		}
+		if('cameraYaw' in mapconf){
+			this.blendCameraYaw.setValue(mapconf.cameraYaw,0);
 		}
 
+		this.callFeatures('applyMapSettings',mapconf);
+	},
+
+	beforeMapLoad(newmap){
+		if(newmap){
+			if($gameVariables.mv3d){ delete $gameVariables.mv3d.disabled; }
+			delete $gamePlayer._mv3d_z;
+		}
+		this.callFeatures('beforeMapLoad',newmap);
+	},
+
+	afterMapLoad(newmap){
 		Blender.reset();
 
 		mv3d.updateClearColor();
 
-		this.callFeatures('applyMapSettings',mapconf,newmap);
+		this.callFeatures('afterMapLoad',newmap);
 	},
     
 
