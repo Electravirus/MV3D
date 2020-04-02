@@ -96,6 +96,7 @@ Scene_Map.prototype.onMapLoaded=function(){
 		mv3d.afterMapLoad(newmap);
 		if(mv3d.isDisabled()){
 			mv3d.mapReady=true;
+			mv3d.createCharacters();
 		}else{
 			mv3d.mapReady=false;
 			//mv3d.mapReady=true;
