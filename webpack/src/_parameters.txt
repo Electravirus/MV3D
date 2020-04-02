@@ -12,10 +12,17 @@
 @default SUBMENU
 
 
-@param renderDist
-@text Render Distance
-@desc The maximum distance that can be rendered by the camera.
+@param renderDistOptionName
+@text Render Distance Option Name
+@desc symbol name: mv3d-renderDist
 @parent options
+@type Text
+@default Render Distance
+
+@param renderDist
+@text Render Distance Default
+@desc The maximum distance that can be rendered by the camera.
+@parent renderDistOptionName
 @type Number
 @default 25
 @min 0
@@ -23,42 +30,56 @@
 @param renderDistOption
 @text Render Distance Option
 @desc Should Render Distance appear on options menu?
-@parent renderDist
+@parent renderDistOptionName
 @type Boolean
 @default true
 
 @param renderDistMin
 @text Render Distance Min
-@parent renderDist
+@parent renderDistOptionName
 @type Number
 @default 10
 @min 0
 
 @param renderDistMax
 @text Render Distance Max
-@parent renderDist
+@parent renderDistOptionName
 @type Number
 @default 100
 @min 0
 
 
-@param mipmap
-@text Mipmapping
+@param mipmapOptionName
+@text Mipmapping Option Name
+@desc symbol name: mv3d-mipmap
 @parent options
+@type Text
+@default Mipmapping
+
+@param mipmap
+@text Mipmapping Default
+@parent mipmapOptionName
 @type Boolean
 @default true
 
 @param mipmapOption
 @text Mipmapping Option
 @desc Should Mipmapping appear on options menu?
-@parent mipmap
+@parent mipmapOptionName
 @type Boolean
 @default true
 
 
-@param fov
-@text FOV
+@param fovOptionName
+@text FOV Option Name
+@desc symbol name: mv3d-fov
 @parent options
+@type Text
+@default FOV
+
+@param fov
+@text FOV Default
+@parent fovOptionName
 @type Number
 @default 65
 @min 0 @max 180
@@ -66,20 +87,20 @@
 @param fovOption
 @text FOV Option
 @desc Should FOV appear on options menu?
-@parent fov
+@parent fovOptionName
 @type Boolean
 @default false
 
 @param fovMin
 @text FOV Min
-@parent fov
+@parent fovOptionName
 @type Number
 @default 50
 @min 0 @max 180
 
 @param fovMax
 @text FOV Max
-@parent fov
+@parent fovOptionName
 @type Number
 @default 100
 @min 0 @max 180

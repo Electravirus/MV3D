@@ -609,10 +609,17 @@ player upgrade their airship's height and speed.
 @default SUBMENU
 
 
-@param renderDist
-@text Render Distance
-@desc The maximum distance that can be rendered by the camera.
+@param renderDistOptionName
+@text Render Distance Option Name
+@desc symbol name: mv3d-renderDist
 @parent options
+@type Text
+@default Render Distance
+
+@param renderDist
+@text Render Distance Default
+@desc The maximum distance that can be rendered by the camera.
+@parent renderDistOptionName
 @type Number
 @default 25
 @min 0
@@ -620,42 +627,56 @@ player upgrade their airship's height and speed.
 @param renderDistOption
 @text Render Distance Option
 @desc Should Render Distance appear on options menu?
-@parent renderDist
+@parent renderDistOptionName
 @type Boolean
 @default true
 
 @param renderDistMin
 @text Render Distance Min
-@parent renderDist
+@parent renderDistOptionName
 @type Number
 @default 10
 @min 0
 
 @param renderDistMax
 @text Render Distance Max
-@parent renderDist
+@parent renderDistOptionName
 @type Number
 @default 100
 @min 0
 
 
-@param mipmap
-@text Mipmapping
+@param mipmapOptionName
+@text Mipmapping Option Name
+@desc symbol name: mv3d-mipmap
 @parent options
+@type Text
+@default Mipmapping
+
+@param mipmap
+@text Mipmapping Default
+@parent mipmapOptionName
 @type Boolean
 @default true
 
 @param mipmapOption
 @text Mipmapping Option
 @desc Should Mipmapping appear on options menu?
-@parent mipmap
+@parent mipmapOptionName
 @type Boolean
 @default true
 
 
-@param fov
-@text FOV
+@param fovOptionName
+@text FOV Option Name
+@desc symbol name: mv3d-fov
 @parent options
+@type Text
+@default FOV
+
+@param fov
+@text FOV Default
+@parent fovOptionName
 @type Number
 @default 65
 @min 0 @max 180
@@ -663,20 +684,20 @@ player upgrade their airship's height and speed.
 @param fovOption
 @text FOV Option
 @desc Should FOV appear on options menu?
-@parent fov
+@parent fovOptionName
 @type Boolean
 @default false
 
 @param fovMin
 @text FOV Min
-@parent fov
+@parent fovOptionName
 @type Number
 @default 50
 @min 0 @max 180
 
 @param fovMax
 @text FOV Max
-@parent fov
+@parent fovOptionName
 @type Number
 @default 100
 @min 0 @max 180
@@ -2012,7 +2033,7 @@ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"]['option-store']={}
 _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options={};
 
 if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_RENDER_DIST) _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options['mv3d-renderDist']={
-	name:"Render Distance",
+	name:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_NAME_RENDER_DIST,
 	min:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_RENDER_DIST_MIN, max:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_RENDER_DIST_MAX,
 	increment:5,
 	wrap:false,
@@ -2021,7 +2042,7 @@ if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_RENDER_DIST) 
 };
 
 if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_FOV) _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options['mv3d-fov']={
-	name:"FOV",
+	name:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_NAME_FOV,
 	min:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_FOV_MIN, max:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_FOV_MAX,
 	increment:5,
 	apply(v){ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].FOV=v; },
@@ -2029,7 +2050,7 @@ if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_FOV) _mv3d_js
 };
 
 if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_MIPMAP) _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options['mv3d-mipmap']={
-	name:"Mipmapping",
+	name:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_NAME_MIPMAP,
 	type:'bool',
 	apply(v){ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].MIPMAP=v; _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].needReloadMap=true; },
 	default:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].MIPMAP,
@@ -3507,10 +3528,13 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 	get renderDist(){ return Math.min(this.RENDER_DIST, mv3d["a" /* default */].blendFogFar.currentValue()+7.5); },
 
 	OPTION_MIPMAP:Object(util["g" /* booleanString */])(parameters.mipmapOption),
+	OPTION_NAME_MIPMAP: parameter('mipmapOptionName',"Mipmapping",String),
 	OPTION_RENDER_DIST: parameter('renderDistOption',true,util["g" /* booleanString */]),
-	OPTION_FOV: parameter('fovOption',false,util["g" /* booleanString */]),
+	OPTION_NAME_RENDER_DIST: parameter('renderDistOptionName',"Render Distance",String),
 	OPTION_RENDER_DIST_MIN: parameter('renderDistMin',10,Number),
 	OPTION_RENDER_DIST_MAX: parameter('renderDistMax',100,Number),
+	OPTION_FOV: parameter('fovOption',false,util["g" /* booleanString */]),
+	OPTION_NAME_FOV: parameter('fovOptionName',"FOV",String),
 	OPTION_FOV_MIN: parameter('fovMin',50,Number),
 	OPTION_FOV_MAX: parameter('fovMax',100,Number),
 

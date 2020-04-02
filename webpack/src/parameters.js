@@ -53,10 +53,13 @@ assign(mv3d,{
 	get renderDist(){ return Math.min(this.RENDER_DIST, mv3d.blendFogFar.currentValue()+7.5); },
 
 	OPTION_MIPMAP:booleanString(parameters.mipmapOption),
+	OPTION_NAME_MIPMAP: parameter('mipmapOptionName',"Mipmapping",String),
 	OPTION_RENDER_DIST: parameter('renderDistOption',true,booleanString),
-	OPTION_FOV: parameter('fovOption',false,booleanString),
+	OPTION_NAME_RENDER_DIST: parameter('renderDistOptionName',"Render Distance",String),
 	OPTION_RENDER_DIST_MIN: parameter('renderDistMin',10,Number),
 	OPTION_RENDER_DIST_MAX: parameter('renderDistMax',100,Number),
+	OPTION_FOV: parameter('fovOption',false,booleanString),
+	OPTION_NAME_FOV: parameter('fovOptionName',"FOV",String),
 	OPTION_FOV_MIN: parameter('fovMin',50,Number),
 	OPTION_FOV_MAX: parameter('fovMax',100,Number),
 

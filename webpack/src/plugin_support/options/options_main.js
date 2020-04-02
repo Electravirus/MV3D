@@ -5,7 +5,7 @@ mv3d['option-store']={}
 mv3d.options={};
 
 if(mv3d.OPTION_RENDER_DIST) mv3d.options['mv3d-renderDist']={
-	name:"Render Distance",
+	name:mv3d.OPTION_NAME_RENDER_DIST,
 	min:mv3d.OPTION_RENDER_DIST_MIN, max:mv3d.OPTION_RENDER_DIST_MAX,
 	increment:5,
 	wrap:false,
@@ -14,7 +14,7 @@ if(mv3d.OPTION_RENDER_DIST) mv3d.options['mv3d-renderDist']={
 };
 
 if(mv3d.OPTION_FOV) mv3d.options['mv3d-fov']={
-	name:"FOV",
+	name:mv3d.OPTION_NAME_FOV,
 	min:mv3d.OPTION_FOV_MIN, max:mv3d.OPTION_FOV_MAX,
 	increment:5,
 	apply(v){ mv3d.FOV=v; },
@@ -22,7 +22,7 @@ if(mv3d.OPTION_FOV) mv3d.options['mv3d-fov']={
 };
 
 if(mv3d.OPTION_MIPMAP) mv3d.options['mv3d-mipmap']={
-	name:"Mipmapping",
+	name:mv3d.OPTION_NAME_MIPMAP,
 	type:'bool',
 	apply(v){ mv3d.MIPMAP=v; mv3d.needReloadMap=true; },
 	default:mv3d.MIPMAP,
