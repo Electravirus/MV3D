@@ -37,15 +37,16 @@ const _createTilemap=Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap=function(){
 	_createTilemap.apply(this,arguments);
 	mv3d.mapDisabled = mv3d.isDisabled();
-	if(mv3d.mapDisabled){ return; }
-	this._tilemap.visible=false;
 	mv3d.pixiSprite=new PIXI.Sprite(mv3d.texture);
 	mv3d.pixiSprite.scale.set(1/mv3d.RES_SCALE,1/mv3d.RES_SCALE);
 	mv3d.pixiContainer=new PIXI.Container();
 	mv3d.viewContainer=new PIXI.Container();
-	this._baseSprite.addChild( mv3d.pixiContainer );
 	mv3d.pixiContainer.addChild( mv3d.viewContainer );
 	mv3d.viewContainer.addChild( mv3d.pixiSprite );
+	if(!mv3d.mapDisabled){
+		this._tilemap.visible=false;
+		this._baseSprite.addChild( mv3d.pixiContainer );
+	}
 };
 
 const _sprite_char_setchar = Sprite_Character.prototype.setCharacter;

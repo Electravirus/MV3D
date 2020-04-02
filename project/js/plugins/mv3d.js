@@ -3342,15 +3342,16 @@ const _createTilemap=Spriteset_Map.prototype.createTilemap;
 Spriteset_Map.prototype.createTilemap=function(){
 	_createTilemap.apply(this,arguments);
 	mv3d["a" /* default */].mapDisabled = mv3d["a" /* default */].isDisabled();
-	if(mv3d["a" /* default */].mapDisabled){ return; }
-	this._tilemap.visible=false;
 	mv3d["a" /* default */].pixiSprite=new PIXI.Sprite(mv3d["a" /* default */].texture);
 	mv3d["a" /* default */].pixiSprite.scale.set(1/mv3d["a" /* default */].RES_SCALE,1/mv3d["a" /* default */].RES_SCALE);
 	mv3d["a" /* default */].pixiContainer=new PIXI.Container();
 	mv3d["a" /* default */].viewContainer=new PIXI.Container();
-	this._baseSprite.addChild( mv3d["a" /* default */].pixiContainer );
 	mv3d["a" /* default */].pixiContainer.addChild( mv3d["a" /* default */].viewContainer );
 	mv3d["a" /* default */].viewContainer.addChild( mv3d["a" /* default */].pixiSprite );
+	if(!mv3d["a" /* default */].mapDisabled){
+		this._tilemap.visible=false;
+		this._baseSprite.addChild( mv3d["a" /* default */].pixiContainer );
+	}
 };
 
 const _sprite_char_setchar = Sprite_Character.prototype.setCharacter;
