@@ -61,6 +61,7 @@ class AnimSprite extends TransformNode{
 		super.dispose(false,true);
 	}
 }
+mv3d.AnimSprite=AnimSprite;
 
 // Balloons
 class Balloon extends AnimSprite{
@@ -78,6 +79,7 @@ class Balloon extends AnimSprite{
 		super.update();
 	}
 }
+mv3d.Balloon=Balloon;
 
 // depth animations
 
@@ -171,6 +173,7 @@ class DepthAnimation{
 		this.spriteList.length=0;
 	}
 }
+mv3d.Animation=DepthAnimation;
 
 function transformVectorForCharacter(vector,char){
 	if(!char.isEmpty&&char.shape===mv3d.enumShapes.SPRITE){
