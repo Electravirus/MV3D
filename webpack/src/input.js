@@ -2,15 +2,9 @@ import mv3d from './mv3d.js';
 import { override } from './util.js';
 import { Feature } from './features.js';
 
-let _is1stPerson = false;
 
 Object.assign(mv3d,{
 	updateInput(){
-		const is1stPerson = mv3d.is1stPerson();
-		if(_is1stPerson !== is1stPerson){
-			Input.clear();
-			_is1stPerson = is1stPerson;
-		}
 		mv3d.updateInputCamera();
 	},
 
