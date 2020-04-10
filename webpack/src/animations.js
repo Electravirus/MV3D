@@ -1,11 +1,8 @@
 import mv3d from './mv3d.js';
 import { Sprite, SpriteManager, TransformNode, Vector3, ORTHOGRAPHIC_CAMERA, StandardMaterial, Texture } from './mod_babylon.js';
-import { radtodeg } from './util.js';
+import { radtodeg, override } from './util.js';
 
 Object.assign(mv3d,{
-	showAnimation(char){
-		if(!char){ char=$gamePlayer.mv3d_sprite; }
-	},
 	showBalloon(char){
 		if(!char){ char=$gamePlayer.mv3d_sprite; }
 		return new Balloon(char);
@@ -88,6 +85,7 @@ class DepthAnimation{
 		this.animation=animation;
 		this.spriteList=[];
 		this.char = this.animation._target._character.mv3d_sprite;
+		DepthAnimation.list.push(this);
 	}
 	resetSpriteList(){
 		for(const animationSprite of this.spriteList ){
@@ -171,8 +169,13 @@ class DepthAnimation{
 			animationSprite.dispose();
 		}
 		this.spriteList.length=0;
+		const index = DepthAnimation.list.indexOf(this);
+		if(index>=0){
+			DepthAnimation.list.splice(index,1);
+		}
 	}
 }
+DepthAnimation.list = [];
 mv3d.Animation=DepthAnimation;
 
 function transformVectorForCharacter(vector,char){
@@ -210,6 +213,14 @@ Sprite_Animation.prototype.remove=function(){
 		this.mv3d_animation.remove();
 	}
 	_animation_remove.apply(this,arguments);
+};
+
+const _map_terminate = Scene_Map.prototype.terminate;
+Scene_Map.prototype.terminate=function(){
+	_map_terminate.apply(this,arguments);
+	for(let i=DepthAnimation.list.length-1;i>=0;--i){
+		DepthAnimation.list[i].remove();
+	}
 };
 
 

@@ -602,6 +602,7 @@ player upgrade their airship's height and speed.
 - nemoma
 - AmalgamAsh
 - Gaikiken
+- Mukadelheid
 
 
 ## Patron Heroes:
@@ -4066,15 +4067,9 @@ var features = __webpack_require__(3);
 
 
 
-let _is1stPerson = false;
 
 Object.assign(mv3d["a" /* default */],{
 	updateInput(){
-		const is1stPerson = mv3d["a" /* default */].is1stPerson();
-		if(_is1stPerson !== is1stPerson){
-			Input.clear();
-			_is1stPerson = is1stPerson;
-		}
 		mv3d["a" /* default */].updateInputCamera();
 	},
 
@@ -7957,9 +7952,6 @@ Game_CharacterBase.prototype.isOnBush = function() {
 
 
 Object.assign(mv3d["a" /* default */],{
-	showAnimation(char){
-		if(!char){ char=$gamePlayer.mv3d_sprite; }
-	},
 	showBalloon(char){
 		if(!char){ char=$gamePlayer.mv3d_sprite; }
 		return new animations_Balloon(char);
@@ -8015,6 +8007,7 @@ class animations_AnimSprite extends mod_babylon["x" /* TransformNode */]{
 		super.dispose(false,true);
 	}
 }
+mv3d["a" /* default */].AnimSprite=animations_AnimSprite;
 
 // Balloons
 class animations_Balloon extends animations_AnimSprite{
@@ -8032,6 +8025,7 @@ class animations_Balloon extends animations_AnimSprite{
 		super.update();
 	}
 }
+mv3d["a" /* default */].Balloon=animations_Balloon;
 
 // depth animations
 
@@ -8040,6 +8034,7 @@ class animations_DepthAnimation{
 		this.animation=animation;
 		this.spriteList=[];
 		this.char = this.animation._target._character.mv3d_sprite;
+		animations_DepthAnimation.list.push(this);
 	}
 	resetSpriteList(){
 		for(const animationSprite of this.spriteList ){
@@ -8123,8 +8118,14 @@ class animations_DepthAnimation{
 			animationSprite.dispose();
 		}
 		this.spriteList.length=0;
+		const index = animations_DepthAnimation.list.indexOf(this);
+		if(index>=0){
+			animations_DepthAnimation.list.splice(index,1);
+		}
 	}
 }
+animations_DepthAnimation.list = [];
+mv3d["a" /* default */].Animation=animations_DepthAnimation;
 
 function transformVectorForCharacter(vector,char){
 	if(!char.isEmpty&&char.shape===mv3d["a" /* default */].enumShapes.SPRITE){
@@ -8161,6 +8162,14 @@ Sprite_Animation.prototype.remove=function(){
 		this.mv3d_animation.remove();
 	}
 	_animation_remove.apply(this,arguments);
+};
+
+const _map_terminate = Scene_Map.prototype.terminate;
+Scene_Map.prototype.terminate=function(){
+	_map_terminate.apply(this,arguments);
+	for(let i=animations_DepthAnimation.list.length-1;i>=0;--i){
+		animations_DepthAnimation.list[i].remove();
+	}
 };
 
 

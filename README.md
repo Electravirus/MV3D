@@ -603,6 +603,7 @@ player upgrade their airship's height and speed.
 - nemoma
 - AmalgamAsh
 - Gaikiken
+- Mukadelheid
 
 
 ## Patron Heroes:
