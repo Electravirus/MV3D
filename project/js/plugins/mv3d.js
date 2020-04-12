@@ -557,6 +557,12 @@ mv3d ＠p animation 8 scale 0.25
 
 ---
 
+    mv3d resolution scale <n> <t>
+
+Sets the resolution scale. n should be a value between 0 and 1.
+
+---
+
     mv3d ＠t configure <functions>
 
 Configure the target with a list of configuration functions.
@@ -7733,19 +7739,23 @@ class characters_Character extends characters_Sprite{
 		if(this.isPlayer){
 			const vehicle = this.char.vehicle();
 			if(vehicle&&vehicle.mv3d_sprite&&vehicle._driving){
-				return vehicle.m3d_sprite.getTargetElevation(x,y);
+				return vehicle.mv3d_sprite.getTargetElevation(x,y);
 			}
 		}
 		if(this.hasConfig('zlock')){
 			return this.getConfig('zlock',0)+this.blendElevation.currentValue();
 		}
+
 		if(!opts.platform){ opts.platform = this.getPlatform(x,y,opts); }
 		const platform = opts.platform;
-		let targetElevation = platform.z2+this.blendElevation.currentValue();
-
+		let targetElevation;
 		if(this.hasFloat && !this.platformChar){
-			targetElevation += this.getPlatformFloat(x,y,{platform});
+			targetElevation = this.getPlatformFloat(x,y,{platform});
+		}else{
+			targetElevation = platform.z2;
 		}
+
+		targetElevation += this.blendElevation.currentValue()
 
 		if(this.isAirship && $gamePlayer.vehicle()===this.char){
 			targetElevation += mv3d["a" /* default */].loadData('airship_height',mv3d["a" /* default */].AIRSHIP_SETTINGS.height)*this.char._altitude/this.char.maxAltitude();

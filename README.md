@@ -558,6 +558,12 @@ mv3d ＠p animation 8 scale 0.25
 
 ---
 
+    mv3d resolution scale <n> <t>
+
+Sets the resolution scale. n should be a value between 0 and 1.
+
+---
+
     mv3d ＠t configure <functions>
 
 Configure the target with a list of configuration functions.

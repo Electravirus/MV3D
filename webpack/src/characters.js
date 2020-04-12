@@ -1027,19 +1027,23 @@ class Character extends Sprite{
 		if(this.isPlayer){
 			const vehicle = this.char.vehicle();
 			if(vehicle&&vehicle.mv3d_sprite&&vehicle._driving){
-				return vehicle.m3d_sprite.getTargetElevation(x,y);
+				return vehicle.mv3d_sprite.getTargetElevation(x,y);
 			}
 		}
 		if(this.hasConfig('zlock')){
 			return this.getConfig('zlock',0)+this.blendElevation.currentValue();
 		}
+
 		if(!opts.platform){ opts.platform = this.getPlatform(x,y,opts); }
 		const platform = opts.platform;
-		let targetElevation = platform.z2+this.blendElevation.currentValue();
-
+		let targetElevation;
 		if(this.hasFloat && !this.platformChar){
-			targetElevation += this.getPlatformFloat(x,y,{platform});
+			targetElevation = this.getPlatformFloat(x,y,{platform});
+		}else{
+			targetElevation = platform.z2;
 		}
+
+		targetElevation += this.blendElevation.currentValue()
 
 		if(this.isAirship && $gamePlayer.vehicle()===this.char){
 			targetElevation += mv3d.loadData('airship_height',mv3d.AIRSHIP_SETTINGS.height)*this.char._altitude/this.char.maxAltitude();
