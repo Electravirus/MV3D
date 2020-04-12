@@ -8,7 +8,6 @@
     "build": "webpack"
   },
   "author": "Dread/Nyanak",
-  "license": "MIT",
   "devDependencies": {
     "glob": "^7.1.6",
     "play-sound": "^1.1.3",
