@@ -8,7 +8,7 @@ Object.assign(mv3d,{
 	tileCollision(char,x,y,useStairThresh=false,useTargetZ=false){
 		if(!(char instanceof mv3d.Character)){if(!char.mv3d_sprite){return false;}char=char.mv3d_sprite;}
 		const z = typeof useTargetZ==='number'? useTargetZ
-		:useTargetZ?char.targetElevation:char.z;
+		:useTargetZ?char.getTargetElevation(x,y):char.z;
 		const cc = char.getCollisionHeight(z);
 		const tcs = this.getCollisionHeights(x,y);
 		if(useStairThresh==2){ cc.z1+=mv3d.STAIR_THRESH; cc.z2+=mv3d.STAIR_THRESH; }
@@ -24,7 +24,7 @@ Object.assign(mv3d,{
 		if(!(char1 instanceof mv3d.Character)){if(!char1.mv3d_sprite){return false;}char1=char1.mv3d_sprite;}
 		if(!(char2 instanceof mv3d.Character)){if(!char2.mv3d_sprite){return false;}char2=char2.mv3d_sprite;}
 		if(!triggerMode&&(!char1.char._mv3d_hasCollide()||!char2.char._mv3d_hasCollide())){ return false; } 
-		const c1z = typeof useTargetZ1==='number'? useTargetZ1 : useTargetZ1?char1.targetElevation:char1.z;
+		const c1z = typeof useTargetZ1==='number'? useTargetZ1 : useTargetZ1?char1.getTargetElevation(char2.x,char2.y):char1.z;
 		const c2z = typeof useTargetZ2==='number'? useTargetZ2 : useTargetZ2?char2.targetElevation:char2.z;
 		const cc1 = char1.getCollisionHeight(c1z);
 		const cc2 = triggerMode ? char2.getTriggerHeight(c2z) : char2.getCollisionHeight(c2z);
@@ -106,7 +106,7 @@ Object.assign(mv3d,{
 		return { id:tileId, x,y,l,conf, z1:height-slopeHeight, z2:height };
 	},
 
-	canPassRamp(d,slope){
+	canPassRamp(d,slope,opts={}){
 		if(d===5||d<=0||d>=10){ return true; }
 		const {dir:sd} = mv3d.getSlopeDirection(slope.x,slope.y,slope.l,true);
 		const x2 = $gameMap.roundXWithDirection(slope.x,d);
@@ -121,7 +121,7 @@ Object.assign(mv3d,{
 			return sd===sd2 && (sd===d?(slope.z1===slope2.z2):(slope.z2===slope2.z1));
 		}
 		if(sd!==d&&sd!==10-d){ return false; }
-		const dh = this.getPlatformAtLocation(x2,y2, (sd===d?slope.z1:slope.z2)+mv3d.STAIR_THRESH ).z2;
+		const dh = this.getPlatformAtLocation(x2,y2, (opts.z!=null?opts.z:sd===d?slope.z1:slope.z2)+mv3d.STAIR_THRESH ).z2;
 		return Math.abs(dh-(sd===d?slope.z1:slope.z2))<=mv3d.STAIR_THRESH;
 	}
 });

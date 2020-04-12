@@ -62,7 +62,7 @@ const _isMapPassable=o=>function(x,y,d){
 	var y2 = $gameMap.roundYWithDirection(y, d);
 	
 	if(slope=mv3d.isRampAt(x2,y2,sprite.z)){
-		if(mv3d.canPassRamp(10-d,slope)){ return true; }
+		if(mv3d.canPassRamp(10-d,slope,{z:sprite.z})){ return true; }
 	}
 	
 	if(this._mv3d_isFlying()){

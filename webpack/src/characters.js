@@ -979,24 +979,19 @@ class Character extends Sprite{
 		if(this.hasConfig('zlock')){
 			this.z=this.getConfig('zlock',0);
 			this.z += this.blendElevation.currentValue();
+			this.targetElevation = this.z;
 			return;
 		}
-		
+
+		this.hasFloat = this.isVehicle || (this.isPlayer||this.isFollower)&&$gamePlayer.vehicle();
+
 		const platform = this.getPlatform(this.char._realX,this.char._realY);
 		this.platform = platform;
 		this.platformHeight = platform.z2;
 		this.platformChar = platform.char;
-		this.targetElevation = this.platformHeight+this.blendElevation.currentValue();
+
+		this.targetElevation = this.getTargetElevation(this.char._realX,this.char._realY,{platform});
 		let gravity = this.getConfig('gravity',mv3d.GRAVITY)/60;
-
-		this.hasFloat = this.isVehicle || (this.isPlayer||this.isFollower)&&$gamePlayer.vehicle();
-		if(this.hasFloat && !this.platformChar){
-			this.targetElevation += mv3d.getFloatHeight(Math.round(this.char._realX),Math.round(this.char._realY),this.z+this.spriteHeight);
-		}
-
-		if(this.isAirship && $gamePlayer.vehicle()===this.char){
-			this.targetElevation += mv3d.loadData('airship_height',mv3d.AIRSHIP_SETTINGS.height)*this.char._altitude/this.char.maxAltitude();
-		}
 
 		if(this.char.isJumping()){
 			let jumpProgress = 1-(this.char._jumpCount/(this.char._jumpPeak*2));
@@ -1026,6 +1021,30 @@ class Character extends Sprite{
 			this.falling=this.z>this.targetElevation;
 		}
 		return;
+	}
+
+	getTargetElevation(x=this.char._realX,y=this.char._realY,opts={}){
+		if(this.isPlayer){
+			const vehicle = this.char.vehicle();
+			if(vehicle&&vehicle.mv3d_sprite&&vehicle._driving){
+				return vehicle.m3d_sprite.getTargetElevation(x,y);
+			}
+		}
+		if(this.hasConfig('zlock')){
+			return this.getConfig('zlock',0)+this.blendElevation.currentValue();
+		}
+		if(!opts.platform){ opts.platform = this.getPlatform(x,y,opts); }
+		const platform = opts.platform;
+		let targetElevation = platform.z2+this.blendElevation.currentValue();
+
+		if(this.hasFloat && !this.platformChar){
+			targetElevation += this.getPlatformFloat(x,y,{platform});
+		}
+
+		if(this.isAirship && $gamePlayer.vehicle()===this.char){
+			targetElevation += mv3d.loadData('airship_height',mv3d.AIRSHIP_SETTINGS.height)*this.char._altitude/this.char.maxAltitude();
+		}
+		return targetElevation;
 	}
 
 	getPlatform(x=this.char._realX,y=this.char._realY,opts={}){
