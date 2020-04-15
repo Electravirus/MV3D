@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2, Color3, Color4 } from './mod_babylon.js';
-import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep } from './util.js';
+import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep, tileSize } from './util.js';
 import { Blender } from './blenders.js';
 
 class ConfigurationFunction{
@@ -87,6 +87,62 @@ function TextureConfigurator(name,extraParams='',apply){
 			apply.call(this,conf,params);
 		}
 	});
+}
+
+function readTextureConfigurations(img,x,y,w,h){
+	// TODO: get img from mv3d folder
+
+}
+
+function interpretTextureCoodinate(nstr,nonrelative){
+	const r = /(\+?-?)(\d*\.?\d+)(px|p|t)?/g;
+	const numobj={v:0,pv:0,rv:0,rpv:0};
+	let match;
+	while(match=r.exec(nstr)){
+		let isRelative = Boolean(match[1]);
+		let unit = match[3]?match[3].startsWith('p')?'p':'t':'t';
+		let num = Number(match[2]);
+		if(num%1){ num=num*tileSize(); unit='p'; }
+	}
+}
+
+class TextureCoordinate{
+	constructor(){
+		this.isPixelValue=false;
+		this.baseValue=null;
+		this.offsetValue=0;
+	}
+	usePixelValue(){
+		if(this.isPixelValue){ return; }
+		this.isPixelValue=true;
+		if(this.baseValue!=null){ this.baseValue*=tileSize(); }
+		this.offsetValue*=tileSize();
+	}
+	setTileValue(v){
+		if(this.isPixelValue){
+			this.setPixelValue(v*tileSize());
+			return;
+		}
+		this.baseValue=v;
+	}
+	setPixelValue(v){
+		this.usePixelValue();
+		this.baseValue=v;
+	}
+	offsetTileValue(v){
+		if(this.isPixelValue){
+			this.offsetPixelValue(v*tileSize());
+			return;
+		}
+		this.offsetValue+=v;
+	}
+	offsetPixelValue(v){
+		this.usePixelValue();
+		this.offsetValue+=v;
+	}
+	collapseValue(){
+		return (this.baseValue||0)+this.offsetValue;
+	}
 }
 
 Object.assign(mv3d,{
