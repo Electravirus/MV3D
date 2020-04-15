@@ -619,7 +619,8 @@ player upgrade their airship's height and speed.
 - nyrion
 - Vaan Auroris
 - Chainer Valentine
-
+- Kaboth
+- Karenksoon
 
 @param options
 @text Option Settings
@@ -2873,7 +2874,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__[/* override */ "r"])(Game_CharacterBas
 		let slope;
 		let realign = false;
 		if(slope=mv3d.isRampAt(tx,ty,sprite.z)){
-			if(mv3d.canPassRamp(10-d,slope)){ continue; }
+			if(mv3d.canPassRamp(10-d,slope,{z:sprite.z})){ continue; }
 		}
 		const tx2 = $gameMap.roundXWithDirection(tx, 10-d);
 		const ty2 = $gameMap.roundYWithDirection(ty, 10-d);
@@ -4481,6 +4482,62 @@ function TextureConfigurator(name,extraParams='',apply){
 			apply.call(this,conf,params);
 		}
 	});
+}
+
+function readTextureConfigurations(img,x,y,w,h){
+	// TODO: get img from mv3d folder
+
+}
+
+function interpretTextureCoodinate(nstr,nonrelative){
+	const r = /(\+?-?)(\d*\.?\d+)(px|p|t)?/g;
+	const numobj={v:0,pv:0,rv:0,rpv:0};
+	let match;
+	while(match=r.exec(nstr)){
+		let isRelative = Boolean(match[1]);
+		let unit = match[3]?match[3].startsWith('p')?'p':'t':'t';
+		let num = Number(match[2]);
+		if(num%1){ num=num*Object(util["y" /* tileSize */])(); unit='p'; }
+	}
+}
+
+class configuration_TextureCoordinate{
+	constructor(){
+		this.isPixelValue=false;
+		this.baseValue=null;
+		this.offsetValue=0;
+	}
+	usePixelValue(){
+		if(this.isPixelValue){ return; }
+		this.isPixelValue=true;
+		if(this.baseValue!=null){ this.baseValue*=Object(util["y" /* tileSize */])(); }
+		this.offsetValue*=Object(util["y" /* tileSize */])();
+	}
+	setTileValue(v){
+		if(this.isPixelValue){
+			this.setPixelValue(v*Object(util["y" /* tileSize */])());
+			return;
+		}
+		this.baseValue=v;
+	}
+	setPixelValue(v){
+		this.usePixelValue();
+		this.baseValue=v;
+	}
+	offsetTileValue(v){
+		if(this.isPixelValue){
+			this.offsetPixelValue(v*Object(util["y" /* tileSize */])());
+			return;
+		}
+		this.offsetValue+=v;
+	}
+	offsetPixelValue(v){
+		this.usePixelValue();
+		this.offsetValue+=v;
+	}
+	collapseValue(){
+		return (this.baseValue||0)+this.offsetValue;
+	}
 }
 
 Object.assign(mv3d["a" /* default */],{

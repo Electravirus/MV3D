@@ -620,4 +620,5 @@ player upgrade their airship's height and speed.
 - nyrion
 - Vaan Auroris
 - Chainer Valentine
-
+- Kaboth
+- Karenksoon

@@ -60,7 +60,7 @@ override(Game_CharacterBase.prototype,'moveVectorMap',o=>function(owner, collide
 		let slope;
 		let realign = false;
 		if(slope=mv3d.isRampAt(tx,ty,sprite.z)){
-			if(mv3d.canPassRamp(10-d,slope)){ continue; }
+			if(mv3d.canPassRamp(10-d,slope,{z:sprite.z})){ continue; }
 		}
 		const tx2 = $gameMap.roundXWithDirection(tx, 10-d);
 		const ty2 = $gameMap.roundYWithDirection(ty, 10-d);
