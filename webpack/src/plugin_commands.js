@@ -6,11 +6,15 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if(command.toLowerCase() !== 'mv3d'){
 		return _pluginCommand.apply(this,arguments);
 	}
+	runPluginCommand(this,args);
+};
+
+function runPluginCommand(interpreter,args){
 	const pc = new mv3d.PluginCommand();
-	pc.INTERPRETER=this;
-	pc.FULL_COMMAND=[command,...args].join(' ');
+	pc.INTERPRETER=interpreter;
+	pc.FULL_COMMAND=['mv3d',...args].join(' ');
 	args=args.filter(v=>v);
-	pc.CHAR=$gameMap.event(this._eventId);
+	pc.CHAR=$gameMap.event(interpreter._eventId)||$gamePlayer;
 	if(args[0]){
 		const firstChar = args[0][0];
 		if(firstChar==='@'||firstChar==='＠'){
@@ -22,7 +26,7 @@ Game_Interpreter.prototype.pluginCommand = function(command, args) {
 	if(com in pc){
 		pc[com](...args);
 	}
-};
+}
 
 mv3d.PluginCommand=class{
 	async animation(id,...a){
@@ -271,4 +275,12 @@ Game_Character.prototype.mv3d_configure = function(data){
 	if(this.mv3d_sprite){
 		this.mv3d_sprite.pageConfigure(this.mv3d_settings);
 	}
+};
+
+mv3d.command=function(...s){
+	s=s.join(' ').split(' ');
+	runPluginCommand({
+		_mapId: $gameMap.mapId(),
+		_eventId: 0,
+	},s);
 };
