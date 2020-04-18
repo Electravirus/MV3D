@@ -9,7 +9,7 @@ Object.assign(mv3d,{
 		$gamePlayer.mv3d_setDirection(dir);
 	},
 
-	yawToDir(yaw=mv3d.blendCameraYaw.targetValue(),dir8=mv3d.DIR8){
+	yawToDir(yaw=mv3d.blendCameraYaw.targetValue(),dir8=false){
 		const divisor = dir8?45:90;
 		yaw=Math.round(yaw/divisor)*divisor;
 		while(yaw<0){yaw+=360;} while(yaw>=360){yaw-=360;}

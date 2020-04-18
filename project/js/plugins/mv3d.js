@@ -578,6 +578,8 @@ the same syntax.
 
 valid settings:
     cameraCollision
+    diagonalMovement
+    turnIncrement
 
 Examples:
 
@@ -598,6 +600,16 @@ player upgrade their airship's height and speed.
 
 ---
 
+## Script Calls
+
+mv3d.command can be used to run a plugin command using script. The syntax is 
+the same as the plugin command, but without `mv3d` at the beginning.  
+The parameters can be passed as arguments.  
+Example:  
+mv3d.command('camera dist',10,1);  
+
+---
+
 ## Patron Knights:
 
 - Whitely
@@ -609,6 +621,7 @@ player upgrade their airship's height and speed.
 - AmalgamAsh
 - Gaikiken
 - Mukadelheid
+- Clumsydemonwithfire
 
 
 ## Patron Heroes:
@@ -3610,10 +3623,20 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 	TEXTURE_BUSHALPHA: parameters.alphaMask||'bushAlpha',
 	TEXTURE_ERROR: parameters.errorTexture||'errorTexture',
 
-	DIR8MOVE: Object(util["g" /* booleanString */])(parameters.dir8Movement),
-	DIR8SMART: parameters.dir8Movement.includes("Smart"),
-	DIR8_2D: !parameters.dir8Movement.includes("3D"),
-	TURN_INCREMENT: Number(parameters.turnIncrement),
+	diagonalMovement: new attributes_Attribute('diagonalMovement',String(parameters.dir8Movement),function(v){
+		v=String(v).toUpperCase();
+		return {
+			enabled:Object(util["g" /* booleanString */])(v),
+			smart:v.includes('SMART'),
+			'2D':!v.includes('3D'),
+		}
+	}),
+	get DIR8MOVE(){ return this.diagonalMovement.enabled; },
+	get DIR8SMART(){ return this.diagonalMovement.smart; },
+	get DIR8_2D(){ return this.diagonalMovement['2D']; },
+
+	turnIncrement: new attributes_Attribute('turnIncrement',String(parameters.turnIncrement),v=>Number(v)),
+	get TURN_INCREMENT(){ return mv3d["a" /* default */].turnIncrement; },
 	WASD: Object(util["g" /* booleanString */])(parameters.WASD),
 
 	KEYBOARD_PITCH: Object(util["g" /* booleanString */])(parameters.keyboardPitch),
@@ -4279,7 +4302,7 @@ Object.assign(mv3d["a" /* default */],{
 		$gamePlayer.mv3d_setDirection(dir);
 	},
 
-	yawToDir(yaw=mv3d["a" /* default */].blendCameraYaw.targetValue(),dir8=mv3d["a" /* default */].DIR8){
+	yawToDir(yaw=mv3d["a" /* default */].blendCameraYaw.targetValue(),dir8=false){
 		const divisor = dir8?45:90;
 		yaw=Math.round(yaw/divisor)*divisor;
 		while(yaw<0){yaw+=360;} while(yaw>=360){yaw-=360;}

@@ -105,10 +105,20 @@ assign(mv3d,{
 	TEXTURE_BUSHALPHA: parameters.alphaMask||'bushAlpha',
 	TEXTURE_ERROR: parameters.errorTexture||'errorTexture',
 
-	DIR8MOVE: booleanString(parameters.dir8Movement),
-	DIR8SMART: parameters.dir8Movement.includes("Smart"),
-	DIR8_2D: !parameters.dir8Movement.includes("3D"),
-	TURN_INCREMENT: Number(parameters.turnIncrement),
+	diagonalMovement: new Attribute('diagonalMovement',String(parameters.dir8Movement),function(v){
+		v=String(v).toUpperCase();
+		return {
+			enabled:booleanString(v),
+			smart:v.includes('SMART'),
+			'2D':!v.includes('3D'),
+		}
+	}),
+	get DIR8MOVE(){ return this.diagonalMovement.enabled; },
+	get DIR8SMART(){ return this.diagonalMovement.smart; },
+	get DIR8_2D(){ return this.diagonalMovement['2D']; },
+
+	turnIncrement: new Attribute('turnIncrement',String(parameters.turnIncrement),v=>Number(v)),
+	get TURN_INCREMENT(){ return mv3d.turnIncrement; },
 	WASD: booleanString(parameters.WASD),
 
 	KEYBOARD_PITCH: booleanString(parameters.keyboardPitch),

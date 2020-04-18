@@ -579,6 +579,8 @@ the same syntax.
 
 valid settings:
     cameraCollision
+    diagonalMovement
+    turnIncrement
 
 Examples:
 
@@ -599,6 +601,16 @@ player upgrade their airship's height and speed.
 
 ---
 
+## Script Calls
+
+mv3d.command can be used to run a plugin command using script. The syntax is 
+the same as the plugin command, but without `mv3d` at the beginning.  
+The parameters can be passed as arguments.  
+Example:  
+mv3d.command('camera dist',10,1);  
+
+---
+
 ## Patron Knights:
 
 - Whitely
@@ -610,6 +622,7 @@ player upgrade their airship's height and speed.
 - AmalgamAsh
 - Gaikiken
 - Mukadelheid
+- Clumsydemonwithfire
 
 
 ## Patron Heroes:
