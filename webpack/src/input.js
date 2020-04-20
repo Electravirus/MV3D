@@ -17,9 +17,9 @@ Object.assign(mv3d,{
 				const turning = this.blendCameraYaw.currentValue()!==this.blendCameraYaw.targetValue();
 				const yawSpeed = mv3d.TURN_INCREMENT / mv3d.YAW_SPEED;
 				if(Input.isTriggered(leftKey)||Input.isPressed(leftKey)&&!turning){
-					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d.TURN_INCREMENT,yawSpeed);
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d.TURN_INCREMENT,yawSpeed,false);
 				}else if(Input.isTriggered(rightKey)||Input.isPressed(rightKey)&&!turning){
-					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-mv3d.TURN_INCREMENT,yawSpeed);
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-mv3d.TURN_INCREMENT,yawSpeed,false);
 				}
 			}else{
 				const increment = mv3d.YAW_SPEED / 60;

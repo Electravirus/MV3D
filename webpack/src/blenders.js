@@ -223,12 +223,17 @@ export class Blender{
 			Blender.list.push(this);
 		}
 	}
-	setValue(target,time=0){
+	setValue(target,time=0,normalize=true){
 		target = Math.min(this.max,Math.max(this.min,target));
 		let diff = target - this.value;
+		if(this.cycle){
+			while( target>this.cycle ){ target-=this.cycle; }
+			while( target<-this.cycle ){ target+=this.cycle; }
+			this.value=target - diff;
+		}
 		this.saveValue(this.key,target);
 		if(!time){ this.changed=true; this.value=target; }
-		if(this.cycle){
+		if(normalize&&this.cycle){
 			while ( Math.abs(diff)>this.cycle/2 ){
 				this.value += Math.sign(diff)*this.cycle;
 				diff = target - this.value;

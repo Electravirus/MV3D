@@ -618,7 +618,6 @@ mv3d.command('camera dist',10,1);
 - L
 - hsumi
 - nemoma
-- AmalgamAsh
 - Gaikiken
 - Mukadelheid
 - Clumsydemonwithfire
@@ -634,6 +633,8 @@ mv3d.command('camera dist',10,1);
 - Chainer Valentine
 - Kaboth
 - Karenksoon
+- AmalgamAsh
+- Rikyu
 
 @param options
 @text Option Settings
@@ -3970,12 +3971,17 @@ class blenders_Blender{
 			blenders_Blender.list.push(this);
 		}
 	}
-	setValue(target,time=0){
+	setValue(target,time=0,normalize=true){
 		target = Math.min(this.max,Math.max(this.min,target));
 		let diff = target - this.value;
+		if(this.cycle){
+			while( target>this.cycle ){ target-=this.cycle; }
+			while( target<-this.cycle ){ target+=this.cycle; }
+			this.value=target - diff;
+		}
 		this.saveValue(this.key,target);
 		if(!time){ this.changed=true; this.value=target; }
-		if(this.cycle){
+		if(normalize&&this.cycle){
 			while ( Math.abs(diff)>this.cycle/2 ){
 				this.value += Math.sign(diff)*this.cycle;
 				diff = target - this.value;
@@ -4112,9 +4118,9 @@ Object.assign(mv3d["a" /* default */],{
 				const turning = this.blendCameraYaw.currentValue()!==this.blendCameraYaw.targetValue();
 				const yawSpeed = mv3d["a" /* default */].TURN_INCREMENT / mv3d["a" /* default */].YAW_SPEED;
 				if(Input.isTriggered(leftKey)||Input.isPressed(leftKey)&&!turning){
-					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d["a" /* default */].TURN_INCREMENT,yawSpeed);
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d["a" /* default */].TURN_INCREMENT,yawSpeed,false);
 				}else if(Input.isTriggered(rightKey)||Input.isPressed(rightKey)&&!turning){
-					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-mv3d["a" /* default */].TURN_INCREMENT,yawSpeed);
+					this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-mv3d["a" /* default */].TURN_INCREMENT,yawSpeed,false);
 				}
 			}else{
 				const increment = mv3d["a" /* default */].YAW_SPEED / 60;
@@ -5269,7 +5275,10 @@ mv3d["a" /* default */].PluginCommand=class{
 	}
 	disable(fadeType){ mv3d["a" /* default */].disable(fadeType); }
 	enable(fadeType){ mv3d["a" /* default */].enable(fadeType); }
-	_RELATIVE_BLEND(blender,n,time){ blender.setValue(Object(util["u" /* relativeNumber */])(blender.targetValue(),n),Number(time)); }
+	_RELATIVE_BLEND(blender,n,time){
+		const relative = String(n).startsWith('+');
+		blender.setValue(Object(util["u" /* relativeNumber */])(blender.targetValue(),n),Number(time),!relative);
+	}
 	_TIME(time){
 		if(typeof time==='number'){ return time; }
 		time=Number(time);

@@ -619,7 +619,6 @@ mv3d.command('camera dist',10,1);
 - L
 - hsumi
 - nemoma
-- AmalgamAsh
 - Gaikiken
 - Mukadelheid
 - Clumsydemonwithfire
@@ -635,3 +634,5 @@ mv3d.command('camera dist',10,1);
 - Chainer Valentine
 - Kaboth
 - Karenksoon
+- AmalgamAsh
+- Rikyu

@@ -199,7 +199,10 @@ mv3d.PluginCommand=class{
 	}
 	disable(fadeType){ mv3d.disable(fadeType); }
 	enable(fadeType){ mv3d.enable(fadeType); }
-	_RELATIVE_BLEND(blender,n,time){ blender.setValue(relativeNumber(blender.targetValue(),n),Number(time)); }
+	_RELATIVE_BLEND(blender,n,time){
+		const relative = String(n).startsWith('+');
+		blender.setValue(relativeNumber(blender.targetValue(),n),Number(time),!relative);
+	}
 	_TIME(time){
 		if(typeof time==='number'){ return time; }
 		time=Number(time);
