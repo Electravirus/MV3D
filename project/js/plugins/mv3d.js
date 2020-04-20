@@ -4507,21 +4507,61 @@ function TextureConfigurator(name,extraParams='',apply){
 	});
 }
 
-function readTextureConfigurations(img,x,y,w,h){
+function readTextureConfigurations(name,conf,img,xstr,ystr,wstr='1',hstr='1'){
 	// TODO: get img from mv3d folder
-
+	let hasPixelValue=false;
+	const coords=[xstr,ystr,wstr,hstr].map(str=>{
+		const coord = interpretTextureCoodinate(str);
+		if(coord.isPixelValue){ hasPixelValue=true; }
+		return coord;
+	});
+	coords.forEach(coord=>{
+		if(hasPixelValue){ coord.usePixelValue(); }
+	});
+	let [xcoord,ycoord,wcoord,hcoord]=coords;
+	let [x,y,w,h] = coords.map(coord=>coord.collapseValue());
+	if(hasPixelValue){
+		if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
+			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,1,0);
+			conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
+			return;
+		}
+	}else if(w===1&&h===1){
+		if(xcoord.isOffsetValue&&ycoord.isOffsetValue){
+			conf[`${name}_offset`] = new mod_babylon["y" /* Vector2 */](Number(x),Number(y));
+			return;
+		}
+		if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
+			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,x,y);
+			return;
+		}
+	}
+	if(hasPixelValue&&xcoord.baseValue!=null&&ycoord.baseValue!=null)
+	
+	conf[`${name}_texture`] = {img:img,x:xcoord,y:ycoord,w:wcoord,h:hcoord};
+	
 }
 
-function interpretTextureCoodinate(nstr,nonrelative){
+function interpretTextureCoodinate(nstr){
 	const r = /(\+?-?)(\d*\.?\d+)(px|p|t)?/g;
-	const numobj={v:0,pv:0,rv:0,rpv:0};
+	const coord = new configuration_TextureCoordinate();
 	let match;
 	while(match=r.exec(nstr)){
-		let isRelative = Boolean(match[1]);
+		const isRelative = Boolean(match[1]);
+		const isNegative = match[1].includes('-');
 		let unit = match[3]?match[3].startsWith('p')?'p':'t':'t';
 		let num = Number(match[2]);
-		if(num%1){ num=num*Object(util["y" /* tileSize */])(); unit='p'; }
+		if(isNegative){ num*=-1; }
+		if(unit==='t'&&num%1){ num=num*Object(util["y" /* tileSize */])(); unit='p'; }
+		if(unit==='t'){
+			if(isRelative) coord.offsetTileValue(num);
+			else coord.setTileValue(num);
+		}else{
+			if(isRelative) coord.offsetPixelValue(num);
+			else coord.setPixelValue(num);
+		}
 	}
+	return coord;
 }
 
 class configuration_TextureCoordinate{
@@ -4558,8 +4598,11 @@ class configuration_TextureCoordinate{
 		this.usePixelValue();
 		this.offsetValue+=v;
 	}
-	collapseValue(){
-		return (this.baseValue||0)+this.offsetValue;
+	collapseValue(baseValue){
+		return (this.baseValue||baseValue||0)+this.offsetValue;
+	}
+	get isOffsetValue(){
+		return this.baseValue==null;
 	}
 }
 
