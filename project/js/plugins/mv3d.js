@@ -635,6 +635,9 @@ mv3d.command('camera dist',10,1);
 - Karenksoon
 - AmalgamAsh
 - Rikyu
+- Samus_X420
+- Strykerx88
+- OvnBun
 
 @param options
 @text Option Settings
@@ -3204,7 +3207,7 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_Character
 Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "r"])(Game_CharacterBase.prototype,'canPassDiagonally',o=>function(x,y,horz,vert){
     const x2 = $gameMap.roundXWithDirection(x, horz);
 	const y2 = $gameMap.roundYWithDirection(y, vert);
-	if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x,y2,true,true)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y,true,true)){
+	if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x,y2,true,false)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y,true,false)){
 		return false;
 	}
 	return o.apply(this,arguments);
@@ -4483,16 +4486,27 @@ mv3d["a" /* default */].ConfigurationFunction=ConfigurationFunction;
 function TextureConfigurator(name,extraParams='',apply){
 	const paramlist = `img,x,y,w,h|${extraParams}|alpha|glow[anim]animx,animy`;
 	return new ConfigurationFunction(paramlist,function(conf,params){
-		if(params.group1.length===5){
+		switch(params.group1.length){
+		case 5:{
 			const [img,x,y,w,h] = params.group1;
-			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,1,0);
-			conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
-		}else if(params.group1.length===3){
+			readTextureConfigurations(name,conf,img,x,y,w,h);
+			break;}
+		case 4:{
+			const [x,y,w,h] = params.group1;
+			readTextureConfigurations(name,conf,null,x,y,w,h);
+			break;}
+		case 3:{
 			const [img,x,y] = params.group1;
-			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,x,y);
-		}else if(params.group1.length===2){
+			readTextureConfigurations(name,conf,img,x,y,'1','1');
+			break;}
+		case 2:{
 			const [x,y] = params.group1;
-			conf[`${name}_offset`] = new mod_babylon["y" /* Vector2 */](Number(x),Number(y));
+			readTextureConfigurations(name,conf,null,x,y,'1','1');
+			break;}
+		case 1:{
+			const [img] = params.group1;
+			conf[`${name}_img`]=img;
+			break;}
 		}
 		if(params.animx&&params.animy){
 			conf[`${name}_animData`]={ animX:Number(params.animx), animY:Number(params.animy) };
@@ -4514,7 +4528,8 @@ function TextureConfigurator(name,extraParams='',apply){
 }
 
 function readTextureConfigurations(name,conf,img,xstr,ystr,wstr='1',hstr='1'){
-	// TODO: get img from mv3d folder
+	conf[`${name}_img`]=img;
+	conf[`${name}_changed`]=true;
 	let hasPixelValue=false;
 	const coords=[xstr,ystr,wstr,hstr].map(str=>{
 		const coord = interpretTextureCoodinate(str);
@@ -4526,30 +4541,30 @@ function readTextureConfigurations(name,conf,img,xstr,ystr,wstr='1',hstr='1'){
 	});
 	let [xcoord,ycoord,wcoord,hcoord]=coords;
 	let [x,y,w,h] = coords.map(coord=>coord.collapseValue());
-	if(hasPixelValue){
-		if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
-			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,1,0);
-			conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
-			return;
-		}
-	}else if(w===1&&h===1){
-		if(xcoord.isOffsetValue&&ycoord.isOffsetValue){
-			conf[`${name}_offset`] = new mod_babylon["y" /* Vector2 */](Number(x),Number(y));
-			return;
-		}
-		if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
-			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,x,y);
-			return;
+	if(mv3d["a" /* default */].validTilesheetName(img)){
+		if(hasPixelValue){
+			if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
+				conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,1,0);
+				conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
+				return;
+			}
+		}else if(w===1&&h===1){
+			if(xcoord.isOffsetValue&&ycoord.isOffsetValue){
+				conf[`${name}_offset`] = new mod_babylon["y" /* Vector2 */](Number(x),Number(y));
+				return;
+			}
+			if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
+				conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,x,y);
+				return;
+			}
 		}
 	}
-	if(hasPixelValue&&xcoord.baseValue!=null&&ycoord.baseValue!=null)
-	
-	conf[`${name}_texture`] = {img:img,x:xcoord,y:ycoord,w:wcoord,h:hcoord};
-	
+	wcoord.usePixelValue(); hcoord.usePixelValue();
+	conf[`${name}_texture`] = {x:xcoord,y:ycoord,w:wcoord.collapseValue(),h:hcoord.collapseValue()};
 }
 
 function interpretTextureCoodinate(nstr){
-	const r = /(\+?-?)(\d*\.?\d+)(px|p|t)?/g;
+	const r = /(\+?-?)(\d+\.\d*|\d*\.?\d+)(px|p|t)?/g;
 	const coord = new configuration_TextureCoordinate();
 	let match;
 	while(match=r.exec(nstr)){
@@ -4558,7 +4573,7 @@ function interpretTextureCoodinate(nstr){
 		let unit = match[3]?match[3].startsWith('p')?'p':'t':'t';
 		let num = Number(match[2]);
 		if(isNegative){ num*=-1; }
-		if(unit==='t'&&num%1){ num=num*Object(util["y" /* tileSize */])(); unit='p'; }
+		if(unit==='t'&&num%1||!match[3]&&match[2].includes('.')){ num=num*Object(util["y" /* tileSize */])(); unit='p'; }
 		if(unit==='t'){
 			if(isRelative) coord.offsetTileValue(num);
 			else coord.setTileValue(num);
@@ -4630,10 +4645,11 @@ Object.assign(mv3d["a" /* default */],{
 			for(let ky=range2[0];ky<=range2[range2.length-1];++ky){
 				const key = `${match[1]},${kx},${ky}`;
 				const tileId=this.constructTileId(...key.split(','));
+				const appliedConf=mv3d["a" /* default */].applyTextureConfigs(Object.assign({},conf),match[1],kx,ky);
 				if(!(tileId in this.tilesetConfigurations)){
 					this.tilesetConfigurations[tileId]={};
 				}
-				Object.assign(this.tilesetConfigurations[tileId],conf);
+				Object.assign(this.tilesetConfigurations[tileId],appliedConf);
 			}
 
 		}
@@ -4826,6 +4842,10 @@ Object.assign(mv3d["a" /* default */],{
 		side:TextureConfigurator('side'),
 		inside:TextureConfigurator('inside'),
 		bottom:TextureConfigurator('bottom'),
+		north:TextureConfigurator('north'),
+		south:TextureConfigurator('south'),
+		east:TextureConfigurator('east'),
+		west:TextureConfigurator('west'),
 		texture:Object.assign(TextureConfigurator('hybrid'),{
 			func(conf,params){
 				mv3d["a" /* default */].tilesetConfigurationFunctions.top.func(conf,params);
@@ -5012,6 +5032,51 @@ Object.assign(mv3d["a" /* default */],{
 		enable(conf,b=true){
 			conf.disabled=!Object(util["g" /* booleanString */])(b);
 		},
+	},
+
+	validTilesheetName(img){
+		return /^(?:a[12345]|[bcde])$/i.test(img);
+	},
+	applyTextureConfigs(conf,img,tx,ty){
+		for (const side of ['top','side','inside','bottom','north','south','east','west']){
+			this.applyTextureSideConfigs(conf,side,img,tx,ty);
+		}
+		return conf;
+	},
+	applyTextureSideConfigs(conf,side,img,tx,ty){
+		let textureCoords = conf[`${side}_texture`];
+		if(`${side}_img` in conf){ img=conf[`${side}_img`]; }
+		else{ conf[`${side}_img`]=img; }
+		if(textureCoords){
+			const {x:xcoord,y:ycoord,w,h}=textureCoords;
+			if(!xcoord.isPixelValue){
+				if(xcoord.isOffsetValue){ tx+=xcoord.offsetValue; }
+				else{ tx=xcoord.collapseValue(); }
+			}
+			if(!ycoord.isPixelValue){
+				if(ycoord.isOffsetValue){ ty+=ycoord.offsetValue; }
+				else{ ty=ycoord.collapseValue(); }
+			}
+			let corner;
+			const validImg=mv3d["a" /* default */].validTilesheetName(img);
+			if(validImg){
+				let id=this.constructTileId(img,tx,ty);
+				corner = mv3d["a" /* default */].getTileCorner(id);
+				corner.x*=Object(util["z" /* tileWidth */])(); corner.y*=Object(util["x" /* tileHeight */])();
+			}else{
+				corner={x:tx*Object(util["z" /* tileWidth */])(),y:ty*Object(util["x" /* tileHeight */])()};
+			}
+			if(xcoord.isPixelValue){
+				if(xcoord.isOffsetValue){ corner.x+=xcoord.offsetValue; }
+				else{ corner.x=xcoord.collapseValue(); }
+			}
+			if(ycoord.isPixelValue){
+				if(ycoord.isOffsetValue){ corner.y+=ycoord.offsetValue; }
+				else{ corner.y=ycoord.collapseValue(); }
+			}
+			conf[`${side}_id`] = validImg?mv3d["a" /* default */].constructTileId(img,1,0):1;
+			conf[`${side}_rect`]=new PIXI.Rectangle(corner.x,corner.y,w,h);
+		}
 	},
 
 });
@@ -5711,6 +5776,7 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		}
 
 		let neededHeight=wallHeight;
+		let textureChanged='side_changed' in tileConf;
 		let tileId=tileConf.side_id,configRect,texture_side='side';
 		if(mv3d["a" /* default */].isTileEmpty(tileId)){ return; }
 		
@@ -5725,13 +5791,14 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 			if(mv3d["a" /* default */].tileHasPit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
 			//if(mv3d.isTilePit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
 			neededHeight = Math.max(neededHeight,-tileConf.depth);
-			if(tileConf.hasInsideConf){
+			if(tileConf.inside_changed){
 				texture_side='inside';
 			}
 		}
 		else if(neededHeight<=0){ return; }
 
 		if(texture_side==='inside'){
+			textureChanged=textureChanged||('inside_changed' in tileConf);
 			tileId=tileConf.inside_id;
 			if(tileConf.inside_rect){ configRect = tileConf.inside_rect; }
 		}else{
@@ -5759,7 +5826,7 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 			const npr=new mod_babylon["y" /* Vector2 */](np.y,-np.x);
 			const leftHeight = mv3d["a" /* default */].getCullingHeight(this.ox+x+npl.x,this.oy+y+npl.y,l,{dir:Input._makeNumpadDirection(npl.x,npl.y)});
 			const rightHeight = mv3d["a" /* default */].getCullingHeight(this.ox+x+npr.x,this.oy+y+npr.y,l,{dir:Input._makeNumpadDirection(npr.x,npr.y)});
-			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,textureChanged,true);
 			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
 			let partHeight=Math.abs(neededHeight/wallParts);
 			let sw = Object(util["y" /* tileSize */])()/2;
@@ -5833,7 +5900,7 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 			}
 
 			if(isAutotile&&!configRect){
-				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+				const {x:bx,y:by} = this.getAutotileCorner(tileId,'side_changed' in tileConf,true);
 				for (let az=0;az<=1;++az){
 					this.builder.addWallFace(tsMaterial,
 						(edge ? (bx+rightSide*1.5) : (bx+1-rightSide*0.5) )*Object(util["z" /* tileWidth */])(),
@@ -5947,7 +6014,7 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 		const isAutotile = Tilemap.isAutotile(tileId)&&!tileConf.side_rect;
 		let rect;
 		if(isAutotile){
-			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,'side_changed' in tileConf,true);
 			rect={x:(bx+0.5)*Object(util["z" /* tileWidth */])(),y:(by+0.5)*Object(util["x" /* tileHeight */])(),width:Object(util["z" /* tileWidth */])(),height:Object(util["x" /* tileHeight */])()};
 		}else{
 			rect = tileConf.side_rect?tileConf.side_rect:mv3d["a" /* default */].getTileRects(tileId)[0];
@@ -5957,14 +6024,32 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 			1, slopeHeight, rot, options
 		);
 	}
-	getAutotileCorner(tileId,realId=tileId,excludeTop=true){
-		const kind = Tilemap.getAutotileKind(tileId);
-		let tx = kind%8;
-		let ty = Math.floor(kind / 8);
-		if(tileId===realId && mv3d["a" /* default */].isWallTile(tileId)==1){ ++ty; }
-		var bx,by;
-		bx=tx*2;
-		by=ty;
+	getAutotileCorner(tileId,textureChanged,excludeTop=true){
+		return mv3d["a" /* default */].getTileCorner(tileId,{
+			useSideWall:!textureChanged,
+			excludeTop,
+		});
+	}
+}
+mapCell_MapCell.neighborPositions = [
+	new mod_babylon["y" /* Vector2 */]( 0, 1),
+	new mod_babylon["y" /* Vector2 */]( 1, 0),
+	new mod_babylon["y" /* Vector2 */]( 0,-1),
+	new mod_babylon["y" /* Vector2 */](-1, 0),
+];
+mapCell_MapCell.meshCache={};
+
+mv3d["a" /* default */].getTileCorner=function(tileId,opts={}){
+	const useSideWall=Boolean(opts.useSideWall);
+	const excludeTop=Boolean(opts.excludeTop);
+	const kind = Tilemap.getAutotileKind(tileId);
+	let tx = kind%8;
+	let ty = Math.floor(kind / 8);
+	if(useSideWall && mv3d["a" /* default */].isWallTile(tileId)==1){ ++ty; }
+	var bx,by;
+	bx=tx*2;
+	by=ty;
+	if(Tilemap.isAutotile(tileId)){
 		if(Tilemap.isTileA1(tileId)){
 			if(kind<4){
 				bx=6*Math.floor(kind/2);
@@ -5986,25 +6071,13 @@ class mapCell_MapCell extends mod_babylon["x" /* TransformNode */]{
 				by=(ty-10)*2.5+(ty%2?0.5:0);
 			}
 		}
-		return {x:bx,y:by};
+	}else{
+		bx = (Math.floor(tileId / 128) % 2 * 8 + tileId % 8);
+		by = (Math.floor(tileId % 256 / 8) % 16);
 	}
+
+	return {x:bx,y:by};
 }
-mapCell_MapCell.neighborPositions = [
-	new mod_babylon["y" /* Vector2 */]( 0, 1),
-	new mod_babylon["y" /* Vector2 */]( 1, 0),
-	new mod_babylon["y" /* Vector2 */]( 0,-1),
-	new mod_babylon["y" /* Vector2 */](-1, 0),
-];
-mapCell_MapCell.meshCache={};
-
-class MapCellFinalized {
-	
-}
-
-class MapCellBuilder {
-
-}
-
 
 
 // CONCATENATED MODULE: ./src/tileData.js
@@ -6041,6 +6114,9 @@ Object.assign(mv3d["a" /* default */],{
 		}else{
 			return Tilemap.isTileA5(id)?4:5+Math.floor(id/256);
 		}
+	},
+	getSetName(id){
+		return (this.getSetName._setnames||(this.getSetName._setnames=['A1','A2','A3','A4','A5','B','C','D','E']))[this.getSetNumber(id)];
 	},
 
 	getShadowBits(x,y){
@@ -6130,37 +6206,32 @@ Object.assign(mv3d["a" /* default */],{
 
 	getTileTextureOffsets(tileId,x,y,l){
 		const conf = this.getTileConfig(tileId,x,y,l);
-		const tileRange = Tilemap.isAutotile(tileId)?48:1;
-		conf.hasInsideConf=Boolean(conf.inside_offset||conf.rectInside||('inside_id' in conf));
-		conf.hasBottomConf=Boolean(conf.bottom_offset||conf.rectBottom||('bottom_id' in conf));
-		if(conf.top_id==null){ 
-			conf.top_id=tileId;
-			if(conf.top_offset){
-				conf.top_id = tileId+conf.top_offset.x*tileRange+conf.top_offset.y*tileRange*8;
-			}
-		 }
-		if(conf.side_id==null){
-			conf.side_id=tileId;
-			if(conf.side_offset){
-				conf.side_id = tileId+conf.side_offset.x*tileRange+conf.side_offset.y*tileRange*8;
-			}
-		}
-		if(conf.inside_id==null){ 
-			conf.inside_id=conf.side_id;
-			if(conf.inside_offset){
-				conf.inside_id=tileId+conf.inside_offset.x*tileRange+conf.inside_offset.y*tileRange*8;
-			}
-		}
-		if(conf.bottom_id==null){
-			conf.bottom_id=conf.top_id;
-			if(conf.bottom_offset){
-				conf.bottom_id=tileId+conf.bottom_offset.x*tileRange+conf.bottom_offset.y*tileRange*8;
-			}
-		}
+		this._tileTextureOffset(conf,'top',tileId,tileId);
+		this._tileTextureOffset(conf,'side',tileId,tileId);
+		this._tileTextureOffset(conf,'inside',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'bottom',tileId,conf.top_id);
+		this._tileTextureOffset(conf,'north',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'south',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'east',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'west',tileId,conf.side_id);
 		if(!('pass' in conf)){
 			conf.pass = this.getTilePassage(tileId,conf);
 		}
 		return conf;
+	},
+
+	_tileTextureOffset(conf,side,tileId,dfault){
+		const tileRange = Tilemap.isAutotile(tileId)?48:1;
+		let id = conf[`${side}_id`];
+		if(id==null){
+			let offset = conf[`${side}_offset`];
+			if(offset){
+				id=conf[`${side}_id`]=tileId+conf.side_offset.x*tileRange+conf.side_offset.y*tileRange
+			}else{
+				id=conf[`${side}_id`]=dfault;
+			}
+			conf[`${side}_img`]=this.getSetName(id);
+		}
 	},
 
 	getTileId(x,y,l=0){

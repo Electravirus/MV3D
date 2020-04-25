@@ -32,6 +32,9 @@ Object.assign(mv3d,{
 			return Tilemap.isTileA5(id)?4:5+Math.floor(id/256);
 		}
 	},
+	getSetName(id){
+		return (this.getSetName._setnames||(this.getSetName._setnames=['A1','A2','A3','A4','A5','B','C','D','E']))[this.getSetNumber(id)];
+	},
 
 	getShadowBits(x,y){
 		return this.getTileId(x,y,4);
@@ -120,37 +123,32 @@ Object.assign(mv3d,{
 
 	getTileTextureOffsets(tileId,x,y,l){
 		const conf = this.getTileConfig(tileId,x,y,l);
-		const tileRange = Tilemap.isAutotile(tileId)?48:1;
-		conf.hasInsideConf=Boolean(conf.inside_offset||conf.rectInside||('inside_id' in conf));
-		conf.hasBottomConf=Boolean(conf.bottom_offset||conf.rectBottom||('bottom_id' in conf));
-		if(conf.top_id==null){ 
-			conf.top_id=tileId;
-			if(conf.top_offset){
-				conf.top_id = tileId+conf.top_offset.x*tileRange+conf.top_offset.y*tileRange*8;
-			}
-		 }
-		if(conf.side_id==null){
-			conf.side_id=tileId;
-			if(conf.side_offset){
-				conf.side_id = tileId+conf.side_offset.x*tileRange+conf.side_offset.y*tileRange*8;
-			}
-		}
-		if(conf.inside_id==null){ 
-			conf.inside_id=conf.side_id;
-			if(conf.inside_offset){
-				conf.inside_id=tileId+conf.inside_offset.x*tileRange+conf.inside_offset.y*tileRange*8;
-			}
-		}
-		if(conf.bottom_id==null){
-			conf.bottom_id=conf.top_id;
-			if(conf.bottom_offset){
-				conf.bottom_id=tileId+conf.bottom_offset.x*tileRange+conf.bottom_offset.y*tileRange*8;
-			}
-		}
+		this._tileTextureOffset(conf,'top',tileId,tileId);
+		this._tileTextureOffset(conf,'side',tileId,tileId);
+		this._tileTextureOffset(conf,'inside',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'bottom',tileId,conf.top_id);
+		this._tileTextureOffset(conf,'north',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'south',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'east',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'west',tileId,conf.side_id);
 		if(!('pass' in conf)){
 			conf.pass = this.getTilePassage(tileId,conf);
 		}
 		return conf;
+	},
+
+	_tileTextureOffset(conf,side,tileId,dfault){
+		const tileRange = Tilemap.isAutotile(tileId)?48:1;
+		let id = conf[`${side}_id`];
+		if(id==null){
+			let offset = conf[`${side}_offset`];
+			if(offset){
+				id=conf[`${side}_id`]=tileId+conf.side_offset.x*tileRange+conf.side_offset.y*tileRange
+			}else{
+				id=conf[`${side}_id`]=dfault;
+			}
+			conf[`${side}_img`]=this.getSetName(id);
+		}
 	},
 
 	getTileId(x,y,l=0){

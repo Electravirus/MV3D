@@ -151,6 +151,7 @@ export class MapCell extends TransformNode{
 		}
 
 		let neededHeight=wallHeight;
+		let textureChanged='side_changed' in tileConf;
 		let tileId=tileConf.side_id,configRect,texture_side='side';
 		if(mv3d.isTileEmpty(tileId)){ return; }
 		
@@ -165,13 +166,14 @@ export class MapCell extends TransformNode{
 			if(mv3d.tileHasPit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
 			//if(mv3d.isTilePit(this.ox+x+np.x,this.oy+y+np.y,l)){ return; }
 			neededHeight = Math.max(neededHeight,-tileConf.depth);
-			if(tileConf.hasInsideConf){
+			if(tileConf.inside_changed){
 				texture_side='inside';
 			}
 		}
 		else if(neededHeight<=0){ return; }
 
 		if(texture_side==='inside'){
+			textureChanged=textureChanged||('inside_changed' in tileConf);
 			tileId=tileConf.inside_id;
 			if(tileConf.inside_rect){ configRect = tileConf.inside_rect; }
 		}else{
@@ -199,7 +201,7 @@ export class MapCell extends TransformNode{
 			const npr=new Vector2(np.y,-np.x);
 			const leftHeight = mv3d.getCullingHeight(this.ox+x+npl.x,this.oy+y+npl.y,l,{dir:Input._makeNumpadDirection(npl.x,npl.y)});
 			const rightHeight = mv3d.getCullingHeight(this.ox+x+npr.x,this.oy+y+npr.y,l,{dir:Input._makeNumpadDirection(npr.x,npr.y)});
-			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,textureChanged,true);
 			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
 			let partHeight=Math.abs(neededHeight/wallParts);
 			let sw = tileSize()/2;
@@ -273,7 +275,7 @@ export class MapCell extends TransformNode{
 			}
 
 			if(isAutotile&&!configRect){
-				const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+				const {x:bx,y:by} = this.getAutotileCorner(tileId,'side_changed' in tileConf,true);
 				for (let az=0;az<=1;++az){
 					this.builder.addWallFace(tsMaterial,
 						(edge ? (bx+rightSide*1.5) : (bx+1-rightSide*0.5) )*tileWidth(),
@@ -387,7 +389,7 @@ export class MapCell extends TransformNode{
 		const isAutotile = Tilemap.isAutotile(tileId)&&!tileConf.side_rect;
 		let rect;
 		if(isAutotile){
-			const {x:bx,y:by} = this.getAutotileCorner(tileId,tileConf.realId,true);
+			const {x:bx,y:by} = this.getAutotileCorner(tileId,'side_changed' in tileConf,true);
 			rect={x:(bx+0.5)*tileWidth(),y:(by+0.5)*tileHeight(),width:tileWidth(),height:tileHeight()};
 		}else{
 			rect = tileConf.side_rect?tileConf.side_rect:mv3d.getTileRects(tileId)[0];
@@ -397,14 +399,32 @@ export class MapCell extends TransformNode{
 			1, slopeHeight, rot, options
 		);
 	}
-	getAutotileCorner(tileId,realId=tileId,excludeTop=true){
-		const kind = Tilemap.getAutotileKind(tileId);
-		let tx = kind%8;
-		let ty = Math.floor(kind / 8);
-		if(tileId===realId && mv3d.isWallTile(tileId)==1){ ++ty; }
-		var bx,by;
-		bx=tx*2;
-		by=ty;
+	getAutotileCorner(tileId,textureChanged,excludeTop=true){
+		return mv3d.getTileCorner(tileId,{
+			useSideWall:!textureChanged,
+			excludeTop,
+		});
+	}
+}
+MapCell.neighborPositions = [
+	new Vector2( 0, 1),
+	new Vector2( 1, 0),
+	new Vector2( 0,-1),
+	new Vector2(-1, 0),
+];
+MapCell.meshCache={};
+
+mv3d.getTileCorner=function(tileId,opts={}){
+	const useSideWall=Boolean(opts.useSideWall);
+	const excludeTop=Boolean(opts.excludeTop);
+	const kind = Tilemap.getAutotileKind(tileId);
+	let tx = kind%8;
+	let ty = Math.floor(kind / 8);
+	if(useSideWall && mv3d.isWallTile(tileId)==1){ ++ty; }
+	var bx,by;
+	bx=tx*2;
+	by=ty;
+	if(Tilemap.isAutotile(tileId)){
 		if(Tilemap.isTileA1(tileId)){
 			if(kind<4){
 				bx=6*Math.floor(kind/2);
@@ -426,23 +446,11 @@ export class MapCell extends TransformNode{
 				by=(ty-10)*2.5+(ty%2?0.5:0);
 			}
 		}
-		return {x:bx,y:by};
+	}else{
+		bx = (Math.floor(tileId / 128) % 2 * 8 + tileId % 8);
+		by = (Math.floor(tileId % 256 / 8) % 16);
 	}
+
+	return {x:bx,y:by};
 }
-MapCell.neighborPositions = [
-	new Vector2( 0, 1),
-	new Vector2( 1, 0),
-	new Vector2( 0,-1),
-	new Vector2(-1, 0),
-];
-MapCell.meshCache={};
-
-class MapCellFinalized {
-	
-}
-
-class MapCellBuilder {
-
-}
-
 
