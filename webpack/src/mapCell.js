@@ -1,10 +1,7 @@
 import mv3d from './mv3d.js';
-import { TransformNode, Mesh, MeshBuilder, Vector3, Vector2, FRONTSIDE, BACKSIDE, WORLDSPACE, LOCALSPACE, DOUBLESIDE, Plane } from "./mod_babylon.js";
-import { tileSize, XAxis, YAxis, tileWidth, tileHeight, sleep, snooze, sin, cos } from './util.js';
+import { TransformNode, Vector3, Vector2, } from 'babylonjs';
+import { tileSize, tileWidth, tileHeight, sleep, sin, cos } from './util.js';
 import { CellMeshBuilder } from './MapCellBuilder.js';
-
-const SOURCEPLANE_GROUND = new Plane(0, 1, -Math.pow(0.1,100), 0);
-const SOURCEPLANE_WALL = new Plane(0,0,-1,0);
 
 export class MapCell extends TransformNode{
 	constructor(cx,cy){

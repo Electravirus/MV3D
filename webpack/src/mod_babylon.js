@@ -1,36 +1,9 @@
-
-const BABYLON = window.BABYLON;
-export const {
-	Scene,
-	Engine,
-	FreeCamera,
-	HemisphericLight,
-	DirectionalLight,
-	SpotLight,
-	PointLight,
-	ShadowGenerator,
-	Vector2,
-	Vector3,
-	Quaternion,
-	Matrix,
-	Color3,
-	Color4,
-	Plane,
-	Node,
-	TransformNode,
-	Texture,
-	StandardMaterial,
-	ShaderMaterial,
-	Effect,
-	Mesh,
-	VertexData,
-	MeshBuilder,
-	AssetsManager,
-	SceneSerializer,
-	Sprite,
-	SpriteManager,
-	Ray,
-} = BABYLON;
+import mv3d from './mv3d.js';
+import { radtodeg, degtorad } from './util.js';
+import { hackShaders } from './shaders.js';
+import * as BABYLON from 'babylonjs';
+import { Texture, Mesh, Scene, Color3, Color4, StandardMaterial, Node } from 'babylonjs';
+import 'babylonjs-loaders';
 
 export const {
 	FRONTSIDE,BACKSIDE,DOUBLESIDE,
@@ -48,13 +21,11 @@ export const{
 	FOGMODE_LINEAR,
 } = Scene;
 
-export const WORLDSPACE = BABYLON.Space.WORLD,
-             LOCALSPACE = BABYLON.Space.LOCAL,
-              BONESPACE = BABYLON.Space.BONE;
-
-import mv3d from './mv3d.js';
-import { radtodeg, degtorad } from './util.js';
-import { hackShaders } from './shaders.js';
+export const {
+	WORLD:WORLDSPACE,
+    LOCAL:LOCALSPACE,
+	BONE:BONESPACE,
+} = BABYLON.Space;
 
 Texture.prototype.crop=function(x=0,y=0,w=0,h=0,useBaseSize=false){
 	const { width, height } = useBaseSize?this.getBaseSize():this.getSize();

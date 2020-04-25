@@ -1,7 +1,7 @@
 import mv3d from './mv3d.js';
 import { MapCell } from './mapCell.js';
-import { sleep, snooze } from './util.js';
-import { Vector2, Vector3 } from './mod_babylon.js';
+import { sleep } from './util.js';
+import { Vector2 } from 'babylonjs';
 
 Object.assign(mv3d,{
 

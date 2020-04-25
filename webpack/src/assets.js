@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { Texture, StandardMaterial, Color3, Color4 } from './mod_babylon.js';
+import { Texture, StandardMaterial, Color3, Color4 } from 'babylonjs';
 import { tileWidth, tileHeight, unround } from './util.js';
 
 Object.assign(mv3d,{

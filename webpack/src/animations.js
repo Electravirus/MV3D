@@ -1,5 +1,6 @@
 import mv3d from './mv3d.js';
-import { Sprite, SpriteManager, TransformNode, Vector3, ORTHOGRAPHIC_CAMERA, StandardMaterial, Texture } from './mod_babylon.js';
+import { TransformNode, Vector3, StandardMaterial, Texture } from 'babylonjs';
+import {ORTHOGRAPHIC_CAMERA} from './mod_babylon.js';
 import { radtodeg, override } from './util.js';
 
 Object.assign(mv3d,{

@@ -1,6 +1,7 @@
 import mv3d from './mv3d.js';
 import { ZAxis, XAxis } from "./util.js";
-import { ORTHOGRAPHIC_CAMERA, LOCALSPACE, Ray, Vector3 } from './mod_babylon.js';
+import { Ray, Vector3 } from 'babylonjs';
+import { ORTHOGRAPHIC_CAMERA, LOCALSPACE } from './mod_babylon.js';
 
 const raycastPredicate=mesh=>{
 	if(!mesh.isEnabled() || !mesh.isVisible || !mesh.isPickable || mesh.character){ return false; }

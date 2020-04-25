@@ -1,5 +1,6 @@
 import mv3d from './mv3d.js';
-import { TransformNode, MeshBuilder, FRONTSIDE, Texture, StandardMaterial, Color3, Mesh, WORLDSPACE, Vector2, SpotLight, Vector3, PointLight, LOCALSPACE, DOUBLESIDE, Plane, Color4 } from "./mod_babylon.js";
+import { TransformNode, MeshBuilder, StandardMaterial, Mesh, Vector2, SpotLight, Vector3, PointLight, Color4 } from 'babylonjs';
+import { WORLDSPACE, DOUBLESIDE } from './mod_babylon.js';
 import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
 

@@ -1,5 +1,6 @@
 import mv3d from './mv3d.js';
-import { FRONTSIDE, BACKSIDE, DOUBLESIDE, Vector2, Color3, Color4 } from './mod_babylon.js';
+import { Vector2, Color3, Color4 } from 'babylonjs';
+import { FRONTSIDE, BACKSIDE, DOUBLESIDE } from './mod_babylon.js';
 import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep, tileSize, tileWidth, tileHeight } from './util.js';
 import { Blender } from './blenders.js';
 

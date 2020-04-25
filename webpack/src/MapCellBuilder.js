@@ -1,6 +1,6 @@
 import mv3d from "./mv3d.js";
-import { Mesh, VertexData } from "./mod_babylon.js";
-import { cos, sin, tileWidth, tileHeight, unround, PI, PI2 } from "./util.js";
+import { Mesh, VertexData } from 'babylonjs';
+import { cos, sin, PI } from "./util.js";
 
 export class CellMeshBuilder{
 	constructor(){

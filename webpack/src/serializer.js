@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { SceneSerializer, AssetsManager } from './mod_babylon.js';
+import { SceneSerializer, AssetsManager } from 'babylonjs';
 
 const _onBoot = Scene_Boot.prototype.start;
 Scene_Boot.prototype.start=function(){
