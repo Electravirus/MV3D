@@ -50,6 +50,8 @@ assign(mv3d,{
 	RENDER_DIST: Number(parameters.renderDist),
 	MIPMAP:booleanString(parameters.mipmap),
 
+	MAP_DEFAULTS: parameter('mapDefaults',"",JSON.parse),
+
 	get renderDist(){ return Math.min(this.RENDER_DIST, mv3d.blendFogFar.currentValue()+7.5); },
 
 	OPTION_MIPMAP:booleanString(parameters.mipmapOption),
@@ -68,9 +70,9 @@ assign(mv3d,{
 	WALK_ON_EVENTS:booleanString(parameters.walkOnEvents),
 	GRAVITY:Number(parameters.gravity),
 
-	FOG_COLOR: makeColor(parameters.fogColor).toNumber(),
-	FOG_NEAR: Number(parameters.fogNear),
-	FOG_FAR: Number(parameters.fogFar), 
+	FOG_COLOR: 0,
+	FOG_NEAR: 20,
+	FOG_FAR: 30, 
 	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
 	get AMBIENT_COLOR(){ return mv3d.featureEnabled('dynamicShadows')?0x888888:0xffffff; },
 
@@ -202,6 +204,8 @@ assign(mv3d,{
 		);
 
 		//Texture.DEFAULT_ANISOTROPIC_FILTERING_LEVEL=0;
+
+		this.MAP_DEFAULTS = this.readConfigurationFunctions(this.MAP_DEFAULTS,this.mapConfigurationFunctions);
 	},
 
 	updateParameters(){

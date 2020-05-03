@@ -232,7 +232,7 @@ Object.assign(mv3d,{
 	loadMapSettings(){
 		const dataMap = this.getDataMap();
 		//map
-		const mapconf=this.mapConfigurations={};
+		const mapconf=this.mapConfigurations=JSON.parse(JSON.stringify(this.MAP_DEFAULTS));
 		this.readConfigurationFunctions(
 			this.readConfigurationBlocks(dataMap.note),
 			this.mapConfigurationFunctions,

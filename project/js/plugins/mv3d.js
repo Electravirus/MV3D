@@ -839,33 +839,13 @@ mv3d.command('camera dist',10,1);
 @type Boolean
 @default true
 
-@param spacer|fog @text‏‏‎ ‎@desc ===============================================
+@param mapDefaults
+@text Map Defaults
+@parent map
+@type Note
+@default
+"sun(white)\nambient(default)\nfog(black|20,30)"
 
-@param fog
-@text Fog
-
-@param fogColor
-@text Fog Color
-@desc The color of the fog. Use css color code or name (example: #ffffff)
-@parent fog
-@type Color
-@default black
-
-@param fogNear
-@text Fog Start Distance
-@desc The distance in tiles at which the fog will start.
-@parent fog
-@type Number
-@decimals 1
-@default 20.0
-
-@param fogFar
-@text Fog End Distance
-@desc The distance in tiles at which the fog will finish. Maybe set this to the same as render distance.
-@parent fog
-@type Number
-@decimals 1
-@default 25.0
 
 @param spacer|input @text‏‏‎ ‎@desc ===============================================
 
@@ -1055,20 +1035,20 @@ there may be z-fighting issues. (default: 0.0100)
 @param eventCharDefaults
 @text Character Event Settings
 @parent characters
-@type Text
-@default shadow(0.8,4),shape(sprite),scale(1)
+@type Note
+@default "shadow(0.8,4)\nshape(sprite)\nscale(1)"
 
 @param eventObjDefaults
 @text Object Event Settings
 @parent characters
-@type Text
-@default shadow(0),shape(sprite),scale(1)
+@type Note
+@default "shadow(0)\nshape(sprite)\nscale(1)"
 
 @param eventTileDefaults
 @text Tile Event Settings
 @parent characters
-@type Text
-@default shadow(0),shape(flat),scale(1)
+@type Note
+@default "shadow(0)\nshape(flat)\nscale(1)"
 
 @param eventHeight
 @text Event "Above Characters" Default Height
@@ -3570,6 +3550,8 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 	RENDER_DIST: Number(parameters.renderDist),
 	MIPMAP:Object(util["g" /* booleanString */])(parameters.mipmap),
 
+	MAP_DEFAULTS: parameter('mapDefaults',"",JSON.parse),
+
 	get renderDist(){ return Math.min(this.RENDER_DIST, mv3d["a" /* default */].blendFogFar.currentValue()+7.5); },
 
 	OPTION_MIPMAP:Object(util["g" /* booleanString */])(parameters.mipmapOption),
@@ -3588,9 +3570,9 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 	WALK_ON_EVENTS:Object(util["g" /* booleanString */])(parameters.walkOnEvents),
 	GRAVITY:Number(parameters.gravity),
 
-	FOG_COLOR: Object(util["q" /* makeColor */])(parameters.fogColor).toNumber(),
-	FOG_NEAR: Number(parameters.fogNear),
-	FOG_FAR: Number(parameters.fogFar), 
+	FOG_COLOR: 0,
+	FOG_NEAR: 20,
+	FOG_FAR: 30, 
 	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
 	get AMBIENT_COLOR(){ return mv3d["a" /* default */].featureEnabled('dynamicShadows')?0x888888:0xffffff; },
 
@@ -3722,6 +3704,8 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 		);
 
 		//Texture.DEFAULT_ANISOTROPIC_FILTERING_LEVEL=0;
+
+		this.MAP_DEFAULTS = this.readConfigurationFunctions(this.MAP_DEFAULTS,this.mapConfigurationFunctions);
 	},
 
 	updateParameters(){
@@ -3745,7 +3729,6 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 		this.camera.fov=fov;
 	},
 });
-
 // EXTERNAL MODULE: ./node_modules/babylonjs/babylon.js
 var babylon = __webpack_require__(2);
 
@@ -4661,7 +4644,7 @@ Object.assign(mv3d["a" /* default */],{
 	loadMapSettings(){
 		const dataMap = this.getDataMap();
 		//map
-		const mapconf=this.mapConfigurations={};
+		const mapconf=this.mapConfigurations=JSON.parse(JSON.stringify(this.MAP_DEFAULTS));
 		this.readConfigurationFunctions(
 			this.readConfigurationBlocks(dataMap.note),
 			this.mapConfigurationFunctions,
