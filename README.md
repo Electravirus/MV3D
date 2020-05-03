@@ -631,7 +631,6 @@ mv3d.command('camera dist',10,1);
 - 冬空 橙
 - nyrion
 - Vaan Auroris
-- Chainer Valentine
 - Kaboth
 - Karenksoon
 - AmalgamAsh
@@ -639,3 +638,4 @@ mv3d.command('camera dist',10,1);
 - Samus_X420
 - Strykerx88
 - OvnBun
+- Kaine Lowe

@@ -828,7 +828,8 @@ class Character extends Sprite{
 			this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
 		}else if(this.shape===shapes.TREE){
 			this.spriteOrigin.pitch=this.getConfig('pitch',0);
-			this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
+			this.spriteOrigin.yaw=this.getConfig('yaw',0);
+			this.mesh.yaw = mv3d.blendCameraYaw.currentValue() - this.spriteOrigin.yaw;
 		}else{
 			this.mesh.yaw=this.getConfig('rot',0);
 			this.spriteOrigin.pitch=this.getConfig('pitch',0);

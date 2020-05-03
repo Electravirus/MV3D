@@ -88,9 +88,12 @@ export const file=(folder=mv3d.MV3D_FOLDER,name)=>{
 	if(name.startsWith('/')){ return '.'+name; }
 	else if(name.startsWith('./')){ return name; }
 	if(folder.startsWith('/')){ folder='.'+folder; }
-	else if(!folder.startsWith('./')){ folder='./'+folder; }
-	return `${folder}/${name}`;
+	else if(!folder.startsWith('./')&&folder!=='.'){ folder='./'+folder; }
+	return `${folder}${folder.endsWith('/')?'':'/'}${name}`;
 };
+
+export const filename=path=>{path=path.split('/');return path[path.length-1];}
+export const foldername=path=>{path=path.split('/');path.pop();return path.join('/')+'/';}
 
 // directions
 
@@ -164,6 +167,6 @@ const util = {
 	pointtorad,pointtodeg,minmax,
 	dirtov,dirtoh,hvtodir,
 	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
-	overload, override, file, assign,
+	overload, override, file, filename, foldername, assign,
 };
 export default util;

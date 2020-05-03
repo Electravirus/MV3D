@@ -160,7 +160,7 @@ if(window.Imported&&Imported.QMovement){
 const _charBase_jump = Game_CharacterBase.prototype.jump;
 Game_CharacterBase.prototype.jump = function(xPlus, yPlus) {
 	if (mv3d.isDisabled()){ return _charBase_jump.apply(this,arguments); }
-	this.mv3d_jumpHeightStart = this.z||mv3d.getWalkHeight(this.x,this.y);
+	this.mv3d_jumpHeightStart = this.z!=null?this.z:mv3d.getWalkHeight(this.x,this.y);
 	this.mv3d_jumpHeightEnd = mv3d.getWalkHeight(this.x+xPlus,this.y+yPlus);
 	_charBase_jump.apply(this,arguments);
 };

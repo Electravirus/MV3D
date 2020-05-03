@@ -50,7 +50,7 @@ class DataProxy{
 		this._data_handler={
 			get:(target,key)=>{
 				if(target[key]&&typeof target[key]==='object'){
-					return new Proxy(target[key],data_handler);
+					return new Proxy(target[key],this._data_handler);
 				}else{
 					return target[key];
 				}

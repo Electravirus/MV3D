@@ -27,12 +27,12 @@ Object.assign(mv3d,{
 	waitTextureLoaded(texture){return new Promise((resolve,reject)=>{
 		if(texture.isReady()){ resolve(); }
 		texture.onLoadObservable.addOnce(()=>{
-			resolve();
+			resolve(texture);
 		});
 	})},
 
 	waitBitmapLoaded(bitmap){
-		return new Promise(resolve=>bitmap.addLoadListener(resolve));
+		return new Promise(resolve=>bitmap.addLoadListener(()=>resolve(bitmap)));
 	},
 
 	async getCachedTilesetTexture(setN,animX=0,animY=0){

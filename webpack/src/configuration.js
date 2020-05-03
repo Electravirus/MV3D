@@ -383,6 +383,9 @@ Object.assign(mv3d,{
 	enumShapes:{
 		FLAT:1,
 		TREE:2,
+		BOARD:2,
+		BILLBOARD:2,
+		CARDBOARD:2,
 		SPRITE:3,
 		FENCE:4,
 		WALL:4,

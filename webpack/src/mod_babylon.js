@@ -74,7 +74,7 @@ const _mixin_angles = {
 }
 Object.defineProperties(Node.prototype,_mixin_xyz);
 Object.defineProperties(Node.prototype,_mixin_angles);
-Object.defineProperties(Sprite.prototype,_mixin_xyz);
+Object.defineProperties(BABYLON.Sprite.prototype,_mixin_xyz);
 
 // mesh sorting
 

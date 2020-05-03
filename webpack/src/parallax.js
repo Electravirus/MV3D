@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { override } from './util.js';
+import { override, tileWidth, tileHeight } from './util.js';
 
 override(Game_Map.prototype,'setupParallax',o=>function(){
 	o.apply(this,arguments);
@@ -73,7 +73,7 @@ override(Game_Screen.prototype,'shake',o=>function(){
 	return 0;
 },()=> !mv3d.isDisabled() && SceneManager._scene instanceof Scene_Map );
 
-override(Game_CharacterBase.prototype,'screenX',o=>function screenX(){
+override(Game_CharacterBase.prototype,'screenX',o=>function(){
 	const sprite = this.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
 	if(SceneManager.isNextScene(Scene_Battle) && this===$gamePlayer){
@@ -82,7 +82,7 @@ override(Game_CharacterBase.prototype,'screenX',o=>function screenX(){
 	return mv3d.getScreenPosition(sprite).x;
 });
 
-override(Game_CharacterBase.prototype,'screenY',o=>function screenY(){
+override(Game_CharacterBase.prototype,'screenY',o=>function(){
 	const sprite = this.mv3d_sprite;
 	if(!sprite){ return o.apply(this,arguments); }
 	if(SceneManager.isNextScene(Scene_Battle) && this===$gamePlayer){
@@ -90,3 +90,36 @@ override(Game_CharacterBase.prototype,'screenY',o=>function screenY(){
 	}
 	return mv3d.getScreenPosition(sprite).y;
 });
+
+Game_CharacterBase.prototype.mv3d_screenWidth=function(){
+	const sprite = this.mv3d_sprite; if(!sprite)return this.mv3d_sprite?this.mv3d_sprite.width:0;
+	return sprite.spriteWidth*tileWidth()*mv3d.getScaleForDist();
+};
+
+Game_CharacterBase.prototype.mv3d_screenHeight=function(){
+	const sprite = this.mv3d_sprite; if(!sprite)return this.mv3d_sprite?this.mv3d_sprite.height:0;
+	return sprite.spriteHeight*tileHeight()*mv3d.getScaleForDist();
+};
+
+Game_CharacterBase.prototype.mv3d_screenBounds=function(){
+	const sprite = this.mv3d_sprite;
+	if(!sprite){
+		const width = this.mv3d_screenWidth();
+		const height = this.mv3d_screenHeight();
+		return new PIXI.Rectangle(this.screenX()-width/2,this.screenY()-height,width/2,height);
+	}
+	const bbox = sprite.mesh.getBoundingInfo().boundingBox;
+	const projections = bbox.vectorsWorld.map(v=>mv3d.getScreenPosition(v));
+	let minX=Graphics.width, minY=Graphics.height, maxX=0, maxY=0;
+	let pointsBehindCamera=0;
+	for (const projection of projections){
+		if(projection.x<minX){ minX=projection.x; }
+		if(projection.y<minY){ minY=projection.y; }
+		if(projection.x>maxX){ maxX=projection.x; }
+		if(projection.y>maxY){ maxY=projection.y; }
+		if(projection.behindCamera){ ++pointsBehindCamera; }
+	}
+	const rect = new PIXI.Rectangle(minX,minY,maxX-minX,maxY-minY);
+	rect.behindCamera = pointsBehindCamera<8;
+	return rect;
+};

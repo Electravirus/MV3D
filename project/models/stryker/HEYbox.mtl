@@ -1,0 +1,8 @@
+# Made in Blockbench 3.4.2
+newmtl 0
+map_Kd textre.png 
+newmtl 1
+map_Kd textretilt.png 
+newmtl 5
+map_Kd HEY.png 
+newmtl none
