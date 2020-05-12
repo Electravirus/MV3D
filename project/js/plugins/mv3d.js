@@ -1,6 +1,6 @@
 /*:
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
-version 0.5.4.2
+version 0.6
 @author Dread/Nyanak
 @help
 
@@ -3173,7 +3173,7 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* override */ "t"])(Game_Character
 				adjustDirection=true;
 			}
 		}
-	}
+	}else{ adjustDirection=true; }
 
 	if(adjustDirection){
 		const d = Object(_util_js__WEBPACK_IMPORTED_MODULE_1__[/* hvtodir */ "p"])(h,v);
@@ -3523,6 +3523,14 @@ Object.assign(mv3d["a" /* default */],{
 	}
 });
 
+function tryParseString(s){
+	try{
+		return JSON.parse(s);
+	}catch(err){
+		return s;
+	}
+}
+
 Object(util["e" /* assign */])(mv3d["a" /* default */],{
 	CAMERA_MODE:"PERSPECTIVE",
 	ORTHOGRAPHIC_DIST:100,
@@ -3596,6 +3604,10 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 	BOAT_SETTINGS:JSON.parse(parameters.boatSettings),
 	SHIP_SETTINGS:JSON.parse(parameters.shipSettings),
 	AIRSHIP_SETTINGS:JSON.parse(parameters.airshipSettings),
+
+	EVENT_CHAR_SETTINGS: parameter('eventCharDefaults',"",tryParseString),
+	EVENT_OBJ_SETTINGS: parameter('eventObjDefaults',"",tryParseString),
+	EVENT_TILE_SETTINGS: parameter('eventTileDefaults',"",tryParseString),
 
 	ALLOW_GLIDE: Object(util["g" /* booleanString */])(parameters.allowGlide),
 
@@ -3672,15 +3684,15 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 		}
 
 		this.EVENT_CHAR_SETTINGS = this.readConfigurationFunctions(
-			parameters.eventCharDefaults,
+			this.EVENT_CHAR_SETTINGS,
 			this.eventConfigurationFunctions,
 		);
 		this.EVENT_OBJ_SETTINGS = this.readConfigurationFunctions(
-			parameters.eventObjDefaults,
+			this.EVENT_OBJ_SETTINGS,
 			this.eventConfigurationFunctions,
 		);
 		this.EVENT_TILE_SETTINGS = this.readConfigurationFunctions(
-			parameters.eventTileDefaults,
+			this.EVENT_TILE_SETTINGS,
 			this.eventConfigurationFunctions,
 		);
 
@@ -4804,6 +4816,8 @@ Object.assign(mv3d["a" /* default */],{
 		CROSS:5,
 		XCROSS:6,
 		SLOPE:7,
+		MESH:91,
+		IMPORTED:92,
 	},
 	enumPassage:{
 		WALL:0,
@@ -5434,7 +5448,7 @@ class MapCellBuilder_CellMeshBuilder{
 			if(typeof total!=='number'){ total=total.getTotalVertices(); }
 			return total+mesh.getTotalVertices();
 		});
-		const mesh = babylon["Mesh"].MergeMeshes(submeshes,true,totalVertices>65536,undefined,false,true);
+		const mesh = babylon["Mesh"].MergeMeshes(submeshes,true,totalVertices>64000,undefined,false,true);
 		return mesh;
 	}
 	getBuilder(material){
@@ -6776,6 +6790,8 @@ Object.assign(mv3d["a" /* default */],{
 
 		if(this.textureCache[key]!==texture){ return await this.getErrorTexture(); }
 		texture.updateSamplingMode(1);
+		//texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+		//texture.wrapV = Texture.CLAMP_ADDRESSMODE;
 		if(animX||animY){
 			const { width, height } = texture.getBaseSize();
 			texture.frameData={x:0,y:0,w:width,h:height};
@@ -6910,7 +6926,186 @@ Object.assign(mv3d["a" /* default */],{
 	},
 
 });
+// CONCATENATED MODULE: ./src/model.js
+
+
+
+
+const modelCache={};
+
+const orphanModelList=[];
+
+class model_Model extends babylon["TransformNode"]{
+	constructor(opts={}){
+		super('model',mv3d["a" /* default */].scene);
+		this.mesh=null;
+		this.textureLoaded=false;
+		const {orphan=true}=opts;
+		if(orphan){ orphanModelList.push(this); }
+	}
+	get meshes(){ return this.mesh instanceof model_MeshGroup ? this.mesh.meshes : [this.mesh]; }
+	get materials(){ return this.mesh.mv3d_materials ? this.mesh.mv3d_materials : this.material ? [this.material] : []; }
+	setupMesh(){
+		if(!this.mesh||this.mesh.mv3d_isSetup){ return; }
+		this.mesh.mv3d_isSetup=true;
+		mv3d["a" /* default */].callFeatures('createCharMesh',this.mesh);
+		this.mesh.parent=this;
+		this.mesh.yaw=0;
+		this.mesh.pitch=0;
+		if(this.shape===mv3d["a" /* default */].enumShapes.XCROSS){
+			this.mesh.yaw=45;
+		}
+		if(this.character){ this.mesh.character=this.character; }
+		if(this.material){
+			this.mesh.material=this.material;
+		}
+		if(this.character){
+			this.character.setupMesh();
+		}
+		if(this.order!=null){ this.mesh.order=this.order; }
+	}
+	isComplexMesh(){
+		return this.shape === mv3d["a" /* default */].enumShapes.IMPORTED || this.shape === mv3d["a" /* default */].enumShapes.MESH;
+	}
+	async setMaterial(src){
+		let newTexture;
+		if(src==='error'){
+			newTexture = await mv3d["a" /* default */].getErrorTexture();
+		}else{
+			newTexture = await mv3d["a" /* default */].createTexture(src);
+		}
+		await mv3d["a" /* default */].waitTextureLoaded(newTexture);
+		this.disposeMaterial();
+		this.texture = newTexture;
+		this.texture.hasAlpha=true;
+		this.texture.updateSamplingMode(1);
+		this.textureLoaded=true;
+		this.material = new babylon["StandardMaterial"]('sprite material',mv3d["a" /* default */].scene);
+		this.material.diffuseTexture=this.texture;
+		this.material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
+		this.material.ambientColor.set(1,1,1);
+		this.material.specularColor.set(0,0,0);
+		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
+		this.mesh.material=this.material;
+	}
+	disposeMaterial(){
+		if(this.material){
+			this.material.dispose();
+			this.texture.dispose();
+			this.material=null;
+			this.texture=null;
+		}
+	}
+	dispose(...args){
+		this.disposeMaterial();
+		// TODO dispose differently for cached complex models
+		super.dispose(...args);
+	}
+	clearMesh(){
+		if(!this.mesh){ return; }
+		mv3d["a" /* default */].callFeatures('destroyCharMesh',this.mesh);
+		this.mesh.dispose();
+	}
+	setMeshForShape(shape){
+		this.shape=shape;
+		let geometry = mv3d["a" /* default */].Meshes.SPRITE;
+		const shapes = mv3d["a" /* default */].enumShapes;
+		switch(this.shape){
+		case shapes.FLAT:
+			geometry = mv3d["a" /* default */].Meshes.FLAT;
+			break;
+		case shapes.XCROSS:
+		case shapes.CROSS:
+			geometry = mv3d["a" /* default */].Meshes.CROSS;
+			break;
+		case shapes.WALL:
+		case shapes.FENCE:
+			break;
+		}
+		this.clearMesh();
+		this.mesh=geometry.clone();
+		this.setupMesh();
+	}
+	update(){
+		if(this.mesh&&this.shape){
+			if(this.shape===mv3d["a" /* default */].enumShapes.SPRITE){
+				this.mesh.pitch = mv3d["a" /* default */].blendCameraPitch.currentValue()-90;
+				this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
+			}else if(this.shape===mv3d["a" /* default */].enumShapes.BOARD){
+				this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
+				if(this.character){ this.mesh.yaw -= this.character.spriteOrigin.yaw; }
+			}
+		}
+	}
+}
+mv3d["a" /* default */].Model = model_Model;
+
+class model_MeshGroup extends babylon["TransformNode"]{
+	constructor(){
+		super('meshGroup',mv3d["a" /* default */].scene);
+		this.meshes=[];
+	}
+	addMesh(){
+		this.meshes.push(...arguments);
+		for(const mesh of arguments){
+			mesh.parent=this;
+		}
+	}
+	dispose(doNotRecurse,disposeMaterialAndTextures){
+		super.dispose(doNotRecurse,disposeMaterialAndTextures);
+		if(doNotRecurse) for(const mesh of this.meshes){
+			mesh.dispose(doNotRecurse,disposeMaterialAndTextures);
+		}
+	}
+}
+mv3d["a" /* default */].MeshGroup = model_MeshGroup;
+for(const property of ['receiveShadows','renderingGroupId','visibility']){
+	Object.defineProperty(model_MeshGroup.prototype,property,{
+		get(){ const p=this[`_${property}`]; return p!==undefined?p:this.meshes[0][property]; },
+		set(v){
+			this[`_${property}`]=v;
+			for(const mesh of this.meshes){
+				mesh[property]=v;
+			}
+		},
+	});
+}
+
+mv3d["a" /* default */].importModel=(url,merge=true)=>new Promise((resolve,reject)=>{
+	// TODO: Caching
+	babylon["SceneLoader"].LoadAssetContainer(Object(util["o" /* foldername */])(url), Object(util["n" /* filename */])(url), mv3d["a" /* default */].scene, container=>{
+		const meshes = container.meshes;
+		const materials = container.materials;
+		for (const mat of materials){
+			mat.ambientColor.set(1,1,1);
+			const texture = mat.diffuseTexture;
+			if(texture) mv3d["a" /* default */].waitTextureLoaded(texture).then(texture=>{
+				texture.updateSamplingMode(1);
+			});
+		}
+		let totalVertices = 0;
+		for (const mesh of meshes){
+			totalVertices += mesh.getTotalVertices();
+			if(!merge){
+				mesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
+			}
+		}
+		if(merge){
+			const importedMesh = babylon["Mesh"].MergeMeshes(meshes,true,totalVertices>64000,undefined,false,true);;
+			importedMesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
+			importedMesh.mv3d_materials=materials;
+			resolve(importedMesh);
+		}else{
+			const group = new model_MeshGroup();
+			container.addAllToScene();
+			group.addMesh(...meshes);
+			group.mv3d_materials = materials;
+			resolve(group);
+		}
+	});
+});
 // CONCATENATED MODULE: ./src/characters.js
+
 
 
 
@@ -6955,17 +7150,17 @@ Object.assign(mv3d["a" /* default */],{
 	},
 
 	setupSpriteMeshes(){
-		this.Meshes = characters_Sprite.Meshes = {};
-		characters_Sprite.Meshes.BASIC=babylon["MeshBuilder"].CreatePlane('sprite mesh',{ sideOrientation: mod_babylon["b" /* DOUBLESIDE */]},mv3d["a" /* default */].scene);
-		characters_Sprite.Meshes.FLAT=babylon["Mesh"].MergeMeshes([characters_Sprite.Meshes.BASIC.clone().rotate(util["b" /* XAxis */],Math.PI/2,mod_babylon["h" /* WORLDSPACE */])]);
-		characters_Sprite.Meshes.SPRITE=babylon["Mesh"].MergeMeshes([characters_Sprite.Meshes.BASIC.clone().translate(util["c" /* YAxis */],0.5,mod_babylon["h" /* WORLDSPACE */])]);
-		characters_Sprite.Meshes.CROSS=babylon["Mesh"].MergeMeshes([
-			characters_Sprite.Meshes.SPRITE.clone(),
-			characters_Sprite.Meshes.SPRITE.clone().rotate(util["c" /* YAxis */],Math.PI/2,mod_babylon["h" /* WORLDSPACE */]),
+		const meshes = this.Meshes = {};
+		meshes.BASIC=babylon["MeshBuilder"].CreatePlane('sprite mesh',{ sideOrientation: mod_babylon["b" /* DOUBLESIDE */]},mv3d["a" /* default */].scene);
+		meshes.FLAT=babylon["Mesh"].MergeMeshes([meshes.BASIC.clone().rotate(util["b" /* XAxis */],Math.PI/2,mod_babylon["h" /* WORLDSPACE */])]);
+		meshes.SPRITE=babylon["Mesh"].MergeMeshes([meshes.BASIC.clone().translate(util["c" /* YAxis */],0.5,mod_babylon["h" /* WORLDSPACE */])]);
+		meshes.CROSS=babylon["Mesh"].MergeMeshes([
+			meshes.SPRITE.clone(),
+			meshes.SPRITE.clone().rotate(util["c" /* YAxis */],Math.PI/2,mod_babylon["h" /* WORLDSPACE */]),
 		]);
-		for (const key in characters_Sprite.Meshes){
-			characters_Sprite.Meshes[key].renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
-			mv3d["a" /* default */].scene.removeMesh(characters_Sprite.Meshes[key]);
+		for (const key in meshes){
+			meshes[key].renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
+			mv3d["a" /* default */].scene.removeMesh(meshes[key]);
 		}
 	},
 
@@ -6986,7 +7181,7 @@ Object.assign(mv3d["a" /* default */],{
 		if(this._shadowMesh){ shadowMesh=this._shadowMesh}
 		else{
 			this.getShadowMesh.getting=true;
-			shadowMesh=characters_Sprite.Meshes.FLAT.clone('shadow mesh');
+			shadowMesh=mv3d["a" /* default */].Meshes.FLAT.clone('shadow mesh');
 			shadowMesh.material=await this.getShadowMaterial();
 			this._shadowMesh=shadowMesh;
 			mv3d["a" /* default */].scene.removeMesh(shadowMesh);
@@ -6997,56 +7192,6 @@ Object.assign(mv3d["a" /* default */],{
 
 	ACTOR_SETTINGS: [],
 });
-
-class characters_Sprite extends babylon["TransformNode"]{
-	constructor(){
-		super('sprite',mv3d["a" /* default */].scene);
-		this.spriteOrigin = new babylon["TransformNode"]('sprite origin',mv3d["a" /* default */].scene);
-		this.spriteOrigin.parent=this;
-		this.mesh = characters_Sprite.Meshes.FLAT.clone();
-		this.mesh.parent = this.spriteOrigin;
-		this.textureLoaded=false;
-	}
-	async setMaterial(src){
-		let newTexture;
-		if(src==='error'){
-			newTexture = await mv3d["a" /* default */].getErrorTexture();
-		}else{
-			newTexture = await mv3d["a" /* default */].createTexture(src);
-		}
-		await this.waitTextureLoaded(newTexture);
-		this.disposeMaterial();
-		this.texture = newTexture;
-		this.texture.hasAlpha=true;
-		this.onTextureLoaded();
-		this.material = new babylon["StandardMaterial"]('sprite material',mv3d["a" /* default */].scene);
-		this.material.diffuseTexture=this.texture;
-		this.material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
-		this.material.ambientColor.set(1,1,1);
-		this.material.specularColor.set(0,0,0);
-		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
-		this.mesh.material=this.material;
-	}
-	async waitTextureLoaded(texture=this.texture){
-		await mv3d["a" /* default */].waitTextureLoaded(texture);
-	}
-	onTextureLoaded(){
-		this.texture.updateSamplingMode(1);
-		this.textureLoaded=true;
-	}
-	disposeMaterial(){
-		if(this.material){
-			this.material.dispose();
-			this.texture.dispose();
-			this.material=null;
-			this.texture=null;
-		}
-	}
-	dispose(...args){
-		this.disposeMaterial();
-		super.dispose(...args);
-	}
-}
 
 const z_descriptor = {
 	configurable: true,
@@ -7067,12 +7212,20 @@ const z_descriptor2 = {
 	}
 }
 
-class characters_Character extends characters_Sprite{
+class characters_Character extends babylon["TransformNode"]{
 	constructor(char,order){
-		super();
-		this.order=order;
-		this.mesh.order=this.order;
-		this.mesh.character=this;
+		super('character',mv3d["a" /* default */].scene);
+		this.spriteOrigin = new babylon["TransformNode"]('sprite origin',mv3d["a" /* default */].scene);
+		this.spriteOrigin.parent=this;
+		this.model = new model_Model();
+		this.model.parent = this.spriteOrigin;
+		this.model.order=order;
+		this.model.character = this;
+
+		//this.order=order;
+		//this.mesh.order=this.order;
+		//this.mesh.character=this;
+		
 		this._character=this.char=char;
 		this.charName='';
 		this.charIndex=0;
@@ -7129,6 +7282,21 @@ class characters_Character extends characters_Sprite{
 		this.intensiveUpdate();
 	}
 
+	dispose(...args){
+		this.model.dispose();
+		super.dispose(...args);
+	}
+
+	//===========================
+	//  Texture & Model
+	//===========================
+
+	async setMaterial(src){
+		this.model.setMaterial(src);
+		this.updateScale();
+		this.needsMaterialUpdate=true;
+	}
+
 	get settings(){ return this.char.mv3d_settings; }
 
 	isBitmapReady(){
@@ -7136,8 +7304,9 @@ class characters_Character extends characters_Sprite{
 	}
 
 	isTextureReady(){
+		const texture = this.model.texture
 		return Boolean(
-			this.texture && this.texture.isReady() && this.isBitmapReady()
+			texture && texture.isReady() && this.isBitmapReady()
 		);
 	}
 
@@ -7176,14 +7345,7 @@ class characters_Character extends characters_Sprite{
 
 	async waitTextureLoaded(texture=this.texture){
 		await this.waitBitmapLoaded();
-		await super.waitTextureLoaded(texture);
-	}
-
-	onTextureLoaded(){
-		super.onTextureLoaded();
-		//this.updateFrame();
-		this.updateScale();
-		this.needsMaterialUpdate=true;
+		await mv3d["a" /* default */].waitTextureLoaded(texture);
 	}
 
 	isImageChanged(){
@@ -7201,16 +7363,16 @@ class characters_Character extends characters_Sprite{
 		this._characterIndex = this._character.characterIndex();
 		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
 		this.isEmpty=false;
-		this.mesh.setEnabled(true);
+		this.model.setEnabled(true);
 		if(this._tileId>0){
 			this.setTileMaterial(this._tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
 		}else{
 			this.isEmpty=true;
-			this.textureLoaded=false;
-			this.disposeMaterial();
-			this.mesh.setEnabled(false);
+			this.model.textureLoaded=false;
+			this.model.disposeMaterial();
+			this.model.setEnabled(false);
 			this.spriteWidth=1;
 			this.spriteHeight=1;
 			this.updateScale();
@@ -7218,14 +7380,14 @@ class characters_Character extends characters_Sprite{
 	}
 	setFrame(x,y,w,h){
 		if(!this.isTextureReady()){ return; }
-		this.texture.crop(x,y,w,h,this._tileId>0);
+		this.model.texture.crop(x,y,w,h,this._tileId>0);
 	}
 
 	async updateScale(){
 		if(this.isEmpty){
 			this.spriteWidth=1;
 			this.spriteHeight=1;
-			this.mesh.scaling.set(1,1,1);
+			if(this.model.mesh)this.model.mesh.scaling.set(1,1,1);
 			return;
 		}
 		if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
@@ -7236,8 +7398,71 @@ class characters_Character extends characters_Sprite{
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
 
-		this.mesh.scaling.set(xscale,yscale,yscale);
+		if(this.model.mesh)this.model.mesh.scaling.set(xscale,yscale,yscale);
 	}
+
+	getShape(){
+		return this.getConfig('shape', mv3d["a" /* default */].enumShapes.SPRITE );
+	}
+	updateShape(){
+		this.model.setMeshForShape(this.getShape());
+		this.updateConfiguration();
+		this.dirtyNearbyCells();
+	}
+
+	updateEmissive(){
+		const materials = this.model.materials;
+		if(!materials.length){ return; }
+		const glow = this.getConfig('glow', new babylon["Color4"](0,0,0,0));
+		if(this.lamp){
+			var lampColor = this.lamp.diffuse;
+			var intensity = Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));	
+		}
+		const blendColor = this.mv_sprite._blendColor;
+		const blendAlpha=blendColor[3]/255;
+		const noShadow = !this.getConfig('dynShadow',true);
+		for(const material of materials){
+			const emissiveColor = material.emissiveColor;
+			if(!material._mv3d_orig_emissiveColor){ material._mv3d_orig_emissiveColor = emissiveColor.clone(); }
+			const orig_emissive = material._mv3d_orig_emissiveColor;
+			material.mv3d_glowColor=glow;
+			if(this.lamp){
+				emissiveColor.set(
+					Math.max(glow.r,lampColor.r*intensity,orig_emissive.r),
+					Math.max(glow.g,lampColor.g*intensity,orig_emissive.g),
+					Math.max(glow.b,lampColor.b*intensity,orig_emissive.b)
+				);
+			}else{
+				emissiveColor.set(
+					Math.max(glow.r,orig_emissive.r),
+					Math.max(glow.g,orig_emissive.g),
+					Math.max(glow.b,orig_emissive.b)
+				);
+			}
+			emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
+			emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
+			emissiveColor.b+=(2-emissiveColor.b)*Math.pow(blendColor[2]/255*blendAlpha,0.5);
+	
+			material.mv3d_noShadow=noShadow;
+		}
+	}
+
+	setupMesh(){
+		if(this.isEmpty){
+			this.model.setEnabled(false);
+		}else{
+			this.model.setEnabled(true);
+		}
+		if(this.flashlight){
+			this.flashlight.excludedMeshes.splice(0,Infinity);
+			this.flashlight.excludedMeshes.push(...this.model.meshes);
+		}
+		this.updateScale();
+	}
+
+	//===========================
+	//	CONFIGURATION & LIGHTS
+	//===========================
 
 	getDefaultConfigObject(){
 		if(this.isVehicle){
@@ -7334,6 +7559,7 @@ class characters_Character extends characters_Sprite{
 
 	initialConfigure(){
 		this.configureHeight();
+		this.updateConfiguration();
 	}
 
 	pageConfigure(settings=this.settings_event_page){
@@ -7383,31 +7609,6 @@ class characters_Character extends characters_Sprite{
 		this.updateLightOffsets();
 	}
 
-	updateEmissive(){
-		if(!this.material){ return; }
-		const emissiveColor = this.material.emissiveColor;
-		const glow = this.getConfig('glow', new babylon["Color4"](0,0,0,0));
-		this.material.mv3d_glowColor=glow;
-		if(this.lamp){
-			const lampColor=this.lamp.diffuse;
-			const intensity = Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));
-			emissiveColor.set(
-				Math.max(glow.r,lampColor.r*intensity),
-				Math.max(glow.g,lampColor.g*intensity),
-				Math.max(glow.b,lampColor.b*intensity)
-			);
-		}else{
-			emissiveColor.set(glow.r,glow.g,glow.b);
-		}
-		const blendColor = this.mv_sprite._blendColor;
-		const blendAlpha=blendColor[3]/255;
-		emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
-		emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
-		emissiveColor.b+=(2-emissiveColor.b)*Math.pow(blendColor[2]/255*blendAlpha,0.5);
-
-		this.material.mv3d_noShadow=!this.getConfig('dynShadow',true);
-	}
-
 	configureHeight(){
 		this.isAbove = this.char._priorityType===2;
 		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('zlock')?mv3d["a" /* default */].EVENT_HEIGHT:0) );
@@ -7415,26 +7616,21 @@ class characters_Character extends characters_Sprite{
 		this.z = this.platformHeight + height;
 	}
 
-	setupMesh(){
-		if(!this.mesh.mv3d_isSetup){
-			mv3d["a" /* default */].callFeatures('createCharMesh',this.mesh);
-			this.mesh.parent = this.spriteOrigin;
-			this.mesh.character=this;
-			this.mesh.order=this.order;
-			if(this.material){
-				this.mesh.material=this.material;
-			}
-			if(this.isEmpty){
-				this.mesh.setEnabled(false);
-			}else{
-				this.mesh.setEnabled(true);
-			}
-			this.mesh.mv3d_isSetup=true;
+	updateConfiguration(){
+		const shapes = mv3d["a" /* default */].enumShapes;
+		if(this.shape===shapes.SPRITE){
+			this.spriteOrigin.pitch=0;
+			this.spriteOrigin.yaw=0;
+		}else if(this.shape===shapes.BOARD){
+			this.spriteOrigin.pitch=this.getConfig('pitch',0);
+			this.spriteOrigin.yaw=this.getConfig('yaw',0);
+		}else{
+			this.model.yaw=this.getConfig('rot',0);
+			this.spriteOrigin.pitch=this.getConfig('pitch',0);
+			this.spriteOrigin.yaw=this.getConfig('yaw',0);
+			//if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
 		}
-		if(this.flashlight){
-			this.flashlight.excludedMeshes.splice(0,Infinity);
-			this.flashlight.excludedMeshes.push(this.mesh);
-		}
+		this.updateScale();
 	}
 
 	dirtyNearbyCells(){
@@ -7486,11 +7682,11 @@ class characters_Character extends characters_Sprite{
 			const dist = babylon["Vector3"].Distance(pos,sphere.centerWorld);
 			if(dist>=sphere.radiusWorld+light.range){ continue; }
 			meshes.push(cell.mesh);
-			for(let character of cell.characters){
-				const sphere = character.mesh.getBoundingInfo().boundingSphere;
+			for(const character of cell.characters)for(const mesh of character.model.meshes){
+				const sphere = mesh.getBoundingInfo().boundingSphere;
 				const dist = babylon["Vector3"].Distance(pos,sphere.centerWorld);
 				if(dist>=sphere.radiusWorld+light.range){ continue; }
-				meshes.push(character.mesh);
+				meshes.push(mesh);
 			}
 		}
 		return meshes;
@@ -7635,41 +7831,9 @@ class characters_Character extends characters_Sprite{
 		))&&!(this.blendElevation.currentValue()||this.falling);
 	}
 
-	getShape(){
-		return this.getConfig('shape', mv3d["a" /* default */].enumShapes.SPRITE );
-	}
-	updateShape(){
-		const newshape = this.getShape();
-		if(this.shape === newshape){ return; }
-		this.shape=newshape;
-		//let backfaceCulling=true;
-		let geometry = characters_Sprite.Meshes.SPRITE;
-		const shapes = mv3d["a" /* default */].enumShapes;
-		switch(this.shape){
-		case shapes.FLAT:
-			geometry = characters_Sprite.Meshes.FLAT;
-			//if(this.char._priorityType===2||this.hasConfig('height')||this.hasConfig('z')){
-			//	backfaceCulling=false;
-			//}
-			break;
-		case shapes.XCROSS:
-		case shapes.CROSS:
-			geometry = characters_Sprite.Meshes.CROSS;
-			//backfaceCulling=false;
-			break;
-		case shapes.WALL:
-		case shapes.FENCE:
-			//backfaceCulling=false;
-			break;
-		}
-		mv3d["a" /* default */].callFeatures('destroyCharMesh',this.mesh);
-		this.mesh.dispose();
-		this.mesh=geometry.clone();
-		//this.material.backfaceCulling=backfaceCulling;
-		this.setupMesh();
-		this.spriteOrigin.rotation.set(0,0,0);
-		this.dirtyNearbyCells();
-	}
+	//===========================
+	//	Update Functions
+	//===========================
 
 	update(){
 		if(this.char._erased){
@@ -7684,7 +7848,7 @@ class characters_Character extends characters_Sprite{
 		const inRenderDist = this.char.mv3d_inRenderDist();
 		this.disabled=!this.visible;
 		if(this.char.isTransparent() || !inRenderDist
-		|| (this.char._characterName||this.char._tileId)&&!this.textureLoaded){
+		|| (this.char._characterName||this.char._tileId)&&!this.model.textureLoaded){
 			this.visible=false;
 		}
 		if(!this._isEnabled){
@@ -7716,7 +7880,7 @@ class characters_Character extends characters_Sprite{
 			this.prevZ = this.z;
 		}
 
-		if(this.material && this._isEnabled){
+		if(!this.isEmpty && this._isEnabled){
 			this.updateNormal();
 		}else{
 			this.updateEmpty();
@@ -7735,23 +7899,11 @@ class characters_Character extends characters_Sprite{
 	//set needsPositionUpdate(v){ this._needsPositionUpdate=v; }
 
 	updateNormal(){
-		const shapes = mv3d["a" /* default */].enumShapes;
-		if(this.shape===shapes.SPRITE){
-			this.mesh.pitch = mv3d["a" /* default */].blendCameraPitch.currentValue()-90;
-			this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
-		}else if(this.shape===shapes.TREE){
-			this.spriteOrigin.pitch=this.getConfig('pitch',0);
-			this.spriteOrigin.yaw=this.getConfig('yaw',0);
-			this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue() - this.spriteOrigin.yaw;
-		}else{
-			this.mesh.yaw=this.getConfig('rot',0);
-			this.spriteOrigin.pitch=this.getConfig('pitch',0);
-			this.spriteOrigin.yaw=this.getConfig('yaw',0);
-			if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
-		}
+
+		this.model.update();
 
 		if(this.isPlayer){
-			this.mesh.visibility = +!mv3d["a" /* default */].is1stPerson(true);
+			this.model.mesh.visibility = +!mv3d["a" /* default */].is1stPerson(true);
 		}
 
 		this.updateAlpha();
@@ -7770,32 +7922,45 @@ class characters_Character extends characters_Sprite{
 	}
 
 	updateAlpha(){
-		let hasAlpha=this.hasConfig('alpha')||this.char.opacity()<255;
+		const materials = this.model.materials;
+		if(!materials.length){ return; }
+		
 		this.bush = Boolean(this.char.bushDepth());
-		const blendMode = mv3d["a" /* default */].blendModes[this.char.blendMode()];
-		if(this.material.alphaMode!==blendMode){
-			this.material.alphaMode=blendMode;
-		}
-		if(blendMode!==mv3d["a" /* default */].blendModes.NORMAL){
-			hasAlpha=true;
-		}else if(this.bush && this.hasBush()){
-			if(!this.material.opacityTexture){
-				const bushAlpha = mv3d["a" /* default */].getBushAlphaTextureSync();
-				if(bushAlpha&&bushAlpha.isReady()){
-					this.material.opacityTexture=bushAlpha;
+		if(this.model.material){
+			const material = this.model.material;
+			if(this.bush && this.hasBush()){
+				if(!material.opacityTexture){
+					const bushAlpha = mv3d["a" /* default */].getBushAlphaTextureSync();
+					if(bushAlpha&&bushAlpha.isReady()){
+						material.opacityTexture=bushAlpha;
+					}
+				}
+			}else{
+				if(material.opacityTexture){
+					material.opacityTexture=null;
 				}
 			}
-		}else{
-			if(this.material.opacityTexture){
-				this.material.opacityTexture=null;
-			}
 		}
-		if(hasAlpha||this.material.opacityTexture){
-			this.material.useAlphaFromDiffuseTexture=true;
-			this.material.alpha=this.getConfig('alpha',1)*this.char.opacity()/255;
-		}else{
-			this.material.useAlphaFromDiffuseTexture=false;
-			this.material.alpha=1;
+
+		const alpha = this.getConfig('alpha',1)*this.char.opacity()/255;
+		const _hasAlpha=this.hasConfig('alpha')||alpha<1;
+		const blendMode = mv3d["a" /* default */].blendModes[this.char.blendMode()];
+		for(const material of materials){
+			if(!material._mv3d_orig_alpha){ material._mv3d_orig_alpha=material.alpha; }
+			let hasAlpha = _hasAlpha||material._mv3d_orig_alpha<1;
+			if(material.alphaMode!==blendMode){
+				material.alphaMode=blendMode;
+			}
+			if(blendMode!==mv3d["a" /* default */].blendModes.NORMAL){
+				hasAlpha=true;
+			}
+			if(hasAlpha||material.opacityTexture){
+				material.useAlphaFromDiffuseTexture=true;
+				material.alpha=alpha*material._mv3d_orig_alpha;
+			}else{
+				material.useAlphaFromDiffuseTexture=false;
+				material.alpha=1;
+			}
 		}
 	}
 
@@ -8162,7 +8327,6 @@ Object(util["t" /* override */])(Sprite_Character.prototype,'setBlendColor',o=>f
 	sprite.needsMaterialUpdate=true;
 });
 
-mv3d["a" /* default */].Sprite = characters_Sprite;
 mv3d["a" /* default */].Character = characters_Character;
 
 
@@ -8696,56 +8860,6 @@ new DataProxy('mv3d_data','mv3d_data.json',()=>({
 // EXTERNAL MODULE: ./src/plugin_support/plugin_support.js
 var plugin_support = __webpack_require__(8);
 
-// CONCATENATED MODULE: ./src/model.js
-
-
-
-
-const modelCache={};
-
-class model_Model extends babylon["TransformNode"]{
-	constructor(){
-		this.mesh=null;
-		this.importedModel=null;
-	}
-
-	loadModel(path){
-		babylon["SceneLoader"].LoadAssetContainer("./models/", "Applebox.obj", mv3d["a" /* default */].scene, function (container) {
-			window.meshes = container.meshes;
-			window. materials = container.materials;
-			for (const mat of materials){
-				mat.ambientColor.set(1,1,1)	;
-			}
-			for (const mesh of meshes){
-				mesh.renderingGroupId=1;
-			}
-			// Adds all elements to the scene
-			container.addAllToScene();
-		});
-	}
-}
-
-mv3d["a" /* default */].testImportModel=function(url){
-	const node = new babylon["TransformNode"]('importedModel',mv3d["a" /* default */].scene);
-	babylon["SceneLoader"].LoadAssetContainer(Object(util["o" /* foldername */])(url), Object(util["n" /* filename */])(url), mv3d["a" /* default */].scene, function (container) {
-		const meshes = container.meshes;
-		const materials = container.materials;
-		node.meshes=meshes; node.materials=materials;
-		for (const mat of materials){
-			mat.ambientColor.set(1,1,1);
-			const texture = mat.diffuseTexture;
-			if(texture) mv3d["a" /* default */].waitTextureLoaded(texture).then(texture=>{
-				texture.updateSamplingMode(1);
-			});
-		}
-		for (const mesh of meshes){
-			mesh.renderingGroupId=1;
-			mesh.parent=node;
-		}
-		container.addAllToScene();
-	});
-	return node;
-}
 // CONCATENATED MODULE: ./src/index.js
 
 

@@ -23,6 +23,14 @@ Object.assign(mv3d,{
 	}
 });
 
+function tryParseString(s){
+	try{
+		return JSON.parse(s);
+	}catch(err){
+		return s;
+	}
+}
+
 assign(mv3d,{
 	CAMERA_MODE:"PERSPECTIVE",
 	ORTHOGRAPHIC_DIST:100,
@@ -96,6 +104,10 @@ assign(mv3d,{
 	BOAT_SETTINGS:JSON.parse(parameters.boatSettings),
 	SHIP_SETTINGS:JSON.parse(parameters.shipSettings),
 	AIRSHIP_SETTINGS:JSON.parse(parameters.airshipSettings),
+
+	EVENT_CHAR_SETTINGS: parameter('eventCharDefaults',"",tryParseString),
+	EVENT_OBJ_SETTINGS: parameter('eventObjDefaults',"",tryParseString),
+	EVENT_TILE_SETTINGS: parameter('eventTileDefaults',"",tryParseString),
 
 	ALLOW_GLIDE: booleanString(parameters.allowGlide),
 
@@ -172,15 +184,15 @@ assign(mv3d,{
 		}
 
 		this.EVENT_CHAR_SETTINGS = this.readConfigurationFunctions(
-			parameters.eventCharDefaults,
+			this.EVENT_CHAR_SETTINGS,
 			this.eventConfigurationFunctions,
 		);
 		this.EVENT_OBJ_SETTINGS = this.readConfigurationFunctions(
-			parameters.eventObjDefaults,
+			this.EVENT_OBJ_SETTINGS,
 			this.eventConfigurationFunctions,
 		);
 		this.EVENT_TILE_SETTINGS = this.readConfigurationFunctions(
-			parameters.eventTileDefaults,
+			this.EVENT_TILE_SETTINGS,
 			this.eventConfigurationFunctions,
 		);
 

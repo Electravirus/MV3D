@@ -3,6 +3,7 @@ import { TransformNode, MeshBuilder, StandardMaterial, Mesh, Vector2, SpotLight,
 import { WORLDSPACE, DOUBLESIDE } from './mod_babylon.js';
 import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
+import { Model } from './model.js';
 
 Object.assign(mv3d,{
 	createCharacters(){
@@ -42,17 +43,17 @@ Object.assign(mv3d,{
 	},
 
 	setupSpriteMeshes(){
-		this.Meshes = Sprite.Meshes = {};
-		Sprite.Meshes.BASIC=MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene);
-		Sprite.Meshes.FLAT=Mesh.MergeMeshes([Sprite.Meshes.BASIC.clone().rotate(XAxis,Math.PI/2,WORLDSPACE)]);
-		Sprite.Meshes.SPRITE=Mesh.MergeMeshes([Sprite.Meshes.BASIC.clone().translate(YAxis,0.5,WORLDSPACE)]);
-		Sprite.Meshes.CROSS=Mesh.MergeMeshes([
-			Sprite.Meshes.SPRITE.clone(),
-			Sprite.Meshes.SPRITE.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
+		const meshes = this.Meshes = {};
+		meshes.BASIC=MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene);
+		meshes.FLAT=Mesh.MergeMeshes([meshes.BASIC.clone().rotate(XAxis,Math.PI/2,WORLDSPACE)]);
+		meshes.SPRITE=Mesh.MergeMeshes([meshes.BASIC.clone().translate(YAxis,0.5,WORLDSPACE)]);
+		meshes.CROSS=Mesh.MergeMeshes([
+			meshes.SPRITE.clone(),
+			meshes.SPRITE.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
 		]);
-		for (const key in Sprite.Meshes){
-			Sprite.Meshes[key].renderingGroupId=mv3d.enumRenderGroups.MAIN;
-			mv3d.scene.removeMesh(Sprite.Meshes[key]);
+		for (const key in meshes){
+			meshes[key].renderingGroupId=mv3d.enumRenderGroups.MAIN;
+			mv3d.scene.removeMesh(meshes[key]);
 		}
 	},
 
@@ -73,7 +74,7 @@ Object.assign(mv3d,{
 		if(this._shadowMesh){ shadowMesh=this._shadowMesh}
 		else{
 			this.getShadowMesh.getting=true;
-			shadowMesh=Sprite.Meshes.FLAT.clone('shadow mesh');
+			shadowMesh=mv3d.Meshes.FLAT.clone('shadow mesh');
 			shadowMesh.material=await this.getShadowMaterial();
 			this._shadowMesh=shadowMesh;
 			mv3d.scene.removeMesh(shadowMesh);
@@ -84,56 +85,6 @@ Object.assign(mv3d,{
 
 	ACTOR_SETTINGS: [],
 });
-
-class Sprite extends TransformNode{
-	constructor(){
-		super('sprite',mv3d.scene);
-		this.spriteOrigin = new TransformNode('sprite origin',mv3d.scene);
-		this.spriteOrigin.parent=this;
-		this.mesh = Sprite.Meshes.FLAT.clone();
-		this.mesh.parent = this.spriteOrigin;
-		this.textureLoaded=false;
-	}
-	async setMaterial(src){
-		let newTexture;
-		if(src==='error'){
-			newTexture = await mv3d.getErrorTexture();
-		}else{
-			newTexture = await mv3d.createTexture(src);
-		}
-		await this.waitTextureLoaded(newTexture);
-		this.disposeMaterial();
-		this.texture = newTexture;
-		this.texture.hasAlpha=true;
-		this.onTextureLoaded();
-		this.material = new StandardMaterial('sprite material',mv3d.scene);
-		this.material.diffuseTexture=this.texture;
-		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
-		this.material.ambientColor.set(1,1,1);
-		this.material.specularColor.set(0,0,0);
-		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
-		this.mesh.material=this.material;
-	}
-	async waitTextureLoaded(texture=this.texture){
-		await mv3d.waitTextureLoaded(texture);
-	}
-	onTextureLoaded(){
-		this.texture.updateSamplingMode(1);
-		this.textureLoaded=true;
-	}
-	disposeMaterial(){
-		if(this.material){
-			this.material.dispose();
-			this.texture.dispose();
-			this.material=null;
-			this.texture=null;
-		}
-	}
-	dispose(...args){
-		this.disposeMaterial();
-		super.dispose(...args);
-	}
-}
 
 const z_descriptor = {
 	configurable: true,
@@ -154,12 +105,20 @@ const z_descriptor2 = {
 	}
 }
 
-class Character extends Sprite{
+class Character extends TransformNode{
 	constructor(char,order){
-		super();
-		this.order=order;
-		this.mesh.order=this.order;
-		this.mesh.character=this;
+		super('character',mv3d.scene);
+		this.spriteOrigin = new TransformNode('sprite origin',mv3d.scene);
+		this.spriteOrigin.parent=this;
+		this.model = new Model();
+		this.model.parent = this.spriteOrigin;
+		this.model.order=order;
+		this.model.character = this;
+
+		//this.order=order;
+		//this.mesh.order=this.order;
+		//this.mesh.character=this;
+		
 		this._character=this.char=char;
 		this.charName='';
 		this.charIndex=0;
@@ -216,6 +175,21 @@ class Character extends Sprite{
 		this.intensiveUpdate();
 	}
 
+	dispose(...args){
+		this.model.dispose();
+		super.dispose(...args);
+	}
+
+	//===========================
+	//  Texture & Model
+	//===========================
+
+	async setMaterial(src){
+		this.model.setMaterial(src);
+		this.updateScale();
+		this.needsMaterialUpdate=true;
+	}
+
 	get settings(){ return this.char.mv3d_settings; }
 
 	isBitmapReady(){
@@ -223,8 +197,9 @@ class Character extends Sprite{
 	}
 
 	isTextureReady(){
+		const texture = this.model.texture
 		return Boolean(
-			this.texture && this.texture.isReady() && this.isBitmapReady()
+			texture && texture.isReady() && this.isBitmapReady()
 		);
 	}
 
@@ -263,14 +238,7 @@ class Character extends Sprite{
 
 	async waitTextureLoaded(texture=this.texture){
 		await this.waitBitmapLoaded();
-		await super.waitTextureLoaded(texture);
-	}
-
-	onTextureLoaded(){
-		super.onTextureLoaded();
-		//this.updateFrame();
-		this.updateScale();
-		this.needsMaterialUpdate=true;
+		await mv3d.waitTextureLoaded(texture);
 	}
 
 	isImageChanged(){
@@ -288,16 +256,16 @@ class Character extends Sprite{
 		this._characterIndex = this._character.characterIndex();
 		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
 		this.isEmpty=false;
-		this.mesh.setEnabled(true);
+		this.model.setEnabled(true);
 		if(this._tileId>0){
 			this.setTileMaterial(this._tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
 		}else{
 			this.isEmpty=true;
-			this.textureLoaded=false;
-			this.disposeMaterial();
-			this.mesh.setEnabled(false);
+			this.model.textureLoaded=false;
+			this.model.disposeMaterial();
+			this.model.setEnabled(false);
 			this.spriteWidth=1;
 			this.spriteHeight=1;
 			this.updateScale();
@@ -305,14 +273,14 @@ class Character extends Sprite{
 	}
 	setFrame(x,y,w,h){
 		if(!this.isTextureReady()){ return; }
-		this.texture.crop(x,y,w,h,this._tileId>0);
+		this.model.texture.crop(x,y,w,h,this._tileId>0);
 	}
 
 	async updateScale(){
 		if(this.isEmpty){
 			this.spriteWidth=1;
 			this.spriteHeight=1;
-			this.mesh.scaling.set(1,1,1);
+			if(this.model.mesh)this.model.mesh.scaling.set(1,1,1);
 			return;
 		}
 		if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
@@ -323,8 +291,71 @@ class Character extends Sprite{
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
 
-		this.mesh.scaling.set(xscale,yscale,yscale);
+		if(this.model.mesh)this.model.mesh.scaling.set(xscale,yscale,yscale);
 	}
+
+	getShape(){
+		return this.getConfig('shape', mv3d.enumShapes.SPRITE );
+	}
+	updateShape(){
+		this.model.setMeshForShape(this.getShape());
+		this.updateConfiguration();
+		this.dirtyNearbyCells();
+	}
+
+	updateEmissive(){
+		const materials = this.model.materials;
+		if(!materials.length){ return; }
+		const glow = this.getConfig('glow', new Color4(0,0,0,0));
+		if(this.lamp){
+			var lampColor = this.lamp.diffuse;
+			var intensity = Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));	
+		}
+		const blendColor = this.mv_sprite._blendColor;
+		const blendAlpha=blendColor[3]/255;
+		const noShadow = !this.getConfig('dynShadow',true);
+		for(const material of materials){
+			const emissiveColor = material.emissiveColor;
+			if(!material._mv3d_orig_emissiveColor){ material._mv3d_orig_emissiveColor = emissiveColor.clone(); }
+			const orig_emissive = material._mv3d_orig_emissiveColor;
+			material.mv3d_glowColor=glow;
+			if(this.lamp){
+				emissiveColor.set(
+					Math.max(glow.r,lampColor.r*intensity,orig_emissive.r),
+					Math.max(glow.g,lampColor.g*intensity,orig_emissive.g),
+					Math.max(glow.b,lampColor.b*intensity,orig_emissive.b)
+				);
+			}else{
+				emissiveColor.set(
+					Math.max(glow.r,orig_emissive.r),
+					Math.max(glow.g,orig_emissive.g),
+					Math.max(glow.b,orig_emissive.b)
+				);
+			}
+			emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
+			emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
+			emissiveColor.b+=(2-emissiveColor.b)*Math.pow(blendColor[2]/255*blendAlpha,0.5);
+	
+			material.mv3d_noShadow=noShadow;
+		}
+	}
+
+	setupMesh(){
+		if(this.isEmpty){
+			this.model.setEnabled(false);
+		}else{
+			this.model.setEnabled(true);
+		}
+		if(this.flashlight){
+			this.flashlight.excludedMeshes.splice(0,Infinity);
+			this.flashlight.excludedMeshes.push(...this.model.meshes);
+		}
+		this.updateScale();
+	}
+
+	//===========================
+	//	CONFIGURATION & LIGHTS
+	//===========================
 
 	getDefaultConfigObject(){
 		if(this.isVehicle){
@@ -421,6 +452,7 @@ class Character extends Sprite{
 
 	initialConfigure(){
 		this.configureHeight();
+		this.updateConfiguration();
 	}
 
 	pageConfigure(settings=this.settings_event_page){
@@ -470,31 +502,6 @@ class Character extends Sprite{
 		this.updateLightOffsets();
 	}
 
-	updateEmissive(){
-		if(!this.material){ return; }
-		const emissiveColor = this.material.emissiveColor;
-		const glow = this.getConfig('glow', new Color4(0,0,0,0));
-		this.material.mv3d_glowColor=glow;
-		if(this.lamp){
-			const lampColor=this.lamp.diffuse;
-			const intensity = Math.max(0,Math.min(1,this.lamp.intensity,this.lamp.range,this.lamp.intensity/4+this.lamp.range/4));
-			emissiveColor.set(
-				Math.max(glow.r,lampColor.r*intensity),
-				Math.max(glow.g,lampColor.g*intensity),
-				Math.max(glow.b,lampColor.b*intensity)
-			);
-		}else{
-			emissiveColor.set(glow.r,glow.g,glow.b);
-		}
-		const blendColor = this.mv_sprite._blendColor;
-		const blendAlpha=blendColor[3]/255;
-		emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
-		emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
-		emissiveColor.b+=(2-emissiveColor.b)*Math.pow(blendColor[2]/255*blendAlpha,0.5);
-
-		this.material.mv3d_noShadow=!this.getConfig('dynShadow',true);
-	}
-
 	configureHeight(){
 		this.isAbove = this.char._priorityType===2;
 		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('zlock')?mv3d.EVENT_HEIGHT:0) );
@@ -502,26 +509,21 @@ class Character extends Sprite{
 		this.z = this.platformHeight + height;
 	}
 
-	setupMesh(){
-		if(!this.mesh.mv3d_isSetup){
-			mv3d.callFeatures('createCharMesh',this.mesh);
-			this.mesh.parent = this.spriteOrigin;
-			this.mesh.character=this;
-			this.mesh.order=this.order;
-			if(this.material){
-				this.mesh.material=this.material;
-			}
-			if(this.isEmpty){
-				this.mesh.setEnabled(false);
-			}else{
-				this.mesh.setEnabled(true);
-			}
-			this.mesh.mv3d_isSetup=true;
+	updateConfiguration(){
+		const shapes = mv3d.enumShapes;
+		if(this.shape===shapes.SPRITE){
+			this.spriteOrigin.pitch=0;
+			this.spriteOrigin.yaw=0;
+		}else if(this.shape===shapes.BOARD){
+			this.spriteOrigin.pitch=this.getConfig('pitch',0);
+			this.spriteOrigin.yaw=this.getConfig('yaw',0);
+		}else{
+			this.model.yaw=this.getConfig('rot',0);
+			this.spriteOrigin.pitch=this.getConfig('pitch',0);
+			this.spriteOrigin.yaw=this.getConfig('yaw',0);
+			//if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
 		}
-		if(this.flashlight){
-			this.flashlight.excludedMeshes.splice(0,Infinity);
-			this.flashlight.excludedMeshes.push(this.mesh);
-		}
+		this.updateScale();
 	}
 
 	dirtyNearbyCells(){
@@ -573,11 +575,11 @@ class Character extends Sprite{
 			const dist = Vector3.Distance(pos,sphere.centerWorld);
 			if(dist>=sphere.radiusWorld+light.range){ continue; }
 			meshes.push(cell.mesh);
-			for(let character of cell.characters){
-				const sphere = character.mesh.getBoundingInfo().boundingSphere;
+			for(const character of cell.characters)for(const mesh of character.model.meshes){
+				const sphere = mesh.getBoundingInfo().boundingSphere;
 				const dist = Vector3.Distance(pos,sphere.centerWorld);
 				if(dist>=sphere.radiusWorld+light.range){ continue; }
-				meshes.push(character.mesh);
+				meshes.push(mesh);
 			}
 		}
 		return meshes;
@@ -722,41 +724,9 @@ class Character extends Sprite{
 		))&&!(this.blendElevation.currentValue()||this.falling);
 	}
 
-	getShape(){
-		return this.getConfig('shape', mv3d.enumShapes.SPRITE );
-	}
-	updateShape(){
-		const newshape = this.getShape();
-		if(this.shape === newshape){ return; }
-		this.shape=newshape;
-		//let backfaceCulling=true;
-		let geometry = Sprite.Meshes.SPRITE;
-		const shapes = mv3d.enumShapes;
-		switch(this.shape){
-		case shapes.FLAT:
-			geometry = Sprite.Meshes.FLAT;
-			//if(this.char._priorityType===2||this.hasConfig('height')||this.hasConfig('z')){
-			//	backfaceCulling=false;
-			//}
-			break;
-		case shapes.XCROSS:
-		case shapes.CROSS:
-			geometry = Sprite.Meshes.CROSS;
-			//backfaceCulling=false;
-			break;
-		case shapes.WALL:
-		case shapes.FENCE:
-			//backfaceCulling=false;
-			break;
-		}
-		mv3d.callFeatures('destroyCharMesh',this.mesh);
-		this.mesh.dispose();
-		this.mesh=geometry.clone();
-		//this.material.backfaceCulling=backfaceCulling;
-		this.setupMesh();
-		this.spriteOrigin.rotation.set(0,0,0);
-		this.dirtyNearbyCells();
-	}
+	//===========================
+	//	Update Functions
+	//===========================
 
 	update(){
 		if(this.char._erased){
@@ -771,7 +741,7 @@ class Character extends Sprite{
 		const inRenderDist = this.char.mv3d_inRenderDist();
 		this.disabled=!this.visible;
 		if(this.char.isTransparent() || !inRenderDist
-		|| (this.char._characterName||this.char._tileId)&&!this.textureLoaded){
+		|| (this.char._characterName||this.char._tileId)&&!this.model.textureLoaded){
 			this.visible=false;
 		}
 		if(!this._isEnabled){
@@ -803,7 +773,7 @@ class Character extends Sprite{
 			this.prevZ = this.z;
 		}
 
-		if(this.material && this._isEnabled){
+		if(!this.isEmpty && this._isEnabled){
 			this.updateNormal();
 		}else{
 			this.updateEmpty();
@@ -822,23 +792,11 @@ class Character extends Sprite{
 	//set needsPositionUpdate(v){ this._needsPositionUpdate=v; }
 
 	updateNormal(){
-		const shapes = mv3d.enumShapes;
-		if(this.shape===shapes.SPRITE){
-			this.mesh.pitch = mv3d.blendCameraPitch.currentValue()-90;
-			this.mesh.yaw = mv3d.blendCameraYaw.currentValue();
-		}else if(this.shape===shapes.TREE){
-			this.spriteOrigin.pitch=this.getConfig('pitch',0);
-			this.spriteOrigin.yaw=this.getConfig('yaw',0);
-			this.mesh.yaw = mv3d.blendCameraYaw.currentValue() - this.spriteOrigin.yaw;
-		}else{
-			this.mesh.yaw=this.getConfig('rot',0);
-			this.spriteOrigin.pitch=this.getConfig('pitch',0);
-			this.spriteOrigin.yaw=this.getConfig('yaw',0);
-			if(this.shape===shapes.XCROSS){this.mesh.yaw+=45;}
-		}
+
+		this.model.update();
 
 		if(this.isPlayer){
-			this.mesh.visibility = +!mv3d.is1stPerson(true);
+			this.model.mesh.visibility = +!mv3d.is1stPerson(true);
 		}
 
 		this.updateAlpha();
@@ -857,32 +815,45 @@ class Character extends Sprite{
 	}
 
 	updateAlpha(){
-		let hasAlpha=this.hasConfig('alpha')||this.char.opacity()<255;
+		const materials = this.model.materials;
+		if(!materials.length){ return; }
+		
 		this.bush = Boolean(this.char.bushDepth());
-		const blendMode = mv3d.blendModes[this.char.blendMode()];
-		if(this.material.alphaMode!==blendMode){
-			this.material.alphaMode=blendMode;
-		}
-		if(blendMode!==mv3d.blendModes.NORMAL){
-			hasAlpha=true;
-		}else if(this.bush && this.hasBush()){
-			if(!this.material.opacityTexture){
-				const bushAlpha = mv3d.getBushAlphaTextureSync();
-				if(bushAlpha&&bushAlpha.isReady()){
-					this.material.opacityTexture=bushAlpha;
+		if(this.model.material){
+			const material = this.model.material;
+			if(this.bush && this.hasBush()){
+				if(!material.opacityTexture){
+					const bushAlpha = mv3d.getBushAlphaTextureSync();
+					if(bushAlpha&&bushAlpha.isReady()){
+						material.opacityTexture=bushAlpha;
+					}
+				}
+			}else{
+				if(material.opacityTexture){
+					material.opacityTexture=null;
 				}
 			}
-		}else{
-			if(this.material.opacityTexture){
-				this.material.opacityTexture=null;
-			}
 		}
-		if(hasAlpha||this.material.opacityTexture){
-			this.material.useAlphaFromDiffuseTexture=true;
-			this.material.alpha=this.getConfig('alpha',1)*this.char.opacity()/255;
-		}else{
-			this.material.useAlphaFromDiffuseTexture=false;
-			this.material.alpha=1;
+
+		const alpha = this.getConfig('alpha',1)*this.char.opacity()/255;
+		const _hasAlpha=this.hasConfig('alpha')||alpha<1;
+		const blendMode = mv3d.blendModes[this.char.blendMode()];
+		for(const material of materials){
+			if(!material._mv3d_orig_alpha){ material._mv3d_orig_alpha=material.alpha; }
+			let hasAlpha = _hasAlpha||material._mv3d_orig_alpha<1;
+			if(material.alphaMode!==blendMode){
+				material.alphaMode=blendMode;
+			}
+			if(blendMode!==mv3d.blendModes.NORMAL){
+				hasAlpha=true;
+			}
+			if(hasAlpha||material.opacityTexture){
+				material.useAlphaFromDiffuseTexture=true;
+				material.alpha=alpha*material._mv3d_orig_alpha;
+			}else{
+				material.useAlphaFromDiffuseTexture=false;
+				material.alpha=1;
+			}
 		}
 	}
 
@@ -1249,7 +1220,6 @@ override(Sprite_Character.prototype,'setBlendColor',o=>function(){
 	sprite.needsMaterialUpdate=true;
 });
 
-mv3d.Sprite = Sprite;
 mv3d.Character = Character;
 
 

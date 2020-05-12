@@ -392,6 +392,8 @@ Object.assign(mv3d,{
 		CROSS:5,
 		XCROSS:6,
 		SLOPE:7,
+		MESH:91,
+		IMPORTED:92,
 	},
 	enumPassage:{
 		WALL:0,

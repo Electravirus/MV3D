@@ -54,6 +54,8 @@ Object.assign(mv3d,{
 
 		if(this.textureCache[key]!==texture){ return await this.getErrorTexture(); }
 		texture.updateSamplingMode(1);
+		//texture.wrapU = Texture.CLAMP_ADDRESSMODE;
+		//texture.wrapV = Texture.CLAMP_ADDRESSMODE;
 		if(animX||animY){
 			const { width, height } = texture.getBaseSize();
 			texture.frameData={x:0,y:0,w:width,h:height};

@@ -14,7 +14,7 @@ export class CellMeshBuilder{
 			if(typeof total!=='number'){ total=total.getTotalVertices(); }
 			return total+mesh.getTotalVertices();
 		});
-		const mesh = Mesh.MergeMeshes(submeshes,true,totalVertices>65536,undefined,false,true);
+		const mesh = Mesh.MergeMeshes(submeshes,true,totalVertices>64000,undefined,false,true);
 		return mesh;
 	}
 	getBuilder(material){

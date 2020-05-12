@@ -161,7 +161,7 @@ override(Game_Character.prototype,'moveDiagonally',o=>function(h,v){
 				adjustDirection=true;
 			}
 		}
-	}
+	}else{ adjustDirection=true; }
 
 	if(adjustDirection){
 		const d = hvtodir(h,v);

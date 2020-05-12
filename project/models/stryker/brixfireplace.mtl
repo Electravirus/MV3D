@@ -1,8 +1,0 @@
-# Made in Blockbench 3.4.2
-newmtl 2
-map_Kd hellzabrix.png 
-newmtl 3
-map_Kd bricktop.png 
-newmtl 4
-map_Kd brickbottom.png 
-newmtl none
