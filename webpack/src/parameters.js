@@ -84,7 +84,7 @@ assign(mv3d,{
 	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
 	get AMBIENT_COLOR(){ return mv3d.featureEnabled('dynamicShadows')?0x888888:0xffffff; },
 
-	LIGHT_LIMIT: Number(parameters.lightLimit),
+	LIGHT_LIMIT: parameter('lightLimit',8,n=>{n=Number(n);return isFinite(n)?n:8;}),
 	LIGHT_HEIGHT: 0.5,
 	LAMP_HEIGHT: 0.5,
 	FLASHLIGHT_HEIGHT: 0.25,

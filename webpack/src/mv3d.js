@@ -52,13 +52,6 @@ const mv3d = {
 
 		this.callFeatures('setup');
 
-		if(isNaN(this.LIGHT_LIMIT)){
-			const _sortLightsByPriority=BABYLON.Scene.prototype.sortLightsByPriority;
-			BABYLON.Scene.prototype.sortLightsByPriority=function(){
-				_sortLightsByPriority.apply(this,arguments);
-				mv3d.updateAutoLightLimit();
-			};
-		}
 	},
 
 	updateCanvas(){
@@ -170,25 +163,6 @@ const mv3d = {
 			y=(y-oy).mod(mapHeight)+oy;
 		}
 		return new Vector2(x,y);
-	},
-
-	autoLightLimit(lightLimit){
-		if(isNaN(this.LIGHT_LIMIT)){
-			return Math.max(4,lightLimit);
-		}else{
-			return this.LIGHT_LIMIT;
-		}
-	},
-
-	updateAutoLightLimit(){
-		const lightLimit=this.autoLightLimit(mv3d.scene.lights.length);
-		for(const m of Object.values(mv3d.materialCache)){
-			m.maxSimultaneousLights=lightLimit;
-		}
-		for(const char of this.characters){
-			if(!char.material){ continue; }
-			char.material.maxSimultaneousLights=this.autoLightLimit(char.mesh.lightSources.length);
-		}
 	},
 
 	getFieldSize(dist=mv3d.blendCameraDist.currentValue()){

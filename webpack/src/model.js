@@ -56,7 +56,7 @@ export class Model extends TransformNode{
 		this.material.alphaCutOff = mv3d.ALPHA_CUTOFF;
 		this.material.ambientColor.set(1,1,1);
 		this.material.specularColor.set(0,0,0);
-		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
+		this.material.maxSimultaneousLights=this.LIGHT_LIMIT;
 		this.mesh.material=this.material;
 	}
 	disposeMaterial(){

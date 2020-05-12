@@ -115,7 +115,7 @@ Object.assign(mv3d,{
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
 		material.backFaceCulling=options.backfaceCulling;
-		if(!isNaN(this.LIGHT_LIMIT)){ material.maxSimultaneousLights=this.LIGHT_LIMIT; }
+		material.maxSimultaneousLights=this.LIGHT_LIMIT;
 		this.materialCache[key]=material;
 		return material;
 	},

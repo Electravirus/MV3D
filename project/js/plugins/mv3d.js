@@ -1340,13 +1340,6 @@ const mv3d = {
 
 		this.callFeatures('setup');
 
-		if(isNaN(this.LIGHT_LIMIT)){
-			const _sortLightsByPriority=BABYLON.Scene.prototype.sortLightsByPriority;
-			BABYLON.Scene.prototype.sortLightsByPriority=function(){
-				_sortLightsByPriority.apply(this,arguments);
-				mv3d.updateAutoLightLimit();
-			};
-		}
 	},
 
 	updateCanvas(){
@@ -1458,25 +1451,6 @@ const mv3d = {
 			y=(y-oy).mod(mapHeight)+oy;
 		}
 		return new babylonjs__WEBPACK_IMPORTED_MODULE_0__["Vector2"](x,y);
-	},
-
-	autoLightLimit(lightLimit){
-		if(isNaN(this.LIGHT_LIMIT)){
-			return Math.max(4,lightLimit);
-		}else{
-			return this.LIGHT_LIMIT;
-		}
-	},
-
-	updateAutoLightLimit(){
-		const lightLimit=this.autoLightLimit(mv3d.scene.lights.length);
-		for(const m of Object.values(mv3d.materialCache)){
-			m.maxSimultaneousLights=lightLimit;
-		}
-		for(const char of this.characters){
-			if(!char.material){ continue; }
-			char.material.maxSimultaneousLights=this.autoLightLimit(char.mesh.lightSources.length);
-		}
 	},
 
 	getFieldSize(dist=mv3d.blendCameraDist.currentValue()){
@@ -3584,7 +3558,7 @@ Object(util["e" /* assign */])(mv3d["a" /* default */],{
 	//AMBIENT_COLOR: makeColor(parameters.ambientColor).toNumber(),
 	get AMBIENT_COLOR(){ return mv3d["a" /* default */].featureEnabled('dynamicShadows')?0x888888:0xffffff; },
 
-	LIGHT_LIMIT: Number(parameters.lightLimit),
+	LIGHT_LIMIT: parameter('lightLimit',8,n=>{n=Number(n);return isFinite(n)?n:8;}),
 	LIGHT_HEIGHT: 0.5,
 	LAMP_HEIGHT: 0.5,
 	FLASHLIGHT_HEIGHT: 0.25,
@@ -6851,7 +6825,7 @@ Object.assign(mv3d["a" /* default */],{
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
 		material.backFaceCulling=options.backfaceCulling;
-		if(!isNaN(this.LIGHT_LIMIT)){ material.maxSimultaneousLights=this.LIGHT_LIMIT; }
+		material.maxSimultaneousLights=this.LIGHT_LIMIT;
 		this.materialCache[key]=material;
 		return material;
 	},
@@ -6985,7 +6959,7 @@ class model_Model extends babylon["TransformNode"]{
 		this.material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
 		this.material.ambientColor.set(1,1,1);
 		this.material.specularColor.set(0,0,0);
-		if(!isNaN(this.LIGHT_LIMIT)){ this.material.maxSimultaneousLights=this.LIGHT_LIMIT; }
+		this.material.maxSimultaneousLights=this.LIGHT_LIMIT;
 		this.mesh.material=this.material;
 	}
 	disposeMaterial(){
