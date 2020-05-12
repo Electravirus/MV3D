@@ -181,9 +181,9 @@ mv3d.Animation=DepthAnimation;
 
 function transformVectorForCharacter(vector,char){
 	if(!char.isEmpty&&char.shape===mv3d.enumShapes.SPRITE){
-		return Vector3.TransformCoordinates(vector,mv3d.getUnscaledMatrix(char.mesh));
+		return Vector3.TransformCoordinates(vector,mv3d.getUnscaledMatrix(char.model.mesh));
 	}else{
-		return Vector3.TransformCoordinates(vector,mv3d.getTranslationMatrix(char.mesh));
+		return Vector3.TransformCoordinates(vector,mv3d.getTranslationMatrix(char.model.mesh));
 	}
 }
 

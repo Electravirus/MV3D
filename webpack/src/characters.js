@@ -110,7 +110,7 @@ class Character extends TransformNode{
 		super('character',mv3d.scene);
 		this.spriteOrigin = new TransformNode('sprite origin',mv3d.scene);
 		this.spriteOrigin.parent=this;
-		this.model = new Model();
+		this.model = new Model({orphan:false});
 		this.model.parent = this.spriteOrigin;
 		this.model.order=order;
 		this.model.character = this;
@@ -882,9 +882,17 @@ class Character extends TransformNode{
 
 	updatePositionOffsets(){
 		this.spriteOrigin.position.set(0,0,0);
-		if(this.shape===mv3d.enumShapes.FLAT){
-			this.spriteOrigin.z = mv3d.LAYER_DIST*4;
-		}else if(this.shape===mv3d.enumShapes.SPRITE){
+		if(this.model.shape===mv3d.enumShapes.FLAT){
+			const elevation = this.blendElevation.currentValue();
+			const offsetDist = mv3d.LAYER_DIST*4;
+			if(this.hasConfig('zlock')){
+				this.spriteOrigin.z = 0;
+			}else if(elevation){
+				this.spriteOrigin.z = Math.max(0,offsetDist - elevation);
+			}else{
+				this.spriteOrigin.z = offsetDist;
+			}
+		}else if(this.model.shape===mv3d.enumShapes.SPRITE){
 			this.spriteOrigin.z = mv3d.LAYER_DIST*4 * (1-Math.max(0,Math.min(90,mv3d.blendCameraPitch.currentValue()))/90);
 		}else{
 			this.spriteOrigin.z = 0;

@@ -7217,7 +7217,7 @@ class characters_Character extends babylon["TransformNode"]{
 		super('character',mv3d["a" /* default */].scene);
 		this.spriteOrigin = new babylon["TransformNode"]('sprite origin',mv3d["a" /* default */].scene);
 		this.spriteOrigin.parent=this;
-		this.model = new model_Model();
+		this.model = new model_Model({orphan:false});
 		this.model.parent = this.spriteOrigin;
 		this.model.order=order;
 		this.model.character = this;
@@ -7989,9 +7989,17 @@ class characters_Character extends babylon["TransformNode"]{
 
 	updatePositionOffsets(){
 		this.spriteOrigin.position.set(0,0,0);
-		if(this.shape===mv3d["a" /* default */].enumShapes.FLAT){
-			this.spriteOrigin.z = mv3d["a" /* default */].LAYER_DIST*4;
-		}else if(this.shape===mv3d["a" /* default */].enumShapes.SPRITE){
+		if(this.model.shape===mv3d["a" /* default */].enumShapes.FLAT){
+			const elevation = this.blendElevation.currentValue();
+			const offsetDist = mv3d["a" /* default */].LAYER_DIST*4;
+			if(this.hasConfig('zlock')){
+				this.spriteOrigin.z = 0;
+			}else if(elevation){
+				this.spriteOrigin.z = Math.max(0,offsetDist - elevation);
+			}else{
+				this.spriteOrigin.z = offsetDist;
+			}
+		}else if(this.model.shape===mv3d["a" /* default */].enumShapes.SPRITE){
 			this.spriteOrigin.z = mv3d["a" /* default */].LAYER_DIST*4 * (1-Math.max(0,Math.min(90,mv3d["a" /* default */].blendCameraPitch.currentValue()))/90);
 		}else{
 			this.spriteOrigin.z = 0;
@@ -8526,9 +8534,9 @@ mv3d["a" /* default */].Animation=animations_DepthAnimation;
 
 function transformVectorForCharacter(vector,char){
 	if(!char.isEmpty&&char.shape===mv3d["a" /* default */].enumShapes.SPRITE){
-		return babylon["Vector3"].TransformCoordinates(vector,mv3d["a" /* default */].getUnscaledMatrix(char.mesh));
+		return babylon["Vector3"].TransformCoordinates(vector,mv3d["a" /* default */].getUnscaledMatrix(char.model.mesh));
 	}else{
-		return babylon["Vector3"].TransformCoordinates(vector,mv3d["a" /* default */].getTranslationMatrix(char.mesh));
+		return babylon["Vector3"].TransformCoordinates(vector,mv3d["a" /* default */].getTranslationMatrix(char.model.mesh));
 	}
 }
 
