@@ -1,6 +1,7 @@
 import { Engine, Scene, TransformNode, FreeCamera, Node, Matrix, Vector2, Vector3, Color3, Quaternion } from 'babylonjs';
 import { FOGMODE_LINEAR, ORTHOGRAPHIC_CAMERA, PERSPECTIVE_CAMERA, setupBabylonMods } from './mod_babylon.js';
-import util, { degtorad, optimalFrustrumHeight } from "./util.js";
+import { degtorad, optimalFrustrumHeight } from "./util.js";
+import * as util from "./util.js";
 
 
 const mv3d = {

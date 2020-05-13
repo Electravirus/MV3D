@@ -95,6 +95,13 @@ export const file=(folder=mv3d.MV3D_FOLDER,name)=>{
 export const filename=path=>{path=path.split('/');return path[path.length-1];}
 export const foldername=path=>{path=path.split('/');path.pop();return path.join('/')+'/';}
 
+const issuedWarnings={};
+export const deprecated=message=>{
+	if(message in issuedWarnings){ return; }
+	issuedWarnings[message]=true;
+	console.warn(message);
+};
+
 // directions
 
 export const dirtoh=d=>5 + ((d-1)%3-1);
@@ -160,13 +167,3 @@ export const assign=(obj,methods)=>{
 
 
 //
-const util = {
-	makeColor,hexNumber,relativeNumber,booleanString,falseString,booleanNumber,
-	sleep,degtorad,radtodeg,sin,cos,unround,
-	tileSize,tileWidth,tileHeight,optimalFrustrumWidth,optimalFrustrumHeight,
-	pointtorad,pointtodeg,minmax,
-	dirtov,dirtoh,hvtodir,
-	XAxis,YAxis,ZAxis,v2origin,v3origin,PI,PI2,
-	overload, override, file, filename, foldername, assign,
-};
-export default util;

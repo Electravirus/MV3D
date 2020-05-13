@@ -193,7 +193,7 @@ class Character extends TransformNode{
 	get settings(){ return this.char.mv3d_settings; }
 
 	isBitmapReady(){
-		return Boolean(this.bitmap && this.bitmap.isReady() && !this._waitingForBitmap);
+		return Boolean(this.mv_sprite && this.bitmap && this.bitmap.isReady() && !this._waitingForBitmap);
 	}
 
 	isTextureReady(){
@@ -204,7 +204,7 @@ class Character extends TransformNode{
 	}
 
 	get mv_sprite(){
-		return this.char.mv_sprite||{};
+		return this.char.mv_sprite;
 	}
 	get bitmap(){
 		return this.mv_sprite.bitmap;
@@ -249,6 +249,7 @@ class Character extends TransformNode{
 		);
 	}
 	updateCharacter(){
+		if(!this.isBitmapReady()){ return; }
 		this.needsPositionUpdate=true;
 		this._tilesetId = $gameMap.tilesetId();
 		this._tileId = this._character.tileId();
@@ -283,7 +284,9 @@ class Character extends TransformNode{
 			if(this.model.mesh)this.model.mesh.scaling.set(1,1,1);
 			return;
 		}
-		if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
+		//if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
+		//if(!this.mv_sprite){ return; }
+		if(!this.isBitmapReady()){ return; }
 		this.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new Vector2(1,1));
 		this.spriteWidth=this.mv_sprite.patternWidth()/tileSize() * configScale.x;
@@ -438,7 +441,6 @@ class Character extends TransformNode{
 			mv3d.eventConfigurationFunctions,
 			this.settings_event_page,
 		);
-		this.updateScale();
 		this.updateShape();
 
 		if(this.char.mv3d_needsConfigure){
@@ -459,11 +461,16 @@ class Character extends TransformNode{
 		const transient = settings===this.settings;
 		if('pos' in settings){
 			const event=this.char.event();
-			const pos = settings;
-			this.char.locate(
-				relativeNumber(event.x,pos.x),
-				relativeNumber(event.y,pos.y),
-			);
+			const pos = settings.pos;
+			if(pos.x||pos.y){
+				this.char.locate(
+					pos.x?relativeNumber(event.x,pos.x):this.char.x,
+					pos.y?relativeNumber(event.y,pos.y):this.char.y,
+				);
+			}
+			if(pos.z){
+				this.z = relativeNumber(mv3d.getWalkHeight(event.x,event.y),pos.z);
+			}
 			if(transient)delete settings.pos;
 		}
 		this.setupEventLights();
@@ -733,13 +740,14 @@ class Character extends TransformNode{
 			this.dispose();
 		}
 
+		const bitmapReady = this.isBitmapReady();
 
-		this.visible=this.mv_sprite.visible;
+		this.visible=bitmapReady&&this.mv_sprite.visible;
 		if(typeof this.char.isVisible === 'function'){
 			this.visible=this.visible&&this.char.isVisible();
 		}
 		const inRenderDist = this.char.mv3d_inRenderDist();
-		this.disabled=!this.visible;
+		//this.disabled=!this.visible;
 		if(this.char.isTransparent() || !inRenderDist
 		|| (this.char._characterName||this.char._tileId)&&!this.model.textureLoaded){
 			this.visible=false;
@@ -757,7 +765,7 @@ class Character extends TransformNode{
 		//	this.updateFrame();
 		//}
 
-		if(!inRenderDist){
+		if(!inRenderDist||!bitmapReady){
 			//this.updateAnimations();
 			return;
 		}
@@ -779,6 +787,7 @@ class Character extends TransformNode{
 			this.updateEmpty();
 		}
 		this.updateAnimations();
+		
 		if(this.needsMaterialUpdate){
 			this.updateEmissive();
 			this.needsMaterialUpdate=false;
@@ -805,6 +814,9 @@ class Character extends TransformNode{
 		this.updateElevation();
 		if(this.shadow){ this.updateShadow(); }
 		this.updateLights();
+
+		// updating the scale every frame still doesn't fix all problems with ChronoEngine.
+		this.updateScale();
 	}
 
 	updateEmpty(){
@@ -859,24 +871,24 @@ class Character extends TransformNode{
 
 	updateLightOffsets(){
 		if(this.lamp){
-			const height = this.getConfig('lampHeight',mv3d.LAMP_HEIGHT);
-			const offset = this.getConfig('lampOffset',null);
-			this.lampOrigin.position.set(0,0,0);
-			this.lampOrigin.z=height;
-			if(offset){
-				this.lampOrigin.x=offset.x;
-				this.lampOrigin.y=offset.y;
+			const offset = {
+				x: this.getConfig('lampXoff',0),
+				y: this.getConfig('lampYoff',0),
+				z: this.getConfig('lampZoff',mv3d.LAMP_HEIGHT),
 			}
+			this.lampOrigin.x=offset.x;
+			this.lampOrigin.y=offset.y;
+			this.lampOrigin.z=offset.z;
 		}
 		if(this.flashlight){
-			const height = this.getConfig('flashlightHeight',mv3d.FLASHLIGHT_HEIGHT);
-			const offset = this.getConfig('flashlightOffset',null);
-			this.flashlightOrigin.position.set(0,0,0);
-			this.flashlightOrigin.z=height;
-			if(offset){
-				this.flashlightOrigin.x=offset.x;
-				this.flashlightOrigin.y=offset.y;
+			const offset = {
+				x: this.getConfig('flashlightXoff',0),
+				y: this.getConfig('flashlightYoff',0),
+				z: this.getConfig('flashlightZoff',mv3d.FLASHLIGHT_HEIGHT),
 			}
+			this.flashlightOrigin.x=offset.x;
+			this.flashlightOrigin.y=offset.y;
+			this.flashlightOrigin.z=offset.z;
 		}
 	}
 

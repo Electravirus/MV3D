@@ -9,7 +9,7 @@ Object.assign(mv3d,{
 	},
 
 	updateInputCamera(){
-		if(this.isDisabled()||this.loadData('cameraLocked')){ return; }
+		if(this.isDisabled()||this.loadData('cameraLocked')||!$gamePlayer.canMove()){ return; }
 		const is1stPerson = this.is1stPerson();
 		if( this.loadData('allowRotation',mv3d.KEYBOARD_TURN) || is1stPerson ){
 			const leftKey=mv3d.getTurnKey('left'), rightKey=mv3d.getTurnKey('right');

@@ -128,7 +128,7 @@ Object.assign(mv3d,{
 
 Game_CharacterBase.prototype._mv3d_isFlying=function(){
 	if(!this.mv3d_sprite){ return false;}
-	return this.mv3d_sprite.blendElevation.currentValue()>0||this.mv3d_sprite.hasConfig('zlock');
+	return this.mv3d_sprite.blendElevation.currentValue()>0||this.mv3d_sprite.hasConfig('zlock')||!this.mv3d_sprite.getConfig('gravity',mv3d.GRAVITY);
 };
 Game_Vehicle.prototype._mv3d_isFlying=function(){
 	return this.isAirship()||Game_CharacterBase.prototype._mv3d_isFlying.apply(this,arguments);

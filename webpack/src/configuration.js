@@ -1,7 +1,7 @@
 import mv3d from './mv3d.js';
 import { Vector2, Color3, Color4 } from 'babylonjs';
 import { FRONTSIDE, BACKSIDE, DOUBLESIDE } from './mod_babylon.js';
-import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep, tileSize, tileWidth, tileHeight } from './util.js';
+import { makeColor, relativeNumber, booleanString, falseString, booleanNumber, sleep, tileSize, tileWidth, tileHeight, deprecated } from './util.js';
 import { Blender } from './blenders.js';
 
 class ConfigurationFunction{
@@ -472,12 +472,12 @@ Object.assign(mv3d,{
 			}else{
 				conf.height=height;
 			}
-			console.warn('event config height() is deprecated. Use elevation(), offset(), or zoff() instead.');
+			deprecated('event config height() is deprecated. Use elevation(), offset(), or zoff() instead.');
 		},
 		elevation(conf,n){ conf.height=Number(n); },
 		z(conf,n){ conf.zlock=Number(n); },
-		x(conf,n){ conf.xoff=Number(n); console.warn('event config x() is deprecated. Use offset() or xoff() instead.'); },
-		y(conf,n){ conf.yoff=Number(n); console.warn('event config y() is deprecated. Use offset() or yoff() instead.'); },
+		x(conf,n){ conf.xoff=Number(n); deprecated('event config x() is deprecated. Use offset() or xoff() instead.'); },
+		y(conf,n){ conf.yoff=Number(n); deprecated('event config y() is deprecated. Use offset() or yoff() instead.'); },
 		xoff(conf,n){ conf.xoff=Number(n); },
 		yoff(conf,n){ conf.yoff=Number(n); },
 		zoff(conf,n){ conf.zoff=Number(n); },
@@ -486,10 +486,11 @@ Object.assign(mv3d,{
 			if(params.y)conf.yoff=Number(params.y);
 			if(params.z)conf.zoff=Number(params.z);
 		}),
-		pos:new ConfigurationFunction('x,y',function(conf,params){
+		pos:new ConfigurationFunction('x,y,z',function(conf,params){
 			if(!conf.pos){conf.pos={};}
 			if(params.x){ conf.pos.x=params.x; }
 			if(params.y){ conf.pos.y=params.y; }
+			if(params.z){ conf.pos.z=params.z; }
 		}),
 		scale(conf,x,y=x){ conf.scale = new Vector2(Number(x),Number(y)); },
 		rot(conf,n){ conf.rot=Number(n); },
@@ -518,12 +519,34 @@ Object.assign(mv3d,{
 		}),
 		flashlightpitch(conf,deg='90'){ conf.flashlightPitch=Number(deg); },
 		flashlightyaw(conf,deg='+0'){ conf.flashlightYaw=deg; },
-		lightheight(conf,n=1){ this.lampheight(conf,n); this.flashlightheight(conf,n); },
-		lightoffset(conf,x=0,y=0){ this.lampoffset(conf,x,y); this.flashlightoffset(conf,x,y); },
-		lampheight(conf,n=1){ conf.lampHeight = Number(n); },
-		lampoffset(conf,x=0,y=0){ conf.lampOffset = {x:+x,y:+y}; },
-		flashlightheight(conf,n=1){ conf.flashlightHeight = Number(n); },
-		flashlightoffset(conf,x=0,y=0){ conf.flashlightOffset = {x:+x,y:+y}; },
+		lightoffset:new ConfigurationFunction('x,y,z',function(conf,params){
+			if(params.x){ conf.lampXoff = conf.flashlightXoff = +params.x; }
+			if(params.y){ conf.lampYoff = conf.flashlightYoff = +params.y; }
+			if(params.z){ conf.lampZoff = conf.flashlightZoff = +params.z; }
+		}),
+		lampoffset:new ConfigurationFunction('x,y,z',function(conf,params){
+			if(params.x){ conf.lampXoff = +params.x; }
+			if(params.y){ conf.lampYoff = +params.y; }
+			if(params.z){ conf.lampZoff = +params.z; }
+		}),
+		flashlightoffset:new ConfigurationFunction('x,y,z',function(conf,params){
+			if(params.x){ conf.flashlightXoff = +params.x; }
+			if(params.y){ conf.flashlightYoff = +params.y; }
+			if(params.z){ conf.flashlightZoff = +params.z; }
+		}),
+		lightheight(conf,n=1){
+			deprecated('event lightHeight() is deprecated. Use lightOffset(z:) instead.');
+			conf.lampZoff = conf.flashlightZoff = +n;
+		},
+		lampheight(conf,n=1){
+			conf.lampZoff = Number(n);
+			deprecated('event lampHeight() is deprecated. Use lampOffset(z:) instead.');
+		},
+		flashlightheight(conf,n=1){
+			deprecated('event flashlightheight() is deprecated. Use flashlightOffset(z:) instead.');
+			conf.flashlightZoff = Number(n);
+		},
+		
 		alpha(conf,n){
 			conf.alpha=Number(n);
 		},
