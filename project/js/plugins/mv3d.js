@@ -4840,7 +4840,7 @@ Object.assign(mv3d["a" /* default */],{
 			conf.transparent=true;
 			conf.alpha=Number(n);
 		},
-		glow(conf,n,a=1){
+		glow(conf,n,a=0){
 			if(isNaN(n)){
 				conf.glow = Object(util["makeColor"])(n);
 			}else{
@@ -4948,7 +4948,7 @@ Object.assign(mv3d["a" /* default */],{
 		alpha(conf,n){
 			conf.alpha=Number(n);
 		},
-		glow(conf,n,a=1){
+		glow(conf,n,a=0){
 			if(isNaN(n)){
 				conf.glow = Object(util["makeColor"])(n);
 			}else{
@@ -5102,10 +5102,16 @@ Game_Event.prototype.initialize = async function() {
 		config,
 	);
 	if('pos' in config){
-		this.locate(
-			Object(util["relativeNumber"])(event.x,config.pos.x),
-			Object(util["relativeNumber"])(event.y,config.pos.y),
-		);
+		const pos = config.pos;
+		if('x' in pos||'y' in pos){
+			this.locate(
+				Object(util["relativeNumber"])(event.x,pos.x),
+				Object(util["relativeNumber"])(event.y,pos.y),
+			);
+		}
+		if('z' in pos){
+			this._mv3d_z = Object(util["relativeNumber"])(mv3d["a" /* default */].getWalkHeight(event.x,event.y),pos.z);
+		}
 	}
 	if(!this.mv3d_blenders){
 		this.mv3d_blenders={};
@@ -6982,7 +6988,7 @@ class model_Model extends babylon["TransformNode"]{
 		this.material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
 		this.material.ambientColor.set(1,1,1);
 		this.material.specularColor.set(0,0,0);
-		this.material.maxSimultaneousLights=this.LIGHT_LIMIT;
+		this.material.maxSimultaneousLights=mv3d["a" /* default */].LIGHT_LIMIT;
 		this.mesh.material=this.material;
 	}
 	disposeMaterial(){
@@ -7056,7 +7062,7 @@ class model_MeshGroup extends babylon["TransformNode"]{
 	}
 }
 mv3d["a" /* default */].MeshGroup = model_MeshGroup;
-for(const property of ['receiveShadows','renderingGroupId','visibility']){
+for(const property of ['receiveShadows','renderingGroupId','visibility','character']){
 	Object.defineProperty(model_MeshGroup.prototype,property,{
 		get(){ const p=this[`_${property}`]; return p!==undefined?p:this.meshes[0][property]; },
 		set(v){
@@ -7148,13 +7154,29 @@ Object.assign(mv3d["a" /* default */],{
 
 	setupSpriteMeshes(){
 		const meshes = this.Meshes = {};
-		meshes.BASIC=babylon["MeshBuilder"].CreatePlane('sprite mesh',{ sideOrientation: mod_babylon["b" /* DOUBLESIDE */]},mv3d["a" /* default */].scene);
-		meshes.FLAT=babylon["Mesh"].MergeMeshes([meshes.BASIC.clone().rotate(util["XAxis"],Math.PI/2,mod_babylon["h" /* WORLDSPACE */])]);
-		meshes.SPRITE=babylon["Mesh"].MergeMeshes([meshes.BASIC.clone().translate(util["YAxis"],0.5,mod_babylon["h" /* WORLDSPACE */])]);
-		meshes.CROSS=babylon["Mesh"].MergeMeshes([
-			meshes.SPRITE.clone(),
-			meshes.SPRITE.clone().rotate(util["YAxis"],Math.PI/2,mod_babylon["h" /* WORLDSPACE */]),
-		]);
+		if(!mv3d["a" /* default */].DYNAMIC_NORMALS){
+			meshes.BASIC=babylon["MeshBuilder"].CreatePlane('sprite mesh',{ sideOrientation: mod_babylon["b" /* DOUBLESIDE */]},mv3d["a" /* default */].scene);
+			meshes.FLAT=babylon["Mesh"].MergeMeshes([meshes.BASIC.clone().rotate(util["XAxis"],Math.PI/2,mod_babylon["h" /* WORLDSPACE */])]);
+			meshes.SPRITE=babylon["Mesh"].MergeMeshes([meshes.BASIC.clone().translate(util["YAxis"],0.5,mod_babylon["h" /* WORLDSPACE */])]);
+			meshes.BOARD=meshes.SPRITE;
+			meshes.CROSS=babylon["Mesh"].MergeMeshes([
+				meshes.BOARD.clone(),
+				meshes.BOARD.clone().rotate(util["YAxis"],Math.PI/2,mod_babylon["h" /* WORLDSPACE */]),
+			]);
+		}else{
+			// TODO: build the dynamic normals meshes
+			vdata = new babylon["VertexData"]();
+			vdata.positions=([-0.5,1,0,0.5,1,0,-0.5,0,0,0.5,0,0]);
+			vdata.indices=[1,0,2,1,2,3];
+			vdata.uvs=[0,1,1,1,0,0,1,0];
+			vdata.normals=[0,1,0,0,1,0,0,1,0,0,1,0];
+			meshes.SPRITE = new babylon["Mesh"]('sprite mesh', mv3d["a" /* default */].scene);
+			vdata.applyToMesh(meshes.SPRITE,true);
+			meshes.BOARD = new babylon["Mesh"]('board mesh', mv3d["a" /* default */].scene);
+			vdata.applyToMesh(meshes.BOARD,false);
+
+		}
+
 		for (const key in meshes){
 			meshes[key].renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
 			mv3d["a" /* default */].scene.removeMesh(meshes[key]);
@@ -7289,7 +7311,7 @@ class characters_Character extends babylon["TransformNode"]{
 	//===========================
 
 	async setMaterial(src){
-		this.model.setMaterial(src);
+		await this.model.setMaterial(src);
 		this.updateScale();
 		this.needsMaterialUpdate=true;
 	}
@@ -7312,6 +7334,9 @@ class characters_Character extends babylon["TransformNode"]{
 	}
 	get bitmap(){
 		return this.mv_sprite.bitmap;
+	}
+	get shape(){
+		return this.model.shape;
 	}
 
 	setTileMaterial(){
@@ -7340,7 +7365,7 @@ class characters_Character extends babylon["TransformNode"]{
 		this._waitingForBitmap=false;
 	}
 
-	async waitTextureLoaded(texture=this.texture){
+	async waitTextureLoaded(texture=this.model.texture){
 		await this.waitBitmapLoaded();
 		await mv3d["a" /* default */].waitTextureLoaded(texture);
 	}
@@ -7458,6 +7483,7 @@ class characters_Character extends babylon["TransformNode"]{
 			this.flashlight.excludedMeshes.push(...this.model.meshes);
 		}
 		this.updateScale();
+		this.model.mesh.character=this;
 	}
 
 	//===========================
@@ -7566,13 +7592,13 @@ class characters_Character extends babylon["TransformNode"]{
 		if('pos' in settings){
 			const event=this.char.event();
 			const pos = settings.pos;
-			if(pos.x||pos.y){
+			if('x' in pos||'y' in pos){
 				this.char.locate(
-					pos.x?Object(util["relativeNumber"])(event.x,pos.x):this.char.x,
-					pos.y?Object(util["relativeNumber"])(event.y,pos.y):this.char.y,
+					'x' in pos?Object(util["relativeNumber"])(event.x,pos.x):this.char.x,
+					'y' in pos?Object(util["relativeNumber"])(event.y,pos.y):this.char.y,
 				);
 			}
-			if(pos.z){
+			if('z' in pos){
 				this.z = Object(util["relativeNumber"])(mv3d["a" /* default */].getWalkHeight(event.x,event.y),pos.z);
 			}
 			if(transient)delete settings.pos;
@@ -7622,10 +7648,10 @@ class characters_Character extends babylon["TransformNode"]{
 
 	updateConfiguration(){
 		const shapes = mv3d["a" /* default */].enumShapes;
-		if(this.shape===shapes.SPRITE){
+		if(this.model.shape===shapes.SPRITE){
 			this.spriteOrigin.pitch=0;
 			this.spriteOrigin.yaw=0;
-		}else if(this.shape===shapes.BOARD){
+		}else if(this.model.shape===shapes.BOARD){
 			this.spriteOrigin.pitch=this.getConfig('pitch',0);
 			this.spriteOrigin.yaw=this.getConfig('yaw',0);
 		}else{
@@ -7736,6 +7762,7 @@ class characters_Character extends babylon["TransformNode"]{
 		this.flashlight.range = this.blendFlashlightDistance.targetValue();
 		this.flashlight.intensity=this.blendFlashlightIntensity.targetValue()*mv3d["a" /* default */].FLASHLIGHT_INTENSITY_MULTIPLIER;
 		this.flashlight.diffuse.set(...this.blendFlashlightColor.targetComponents());
+		this.flashlight.specular.set(0,0,0);
 		//this.flashlight.projectionTexture = mv3d.getFlashlightTexture();
 		this.flashlight.direction.y=-1;
 		this.flashlightOrigin=new babylon["TransformNode"]('flashlight origin',mv3d["a" /* default */].scene);
@@ -7768,6 +7795,7 @@ class characters_Character extends babylon["TransformNode"]{
 		this.lamp = new babylon["PointLight"]('lamp',babylon["Vector3"].Zero(),mv3d["a" /* default */].scene);
 		this.lamp.renderPriority=1;
 		this.lamp.diffuse.set(...this.blendLampColor.targetComponents());
+		this.lamp.specular.set(0,0,0);
 		this.lamp.intensity=this.blendLampIntensity.targetValue();
 		this.lamp.range=this.blendLampDistance.targetValue();
 		this.lampOrigin=new babylon["TransformNode"]('lamp origin',mv3d["a" /* default */].scene);
@@ -8010,25 +8038,19 @@ class characters_Character extends babylon["TransformNode"]{
 			}
 		}else if(this.model.shape===mv3d["a" /* default */].enumShapes.SPRITE){
 			this.spriteOrigin.z = mv3d["a" /* default */].LAYER_DIST*4 * (1-Math.max(0,Math.min(90,mv3d["a" /* default */].blendCameraPitch.currentValue()))/90);
-		}else{
-			this.spriteOrigin.z = 0;
-		}
-
-		const billboardOffset = new babylon["Vector2"](Math.sin(-mv3d["a" /* default */].cameraNode.rotation.y),Math.cos(mv3d["a" /* default */].cameraNode.rotation.y));
-		this.billboardOffset=billboardOffset;
-		if(this.shape===mv3d["a" /* default */].enumShapes.SPRITE){
+		
+			const billboardOffset = new babylon["Vector2"](Math.sin(-mv3d["a" /* default */].cameraNode.rotation.y),Math.cos(mv3d["a" /* default */].cameraNode.rotation.y));
 			this.spriteOrigin.x=billboardOffset.x*mv3d["a" /* default */].SPRITE_OFFSET;
 			this.spriteOrigin.y=billboardOffset.y*mv3d["a" /* default */].SPRITE_OFFSET;
-			this.lightOrigin.x=this.spriteOrigin.x;
-			this.lightOrigin.y=this.spriteOrigin.y;
-		}else{
-			this.lightOrigin.x=0;
-			this.lightOrigin.y=0;
 		}
+
+		this.lightOrigin.x=this.spriteOrigin.x;
+		this.lightOrigin.y=this.spriteOrigin.y;
 
 		this.spriteOrigin.x += this.getConfig('xoff',0);
 		this.spriteOrigin.y += this.getConfig('yoff',0);
 		this.spriteOrigin.z += this.getConfig('zoff',0);
+		
 	}
 
 	updatePosition(){
@@ -8164,7 +8186,7 @@ class characters_Character extends babylon["TransformNode"]{
 	}
 
 	updateShadow(){
-		let shadowVisible = Boolean(this.getConfig('shadow', this.shape!=mv3d["a" /* default */].enumShapes.FLAT ));
+		let shadowVisible = Boolean(this.getConfig('shadow', this.model.shape!=mv3d["a" /* default */].enumShapes.FLAT ));
 
 		if(shadowVisible&&(this.isPlayer||this.isFollower)){
 			const myIndex = mv3d["a" /* default */].characters.indexOf(this);
@@ -8241,7 +8263,7 @@ class characters_Character extends babylon["TransformNode"]{
 	}
 
 	getCHeight(){
-		let collide = this.getConfig('collide',this.shape===mv3d["a" /* default */].enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+		let collide = this.getConfig('collide',this.model.shape===mv3d["a" /* default */].enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
 		return collide===true ? this.spriteHeight : Number(collide);
 	}
 

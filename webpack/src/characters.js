@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { TransformNode, MeshBuilder, StandardMaterial, Mesh, Vector2, SpotLight, Vector3, PointLight, Color4 } from 'babylonjs';
+import { TransformNode, MeshBuilder, StandardMaterial, Mesh, Vector2, SpotLight, Vector3, PointLight, Color4, VertexData } from 'babylonjs';
 import { WORLDSPACE, DOUBLESIDE } from './mod_babylon.js';
 import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
@@ -44,13 +44,29 @@ Object.assign(mv3d,{
 
 	setupSpriteMeshes(){
 		const meshes = this.Meshes = {};
-		meshes.BASIC=MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene);
-		meshes.FLAT=Mesh.MergeMeshes([meshes.BASIC.clone().rotate(XAxis,Math.PI/2,WORLDSPACE)]);
-		meshes.SPRITE=Mesh.MergeMeshes([meshes.BASIC.clone().translate(YAxis,0.5,WORLDSPACE)]);
-		meshes.CROSS=Mesh.MergeMeshes([
-			meshes.SPRITE.clone(),
-			meshes.SPRITE.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
-		]);
+		if(!mv3d.DYNAMIC_NORMALS){
+			meshes.BASIC=MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene);
+			meshes.FLAT=Mesh.MergeMeshes([meshes.BASIC.clone().rotate(XAxis,Math.PI/2,WORLDSPACE)]);
+			meshes.SPRITE=Mesh.MergeMeshes([meshes.BASIC.clone().translate(YAxis,0.5,WORLDSPACE)]);
+			meshes.BOARD=meshes.SPRITE;
+			meshes.CROSS=Mesh.MergeMeshes([
+				meshes.BOARD.clone(),
+				meshes.BOARD.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
+			]);
+		}else{
+			// TODO: build the dynamic normals meshes
+			vdata = new VertexData();
+			vdata.positions=([-0.5,1,0,0.5,1,0,-0.5,0,0,0.5,0,0]);
+			vdata.indices=[1,0,2,1,2,3];
+			vdata.uvs=[0,1,1,1,0,0,1,0];
+			vdata.normals=[0,1,0,0,1,0,0,1,0,0,1,0];
+			meshes.SPRITE = new Mesh('sprite mesh', mv3d.scene);
+			vdata.applyToMesh(meshes.SPRITE,true);
+			meshes.BOARD = new Mesh('board mesh', mv3d.scene);
+			vdata.applyToMesh(meshes.BOARD,false);
+
+		}
+
 		for (const key in meshes){
 			meshes[key].renderingGroupId=mv3d.enumRenderGroups.MAIN;
 			mv3d.scene.removeMesh(meshes[key]);
@@ -185,7 +201,7 @@ class Character extends TransformNode{
 	//===========================
 
 	async setMaterial(src){
-		this.model.setMaterial(src);
+		await this.model.setMaterial(src);
 		this.updateScale();
 		this.needsMaterialUpdate=true;
 	}
@@ -208,6 +224,9 @@ class Character extends TransformNode{
 	}
 	get bitmap(){
 		return this.mv_sprite.bitmap;
+	}
+	get shape(){
+		return this.model.shape;
 	}
 
 	setTileMaterial(){
@@ -236,7 +255,7 @@ class Character extends TransformNode{
 		this._waitingForBitmap=false;
 	}
 
-	async waitTextureLoaded(texture=this.texture){
+	async waitTextureLoaded(texture=this.model.texture){
 		await this.waitBitmapLoaded();
 		await mv3d.waitTextureLoaded(texture);
 	}
@@ -354,6 +373,7 @@ class Character extends TransformNode{
 			this.flashlight.excludedMeshes.push(...this.model.meshes);
 		}
 		this.updateScale();
+		this.model.mesh.character=this;
 	}
 
 	//===========================
@@ -462,13 +482,13 @@ class Character extends TransformNode{
 		if('pos' in settings){
 			const event=this.char.event();
 			const pos = settings.pos;
-			if(pos.x||pos.y){
+			if('x' in pos||'y' in pos){
 				this.char.locate(
-					pos.x?relativeNumber(event.x,pos.x):this.char.x,
-					pos.y?relativeNumber(event.y,pos.y):this.char.y,
+					'x' in pos?relativeNumber(event.x,pos.x):this.char.x,
+					'y' in pos?relativeNumber(event.y,pos.y):this.char.y,
 				);
 			}
-			if(pos.z){
+			if('z' in pos){
 				this.z = relativeNumber(mv3d.getWalkHeight(event.x,event.y),pos.z);
 			}
 			if(transient)delete settings.pos;
@@ -518,10 +538,10 @@ class Character extends TransformNode{
 
 	updateConfiguration(){
 		const shapes = mv3d.enumShapes;
-		if(this.shape===shapes.SPRITE){
+		if(this.model.shape===shapes.SPRITE){
 			this.spriteOrigin.pitch=0;
 			this.spriteOrigin.yaw=0;
-		}else if(this.shape===shapes.BOARD){
+		}else if(this.model.shape===shapes.BOARD){
 			this.spriteOrigin.pitch=this.getConfig('pitch',0);
 			this.spriteOrigin.yaw=this.getConfig('yaw',0);
 		}else{
@@ -632,6 +652,7 @@ class Character extends TransformNode{
 		this.flashlight.range = this.blendFlashlightDistance.targetValue();
 		this.flashlight.intensity=this.blendFlashlightIntensity.targetValue()*mv3d.FLASHLIGHT_INTENSITY_MULTIPLIER;
 		this.flashlight.diffuse.set(...this.blendFlashlightColor.targetComponents());
+		this.flashlight.specular.set(0,0,0);
 		//this.flashlight.projectionTexture = mv3d.getFlashlightTexture();
 		this.flashlight.direction.y=-1;
 		this.flashlightOrigin=new TransformNode('flashlight origin',mv3d.scene);
@@ -664,6 +685,7 @@ class Character extends TransformNode{
 		this.lamp = new PointLight('lamp',Vector3.Zero(),mv3d.scene);
 		this.lamp.renderPriority=1;
 		this.lamp.diffuse.set(...this.blendLampColor.targetComponents());
+		this.lamp.specular.set(0,0,0);
 		this.lamp.intensity=this.blendLampIntensity.targetValue();
 		this.lamp.range=this.blendLampDistance.targetValue();
 		this.lampOrigin=new TransformNode('lamp origin',mv3d.scene);
@@ -906,25 +928,19 @@ class Character extends TransformNode{
 			}
 		}else if(this.model.shape===mv3d.enumShapes.SPRITE){
 			this.spriteOrigin.z = mv3d.LAYER_DIST*4 * (1-Math.max(0,Math.min(90,mv3d.blendCameraPitch.currentValue()))/90);
-		}else{
-			this.spriteOrigin.z = 0;
-		}
-
-		const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y));
-		this.billboardOffset=billboardOffset;
-		if(this.shape===mv3d.enumShapes.SPRITE){
+		
+			const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y));
 			this.spriteOrigin.x=billboardOffset.x*mv3d.SPRITE_OFFSET;
 			this.spriteOrigin.y=billboardOffset.y*mv3d.SPRITE_OFFSET;
-			this.lightOrigin.x=this.spriteOrigin.x;
-			this.lightOrigin.y=this.spriteOrigin.y;
-		}else{
-			this.lightOrigin.x=0;
-			this.lightOrigin.y=0;
 		}
+
+		this.lightOrigin.x=this.spriteOrigin.x;
+		this.lightOrigin.y=this.spriteOrigin.y;
 
 		this.spriteOrigin.x += this.getConfig('xoff',0);
 		this.spriteOrigin.y += this.getConfig('yoff',0);
 		this.spriteOrigin.z += this.getConfig('zoff',0);
+		
 	}
 
 	updatePosition(){
@@ -1060,7 +1076,7 @@ class Character extends TransformNode{
 	}
 
 	updateShadow(){
-		let shadowVisible = Boolean(this.getConfig('shadow', this.shape!=mv3d.enumShapes.FLAT ));
+		let shadowVisible = Boolean(this.getConfig('shadow', this.model.shape!=mv3d.enumShapes.FLAT ));
 
 		if(shadowVisible&&(this.isPlayer||this.isFollower)){
 			const myIndex = mv3d.characters.indexOf(this);
@@ -1137,7 +1153,7 @@ class Character extends TransformNode{
 	}
 
 	getCHeight(){
-		let collide = this.getConfig('collide',this.shape===mv3d.enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
+		let collide = this.getConfig('collide',this.model.shape===mv3d.enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
 		return collide===true ? this.spriteHeight : Number(collide);
 	}
 

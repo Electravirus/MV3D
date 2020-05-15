@@ -442,7 +442,7 @@ Object.assign(mv3d,{
 			conf.transparent=true;
 			conf.alpha=Number(n);
 		},
-		glow(conf,n,a=1){
+		glow(conf,n,a=0){
 			if(isNaN(n)){
 				conf.glow = makeColor(n);
 			}else{
@@ -550,7 +550,7 @@ Object.assign(mv3d,{
 		alpha(conf,n){
 			conf.alpha=Number(n);
 		},
-		glow(conf,n,a=1){
+		glow(conf,n,a=0){
 			if(isNaN(n)){
 				conf.glow = makeColor(n);
 			}else{
@@ -704,10 +704,16 @@ Game_Event.prototype.initialize = async function() {
 		config,
 	);
 	if('pos' in config){
-		this.locate(
-			relativeNumber(event.x,config.pos.x),
-			relativeNumber(event.y,config.pos.y),
-		);
+		const pos = config.pos;
+		if('x' in pos||'y' in pos){
+			this.locate(
+				relativeNumber(event.x,pos.x),
+				relativeNumber(event.y,pos.y),
+			);
+		}
+		if('z' in pos){
+			this._mv3d_z = relativeNumber(mv3d.getWalkHeight(event.x,event.y),pos.z);
+		}
 	}
 	if(!this.mv3d_blenders){
 		this.mv3d_blenders={};
