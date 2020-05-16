@@ -57,6 +57,8 @@ export class Model extends TransformNode{
 		this.material.ambientColor.set(1,1,1);
 		this.material.specularColor.set(0,0,0);
 		this.material.maxSimultaneousLights=mv3d.LIGHT_LIMIT;
+		this.material.backFaceCulling=false;
+		this.material.twoSidedLighting=true;
 		this.mesh.material=this.material;
 	}
 	disposeMaterial(){
@@ -78,6 +80,7 @@ export class Model extends TransformNode{
 		this.mesh.dispose();
 	}
 	setMeshForShape(shape){
+		if(this.shape===shape){ return; }
 		this.shape=shape;
 		let geometry = mv3d.Meshes.SPRITE;
 		const shapes = mv3d.enumShapes;

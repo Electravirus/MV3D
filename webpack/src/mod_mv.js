@@ -64,9 +64,16 @@ Sprite_Character.prototype.setCharacter = function(character) {
 
 const _performTransfer=Game_Player.prototype.performTransfer;
 Game_Player.prototype.performTransfer = function() {
+	const newmap = this._newMapId !== $gameMap.mapId();
 	_performTransfer.apply(this,arguments);
 	if(mv3d.is1stPerson()){
 		mv3d.blendCameraYaw.setValue(mv3d.dirToYaw($gamePlayer.direction(),0));
+	}
+	if(!newmap){
+		this.z = mv3d.getWalkHeight(this.x,this.y);
+		for ( const follower of this._followers._data){
+			follower.z=this.z;
+		}
 	}
 };
 

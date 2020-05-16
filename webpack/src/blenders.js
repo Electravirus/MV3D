@@ -149,6 +149,10 @@ Object.assign(mv3d,{
 			this.cameraNode.translate(XAxis,-$gameScreen._shake/48,LOCALSPACE);
 			this.updateDirection();
 			this.updateFov();
+
+			if(mv3d.DYNAMIC_NORMALS && (reorient||this.blendCameraPitch.updated) ){
+				this.updateDynamicNormals();
+			}
 		}
 
 		//fog
@@ -219,7 +223,6 @@ export class Blender{
 		this.max=Infinity;
 		this.min=-Infinity;
 		this.cycle=false;
-		this.changed=false;
 		if(track){
 			Blender.list.push(this);
 		}
@@ -233,7 +236,7 @@ export class Blender{
 			this.value=target - diff;
 		}
 		this.saveValue(this.key,target);
-		if(!time){ this.changed=true; this.value=target; }
+		if(!time){ this.instantChanged=true; this.value=target; }
 		if(normalize&&this.cycle){
 			while ( Math.abs(diff)>this.cycle/2 ){
 				this.value += Math.sign(diff)*this.cycle;
@@ -248,9 +251,9 @@ export class Blender{
 	update(){
 		const target = this.targetValue();
 		if(this.value===target){ 
-			if(this.changed){
+			if(this.instantChanged){
 				this.updated=true;
-				this.changed=false;
+				delete this.instantChanged;
 				return true;
 			}else{
 				this.updated=false;

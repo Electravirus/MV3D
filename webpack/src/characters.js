@@ -1,7 +1,7 @@
 import mv3d from './mv3d.js';
 import { TransformNode, MeshBuilder, StandardMaterial, Mesh, Vector2, SpotLight, Vector3, PointLight, Color4, VertexData } from 'babylonjs';
 import { WORLDSPACE, DOUBLESIDE } from './mod_babylon.js';
-import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override } from './util.js';
+import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override, sin, cos } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
 import { Model } from './model.js';
 
@@ -42,34 +42,59 @@ Object.assign(mv3d,{
 		}
 	},
 
+	updateDynamicNormals(){
+		if(!mv3d.DYNAMIC_NORMALS){ return; }
+		const pitch = this.blendCameraPitch.currentValue();
+		const y = sin(degtorad(pitch));
+		const z = -cos(degtorad(pitch));
+		this.Meshes.SPRITE.updateVerticesData(BABYLON.VertexBuffer.NormalKind, [ 0,y,z, 0,y,z, 0,y,z, 0,y,z ]);
+	},
+
 	setupSpriteMeshes(){
 		const meshes = this.Meshes = {};
-		if(!mv3d.DYNAMIC_NORMALS){
-			meshes.BASIC=MeshBuilder.CreatePlane('sprite mesh',{ sideOrientation: DOUBLESIDE},mv3d.scene);
-			meshes.FLAT=Mesh.MergeMeshes([meshes.BASIC.clone().rotate(XAxis,Math.PI/2,WORLDSPACE)]);
-			meshes.SPRITE=Mesh.MergeMeshes([meshes.BASIC.clone().translate(YAxis,0.5,WORLDSPACE)]);
-			meshes.BOARD=meshes.SPRITE;
-			meshes.CROSS=Mesh.MergeMeshes([
-				meshes.BOARD.clone(),
-				meshes.BOARD.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
-			]);
-		}else{
-			// TODO: build the dynamic normals meshes
-			vdata = new VertexData();
-			vdata.positions=([-0.5,1,0,0.5,1,0,-0.5,0,0,0.5,0,0]);
-			vdata.indices=[1,0,2,1,2,3];
-			vdata.uvs=[0,1,1,1,0,0,1,0];
-			vdata.normals=[0,1,0,0,1,0,0,1,0,0,1,0];
-			meshes.SPRITE = new Mesh('sprite mesh', mv3d.scene);
-			vdata.applyToMesh(meshes.SPRITE,true);
-			meshes.BOARD = new Mesh('board mesh', mv3d.scene);
-			vdata.applyToMesh(meshes.BOARD,false);
 
-		}
+		const vdata = new VertexData();
+		vdata.indices=[1,0,2,1,2,3];
+		vdata.uvs=[0,1,1,1,0,0,1,0];
+		const normals_up = [ 0,1,0, 0,1,0, 0,1,0, 0,1,0 ];
+		const normals_front = [ 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1 ]
+
+		vdata.positions=[ -0.5,0.5,0, 0.5,0.5,0, -0.5,-0.5,0, 0.5,-0.5,0 ];
+		vdata.normals=normals_front;
+		meshes.BASIC = new Mesh('basic mesh', mv3d.scene);
+		vdata.applyToMesh(meshes.BASIC,false);
+
+		vdata.positions=[ -0.5,0,0.5, 0.5,0,0.5, -0.5,0,-0.5, 0.5,0,-0.5 ];
+		vdata.normals=normals_up;
+		meshes.FLAT = new Mesh('flat mesh', mv3d.scene);
+		vdata.applyToMesh(meshes.FLAT,false);
+
+		vdata.positions=[ -0.5,1,0, 0.5,1,0, -0.5,0,0, 0.5,0,0 ];
+		vdata.normals=mv3d.DYNAMIC_NORMALS?normals_up:normals_front;
+		meshes.SPRITE = new Mesh('sprite mesh', mv3d.scene);
+		vdata.applyToMesh(meshes.SPRITE,true);
+		meshes.BOARD = new Mesh('board mesh', mv3d.scene);
+		vdata.applyToMesh(meshes.BOARD,false);
+
+		vdata.normals=normals_front;
+		meshes.WALL = new Mesh('wall mesh', mv3d.scene);
+		vdata.applyToMesh(meshes.WALL,false);
+
+		vdata.normals=mv3d.ABNORMAL?normals_up:normals_front;
+		meshes.TEMP_CROSS = new Mesh('cross mesh', mv3d.scene);
+		vdata.applyToMesh(meshes.TEMP_CROSS,false);
+		meshes.CROSS=Mesh.MergeMeshes([
+			meshes.TEMP_CROSS.clone(),
+			meshes.TEMP_CROSS.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
+		]);
 
 		for (const key in meshes){
 			meshes[key].renderingGroupId=mv3d.enumRenderGroups.MAIN;
 			mv3d.scene.removeMesh(meshes[key]);
+			if(key.startsWith('TEMP_')){
+				meshes[key].dispose();
+				delete meshes[key];
+			}
 		}
 	},
 
@@ -706,9 +731,18 @@ class Character extends TransformNode{
 
 	updateLights(){
 		if(this.flashlight){
-			const flashlightYaw = 180+relativeNumber( mv3d.dirToYaw( this.char.mv3d_direction(),mv3d.DIR8MOVE ), this.getConfig('flashlightYaw','+0'));
+			let flashlightYaw = 180+relativeNumber( mv3d.dirToYaw( this.char.mv3d_direction(),mv3d.DIR8MOVE ), this.getConfig('flashlightYaw','+0'));
+			let firstPerson=this.isPlayer&&mv3d.is1stPerson();
+			if(this.isPlayer){
+				let flashlightPitch = this.getConfig('flashlightPitch',90);
+				if(firstPerson){
+					flashlightYaw=180+mv3d.blendCameraYaw.currentValue();
+					flashlightPitch=mv3d.blendCameraPitch.currentValue();
+				}
+				this.blendFlashlightPitch.setValue(flashlightPitch,firstPerson?0:0.25);
+			}
 			if(flashlightYaw !== this.blendFlashlightYaw.targetValue()){
-				this.blendFlashlightYaw.setValue(flashlightYaw,0.25);
+				this.blendFlashlightYaw.setValue(flashlightYaw,firstPerson?0:0.25);
 			}
 			if(this.blendFlashlightColor.update()|this.blendFlashlightIntensity.update()
 			|this.blendFlashlightDistance.update()|this.blendFlashlightAngle.update()
@@ -934,8 +968,13 @@ class Character extends TransformNode{
 			this.spriteOrigin.y=billboardOffset.y*mv3d.SPRITE_OFFSET;
 		}
 
-		this.lightOrigin.x=this.spriteOrigin.x;
-		this.lightOrigin.y=this.spriteOrigin.y;
+		if(this.isPlayer&&mv3d.is1stPerson()){
+			this.lightOrigin.x=0;
+			this.lightOrigin.y=0;
+		}else{
+			this.lightOrigin.x=this.spriteOrigin.x;
+			this.lightOrigin.y=this.spriteOrigin.y;
+		}
 
 		this.spriteOrigin.x += this.getConfig('xoff',0);
 		this.spriteOrigin.y += this.getConfig('yoff',0);

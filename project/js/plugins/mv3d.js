@@ -3139,7 +3139,7 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_Character.prototy
 
 	if(this.isMovementSucceeded()){
 		adjustDirection=true;
-	}else if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8SMART){
+	}else if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8SMART && !this.isDebugThrough()){
 		this.moveStraight(h);
 		if(!this.isMovementSucceeded()){
 			this.moveStraight(v);
@@ -3157,6 +3157,7 @@ Object(_util_js__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_Character.prototy
 },_dir8Condition);
 
 Object(_util_js__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_CharacterBase.prototype,'canPassDiagonally',o=>function(x,y,horz,vert){
+	if(this.isDebugThrough()){ return true; }
     const x2 = $gameMap.roundXWithDirection(x, horz);
 	const y2 = $gameMap.roundYWithDirection(y, vert);
 	if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x,y2,true,false)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y,true,false)){
@@ -3346,9 +3347,16 @@ Sprite_Character.prototype.setCharacter = function(character) {
 
 const _performTransfer=Game_Player.prototype.performTransfer;
 Game_Player.prototype.performTransfer = function() {
+	const newmap = this._newMapId !== $gameMap.mapId();
 	_performTransfer.apply(this,arguments);
 	if(mv3d["a" /* default */].is1stPerson()){
 		mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].dirToYaw($gamePlayer.direction(),0));
+	}
+	if(!newmap){
+		this.z = mv3d["a" /* default */].getWalkHeight(this.x,this.y);
+		for ( const follower of this._followers._data){
+			follower.z=this.z;
+		}
 	}
 };
 
@@ -3870,6 +3878,10 @@ Object.assign(mv3d["a" /* default */],{
 			this.cameraNode.translate(util["XAxis"],-$gameScreen._shake/48,mod_babylon["e" /* LOCALSPACE */]);
 			this.updateDirection();
 			this.updateFov();
+
+			if(mv3d["a" /* default */].DYNAMIC_NORMALS && (reorient||this.blendCameraPitch.updated) ){
+				this.updateDynamicNormals();
+			}
 		}
 
 		//fog
@@ -3940,7 +3952,6 @@ class blenders_Blender{
 		this.max=Infinity;
 		this.min=-Infinity;
 		this.cycle=false;
-		this.changed=false;
 		if(track){
 			blenders_Blender.list.push(this);
 		}
@@ -3954,7 +3965,7 @@ class blenders_Blender{
 			this.value=target - diff;
 		}
 		this.saveValue(this.key,target);
-		if(!time){ this.changed=true; this.value=target; }
+		if(!time){ this.instantChanged=true; this.value=target; }
 		if(normalize&&this.cycle){
 			while ( Math.abs(diff)>this.cycle/2 ){
 				this.value += Math.sign(diff)*this.cycle;
@@ -3969,9 +3980,9 @@ class blenders_Blender{
 	update(){
 		const target = this.targetValue();
 		if(this.value===target){ 
-			if(this.changed){
+			if(this.instantChanged){
 				this.updated=true;
-				this.changed=false;
+				delete this.instantChanged;
 				return true;
 			}else{
 				this.updated=false;
@@ -6989,6 +7000,8 @@ class model_Model extends babylon["TransformNode"]{
 		this.material.ambientColor.set(1,1,1);
 		this.material.specularColor.set(0,0,0);
 		this.material.maxSimultaneousLights=mv3d["a" /* default */].LIGHT_LIMIT;
+		this.material.backFaceCulling=false;
+		this.material.twoSidedLighting=true;
 		this.mesh.material=this.material;
 	}
 	disposeMaterial(){
@@ -7010,6 +7023,7 @@ class model_Model extends babylon["TransformNode"]{
 		this.mesh.dispose();
 	}
 	setMeshForShape(shape){
+		if(this.shape===shape){ return; }
 		this.shape=shape;
 		let geometry = mv3d["a" /* default */].Meshes.SPRITE;
 		const shapes = mv3d["a" /* default */].enumShapes;
@@ -7152,34 +7166,59 @@ Object.assign(mv3d["a" /* default */],{
 		}
 	},
 
+	updateDynamicNormals(){
+		if(!mv3d["a" /* default */].DYNAMIC_NORMALS){ return; }
+		const pitch = this.blendCameraPitch.currentValue();
+		const y = Object(util["sin"])(Object(util["degtorad"])(pitch));
+		const z = -Object(util["cos"])(Object(util["degtorad"])(pitch));
+		this.Meshes.SPRITE.updateVerticesData(BABYLON.VertexBuffer.NormalKind, [ 0,y,z, 0,y,z, 0,y,z, 0,y,z ]);
+	},
+
 	setupSpriteMeshes(){
 		const meshes = this.Meshes = {};
-		if(!mv3d["a" /* default */].DYNAMIC_NORMALS){
-			meshes.BASIC=babylon["MeshBuilder"].CreatePlane('sprite mesh',{ sideOrientation: mod_babylon["b" /* DOUBLESIDE */]},mv3d["a" /* default */].scene);
-			meshes.FLAT=babylon["Mesh"].MergeMeshes([meshes.BASIC.clone().rotate(util["XAxis"],Math.PI/2,mod_babylon["h" /* WORLDSPACE */])]);
-			meshes.SPRITE=babylon["Mesh"].MergeMeshes([meshes.BASIC.clone().translate(util["YAxis"],0.5,mod_babylon["h" /* WORLDSPACE */])]);
-			meshes.BOARD=meshes.SPRITE;
-			meshes.CROSS=babylon["Mesh"].MergeMeshes([
-				meshes.BOARD.clone(),
-				meshes.BOARD.clone().rotate(util["YAxis"],Math.PI/2,mod_babylon["h" /* WORLDSPACE */]),
-			]);
-		}else{
-			// TODO: build the dynamic normals meshes
-			vdata = new babylon["VertexData"]();
-			vdata.positions=([-0.5,1,0,0.5,1,0,-0.5,0,0,0.5,0,0]);
-			vdata.indices=[1,0,2,1,2,3];
-			vdata.uvs=[0,1,1,1,0,0,1,0];
-			vdata.normals=[0,1,0,0,1,0,0,1,0,0,1,0];
-			meshes.SPRITE = new babylon["Mesh"]('sprite mesh', mv3d["a" /* default */].scene);
-			vdata.applyToMesh(meshes.SPRITE,true);
-			meshes.BOARD = new babylon["Mesh"]('board mesh', mv3d["a" /* default */].scene);
-			vdata.applyToMesh(meshes.BOARD,false);
 
-		}
+		const vdata = new babylon["VertexData"]();
+		vdata.indices=[1,0,2,1,2,3];
+		vdata.uvs=[0,1,1,1,0,0,1,0];
+		const normals_up = [ 0,1,0, 0,1,0, 0,1,0, 0,1,0 ];
+		const normals_front = [ 0,0,-1, 0,0,-1, 0,0,-1, 0,0,-1 ]
+
+		vdata.positions=[ -0.5,0.5,0, 0.5,0.5,0, -0.5,-0.5,0, 0.5,-0.5,0 ];
+		vdata.normals=normals_front;
+		meshes.BASIC = new babylon["Mesh"]('basic mesh', mv3d["a" /* default */].scene);
+		vdata.applyToMesh(meshes.BASIC,false);
+
+		vdata.positions=[ -0.5,0,0.5, 0.5,0,0.5, -0.5,0,-0.5, 0.5,0,-0.5 ];
+		vdata.normals=normals_up;
+		meshes.FLAT = new babylon["Mesh"]('flat mesh', mv3d["a" /* default */].scene);
+		vdata.applyToMesh(meshes.FLAT,false);
+
+		vdata.positions=[ -0.5,1,0, 0.5,1,0, -0.5,0,0, 0.5,0,0 ];
+		vdata.normals=mv3d["a" /* default */].DYNAMIC_NORMALS?normals_up:normals_front;
+		meshes.SPRITE = new babylon["Mesh"]('sprite mesh', mv3d["a" /* default */].scene);
+		vdata.applyToMesh(meshes.SPRITE,true);
+		meshes.BOARD = new babylon["Mesh"]('board mesh', mv3d["a" /* default */].scene);
+		vdata.applyToMesh(meshes.BOARD,false);
+
+		vdata.normals=normals_front;
+		meshes.WALL = new babylon["Mesh"]('wall mesh', mv3d["a" /* default */].scene);
+		vdata.applyToMesh(meshes.WALL,false);
+
+		vdata.normals=mv3d["a" /* default */].ABNORMAL?normals_up:normals_front;
+		meshes.TEMP_CROSS = new babylon["Mesh"]('cross mesh', mv3d["a" /* default */].scene);
+		vdata.applyToMesh(meshes.TEMP_CROSS,false);
+		meshes.CROSS=babylon["Mesh"].MergeMeshes([
+			meshes.TEMP_CROSS.clone(),
+			meshes.TEMP_CROSS.clone().rotate(util["YAxis"],Math.PI/2,mod_babylon["h" /* WORLDSPACE */]),
+		]);
 
 		for (const key in meshes){
 			meshes[key].renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
 			mv3d["a" /* default */].scene.removeMesh(meshes[key]);
+			if(key.startsWith('TEMP_')){
+				meshes[key].dispose();
+				delete meshes[key];
+			}
 		}
 	},
 
@@ -7816,9 +7855,18 @@ class characters_Character extends babylon["TransformNode"]{
 
 	updateLights(){
 		if(this.flashlight){
-			const flashlightYaw = 180+Object(util["relativeNumber"])( mv3d["a" /* default */].dirToYaw( this.char.mv3d_direction(),mv3d["a" /* default */].DIR8MOVE ), this.getConfig('flashlightYaw','+0'));
+			let flashlightYaw = 180+Object(util["relativeNumber"])( mv3d["a" /* default */].dirToYaw( this.char.mv3d_direction(),mv3d["a" /* default */].DIR8MOVE ), this.getConfig('flashlightYaw','+0'));
+			let firstPerson=this.isPlayer&&mv3d["a" /* default */].is1stPerson();
+			if(this.isPlayer){
+				let flashlightPitch = this.getConfig('flashlightPitch',90);
+				if(firstPerson){
+					flashlightYaw=180+mv3d["a" /* default */].blendCameraYaw.currentValue();
+					flashlightPitch=mv3d["a" /* default */].blendCameraPitch.currentValue();
+				}
+				this.blendFlashlightPitch.setValue(flashlightPitch,firstPerson?0:0.25);
+			}
 			if(flashlightYaw !== this.blendFlashlightYaw.targetValue()){
-				this.blendFlashlightYaw.setValue(flashlightYaw,0.25);
+				this.blendFlashlightYaw.setValue(flashlightYaw,firstPerson?0:0.25);
 			}
 			if(this.blendFlashlightColor.update()|this.blendFlashlightIntensity.update()
 			|this.blendFlashlightDistance.update()|this.blendFlashlightAngle.update()
@@ -8044,8 +8092,13 @@ class characters_Character extends babylon["TransformNode"]{
 			this.spriteOrigin.y=billboardOffset.y*mv3d["a" /* default */].SPRITE_OFFSET;
 		}
 
-		this.lightOrigin.x=this.spriteOrigin.x;
-		this.lightOrigin.y=this.spriteOrigin.y;
+		if(this.isPlayer&&mv3d["a" /* default */].is1stPerson()){
+			this.lightOrigin.x=0;
+			this.lightOrigin.y=0;
+		}else{
+			this.lightOrigin.x=this.spriteOrigin.x;
+			this.lightOrigin.y=this.spriteOrigin.y;
+		}
 
 		this.spriteOrigin.x += this.getConfig('xoff',0);
 		this.spriteOrigin.y += this.getConfig('yoff',0);
