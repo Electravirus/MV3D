@@ -87,6 +87,10 @@ Object.assign(mv3d,{
 			meshes.TEMP_CROSS.clone(),
 			meshes.TEMP_CROSS.clone().rotate(YAxis,Math.PI/2,WORLDSPACE),
 		]);
+		meshes['8CROSS']=Mesh.MergeMeshes([
+			meshes.CROSS.clone(),
+			meshes.CROSS.clone().rotate(YAxis,Math.PI/4,WORLDSPACE),
+		]);
 
 		for (const key in meshes){
 			meshes[key].renderingGroupId=mv3d.enumRenderGroups.MAIN;

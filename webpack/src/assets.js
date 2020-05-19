@@ -35,8 +35,8 @@ Object.assign(mv3d,{
 		return new Promise(resolve=>bitmap.addLoadListener(()=>resolve(bitmap)));
 	},
 
-	async getCachedTilesetTexture(setN,animX=0,animY=0){
-		const key = `TS:${setN}|${animX},${animY}`;
+	async getCachedTilesetTexture(setN,animX=0,animY=0,options={}){
+		const key = `TS:${setN}|${animX},${animY}${this.getExtraBit2(options)}`;
 		if(key in this.textureCache){
 			return this.textureCache[key];
 		}
@@ -56,9 +56,13 @@ Object.assign(mv3d,{
 		texture.updateSamplingMode(1);
 		//texture.wrapU = Texture.CLAMP_ADDRESSMODE;
 		//texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+		if(options.cropTexture){
+			const ct = options.cropTexture;
+			texture.crop(ct.x,ct.y,ct.width,ct.height,true);
+		}
 		if(animX||animY){
 			const { width, height } = texture.getBaseSize();
-			texture.frameData={x:0,y:0,w:width,h:height};
+			texture.frameData = options.cropTexture || {x:0,y:0,width,height};
 			texture.animX = animX;
 			texture.animY = animY;
 			this.animatedTextures.push(texture);
@@ -94,11 +98,11 @@ Object.assign(mv3d,{
 
 	async getCachedTilesetMaterial(setN,animX=0,animY=0,options={}){
 		this.processMaterialOptions(options);
-		const key = `TS:${setN}|${animX},${animY}|${this.getExtraBit(options)}`;
+		const key = `TS:${setN}|${animX},${animY}|${this.getExtraBit(options)}${this.getExtraBit2(options)}`;
 		if(key in this.materialCache){
 			return this.materialCache[key];
 		}
-		const texture = await this.getCachedTilesetTexture(setN,animX,animY);
+		const texture = await this.getCachedTilesetTexture(setN,animX,animY,options);
 		const material = new StandardMaterial(key, this.scene);
 		material.diffuseTexture=texture;
 		if(options.transparent){
@@ -115,6 +119,7 @@ Object.assign(mv3d,{
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
 		material.backFaceCulling=options.backfaceCulling;
+		material.twoSidedLighting=options.twosided;
 		material.maxSimultaneousLights=this.LIGHT_LIMIT;
 		this.materialCache[key]=material;
 		return material;
@@ -126,6 +131,27 @@ Object.assign(mv3d,{
 		const animData = mv3d.getTileAnimationData(tileConf,side);
 		//console.log(options);
 		return await mv3d.getCachedTilesetMaterial(setN,animData.animX,animData.animY,options);
+	},
+
+	getMaterialOptions(conf,side){
+		const options={};
+		if ('cropTexture' in conf){ options.cropTexture=conf.cropTexture; }
+		if ('pass' in conf){ options.through=conf.pass===this.enumPassage.THROUGH; }
+		if ('alpha' in conf){ options.alpha=conf.alpha; }
+		if ('glow' in conf){ options.glow=conf.glow; }
+		if ('shadow' in conf){ options.shadow=conf.shadow; }
+		if(side){
+			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
+			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
+			if(`${side}_shadow` in conf){ options.shadow=conf[`${side}_shadow`]; }
+		}
+		if(conf.isCeiling){
+			options.backfaceCulling=conf.backfaceCulling;
+			options.through = conf.skylight;
+		}
+		if(conf.twosided){ options.backfaceCulling=false;options.twosided=true; }
+		if('alpha' in options){ options.transparent=true; }
+		return options;
 	},
 
 	processMaterialOptions(options){
@@ -157,7 +183,17 @@ Object.assign(mv3d,{
 		extra = 0;
 		extra|=Boolean(options.through)<<0;
 		extra|=(!options.backfaceCulling)<<1;
+		extra|=Boolean(options.twosided)<<2;
 		string += ','+extra.toString(36);
+		return string;
+	},
+
+	getExtraBit2(options){
+		let string = '';
+		if(options.cropTexture){
+			const ct=options.cropTexture
+			string += `|crop:${ct.x},${ct.y},${ct.width},${ct.height}`;
+		}
 		return string;
 	},
 
@@ -182,8 +218,8 @@ Object.assign(mv3d,{
 			texture.crop(
 				texture.frameData.x+texture.animX*this.animXFrame*tileWidth(),
 				texture.frameData.y+texture.animY*this.animYFrame*tileHeight(),
-				texture.frameData.w,
-				texture.frameData.h,
+				texture.frameData.width,
+				texture.frameData.height,
 				true
 			);
 		}

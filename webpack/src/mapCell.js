@@ -1,7 +1,8 @@
 import mv3d from './mv3d.js';
 import { TransformNode, Vector3, Vector2, } from 'babylonjs';
-import { tileSize, tileWidth, tileHeight, sleep, sin, cos } from './util.js';
+import { tileSize, tileWidth, tileHeight, sleep, sin, cos, degtorad } from './util.js';
 import { CellMeshBuilder } from './MapCellBuilder.js';
+import { Model } from './model.js';
 
 export class MapCell extends TransformNode{
 	constructor(cx,cy){
@@ -14,6 +15,7 @@ export class MapCell extends TransformNode{
 		this.x=this.ox; this.y=this.oy;
 		this.key=key;
 		this.characters=[];
+		this.doodads=[];
 
 		//this.load();
 	}
@@ -21,6 +23,14 @@ export class MapCell extends TransformNode{
 		const loopPos = mv3d.loopCoords((this.cx+0.5)*mv3d.CELL_SIZE,(this.cy+0.5)*mv3d.CELL_SIZE);
 		this.x=loopPos.x-mv3d.CELL_SIZE/2;
 		this.y=loopPos.y-mv3d.CELL_SIZE/2;
+		for (const doodad of this.doodads){
+			doodad.update();
+			if(doodad.shape===mv3d.enumShapes.SPRITE){
+				const billboardOffset = new Vector2(Math.sin(-mv3d.cameraNode.rotation.y),Math.cos(mv3d.cameraNode.rotation.y));
+				doodad.mesh.x=billboardOffset.x*mv3d.SPRITE_OFFSET;
+				doodad.mesh.y=billboardOffset.y*mv3d.SPRITE_OFFSET;
+			}
+		}
 	}
 	async load(){
 		const shapes = mv3d.enumShapes;
@@ -84,7 +94,12 @@ export class MapCell extends TransformNode{
 				if(shape===shapes.FENCE){
 					await this.loadFence(tileConf,x,y,z,l,wallHeight);
 				}else if(shape===shapes.CROSS||shape===shapes.XCROSS){
-					await this.loadCross(tileConf,x,y,z,l,wallHeight);
+					await this.loadCross(tileConf,x,y,z,l,wallHeight,shape===shapes.XCROSS ? 45 : 0);
+				}else if(shape===shapes['8CROSS']){
+					await this.loadCross(tileConf,x,y,z,l,wallHeight,0);
+					await this.loadCross(tileConf,x,y,z,l,wallHeight,45);
+				}else if(shape===shapes.SPRITE||shape===shapes.BOARD){
+					await this.loadDoodad(tileConf,x,y,z-wallHeight,shape);
 				}
 			}
 			if(!mv3d.isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
@@ -111,6 +126,27 @@ export class MapCell extends TransformNode{
 		if(this.mesh){
 			mv3d.callFeatures('destroyCellMesh',this.mesh);
 		}
+		for (const doodad of this.doodads){
+			doodad.dispose();
+		}
+	}
+	async loadDoodad(tileConf,x,y,z,shape){
+		const tileId = tileConf.top_id;
+		const configRect = tileConf.top_rect;
+		const rect = configRect ? configRect : mv3d.getTileRects(tileId)[0];
+		tileConf.cropTexture = rect;
+		tileConf.twosided = true;
+		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'top');
+		// TODO: create doodad
+		const doodad = new Model({orphan:false});
+		this.doodads.push(doodad);
+		doodad.setMeshForShape(shape);
+		doodad.mesh.material = tsMaterial;
+		doodad.parent=this;
+		doodad.x=x; doodad.y=y; doodad.z=z;
+		const scaleX = rect.width / tileWidth();
+		const scaleY = tileConf.height||(rect.height/tileHeight());
+		doodad.mesh.scaling.set(scaleX,scaleY,scaleY);
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false,double=false){
 		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;
@@ -298,7 +334,7 @@ export class MapCell extends TransformNode{
 			}
 		}
 	}
-	async loadCross(tileConf,x,y,z,l,wallHeight){
+	async loadCross(tileConf,x,y,z,l,wallHeight,angle=0){
 		const tileId = tileConf.side_id;
 		if(mv3d.isTileEmpty(tileId)){ return; }
 		const configRect = tileConf.side_rect;
@@ -310,18 +346,19 @@ export class MapCell extends TransformNode{
 		}else{
 			rects = mv3d.getTileRects(tileId);
 		}
-		const rot = tileConf.shape===mv3d.enumShapes.XCROSS ? Math.PI/4 : 0;
+		const rot = tileConf.shape===mv3d.enumShapes.XCROSS ? Math.PI/4 : degtorad(angle);
 		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
+		const partWidth = (tileConf.width||rects[0].width/tileWidth())/(isAutotile?2:1);
 		for (let i=0; i<=1; ++i){
 			for (const rect of rects){
 				const irot = -Math.PI/2*i+rot;
-				const trans= -0.25*isAutotile+(rect.ox|0)/tileWidth();
+				const trans= isAutotile?(-partWidth/2+Math.sign(rect.ox)*partWidth):0;
 				this.builder.addWallFace(tsMaterial,
 					rect.x,rect.y,rect.width,rect.height,
 					x+trans*Math.cos(irot),
 					y+trans*Math.sin(irot),
 					z - (rect.oy|0)/tileHeight()*wallHeight - partHeight/2,
-					1-isAutotile/2,partHeight, irot, {double:true, abnormal:mv3d.ABNORMAL}
+					partWidth, partHeight, irot, {double:true, abnormal:mv3d.ABNORMAL}
 				);
 			}
 		}

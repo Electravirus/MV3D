@@ -92,8 +92,14 @@ export class Model extends TransformNode{
 		case shapes.CROSS:
 			geometry = mv3d.Meshes.CROSS;
 			break;
+		case shapes['8CROSS']:
+			geometry = mv3d.Meshes['8CROSS'];
+			break;
 		case shapes.WALL:
-		case shapes.FENCE:
+			geometry = mv3d.Meshes.WALL;
+			break;
+		case shapes.BOARD:
+			geometry = mv3d.Meshes.BOARD;
 			break;
 		}
 		this.clearMesh();

@@ -64,25 +64,6 @@ Object.assign(mv3d,{
 		}
 	}),
 
-	getMaterialOptions(conf,side){
-		const options={};
-		if ('pass' in conf){ options.through=conf.pass===this.enumPassage.THROUGH; }
-		if ('alpha' in conf){ options.alpha=conf.alpha; }
-		if ('glow' in conf){ options.glow=conf.glow; }
-		if ('shadow' in conf){ options.shadow=conf.shadow; }
-		if(side){
-			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
-			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
-			if(`${side}_shadow` in conf){ options.shadow=conf[`${side}_shadow`]; }
-		}
-		if(conf.isCeiling){
-			options.backfaceCulling=conf.backfaceCulling;
-			options.through = conf.skylight;
-		}
-		if('alpha' in options){ options.transparent=true; }
-		return options;
-	},
-
 	getTileAnimationData(tileConf,side){
 		const tileId=tileConf[`${side}_id`];
 		if(`${side}_animData` in tileConf){

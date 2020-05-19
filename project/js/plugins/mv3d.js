@@ -4801,6 +4801,7 @@ Object.assign(mv3d["a" /* default */],{
 		CROSS:5,
 		XCROSS:6,
 		SLOPE:7,
+		'8CROSS':8,
 		MESH:91,
 		IMPORTED:92,
 	},
@@ -4817,6 +4818,7 @@ Object.assign(mv3d["a" /* default */],{
     
 
 	tilesetConfigurationFunctions:{
+		width(conf,n){ conf.width=Number(n); },
 		height(conf,n){ conf.height=Number(n); },
 		depth(conf,n){ conf.depth=Number(n); },
 		fringe(conf,n){ conf.fringe=Number(n); },
@@ -5639,7 +5641,195 @@ class MapCellBuilder_SubMeshBuilder{
 		for(let i=0;i<normals.length;++i){ normals[i]*=-1; }
 	}
 }
+// CONCATENATED MODULE: ./src/model.js
+
+
+
+
+const modelCache={};
+
+const orphanModelList=[];
+
+class model_Model extends babylon["TransformNode"]{
+	constructor(opts={}){
+		super('model',mv3d["a" /* default */].scene);
+		this.mesh=null;
+		this.textureLoaded=false;
+		const {orphan=true}=opts;
+		if(orphan){ orphanModelList.push(this); }
+	}
+	get meshes(){ return this.mesh instanceof model_MeshGroup ? this.mesh.meshes : [this.mesh]; }
+	get materials(){ return this.mesh.mv3d_materials ? this.mesh.mv3d_materials : this.material ? [this.material] : []; }
+	setupMesh(){
+		if(!this.mesh||this.mesh.mv3d_isSetup){ return; }
+		this.mesh.mv3d_isSetup=true;
+		mv3d["a" /* default */].callFeatures('createCharMesh',this.mesh);
+		this.mesh.parent=this;
+		this.mesh.yaw=0;
+		this.mesh.pitch=0;
+		if(this.shape===mv3d["a" /* default */].enumShapes.XCROSS){
+			this.mesh.yaw=45;
+		}
+		if(this.character){ this.mesh.character=this.character; }
+		if(this.material){
+			this.mesh.material=this.material;
+		}
+		if(this.character){
+			this.character.setupMesh();
+		}
+		if(this.order!=null){ this.mesh.order=this.order; }
+	}
+	isComplexMesh(){
+		return this.shape === mv3d["a" /* default */].enumShapes.IMPORTED || this.shape === mv3d["a" /* default */].enumShapes.MESH;
+	}
+	async setMaterial(src){
+		let newTexture;
+		if(src==='error'){
+			newTexture = await mv3d["a" /* default */].getErrorTexture();
+		}else{
+			newTexture = await mv3d["a" /* default */].createTexture(src);
+		}
+		await mv3d["a" /* default */].waitTextureLoaded(newTexture);
+		this.disposeMaterial();
+		this.texture = newTexture;
+		this.texture.hasAlpha=true;
+		this.texture.updateSamplingMode(1);
+		this.textureLoaded=true;
+		this.material = new babylon["StandardMaterial"]('sprite material',mv3d["a" /* default */].scene);
+		this.material.diffuseTexture=this.texture;
+		this.material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
+		this.material.ambientColor.set(1,1,1);
+		this.material.specularColor.set(0,0,0);
+		this.material.maxSimultaneousLights=mv3d["a" /* default */].LIGHT_LIMIT;
+		this.material.backFaceCulling=false;
+		this.material.twoSidedLighting=true;
+		this.mesh.material=this.material;
+	}
+	disposeMaterial(){
+		if(this.material){
+			this.material.dispose();
+			this.texture.dispose();
+			this.material=null;
+			this.texture=null;
+		}
+	}
+	dispose(...args){
+		this.disposeMaterial();
+		// TODO dispose differently for cached complex models
+		super.dispose(...args);
+	}
+	clearMesh(){
+		if(!this.mesh){ return; }
+		mv3d["a" /* default */].callFeatures('destroyCharMesh',this.mesh);
+		this.mesh.dispose();
+	}
+	setMeshForShape(shape){
+		if(this.shape===shape){ return; }
+		this.shape=shape;
+		let geometry = mv3d["a" /* default */].Meshes.SPRITE;
+		const shapes = mv3d["a" /* default */].enumShapes;
+		switch(this.shape){
+		case shapes.FLAT:
+			geometry = mv3d["a" /* default */].Meshes.FLAT;
+			break;
+		case shapes.XCROSS:
+		case shapes.CROSS:
+			geometry = mv3d["a" /* default */].Meshes.CROSS;
+			break;
+		case shapes['8CROSS']:
+			geometry = mv3d["a" /* default */].Meshes['8CROSS'];
+			break;
+		case shapes.WALL:
+			geometry = mv3d["a" /* default */].Meshes.WALL;
+			break;
+		case shapes.BOARD:
+			geometry = mv3d["a" /* default */].Meshes.BOARD;
+			break;
+		}
+		this.clearMesh();
+		this.mesh=geometry.clone();
+		this.setupMesh();
+	}
+	update(){
+		if(this.mesh&&this.shape){
+			if(this.shape===mv3d["a" /* default */].enumShapes.SPRITE){
+				this.mesh.pitch = mv3d["a" /* default */].blendCameraPitch.currentValue()-90;
+				this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
+			}else if(this.shape===mv3d["a" /* default */].enumShapes.BOARD){
+				this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
+				if(this.character){ this.mesh.yaw -= this.character.spriteOrigin.yaw; }
+			}
+		}
+	}
+}
+mv3d["a" /* default */].Model = model_Model;
+
+class model_MeshGroup extends babylon["TransformNode"]{
+	constructor(){
+		super('meshGroup',mv3d["a" /* default */].scene);
+		this.meshes=[];
+	}
+	addMesh(){
+		this.meshes.push(...arguments);
+		for(const mesh of arguments){
+			mesh.parent=this;
+		}
+	}
+	dispose(doNotRecurse,disposeMaterialAndTextures){
+		super.dispose(doNotRecurse,disposeMaterialAndTextures);
+		if(doNotRecurse) for(const mesh of this.meshes){
+			mesh.dispose(doNotRecurse,disposeMaterialAndTextures);
+		}
+	}
+}
+mv3d["a" /* default */].MeshGroup = model_MeshGroup;
+for(const property of ['receiveShadows','renderingGroupId','visibility','character']){
+	Object.defineProperty(model_MeshGroup.prototype,property,{
+		get(){ const p=this[`_${property}`]; return p!==undefined?p:this.meshes[0][property]; },
+		set(v){
+			this[`_${property}`]=v;
+			for(const mesh of this.meshes){
+				mesh[property]=v;
+			}
+		},
+	});
+}
+
+mv3d["a" /* default */].importModel=(url,merge=true)=>new Promise((resolve,reject)=>{
+	// TODO: Caching
+	babylon["SceneLoader"].LoadAssetContainer(Object(util["foldername"])(url), Object(util["filename"])(url), mv3d["a" /* default */].scene, container=>{
+		const meshes = container.meshes;
+		const materials = container.materials;
+		for (const mat of materials){
+			mat.ambientColor.set(1,1,1);
+			const texture = mat.diffuseTexture;
+			if(texture) mv3d["a" /* default */].waitTextureLoaded(texture).then(texture=>{
+				texture.updateSamplingMode(1);
+			});
+		}
+		let totalVertices = 0;
+		for (const mesh of meshes){
+			totalVertices += mesh.getTotalVertices();
+			if(!merge){
+				mesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
+			}
+		}
+		if(merge){
+			const importedMesh = babylon["Mesh"].MergeMeshes(meshes,true,totalVertices>64000,undefined,false,true);;
+			importedMesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
+			importedMesh.mv3d_materials=materials;
+			resolve(importedMesh);
+		}else{
+			const group = new model_MeshGroup();
+			container.addAllToScene();
+			group.addMesh(...meshes);
+			group.mv3d_materials = materials;
+			resolve(group);
+		}
+	});
+});
 // CONCATENATED MODULE: ./src/mapCell.js
+
 
 
 
@@ -5656,6 +5846,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		this.x=this.ox; this.y=this.oy;
 		this.key=key;
 		this.characters=[];
+		this.doodads=[];
 
 		//this.load();
 	}
@@ -5663,6 +5854,14 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		const loopPos = mv3d["a" /* default */].loopCoords((this.cx+0.5)*mv3d["a" /* default */].CELL_SIZE,(this.cy+0.5)*mv3d["a" /* default */].CELL_SIZE);
 		this.x=loopPos.x-mv3d["a" /* default */].CELL_SIZE/2;
 		this.y=loopPos.y-mv3d["a" /* default */].CELL_SIZE/2;
+		for (const doodad of this.doodads){
+			doodad.update();
+			if(doodad.shape===mv3d["a" /* default */].enumShapes.SPRITE){
+				const billboardOffset = new babylon["Vector2"](Math.sin(-mv3d["a" /* default */].cameraNode.rotation.y),Math.cos(mv3d["a" /* default */].cameraNode.rotation.y));
+				doodad.mesh.x=billboardOffset.x*mv3d["a" /* default */].SPRITE_OFFSET;
+				doodad.mesh.y=billboardOffset.y*mv3d["a" /* default */].SPRITE_OFFSET;
+			}
+		}
 	}
 	async load(){
 		const shapes = mv3d["a" /* default */].enumShapes;
@@ -5726,7 +5925,12 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 				if(shape===shapes.FENCE){
 					await this.loadFence(tileConf,x,y,z,l,wallHeight);
 				}else if(shape===shapes.CROSS||shape===shapes.XCROSS){
-					await this.loadCross(tileConf,x,y,z,l,wallHeight);
+					await this.loadCross(tileConf,x,y,z,l,wallHeight,shape===shapes.XCROSS ? 45 : 0);
+				}else if(shape===shapes['8CROSS']){
+					await this.loadCross(tileConf,x,y,z,l,wallHeight,0);
+					await this.loadCross(tileConf,x,y,z,l,wallHeight,45);
+				}else if(shape===shapes.SPRITE||shape===shapes.BOARD){
+					await this.loadDoodad(tileConf,x,y,z-wallHeight,shape);
 				}
 			}
 			if(!mv3d["a" /* default */].isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
@@ -5753,6 +5957,27 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		if(this.mesh){
 			mv3d["a" /* default */].callFeatures('destroyCellMesh',this.mesh);
 		}
+		for (const doodad of this.doodads){
+			doodad.dispose();
+		}
+	}
+	async loadDoodad(tileConf,x,y,z,shape){
+		const tileId = tileConf.top_id;
+		const configRect = tileConf.top_rect;
+		const rect = configRect ? configRect : mv3d["a" /* default */].getTileRects(tileId)[0];
+		tileConf.cropTexture = rect;
+		tileConf.twosided = true;
+		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,'top');
+		// TODO: create doodad
+		const doodad = new model_Model({orphan:false});
+		this.doodads.push(doodad);
+		doodad.setMeshForShape(shape);
+		doodad.mesh.material = tsMaterial;
+		doodad.parent=this;
+		doodad.x=x; doodad.y=y; doodad.z=z;
+		const scaleX = rect.width / Object(util["tileWidth"])();
+		const scaleY = tileConf.height||(rect.height/Object(util["tileHeight"])());
+		doodad.mesh.scaling.set(scaleX,scaleY,scaleY);
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false,double=false){
 		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;
@@ -5940,7 +6165,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 			}
 		}
 	}
-	async loadCross(tileConf,x,y,z,l,wallHeight){
+	async loadCross(tileConf,x,y,z,l,wallHeight,angle=0){
 		const tileId = tileConf.side_id;
 		if(mv3d["a" /* default */].isTileEmpty(tileId)){ return; }
 		const configRect = tileConf.side_rect;
@@ -5952,18 +6177,19 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		}else{
 			rects = mv3d["a" /* default */].getTileRects(tileId);
 		}
-		const rot = tileConf.shape===mv3d["a" /* default */].enumShapes.XCROSS ? Math.PI/4 : 0;
+		const rot = tileConf.shape===mv3d["a" /* default */].enumShapes.XCROSS ? Math.PI/4 : Object(util["degtorad"])(angle);
 		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
+		const partWidth = (tileConf.width||rects[0].width/Object(util["tileWidth"])())/(isAutotile?2:1);
 		for (let i=0; i<=1; ++i){
 			for (const rect of rects){
 				const irot = -Math.PI/2*i+rot;
-				const trans= -0.25*isAutotile+(rect.ox|0)/Object(util["tileWidth"])();
+				const trans= isAutotile?(-partWidth/2+Math.sign(rect.ox)*partWidth):0;
 				this.builder.addWallFace(tsMaterial,
 					rect.x,rect.y,rect.width,rect.height,
 					x+trans*Math.cos(irot),
 					y+trans*Math.sin(irot),
 					z - (rect.oy|0)/Object(util["tileHeight"])()*wallHeight - partHeight/2,
-					1-isAutotile/2,partHeight, irot, {double:true, abnormal:mv3d["a" /* default */].ABNORMAL}
+					partWidth, partHeight, irot, {double:true, abnormal:mv3d["a" /* default */].ABNORMAL}
 				);
 			}
 		}
@@ -6160,25 +6386,6 @@ Object.assign(mv3d["a" /* default */],{
 			return this.getTilePassage(tileId,this.getTileConfig(tileId,x,y,l));
 		}
 	}),
-
-	getMaterialOptions(conf,side){
-		const options={};
-		if ('pass' in conf){ options.through=conf.pass===this.enumPassage.THROUGH; }
-		if ('alpha' in conf){ options.alpha=conf.alpha; }
-		if ('glow' in conf){ options.glow=conf.glow; }
-		if ('shadow' in conf){ options.shadow=conf.shadow; }
-		if(side){
-			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
-			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
-			if(`${side}_shadow` in conf){ options.shadow=conf[`${side}_shadow`]; }
-		}
-		if(conf.isCeiling){
-			options.backfaceCulling=conf.backfaceCulling;
-			options.through = conf.skylight;
-		}
-		if('alpha' in options){ options.transparent=true; }
-		return options;
-	},
 
 	getTileAnimationData(tileConf,side){
 		const tileId=tileConf[`${side}_id`];
@@ -6785,8 +6992,8 @@ Object.assign(mv3d["a" /* default */],{
 		return new Promise(resolve=>bitmap.addLoadListener(()=>resolve(bitmap)));
 	},
 
-	async getCachedTilesetTexture(setN,animX=0,animY=0){
-		const key = `TS:${setN}|${animX},${animY}`;
+	async getCachedTilesetTexture(setN,animX=0,animY=0,options={}){
+		const key = `TS:${setN}|${animX},${animY}${this.getExtraBit2(options)}`;
 		if(key in this.textureCache){
 			return this.textureCache[key];
 		}
@@ -6806,9 +7013,13 @@ Object.assign(mv3d["a" /* default */],{
 		texture.updateSamplingMode(1);
 		//texture.wrapU = Texture.CLAMP_ADDRESSMODE;
 		//texture.wrapV = Texture.CLAMP_ADDRESSMODE;
+		if(options.cropTexture){
+			const ct = options.cropTexture;
+			texture.crop(ct.x,ct.y,ct.width,ct.height,true);
+		}
 		if(animX||animY){
 			const { width, height } = texture.getBaseSize();
-			texture.frameData={x:0,y:0,w:width,h:height};
+			texture.frameData = options.cropTexture || {x:0,y:0,width,height};
 			texture.animX = animX;
 			texture.animY = animY;
 			this.animatedTextures.push(texture);
@@ -6844,11 +7055,11 @@ Object.assign(mv3d["a" /* default */],{
 
 	async getCachedTilesetMaterial(setN,animX=0,animY=0,options={}){
 		this.processMaterialOptions(options);
-		const key = `TS:${setN}|${animX},${animY}|${this.getExtraBit(options)}`;
+		const key = `TS:${setN}|${animX},${animY}|${this.getExtraBit(options)}${this.getExtraBit2(options)}`;
 		if(key in this.materialCache){
 			return this.materialCache[key];
 		}
-		const texture = await this.getCachedTilesetTexture(setN,animX,animY);
+		const texture = await this.getCachedTilesetTexture(setN,animX,animY,options);
 		const material = new babylon["StandardMaterial"](key, this.scene);
 		material.diffuseTexture=texture;
 		if(options.transparent){
@@ -6865,6 +7076,7 @@ Object.assign(mv3d["a" /* default */],{
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
 		material.backFaceCulling=options.backfaceCulling;
+		material.twoSidedLighting=options.twosided;
 		material.maxSimultaneousLights=this.LIGHT_LIMIT;
 		this.materialCache[key]=material;
 		return material;
@@ -6876,6 +7088,27 @@ Object.assign(mv3d["a" /* default */],{
 		const animData = mv3d["a" /* default */].getTileAnimationData(tileConf,side);
 		//console.log(options);
 		return await mv3d["a" /* default */].getCachedTilesetMaterial(setN,animData.animX,animData.animY,options);
+	},
+
+	getMaterialOptions(conf,side){
+		const options={};
+		if ('cropTexture' in conf){ options.cropTexture=conf.cropTexture; }
+		if ('pass' in conf){ options.through=conf.pass===this.enumPassage.THROUGH; }
+		if ('alpha' in conf){ options.alpha=conf.alpha; }
+		if ('glow' in conf){ options.glow=conf.glow; }
+		if ('shadow' in conf){ options.shadow=conf.shadow; }
+		if(side){
+			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
+			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
+			if(`${side}_shadow` in conf){ options.shadow=conf[`${side}_shadow`]; }
+		}
+		if(conf.isCeiling){
+			options.backfaceCulling=conf.backfaceCulling;
+			options.through = conf.skylight;
+		}
+		if(conf.twosided){ options.backfaceCulling=false;options.twosided=true; }
+		if('alpha' in options){ options.transparent=true; }
+		return options;
 	},
 
 	processMaterialOptions(options){
@@ -6907,7 +7140,17 @@ Object.assign(mv3d["a" /* default */],{
 		extra = 0;
 		extra|=Boolean(options.through)<<0;
 		extra|=(!options.backfaceCulling)<<1;
+		extra|=Boolean(options.twosided)<<2;
 		string += ','+extra.toString(36);
+		return string;
+	},
+
+	getExtraBit2(options){
+		let string = '';
+		if(options.cropTexture){
+			const ct=options.cropTexture
+			string += `|crop:${ct.x},${ct.y},${ct.width},${ct.height}`;
+		}
 		return string;
 	},
 
@@ -6932,194 +7175,13 @@ Object.assign(mv3d["a" /* default */],{
 			texture.crop(
 				texture.frameData.x+texture.animX*this.animXFrame*Object(util["tileWidth"])(),
 				texture.frameData.y+texture.animY*this.animYFrame*Object(util["tileHeight"])(),
-				texture.frameData.w,
-				texture.frameData.h,
+				texture.frameData.width,
+				texture.frameData.height,
 				true
 			);
 		}
 	},
 
-});
-// CONCATENATED MODULE: ./src/model.js
-
-
-
-
-const modelCache={};
-
-const orphanModelList=[];
-
-class model_Model extends babylon["TransformNode"]{
-	constructor(opts={}){
-		super('model',mv3d["a" /* default */].scene);
-		this.mesh=null;
-		this.textureLoaded=false;
-		const {orphan=true}=opts;
-		if(orphan){ orphanModelList.push(this); }
-	}
-	get meshes(){ return this.mesh instanceof model_MeshGroup ? this.mesh.meshes : [this.mesh]; }
-	get materials(){ return this.mesh.mv3d_materials ? this.mesh.mv3d_materials : this.material ? [this.material] : []; }
-	setupMesh(){
-		if(!this.mesh||this.mesh.mv3d_isSetup){ return; }
-		this.mesh.mv3d_isSetup=true;
-		mv3d["a" /* default */].callFeatures('createCharMesh',this.mesh);
-		this.mesh.parent=this;
-		this.mesh.yaw=0;
-		this.mesh.pitch=0;
-		if(this.shape===mv3d["a" /* default */].enumShapes.XCROSS){
-			this.mesh.yaw=45;
-		}
-		if(this.character){ this.mesh.character=this.character; }
-		if(this.material){
-			this.mesh.material=this.material;
-		}
-		if(this.character){
-			this.character.setupMesh();
-		}
-		if(this.order!=null){ this.mesh.order=this.order; }
-	}
-	isComplexMesh(){
-		return this.shape === mv3d["a" /* default */].enumShapes.IMPORTED || this.shape === mv3d["a" /* default */].enumShapes.MESH;
-	}
-	async setMaterial(src){
-		let newTexture;
-		if(src==='error'){
-			newTexture = await mv3d["a" /* default */].getErrorTexture();
-		}else{
-			newTexture = await mv3d["a" /* default */].createTexture(src);
-		}
-		await mv3d["a" /* default */].waitTextureLoaded(newTexture);
-		this.disposeMaterial();
-		this.texture = newTexture;
-		this.texture.hasAlpha=true;
-		this.texture.updateSamplingMode(1);
-		this.textureLoaded=true;
-		this.material = new babylon["StandardMaterial"]('sprite material',mv3d["a" /* default */].scene);
-		this.material.diffuseTexture=this.texture;
-		this.material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
-		this.material.ambientColor.set(1,1,1);
-		this.material.specularColor.set(0,0,0);
-		this.material.maxSimultaneousLights=mv3d["a" /* default */].LIGHT_LIMIT;
-		this.material.backFaceCulling=false;
-		this.material.twoSidedLighting=true;
-		this.mesh.material=this.material;
-	}
-	disposeMaterial(){
-		if(this.material){
-			this.material.dispose();
-			this.texture.dispose();
-			this.material=null;
-			this.texture=null;
-		}
-	}
-	dispose(...args){
-		this.disposeMaterial();
-		// TODO dispose differently for cached complex models
-		super.dispose(...args);
-	}
-	clearMesh(){
-		if(!this.mesh){ return; }
-		mv3d["a" /* default */].callFeatures('destroyCharMesh',this.mesh);
-		this.mesh.dispose();
-	}
-	setMeshForShape(shape){
-		if(this.shape===shape){ return; }
-		this.shape=shape;
-		let geometry = mv3d["a" /* default */].Meshes.SPRITE;
-		const shapes = mv3d["a" /* default */].enumShapes;
-		switch(this.shape){
-		case shapes.FLAT:
-			geometry = mv3d["a" /* default */].Meshes.FLAT;
-			break;
-		case shapes.XCROSS:
-		case shapes.CROSS:
-			geometry = mv3d["a" /* default */].Meshes.CROSS;
-			break;
-		case shapes.WALL:
-		case shapes.FENCE:
-			break;
-		}
-		this.clearMesh();
-		this.mesh=geometry.clone();
-		this.setupMesh();
-	}
-	update(){
-		if(this.mesh&&this.shape){
-			if(this.shape===mv3d["a" /* default */].enumShapes.SPRITE){
-				this.mesh.pitch = mv3d["a" /* default */].blendCameraPitch.currentValue()-90;
-				this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
-			}else if(this.shape===mv3d["a" /* default */].enumShapes.BOARD){
-				this.mesh.yaw = mv3d["a" /* default */].blendCameraYaw.currentValue();
-				if(this.character){ this.mesh.yaw -= this.character.spriteOrigin.yaw; }
-			}
-		}
-	}
-}
-mv3d["a" /* default */].Model = model_Model;
-
-class model_MeshGroup extends babylon["TransformNode"]{
-	constructor(){
-		super('meshGroup',mv3d["a" /* default */].scene);
-		this.meshes=[];
-	}
-	addMesh(){
-		this.meshes.push(...arguments);
-		for(const mesh of arguments){
-			mesh.parent=this;
-		}
-	}
-	dispose(doNotRecurse,disposeMaterialAndTextures){
-		super.dispose(doNotRecurse,disposeMaterialAndTextures);
-		if(doNotRecurse) for(const mesh of this.meshes){
-			mesh.dispose(doNotRecurse,disposeMaterialAndTextures);
-		}
-	}
-}
-mv3d["a" /* default */].MeshGroup = model_MeshGroup;
-for(const property of ['receiveShadows','renderingGroupId','visibility','character']){
-	Object.defineProperty(model_MeshGroup.prototype,property,{
-		get(){ const p=this[`_${property}`]; return p!==undefined?p:this.meshes[0][property]; },
-		set(v){
-			this[`_${property}`]=v;
-			for(const mesh of this.meshes){
-				mesh[property]=v;
-			}
-		},
-	});
-}
-
-mv3d["a" /* default */].importModel=(url,merge=true)=>new Promise((resolve,reject)=>{
-	// TODO: Caching
-	babylon["SceneLoader"].LoadAssetContainer(Object(util["foldername"])(url), Object(util["filename"])(url), mv3d["a" /* default */].scene, container=>{
-		const meshes = container.meshes;
-		const materials = container.materials;
-		for (const mat of materials){
-			mat.ambientColor.set(1,1,1);
-			const texture = mat.diffuseTexture;
-			if(texture) mv3d["a" /* default */].waitTextureLoaded(texture).then(texture=>{
-				texture.updateSamplingMode(1);
-			});
-		}
-		let totalVertices = 0;
-		for (const mesh of meshes){
-			totalVertices += mesh.getTotalVertices();
-			if(!merge){
-				mesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
-			}
-		}
-		if(merge){
-			const importedMesh = babylon["Mesh"].MergeMeshes(meshes,true,totalVertices>64000,undefined,false,true);;
-			importedMesh.renderingGroupId=mv3d["a" /* default */].enumRenderGroups.MAIN;
-			importedMesh.mv3d_materials=materials;
-			resolve(importedMesh);
-		}else{
-			const group = new model_MeshGroup();
-			container.addAllToScene();
-			group.addMesh(...meshes);
-			group.mv3d_materials = materials;
-			resolve(group);
-		}
-	});
 });
 // CONCATENATED MODULE: ./src/characters.js
 
@@ -7210,6 +7272,10 @@ Object.assign(mv3d["a" /* default */],{
 		meshes.CROSS=babylon["Mesh"].MergeMeshes([
 			meshes.TEMP_CROSS.clone(),
 			meshes.TEMP_CROSS.clone().rotate(util["YAxis"],Math.PI/2,mod_babylon["h" /* WORLDSPACE */]),
+		]);
+		meshes['8CROSS']=babylon["Mesh"].MergeMeshes([
+			meshes.CROSS.clone(),
+			meshes.CROSS.clone().rotate(util["YAxis"],Math.PI/4,mod_babylon["h" /* WORLDSPACE */]),
 		]);
 
 		for (const key in meshes){

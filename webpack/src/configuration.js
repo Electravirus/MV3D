@@ -392,6 +392,7 @@ Object.assign(mv3d,{
 		CROSS:5,
 		XCROSS:6,
 		SLOPE:7,
+		'8CROSS':8,
 		MESH:91,
 		IMPORTED:92,
 	},
@@ -408,6 +409,7 @@ Object.assign(mv3d,{
     
 
 	tilesetConfigurationFunctions:{
+		width(conf,n){ conf.width=Number(n); },
 		height(conf,n){ conf.height=Number(n); },
 		depth(conf,n){ conf.depth=Number(n); },
 		fringe(conf,n){ conf.fringe=Number(n); },
