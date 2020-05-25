@@ -27,17 +27,11 @@ export const {
 	BONE:BONESPACE,
 } = BABYLON.Space;
 
-Texture.prototype.crop=function(x=0,y=0,w=0,h=0,useBaseSize=false){
-	const { width, height } = useBaseSize?this.getBaseSize():this.getSize();
+Texture.prototype.crop=function(x=0,y=0,w=0,h=0){
+	const { width, height } = this.getBaseSize();
 	if(!w)w=width-x;
 	if(!h)h=height-y;
 	if(mv3d.EDGE_FIX){ x+=mv3d.EDGE_FIX;y+=mv3d.EDGE_FIX;w-=mv3d.EDGE_FIX*2;h-=mv3d.EDGE_FIX*2; }
-	if(!useBaseSize){
-		const size = this.getSize(), baseSize = this.getBaseSize();
-		const scaleX=baseSize.width/size.width;
-		const scaleY=baseSize.height/size.height;
-		x/=scaleX; w/=scaleX; y/=scaleY; h/=scaleY;
-	}
 	this.uScale=w/width;
 	this.vScale=h/height;
 	this.uOffset=x/width;

@@ -52,7 +52,7 @@ class AnimSprite extends TransformNode{
 		this.texture.crop(
 			this.cellIndex%this.cellCols*this.cellWidth,
 			Math.floor(this.cellIndex/this.cellCols)*this.cellHeight,
-			this.cellWidth, this.cellHeight, true
+			this.cellWidth, this.cellHeight
 		);
 	}
 	dispose(){

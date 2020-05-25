@@ -1,256 +1,256 @@
-﻿Decorative Pillar A (Stone)|装飾柱A（石）
-Decorative Pillar B (Stone)|装飾柱B（石）
-Decorative Pillar C (Temple)|装飾柱C（遺跡）
-Decorative Pillar D (Rock Cave)|装飾柱D（岩洞窟）
-Decorative Pillar E (Demon Castle)|装飾柱E（魔王城）
-Decorative Pillar F (Fort)|装飾柱F（砦）
-Decorative Pillar G (Dirt Cave)|装飾柱G（土洞窟）
-Decorative Pillar H (Factory)|装飾柱H（工場）
-Decorative Pillar A (Stone)|装飾柱A（石）
-Decorative Pillar B (Stone)|装飾柱B（石）
-Decorative Pillar C (Temple)|装飾柱C（遺跡）
-Decorative Pillar D (Rock Cave)|装飾柱D（岩洞窟）
-Decorative Pillar E (Demon Castle)|装飾柱E（魔王城）
-Decorative Pillar F (Fort)|装飾柱F（砦）
-Decorative Pillar G (Dirt Cave)|装飾柱G（土洞窟）
-Decorative Pillar H (Factory)|装飾柱H（工場）
-Decorative Pillar A (Stone)|装飾柱A（石）
-Decorative Pillar B (Stone)|装飾柱B（石）
-Decorative Pillar C (Temple)|装飾柱C（遺跡）
-Decorative Pillar D (Rock Cave)|装飾柱D（岩洞窟）
-Decorative Pillar E (Demon Castle)|装飾柱E（魔王城）
-Decorative Pillar F (Fort)|装飾柱F（砦）
-Decorative Pillar G (Dirt Cave)|装飾柱G（土洞窟）
-Decorative Pillar H (Factory)|装飾柱H（工場）
-Decorative Pillar A (Stone, Ruins)|装飾柱A（石・廃墟）
-Decorative Pillar B (Stone, Ruins)|装飾柱B（石・廃墟）
-Decorative Pillar C (Temple, Ruins)|装飾柱C（遺跡・廃墟）
-Decorative Pillar D (Rock Cave, Ruins)|装飾柱D（岩洞窟・廃墟）
-Decorative Pillar E (Demon Castle, Ruins)|装飾柱E（魔王城・廃墟）
-Decorative Pillar F (Fort, Ruins)|装飾柱F（砦・廃墟）
-Decorative Pillar G (Dirt Cave, Ruins)|装飾柱G（土洞窟・廃墟）
-Decorative Pillar A (Stone, Front, Ruins)|装飾柱A（石・手前・廃墟）
-Decorative Pillar A (Stone, Ruins)|装飾柱A（石・廃墟）
-Decorative Pillar B (Stone, Ruins)|装飾柱B（石・廃墟）
-Decorative Pillar C (Temple, Ruins)|装飾柱C（遺跡・廃墟）
-Decorative Pillar D (Rock Cave, Ruins)|装飾柱D（岩洞窟・廃墟）
-Decorative Pillar E (Demon Castle, Ruins)|装飾柱E（魔王城・廃墟）
-Decorative Pillar F (Fort, Ruins)|装飾柱F（砦・廃墟）
-Decorative Pillar G (Dirt Cave, Ruins)|装飾柱G（土洞窟・廃墟）
-Decorative Pillar D (Rock Cave, Front, Ruins)|装飾柱F（岩洞窟・手前・廃墟）
-Decorative Pillar A (Stone, Ruins)|装飾柱A（石・廃墟）
-Decorative Pillar B (Stone, Ruins)|装飾柱B（石・廃墟）
-Decorative Pillar C (Temple, Ruins)|装飾柱C（遺跡・廃墟）
-Decorative Pillar D (Rock Cave, Ruins)|装飾柱D（岩洞窟・廃墟）
-Decorative Pillar E (Demon Castle, Ruins)|装飾柱E（魔王城・廃墟）
-Decorative Pillar F (Fort, Ruins)|装飾柱F（砦・廃墟）
-Decorative Pillar G (Dirt Cave, Ruins)|装飾柱G（土洞窟・廃墟）
-Decorative Pillar F (Fort, Front, Ruins)|装飾柱F（砦・手前・廃墟）
-Decorative Pillar A (Stone, Front)|装飾柱A（石・手前）
-Decorative Pillar B (Stone, Front)|装飾柱B（石・手前）
-Decorative Pillar C (Temple, Front)|装飾柱C（神殿・手前）
-Decorative Pillar D (Rock Cave, Front)|装飾柱D（岩洞窟・手前）
-Decorative Pillar E (Demon Castle, Front)|装飾柱E（魔王城・手前）
-Decorative Pillar F (Fort, Front)|装飾柱F（砦・手前）
-Decorative Pillar G (Dirt Cave, Front)|装飾柱G（土洞窟・手前）
-Decorative Pillar H (Factory, Front)|装飾柱H（工場・手前）
-Gate A|門A
-Gate A|門A
-Gate A|門A
-Gate B|門B
-Gate B|門B
-Gate B|門B
-Decorative Pillar I (Demonic)|装飾柱I（悪魔）
-Decorative Pillar I (Demonic, Ruins)|装飾柱I（悪魔・廃墟）
-Gate A|門A
-Gate A|門A
-Gate A|門A
-Gate B|門B
-Gate B|門B
-Gate B|門B
-Decorative Pillar I (Demonic)|装飾柱I（悪魔）
-Decorative Pillar I (Demonic, Ruins)|装飾柱I（悪魔・廃墟）
-Gate A|門A
-Gate A|門A
-Gate A|門A
-Gate B|門B
-Gate B|門B
-Gate B|門B
-Coffin A (Right)|棺A（右）
-Coffin A (Right)|棺A（右）
-Hexagram|魔法陣
-Hexagram|魔法陣
-Hexagram|魔法陣
-Hexagram (Lit)|魔法陣（光）
-Hexagram (Lit)|魔法陣（光）
-Hexagram (Lit)|魔法陣（光）
-Coffin B (Top)|棺B（上）
-Coffin C (Bottom)|棺C（下）
-Hexagram|魔法陣
-Hexagram|魔法陣
-Hexagram|魔法陣
-Hexagram (Lit)|魔法陣（光）
-Hexagram (Lit)|魔法陣（光）
-Hexagram (Lit)|魔法陣（光）
-Coffin B (Top)|棺B（上）
-Coffin C (Bottom)|棺C（下）
-Hexagram|魔法陣
-Hexagram|魔法陣
-Hexagram|魔法陣
-Hexagram (Lit)|魔法陣（光）
-Hexagram (Lit)|魔法陣（光）
-Hexagram (Lit)|魔法陣（光）
-Coffin D  (Left)|棺D（左）
-Coffin D  (Left)|棺D（左）
-Rails|線路
-Rails|線路
-Rails|線路
-Rails|線路
-Rails (Ruins)|線路（廃墟）
-Rails (Ruins)|線路（廃墟）
-Rails (Ruins)|線路（廃墟）
-Rails (Ruins)|線路（廃墟）
-Rails|線路
-Railroad Ties A|枕木A
-Rails|線路
-Rails|線路
-Rails|線路
-Rails|線路
-Rails|線路
-Rails|線路
-Rails|線路
-Railroad Ties B|枕木B
-Rails|線路
-Rails|線路
-Rails|線路
-Rails|線路
-Rails|線路
-Rails|線路
-Mural A|壁画A
-Hieroglyph|ヒエログリフ
-Hieroglyph|ヒエログリフ
-Large Mural A|大きな壁画A
-Large Mural A|大きな壁画A
-Large Mural A|大きな壁画A
-Bed|ベッド
-Bed (Ruins)|ベッド（廃墟）
-Mural B|壁画B
-Hieroglyph|ヒエログリフ
-Hieroglyph|ヒエログリフ
-Large Mural B|大きな壁画B
-Large Mural B|大きな壁画B
-Large Mural B|大きな壁画B
-Bed|ベッド
-Bed (Ruins)|ベッド（廃墟）
-Middle Window A|中型窓A
-Middle Window B|中型窓B
-Middle Window C|中型窓C
-Middle Window D (Ruins)|中型窓窓D（廃墟）
-Window (Demon Castle)|窓（魔王城）
-Table|テーブル
-Cheap Bed|粗末なベッド
-Straw Bed|むしろの寝床
-Middle Window A|中型窓A
-Middle Window B|中型窓B
-Middle Window C|中型窓C
-Middle Window D (Ruins)|中型窓窓D（廃墟）
-Window (Demon Castle)|窓（魔王城）
-Stool|椅子
-Cheap Bed|粗末なベッド
-Straw Bed|むしろの寝床
-Large Window A|大型窓A
-Large Window B|大型窓B
-Large Window C|大型窓C
-Stained Glass Window|ステンドグラス
-Large Window D|大型窓D
-Window A|窓A
-Window B|窓B
-Window C|窓C
-Large Window A|大型窓A
-Large Window B|大型窓B
-Large Window C|大型窓C
-Stained Glass Window|ステンドグラス
-Large Window D|大型窓D
-Window A|窓A
-Window B|窓B
-Window C|窓C
-Chest A|チェストA
-Cabinet|キャビネット
-Closet|クローゼット
-Chest of Drawers|タンス
-Dish Cabinet|食器棚
-Wine Rack|ワインセラー
-Bottle Shelf A|ボトル棚A
-Bottle Shelf B|ボトル棚B
-Chest B|チェストB
-Chest C|チェストC
-Closet|クローゼット
-Chest of Drawers|タンス
-Dish Cabinet|食器棚
-Wine Rack|ワインセラー
-Bottle Shelf A|ボトル棚A
-Bottle Shelf B|ボトル棚B
-Tipped Shelf|倒れた棚
-Sundries Shelf A|雑貨棚A
-Sundries Shelf A|雑貨棚A
-Sundries Shelf B|雑貨棚B
-Medicine Shelf|薬品棚
-Bookshelf A|本棚A
-Bookshelf B|本棚B
-Bookshelf B|本棚B
-Tipped Shelf|倒れた棚
-Sundries Shelf A|雑貨棚A
-Sundries Shelf A|雑貨棚A
-Sundries Shelf B|雑貨棚B
-Medicine Shelf|薬品棚
-Bookshelf A|本棚A
-Bookshelf B|本棚B
-Bookshelf B|本棚B
-Curtains A|カーテンA
-Curtains B|カーテンB
-Curtains C|カーテンC
-Curtains D|カーテンD
-Curtains A (Ruins)|カーテンA（廃墟）
-Curtains B (Ruins)|カーテンB（廃墟）
-Curtains C (Ruins)|カーテンC（廃墟）
-Curtains D (Ruins)|カーテンD（廃墟）
-Curtains A|カーテンA
-Curtains B|カーテンB
-Curtains C|カーテンC
-Curtains D|カーテンD
-Curtains A (Ruins)|カーテンA（廃墟）
-Curtains B (Ruins)|カーテンB（廃墟）
-Curtains C (Ruins)|カーテンC（廃墟）
-Curtains D (Ruins)|カーテンD（廃墟）
-Clock|時計
-Mirror|鏡
-Clock (Ruins)|時計（廃墟）
-Mirror (Ruins)|鏡（廃墟）
-Stacked Crates|積まれた木箱
-Stacked Crates|積まれた木箱
-Tapestry A|タペストリーA
-Tapestry  A (Ruins)|タペストリーA（廃墟）
-Clock|時計
-Mirror|鏡
-Clock (Ruins)|時計（廃墟）
-Mirror (Ruins)|鏡（廃墟）
-Stacked Crates|積まれた木箱
-Stacked Crates|積まれた木箱
-Tapestry A|タペストリーA
-Tapestry  A (Ruins)|タペストリーA（廃墟）
-Chair A (Wood)|背もたれ椅子A（木製）
-Chair B (Stone)|背もたれ椅子B（石）
-Throne A|玉座A
-Throne A|玉座A
-Throne A|玉座A
-Throne B (Demon Castle)|玉座B（魔王城）
-Throne B (Demon Castle)|玉座B（魔王城）
-Throne B (Demon Castle)|玉座B（魔王城）
-Chair A (Wood)|背もたれ椅子A（木製）
-Chair B (Stone)|背もたれ椅子B（石）
-Throne A|玉座A
-Throne A|玉座A
-Throne A|玉座A
-Throne B (Demon Castle)|玉座B（魔王城）
-Throne B (Demon Castle)|玉座B（魔王城）
-Throne B (Demon Castle)|玉座B（魔王城）
+﻿C,0,0
+C,1,0
+C,2,0
+C,3,0
+C,4,0
+C,5,0
+C,6,0
+C,7,0
+C,0,1
+C,1,1
+C,2,1
+C,3,1
+C,4,1
+C,5,1
+C,6,1
+C,7,1
+C,0,2
+C,1,2
+C,2,2
+C,3,2
+C,4,2
+C,5,2
+C,6,2
+C,7,2
+C,0,3
+C,1,3
+C,2,3
+C,3,3
+C,4,3
+C,5,3
+C,6,3
+C,7,3
+C,0,4
+C,1,4
+C,2,4
+C,3,4
+C,4,4
+C,5,4
+C,6,4
+C,7,4
+C,0,5
+C,1,5
+C,2,5
+C,3,5
+C,4,5
+C,5,5
+C,6,5
+C,7,5
+C,0,6
+C,1,6
+C,2,6
+C,3,6
+C,4,6
+C,5,6
+C,6,6
+C,7,6
+C,0,7
+C,1,7
+C,2,7
+C,3,7
+C,4,7
+C,5,7
+C,6,7
+C,7,7
+C,0,8
+C,1,8
+C,2,8
+C,3,8
+C,4,8
+C,5,8
+C,6,8
+C,7,8
+C,0,9
+C,1,9
+C,2,9
+C,3,9
+C,4,9
+C,5,9
+C,6,9
+C,7,9
+C,0,10
+C,1,10
+C,2,10
+C,3,10
+C,4,10
+C,5,10
+C,6,10
+C,7,10
+C,0,11
+C,1,11
+C,2,11
+C,3,11
+C,4,11
+C,5,11
+C,6,11
+C,7,11
+C,0,12
+C,1,12
+C,2,12
+C,3,12
+C,4,12
+C,5,12
+C,6,12
+C,7,12
+C,0,13
+C,1,13
+C,2,13
+C,3,13
+C,4,13
+C,5,13
+C,6,13
+C,7,13
+C,0,14
+C,1,14
+C,2,14
+C,3,14
+C,4,14
+C,5,14
+C,6,14
+C,7,14
+C,0,15
+C,1,15
+C,2,15
+C,3,15
+C,4,15
+C,5,15
+C,6,15
+C,7,15
+C,0,16
+C,1,16
+C,2,16
+C,3,16
+C,4,16
+C,5,16
+C,6,16
+C,7,16
+C,0,17
+C,1,17
+C,2,17
+C,3,17
+C,4,17
+C,5,17
+C,6,17
+C,7,17
+C,0,18
+C,1,18
+C,2,18
+C,3,18
+C,4,18
+C,5,18
+C,6,18
+C,7,18
+C,0,19
+C,1,19
+C,2,19
+C,3,19
+C,4,19
+C,5,19
+C,6,19
+C,7,19
+C,0,20
+C,1,20
+C,2,20
+C,3,20
+C,4,20
+C,5,20
+C,6,20
+C,7,20
+C,0,21
+C,1,21
+C,2,21
+C,3,21
+C,4,21
+C,5,21
+C,6,21
+C,7,21
+C,0,22
+C,1,22
+C,2,22
+C,3,22
+C,4,22
+C,5,22
+C,6,22
+C,7,22
+C,0,23
+C,1,23
+C,2,23
+C,3,23
+C,4,23
+C,5,23
+C,6,23
+C,7,23
+C,0,24
+C,1,24
+C,2,24
+C,3,24
+C,4,24
+C,5,24
+C,6,24
+C,7,24
+C,0,25
+C,1,25
+C,2,25
+C,3,25
+C,4,25
+C,5,25
+C,6,25
+C,7,25
+C,0,26
+C,1,26
+C,2,26
+C,3,26
+C,4,26
+C,5,26
+C,6,26
+C,7,26
+C,0,27
+C,1,27
+C,2,27
+C,3,27
+C,4,27
+C,5,27
+C,6,27
+C,7,27
+C,0,28
+C,1,28
+C,2,28
+C,3,28
+C,4,28
+C,5,28
+C,6,28
+C,7,28
+C,0,29
+C,1,29
+C,2,29
+C,3,29
+C,4,29
+C,5,29
+C,6,29
+C,7,29
+C,0,30
+C,1,30
+C,2,30
+C,3,30
+C,4,30
+C,5,30
+C,6,30
+C,7,30
+C,0,31
+C,1,31
+C,2,31
+C,3,31
+C,4,31
+C,5,31
+C,6,31
+C,7,31

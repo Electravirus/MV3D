@@ -203,7 +203,7 @@
 @parent map
 @type Note
 @default
-"sun(white)\nambient(default)\nfog(black|20,30)"
+"sun(white)\nambient(default)\nfog(black|20,30)\nceiling(backface:true)"
 
 
 @param spacer|input @text‏‏‎ ‎@desc ===============================================
@@ -259,7 +259,7 @@
 @param turnIncrement
 @text Turn Increment
 @parent input
-@description How many degrees the camera will turn when you press the turn button. Other numbers may also be entered.
+@desc How many degrees the camera will turn when you press the turn button. Other numbers may also be entered.
 @type Combo
 @option 90
 @option 45
@@ -269,14 +269,14 @@
 @param yawSpeed
 @text Turn Speed
 @parent input
-@description Speed when turning with keyboard (in degrees per second).
+@desc Speed when turning with keyboard (in degrees per second).
 @type Number
 @default 180
 
 @param pitchSpeed
 @text Pitch Speed
 @parent input
-@description Speed when changing pitch with keyboard (in degrees per second).
+@desc Speed when changing pitch with keyboard (in degrees per second).
 @type Number
 @default 90
 

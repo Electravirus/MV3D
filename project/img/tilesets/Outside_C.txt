@@ -1,256 +1,256 @@
-﻿Stone Pillar A|石の柱A
-Stone Pillar B|石の柱B
-Stone Pillar C|石の柱C
-Stone Pillar C (Moss)|石の柱C（苔）
-Stone Pillar C (Snow)|石の柱C（雪）
-Wood Pillar|木の柱
-Stone Pillar D|石の柱D
-Demon Castle Pillar|魔王城の柱
-Stone Pillar A|石の柱A
-Stone Pillar B|石の柱B
-Stone Pillar C|石の柱C
-Stone Pillar C (Moss)|石の柱C（苔）
-Stone Pillar C (Snow)|石の柱C（雪）
-Wood Pillar|木の柱
-Stone Pillar D|石の柱D
-Demon Castle Pillar|魔王城の柱
-Broken Stone Pillar|折れた石の柱A
-Broken Stone Pillar|折れた石の柱B
-Broken Stone Pillar|折れた石の柱C
-Broken Stone Pillar C (Moss)|折れた石の柱C（苔）
-Broken Stone Pillar C (Snow)|折れた石の柱C（雪）
-Broken Wood Pillar|折れた木の柱
-Broken Stone Pillar F|折れた石の柱D
-Broken Demon Castle Pillar|折れた魔王城の柱
-Bones A|骸骨A
-Bones B|骸骨B
-Rubble|瓦礫A
-Rubble B (Moss)|瓦礫B（苔）
-Rubble C (Snow)|瓦礫C（雪）
-Broken Wood Pillar|折れた木の柱
-Rubble D|瓦礫D
-Rubble E (Demon Castle)|瓦礫E（魔王城）
-Tapestry A|タペストリーA
-Tapestry A (Ruins)|タペストリーA（廃墟）
-Tapestry B|タペストリーB
-Tapestry B (Ruins)|タペストリーB（廃墟）
-Tapestry C|タペストリーC
-Tapestry C (Ruins)|タペストリーC（廃墟）
-Tapestry D|タペストリーD
-Tapestry D (Ruins)|タペストリーD（廃墟）
-Tapestry A|タペストリーA
-Tapestry A (Ruins)|タペストリーA（廃墟）
-Tapestry B|タペストリーB
-Tapestry B (Ruins)|タペストリーB（廃墟）
-Tapestry C|タペストリーC
-Tapestry C (Ruins)|タペストリーC（廃墟）
-Tapestry D|タペストリーD
-Tapestry D (Ruins)|タペストリーD（廃墟）
-Monument A|石碑A
-Monument B|石碑B
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Monument A|石碑A
-Monument C|石碑C
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Monument A (Snow)|石碑A（雪）
-Monument B (Snow)|石碑B（雪）
-Large Monument (Snow)|大きな石碑（雪）
-Large Monument (Snow)|大きな石碑（雪）
-Large Monument (Snow)|大きな石碑（雪）
-Large Monument (Ruins)|大きな石碑（廃墟）
-Large Monument (Ruins)|大きな石碑（廃墟）
-Large Monument (Ruins)|大きな石碑（廃墟）
-Monument A (Snow)|石碑A（雪）
-Monument B (Snow)|石碑B（雪）
-Large Monument (Snow)|大きな石碑（雪）
-Large Monument (Snow)|大きな石碑（雪）
-Large Monument (Snow)|大きな石碑（雪）
-Large Monument (Ruins)|大きな石碑（廃墟）
-Large Monument (Ruins)|大きな石碑（廃墟）
-Large Monument (Ruins)|大きな石碑（廃墟）
-Statue A|石像A
-Angel Statue A|天使像A
-Angel Statue B|天使像B
-Demon Statue|悪魔像
-Dais|台座
-Dragon Statue|竜像
-Dragon Statue|竜像
-Statue B|石像B
-Statue A|石像A
-Angel Statue A|天使像A
-Angel Statue B|天使像B
-Demon Statue|悪魔像
-Dais|台座
-Dragon Statue|竜像
-Dragon Statue|竜像
-Statue B|石像B
-Statue A (Snow)|石像A（雪）
-Angel Statue A (Snow)|天使像A（雪）
-Angel Statue B (Snow)|天使像B（雪）
-Demon Statue (Snow)|悪魔像（雪）
-Dais (Snow)|台座（雪）
-Dragon Statue (Snow)|竜像（雪）
-Dragon Statue (Snow)|竜像（雪）
-Ice Statue|氷像
-Statue A (Snow)|石像A（雪）
-Angel Statue A (Snow)|天使像A（雪）
-Angel Statue B (Snow)|天使像B（雪）
-Demon Statue (Snow)|悪魔像（雪）
-Dais (Snow)|台座（雪）
-Dragon Statue (Snow)|竜像（雪）
-Dragon Statue (Snow)|竜像（雪）
-Ice Statue|氷像
-Window A (Demon Castle)|窓A（魔王城）
-Window B (Demon Castle)|窓B（魔王城）
-Window C (Demon Castle)|窓C（魔王城）
-Gravel Mound (Dirt)|土砂A（土）
-Large Gravel Mound (Dirt)|大きな土砂（土）
-Large Gravel Mound (Dirt)|大きな土砂（土）
-Cave Entrance|洞窟入口
-Mine Entrance|坑道入口
-Window A (Demon Castle)|窓A（魔王城）
-Window B (Demon Castle)|窓B（魔王城）
-Window D (Demon Castle)|窓D（魔王城）
-Gravel Mound B (Dirt, Snow)|土砂B（土・雪）
-Large Gravel Mound (Dirt)|大きな土砂（土）
-Large Gravel Mound (Dirt)|大きな土砂（土）
-Cave Entrance|洞窟入口
-Mine Entrance|坑道入口
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof A (Red Tile)|屋根A（赤瓦）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof B (Snow)|屋根B（雪）
-Roof B (Snow)|屋根B（雪）
-Roof D (Wood)|屋根D（木造）
-Roof D (Wood)|屋根D（木造）
-Roof D (Wood)|屋根D（木造）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof D (Wood)|屋根D（木造）
-Roof D (Wood)|屋根D（木造）
-Roof D (Wood)|屋根D（木造）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof C (Indigo Tile)|屋根C（藍瓦）
-Roof D (Wood)|屋根D（木造）
-Roof D (Wood)|屋根D（木造）
-Roof D (Wood)|屋根D（木造）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle)|円塔A（城）
-Roof Detail A (Red Tile)|屋根飾りA（赤瓦）
-Roof Detail B (Snow)|屋根飾りB（雪）
-Roof D (Wood)|屋根D（木造）
-Roof D (Wood)|屋根D（木造）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle)|円塔A（城）
-Roof Detail C (Indigo Tile)|屋根飾りC（藍瓦）
-Roof Detail D (Wood)|屋根飾りD（木造）
-Roof D (Wood)|屋根D（木造）
-Roof D (Wood)|屋根D（木造）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle's Spire)|円塔A（城の尖塔）
-Round Tower A (Castle's Spire)|円塔A（城の尖塔）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle's Spire)|円塔A（城の尖塔）
-Round Tower A (Castle's Spire)|円塔A（城の尖塔）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle's Spire)|円塔A（城の尖塔）
-Round Tower A (Castle's Spire)|円塔A（城の尖塔）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower B (Fort)|円塔B（砦）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle)|円塔A（城）
-Round Tower A (Castle)|円塔A（城）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle's Spire, Snow)|円塔A（城の尖塔・雪）
-Round Tower A (Castle's Spire, Snow)|円塔A（城の尖塔・雪）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle's Spire, Snow)|円塔A（城の尖塔・雪）
-Round Tower A (Castle's Spire, Snow)|円塔A（城の尖塔・雪）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle's Spire, Snow)|円塔A（城の尖塔・雪）
-Round Tower A (Castle's Spire, Snow)|円塔A（城の尖塔・雪）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower C (Demon Castle)|円塔C（魔王城）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower A (Castle, Snow)|円塔A（城・雪）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
-Round Tower B (Fort, Snow)|円塔B（砦・雪）
+﻿C,0,0
+C,1,0
+C,2,0
+C,3,0
+C,4,0
+C,5,0
+C,6,0
+C,7,0
+C,0,1
+C,1,1
+C,2,1
+C,3,1
+C,4,1
+C,5,1
+C,6,1
+C,7,1
+C,0,2
+C,1,2
+C,2,2
+C,3,2
+C,4,2
+C,5,2
+C,6,2
+C,7,2
+C,0,3
+C,1,3
+C,2,3
+C,3,3
+C,4,3
+C,5,3
+C,6,3
+C,7,3
+C,0,4
+C,1,4
+C,2,4
+C,3,4
+C,4,4
+C,5,4
+C,6,4
+C,7,4
+C,0,5
+C,1,5
+C,2,5
+C,3,5
+C,4,5
+C,5,5
+C,6,5
+C,7,5
+C,0,6
+C,1,6
+C,2,6
+C,3,6
+C,4,6
+C,5,6
+C,6,6
+C,7,6
+C,0,7
+C,1,7
+C,2,7
+C,3,7
+C,4,7
+C,5,7
+C,6,7
+C,7,7
+C,0,8
+C,1,8
+C,2,8
+C,3,8
+C,4,8
+C,5,8
+C,6,8
+C,7,8
+C,0,9
+C,1,9
+C,2,9
+C,3,9
+C,4,9
+C,5,9
+C,6,9
+C,7,9
+C,0,10
+C,1,10
+C,2,10
+C,3,10
+C,4,10
+C,5,10
+C,6,10
+C,7,10
+C,0,11
+C,1,11
+C,2,11
+C,3,11
+C,4,11
+C,5,11
+C,6,11
+C,7,11
+C,0,12
+C,1,12
+C,2,12
+C,3,12
+C,4,12
+C,5,12
+C,6,12
+C,7,12
+C,0,13
+C,1,13
+C,2,13
+C,3,13
+C,4,13
+C,5,13
+C,6,13
+C,7,13
+C,0,14
+C,1,14
+C,2,14
+C,3,14
+C,4,14
+C,5,14
+C,6,14
+C,7,14
+C,0,15
+C,1,15
+C,2,15
+C,3,15
+C,4,15
+C,5,15
+C,6,15
+C,7,15
+C,0,16
+C,1,16
+C,2,16
+C,3,16
+C,4,16
+C,5,16
+C,6,16
+C,7,16
+C,0,17
+C,1,17
+C,2,17
+C,3,17
+C,4,17
+C,5,17
+C,6,17
+C,7,17
+C,0,18
+C,1,18
+C,2,18
+C,3,18
+C,4,18
+C,5,18
+C,6,18
+C,7,18
+C,0,19
+C,1,19
+C,2,19
+C,3,19
+C,4,19
+C,5,19
+C,6,19
+C,7,19
+C,0,20
+C,1,20
+C,2,20
+C,3,20
+C,4,20
+C,5,20
+C,6,20
+C,7,20
+C,0,21
+C,1,21
+C,2,21
+C,3,21
+C,4,21
+C,5,21
+C,6,21
+C,7,21
+C,0,22
+C,1,22
+C,2,22
+C,3,22
+C,4,22
+C,5,22
+C,6,22
+C,7,22
+C,0,23
+C,1,23
+C,2,23
+C,3,23
+C,4,23
+C,5,23
+C,6,23
+C,7,23
+C,0,24
+C,1,24
+C,2,24
+C,3,24
+C,4,24
+C,5,24
+C,6,24
+C,7,24
+C,0,25
+C,1,25
+C,2,25
+C,3,25
+C,4,25
+C,5,25
+C,6,25
+C,7,25
+C,0,26
+C,1,26
+C,2,26
+C,3,26
+C,4,26
+C,5,26
+C,6,26
+C,7,26
+C,0,27
+C,1,27
+C,2,27
+C,3,27
+C,4,27
+C,5,27
+C,6,27
+C,7,27
+C,0,28
+C,1,28
+C,2,28
+C,3,28
+C,4,28
+C,5,28
+C,6,28
+C,7,28
+C,0,29
+C,1,29
+C,2,29
+C,3,29
+C,4,29
+C,5,29
+C,6,29
+C,7,29
+C,0,30
+C,1,30
+C,2,30
+C,3,30
+C,4,30
+C,5,30
+C,6,30
+C,7,30
+C,0,31
+C,1,31
+C,2,31
+C,3,31
+C,4,31
+C,5,31
+C,6,31
+C,7,31

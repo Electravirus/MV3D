@@ -844,7 +844,7 @@ mv3d.command('camera dist',10,1);
 @parent map
 @type Note
 @default
-"sun(white)\nambient(default)\nfog(black|20,30)"
+"sun(white)\nambient(default)\nfog(black|20,30)\nceiling(backface:true)"
 
 
 @param spacer|input @text‏‏‎ ‎@desc ===============================================
@@ -900,7 +900,7 @@ mv3d.command('camera dist',10,1);
 @param turnIncrement
 @text Turn Increment
 @parent input
-@description How many degrees the camera will turn when you press the turn button. Other numbers may also be entered.
+@desc How many degrees the camera will turn when you press the turn button. Other numbers may also be entered.
 @type Combo
 @option 90
 @option 45
@@ -910,14 +910,14 @@ mv3d.command('camera dist',10,1);
 @param yawSpeed
 @text Turn Speed
 @parent input
-@description Speed when turning with keyboard (in degrees per second).
+@desc Speed when turning with keyboard (in degrees per second).
 @type Number
 @default 180
 
 @param pitchSpeed
 @text Pitch Speed
 @parent input
-@description Speed when changing pitch with keyboard (in degrees per second).
+@desc Speed when changing pitch with keyboard (in degrees per second).
 @type Number
 @default 90
 
@@ -1834,17 +1834,11 @@ const {
 	BONE:BONESPACE,
 } = babylon["Space"];
 
-babylon["Texture"].prototype.crop=function(x=0,y=0,w=0,h=0,useBaseSize=false){
-	const { width, height } = useBaseSize?this.getBaseSize():this.getSize();
+babylon["Texture"].prototype.crop=function(x=0,y=0,w=0,h=0){
+	const { width, height } = this.getBaseSize();
 	if(!w)w=width-x;
 	if(!h)h=height-y;
 	if(src_mv3d["a" /* default */].EDGE_FIX){ x+=src_mv3d["a" /* default */].EDGE_FIX;y+=src_mv3d["a" /* default */].EDGE_FIX;w-=src_mv3d["a" /* default */].EDGE_FIX*2;h-=src_mv3d["a" /* default */].EDGE_FIX*2; }
-	if(!useBaseSize){
-		const size = this.getSize(), baseSize = this.getBaseSize();
-		const scaleX=baseSize.width/size.width;
-		const scaleY=baseSize.height/size.height;
-		x/=scaleX; w/=scaleX; y/=scaleY; h/=scaleY;
-	}
 	this.uScale=w/width;
 	this.vScale=h/height;
 	this.uOffset=x/width;
@@ -3660,9 +3654,17 @@ Object(util["assign"])(mv3d["a" /* default */],{
 			this._REGION_DATA[entry.regionId]=regionData;
 			
 		}
+		for (const id in this._REGION_DATA){
+			this.applyTextureConfigs(this._REGION_DATA[id],'B',0,0);
+			this.collapseCeilingOffsets(this._REGION_DATA[id]);
+		}
 		for (let entry of JSON.parse(parameters.ttags)){
 			entry=JSON.parse(entry);
 			this.TTAG_DATA[entry.terrainTag]=this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions);
+		}
+		for (const id in this.TTAG_DATA){
+			this.applyTextureConfigs(this.TTAG_DATA[id],'B',0,0);
+			this.collapseCeilingOffsets(this.TTAG_DATA[id]);
 		}
 
 		this.EVENT_CHAR_SETTINGS = this.readConfigurationFunctions(
@@ -4488,7 +4490,10 @@ function TextureConfigurator(name,extraParams='',apply){
 			break;}
 		case 1:{
 			const [img] = params.group1;
-			conf[`${name}_img`]=img;
+			readTextureConfigurations(name,conf,img,0,0,'100%','100%');
+			//conf[`${name}_img`]=img;
+			//conf[`${name}_id`] = 1;
+			//conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
 			break;}
 		}
 		if(params.animx&&params.animy){
@@ -4511,12 +4516,16 @@ function TextureConfigurator(name,extraParams='',apply){
 }
 
 function readTextureConfigurations(name,conf,img,xstr,ystr,wstr='1',hstr='1'){
+	const validImg = mv3d["a" /* default */].validTilesheetName(img);
+	if(validImg){ img=img.toUpperCase(); }
 	conf[`${name}_img`]=img;
 	conf[`${name}_changed`]=true;
 	let hasPixelValue=false;
+	let hasPercentValue=false;
 	const coords=[xstr,ystr,wstr,hstr].map(str=>{
 		const coord = interpretTextureCoodinate(str);
 		if(coord.isPixelValue){ hasPixelValue=true; }
+		if(coord.percentValue){ hasPercentValue=true; }
 		return coord;
 	});
 	coords.forEach(coord=>{
@@ -4524,45 +4533,63 @@ function readTextureConfigurations(name,conf,img,xstr,ystr,wstr='1',hstr='1'){
 	});
 	let [xcoord,ycoord,wcoord,hcoord]=coords;
 	let [x,y,w,h] = coords.map(coord=>coord.collapseValue());
-	if(mv3d["a" /* default */].validTilesheetName(img)){
-		if(hasPixelValue){
-			if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
-				conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,1,0);
-				conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
-				return;
-			}
-		}else if(w===1&&h===1){
-			if(xcoord.isOffsetValue&&ycoord.isOffsetValue){
-				conf[`${name}_offset`] = new babylon["Vector2"](Number(x),Number(y));
-				return;
-			}
-			if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
-				conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,x,y);
-				return;
-			}
+	if(hasPercentValue){
+	}else if(hasPixelValue){
+		if(validImg&&!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
+			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,1,0);
+			conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
+			return;
+		}
+	}else if(w===1&&h===1){
+		if((!img||validImg)&&xcoord.isOffsetValue&&ycoord.isOffsetValue){
+			conf[`${name}_offset`] = new babylon["Vector2"](Number(x),Number(y));
+			return;
+		}
+		if(validImg&&!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
+			conf[`${name}_id`] = mv3d["a" /* default */].constructTileId(img,x,y);
+			return;
 		}
 	}
 	wcoord.usePixelValue(); hcoord.usePixelValue();
-	conf[`${name}_texture`] = {x:xcoord,y:ycoord,w:wcoord.collapseValue(),h:hcoord.collapseValue()};
+	const textureCoords = {x:xcoord,y:ycoord,w:wcoord.collapseValue(),h:hcoord.collapseValue()};
+	if(hasPercentValue){
+		textureCoords.percentRect = new PIXI.Rectangle(xcoord.percentValue,ycoord.percentValue,wcoord.percentValue,hcoord.percentValue);
+	}
+	conf[`${name}_texture`] = textureCoords;
+}
+
+mv3d["a" /* default */].finalizeTextureRect = function(rect,width,height){
+	let {x,y,width:w,height:h} = rect;
+	if(rect.percentRect){
+		const pr = rect.percentRect;
+		x+=pr.x*width; 
+		y+=pr.y*height;
+		w+=pr.width*width;
+		h+=pr.height*height;
+	}
+	return new PIXI.Rectangle(x,y,w,h);
 }
 
 function interpretTextureCoodinate(nstr){
-	const r = /(\+?-?)(\d+\.\d*|\d*\.?\d+)(px|p|t)?/g;
+	const r = /(\+?-?)(\d+\.\d*|\d*\.?\d+)(px?|t|%)?/g;
 	const coord = new configuration_TextureCoordinate();
 	let match;
 	while(match=r.exec(nstr)){
 		const isRelative = Boolean(match[1]);
 		const isNegative = match[1].includes('-');
-		let unit = match[3]?match[3].startsWith('p')?'p':'t':'t';
+		let unit = (match[3]||'t')[0];
 		let num = Number(match[2]);
 		if(isNegative){ num*=-1; }
 		if(unit==='t'&&num%1||!match[3]&&match[2].includes('.')){ num=num*Object(util["tileSize"])(); unit='p'; }
 		if(unit==='t'){
 			if(isRelative) coord.offsetTileValue(num);
 			else coord.setTileValue(num);
-		}else{
+		}else if(unit==='p'){
 			if(isRelative) coord.offsetPixelValue(num);
 			else coord.setPixelValue(num);
+		}else if(unit==='%'){
+			if(isRelative) coord.offsetPercentValue(num);
+			else coord.setPercentValue(num);
 		}
 	}
 	return coord;
@@ -4573,6 +4600,7 @@ class configuration_TextureCoordinate{
 		this.isPixelValue=false;
 		this.baseValue=null;
 		this.offsetValue=0;
+		this.percentValue=0;
 	}
 	usePixelValue(){
 		if(this.isPixelValue){ return; }
@@ -4602,8 +4630,17 @@ class configuration_TextureCoordinate{
 		this.usePixelValue();
 		this.offsetValue+=v;
 	}
-	collapseValue(baseValue){
-		return (this.baseValue||baseValue||0)+this.offsetValue;
+	setPercentValue(v){
+		this.usePixelValue();
+		if(this.baseValue===null){ this.baseValue=0; }
+		this.percentValue=v/100;
+	}
+	offsetPercentValue(v){
+		this.usePixelValue();
+		this.percentValue+=v/100
+	}
+	collapseValue(){
+		return (this.baseValue||0)+this.offsetValue;
 	}
 	get isOffsetValue(){
 		return this.baseValue==null;
@@ -4667,6 +4704,10 @@ Object.assign(mv3d["a" /* default */],{
 				);
 			}
 		}
+		for (const id in this._REGION_DATA_MAP){
+			this.applyTextureConfigs(this._REGION_DATA_MAP[id],'B',0,0);
+			this.collapseCeilingOffsets(this._REGION_DATA_MAP[id]);
+		}
 	},
 	applyMapSettings(){
 		const mapconf = this.mapConfigurations;
@@ -4718,23 +4759,32 @@ Object.assign(mv3d["a" /* default */],{
     
 
 	getMapConfig(key,dfault){
-		if(key in this.mapConfigurations){
-			return this.mapConfigurations[key];
+		return this.getConfig(this.mapConfigurations,key,dfault);
+	},
+
+	getConfig(conf,key,dfault){
+		if(key in conf){
+			return conf[key];
 		}
 		return dfault;
 	},
 
-	getCeilingConfig(){
+	getCeilingConfig(tileConf={}){
 		let conf={};
-		for (const key in this.mapConfigurations){
+		const reassign=entry=>{
+			const [key,value] = entry;
 			if(key.startsWith('ceiling_')){
-				conf[key.replace('ceiling_','bottom_')]=this.mapConfigurations[key];
+				conf[key.replace('ceiling_','bottom_')]=value;
 			}
 		}
-		conf.bottom_id = this.getMapConfig('ceiling_id',0);
-		conf.height = this.getMapConfig('ceiling_height',this.CEILING_HEIGHT);
-		conf.skylight = this.getMapConfig('ceiling_skylight',true);
-		conf.backfaceCulling = true;
+		Object.entries(this.mapConfigurations).forEach(reassign);
+		Object.entries(tileConf).forEach(reassign);
+		const getConfig=(key,dfault)=>{
+			return this.getConfig(tileConf,key,this.getMapConfig(key,dfault));
+		};
+		conf.bottom_id = getConfig('ceiling_id',0);
+		conf.height = getConfig('ceiling_height',this.CEILING_HEIGHT);
+		conf.twosided = getConfig('ceiling_backface',true);
 		conf.isCeiling = true;
 		return conf;
 	},
@@ -4842,6 +4892,7 @@ Object.assign(mv3d["a" /* default */],{
 				mv3d["a" /* default */].tilesetConfigurationFunctions.side.func(conf,params);
 			}
 		}),
+		get ceiling(){ return mv3d["a" /* default */].mapConfigurationFunctions.ceiling; },
 		shape(conf,name,data){
 			conf.shape=mv3d["a" /* default */].enumShapes[name.toUpperCase()];
 			if(conf.shape===mv3d["a" /* default */].enumShapes.SLOPE && data||!('slopeHeight' in conf)){ conf.slopeHeight=Number(data)||1; }
@@ -4997,6 +5048,22 @@ Object.assign(mv3d["a" /* default */],{
 				conf.collide=false;
 			}
 		},
+		texture:(()=>{
+			const configurator = TextureConfigurator('texture');
+			return new ConfigurationFunction('img,x,y,w,h',(conf,params)=>{
+				const img = (mv3d["a" /* default */].validTilesheetName(params.img)?params.img.toUpperCase():params.img)||'B';
+				let defaultTileId = `TILE_ID_${img}` in Tilemap ? Tilemap[`TILE_ID_${img}`] : 0;
+				delete conf.texture_id;
+				delete conf.texture_img;
+				delete conf.texture_rect;
+				delete conf.texture_offset;
+				delete conf.texture_texture;
+				configurator.func(conf,params);
+				mv3d["a" /* default */].applyTextureSideConfigs(conf,'texture',img||'B',0,0);
+				mv3d["a" /* default */]._tileTextureOffset(conf,'texture',defaultTileId,defaultTileId);
+				conf.texture_symbol=Symbol(`${img},${params.x},${params.y},${params.w},${params.h}`);
+			});
+		})(),
 	},
 	mapConfigurationFunctions:{
 		get ambient(){ return this.light; },
@@ -5025,7 +5092,7 @@ Object.assign(mv3d["a" /* default */],{
 				conf[`ceiling_height`]=Number(params.height);
 			}
 			if(params.backface){
-				conf[`ceiling_skylight`]=!Object(util["booleanString"])(params.backface);
+				conf[`ceiling_backface`]=Object(util["booleanString"])(params.backface);
 			}
 		}),
 		edge(conf,b,data){
@@ -5051,7 +5118,7 @@ Object.assign(mv3d["a" /* default */],{
 		return /^(?:a[12345]|[bcde])$/i.test(img);
 	},
 	applyTextureConfigs(conf,img,tx,ty){
-		for (const side of ['top','side','inside','bottom','north','south','east','west']){
+		for (const side of ['top','side','inside','bottom','north','south','east','west','ceiling']){
 			this.applyTextureSideConfigs(conf,side,img,tx,ty);
 		}
 		return conf;
@@ -5059,7 +5126,7 @@ Object.assign(mv3d["a" /* default */],{
 	applyTextureSideConfigs(conf,side,img,tx,ty){
 		let textureCoords = conf[`${side}_texture`];
 		if(`${side}_img` in conf){ img=conf[`${side}_img`]; }
-		else{ conf[`${side}_img`]=img; }
+		//else{ conf[`${side}_img`]=img; }
 		if(textureCoords){
 			const {x:xcoord,y:ycoord,w,h}=textureCoords;
 			if(!xcoord.isPixelValue){
@@ -5087,9 +5154,19 @@ Object.assign(mv3d["a" /* default */],{
 				if(ycoord.isOffsetValue){ corner.y+=ycoord.offsetValue; }
 				else{ corner.y=ycoord.collapseValue(); }
 			}
+			
+			const rect = new PIXI.Rectangle(corner.x,corner.y,w,h);
+			if(textureCoords.percentRect){
+				rect.percentRect=textureCoords.percentRect;
+			}
 			conf[`${side}_id`] = validImg?mv3d["a" /* default */].constructTileId(img,1,0):1;
-			conf[`${side}_rect`]=new PIXI.Rectangle(corner.x,corner.y,w,h);
+			conf[`${side}_rect`]=rect;
 		}
+	},
+	collapseCeilingOffsets(conf){
+		const img = conf.ceiling_img||'B';
+		let defaultTileId = `TILE_ID_${img}` in Tilemap ? Tilemap[`TILE_ID_${img}`] : 0;
+		this._tileTextureOffset(conf,'ceiling',defaultTileId,defaultTileId);
 	},
 
 });
@@ -5473,36 +5550,36 @@ class MapCellBuilder_CellMeshBuilder{
 		}
 		return this.submeshBuilders[material.name];
 	}
-	addWallFace(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+	addWallFace(material,rect,x,y,z,w,h,rot,options={}){
 		const builder = this.getBuilder(material);
-		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,rect);
 		builder.addWallFace(x,y,z,w,h,rot,uvRect,options);
 		if(options.double){
 			options.flip=!options.flip;
 			builder.addWallFace(x,y,z,w,h,rot,uvRect,options);
 		}
 	}
-	addFloorFace(material,tx,ty,tw,th,x,y,z,w,h,options={}){
+	addFloorFace(material,rect,x,y,z,w,h,options={}){
 		const builder = this.getBuilder(material);
-		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,rect);
 		builder.addFloorFace(x,y,z,w,h,uvRect,options);
 		if(options.double){
 			options.flip=!options.flip;
 			builder.addFloorFace(x,y,z,w,h,uvRect,options);
 		}
 	}
-	addSlopeFace(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+	addSlopeFace(material,rect,x,y,z,w,h,rot,options={}){
 		const builder = this.getBuilder(material);
-		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,rect);
 		builder.addSlopeFace(x,y,z,w,h,rot,uvRect,options);
 		if(options.double){
 			options.flip=!options.flip;
 			builder.addSlopeFace(x,y,z,w,h,rot,uvRect,options);
 		}
 	}
-	addSlopeSide(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+	addSlopeSide(material,rect,x,y,z,w,h,rot,options={}){
 		const builder = this.getBuilder(material);
-		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		const uvRect = MapCellBuilder_SubMeshBuilder.getUvRect(material.diffuseTexture,rect);
 		builder.addSlopeSide(x,y,z,w,h,rot,uvRect,options);
 		if(options.double){
 			options.flip=!options.flip;
@@ -5617,8 +5694,10 @@ class MapCellBuilder_SubMeshBuilder{
 		this.normals.push(...normals);
 		this.uvs.push(...uvs);
 	}
-	static getUvRect(tsTexture,x,y,w,h){
+	static getUvRect(tsTexture,rect){
 		const { width, height } = tsTexture.getBaseSize();
+		rect = mv3d["a" /* default */].finalizeTextureRect(rect,width,height);
+		let {x,y,width:w,height:h} = rect;
 		if(mv3d["a" /* default */].EDGE_FIX){ x+=mv3d["a" /* default */].EDGE_FIX;y+=mv3d["a" /* default */].EDGE_FIX;w-=mv3d["a" /* default */].EDGE_FIX*2;h-=mv3d["a" /* default */].EDGE_FIX*2; }
 		return {
 			x1:x/width,
@@ -5872,17 +5951,22 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 			cellWidth = Math.min(mv3d["a" /* default */].CELL_SIZE,mv3d["a" /* default */].mapWidth()-this.cx*mv3d["a" /* default */].CELL_SIZE);
 			cellHeight = Math.min(mv3d["a" /* default */].CELL_SIZE,mv3d["a" /* default */].mapHeight()-this.cy*mv3d["a" /* default */].CELL_SIZE);
 		}
-		const ceiling = mv3d["a" /* default */].getCeilingConfig();
+		const ceilingConf = mv3d["a" /* default */].getCeilingConfig();
 		for (let y=0; y<cellHeight; ++y)
 		for (let x=0; x<cellWidth; ++x){
-			ceiling.cull=false;
+			let ceiling = ceilingConf;
 			const tileData = mv3d["a" /* default */].getTileData(this.ox+x,this.oy+y);
+			const zeroConf = mv3d["a" /* default */].getTileTextureOffsets(tileData[0],this.ox+x,this.oy+y,0);
+			if(zeroConf.ceiling_changed){
+				ceiling = mv3d["a" /* default */].getCeilingConfig(zeroConf);
+			}
+			ceiling.cull=false;
 			let lastZ=Infinity;
 			const cullHeight = mv3d["a" /* default */].getCullingHeight(this.ox+x,this.oy+y);
 			for (let l=3; l>=0; --l){
 				if(mv3d["a" /* default */].isTileEmpty(tileData[l])){ continue; }
 				let z = mv3d["a" /* default */].getStackHeight(this.ox+x,this.oy+y,l);
-				const tileConf = mv3d["a" /* default */].getTileTextureOffsets(tileData[l],this.ox+x,this.oy+y,l);
+				const tileConf = l===0?zeroConf:mv3d["a" /* default */].getTileTextureOffsets(tileData[l],this.ox+x,this.oy+y,l);
 				const shape = tileConf.shape;
 				tileConf.realId = tileData[l];
 				//tileConf.isAutotile = Tilemap.isAutotile(tileData[l]);
@@ -5934,7 +6018,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 				}
 			}
 			if(!mv3d["a" /* default */].isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
-				await this.loadTile(ceiling,x,y,ceiling.height,0,true,!ceiling.skylight);
+				await this.loadTile(ceiling,x,y,ceiling.height,0,true,false);
 			}
 
 			//if(mv3d.mapReady){ await sleep(); }
@@ -5975,8 +6059,8 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		doodad.mesh.material = tsMaterial;
 		doodad.parent=this;
 		doodad.x=x; doodad.y=y; doodad.z=z;
-		const scaleX = rect.width / Object(util["tileWidth"])();
-		const scaleY = tileConf.height||(rect.height/Object(util["tileHeight"])());
+		const scaleX = rect.width / Object(util["tileWidth"])() || 1;
+		const scaleY = tileConf.height||(rect.height/Object(util["tileHeight"])()) || 1;
 		doodad.mesh.scaling.set(scaleX,scaleY,scaleY);
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false,double=false){
@@ -5992,7 +6076,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		}
 		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,ceiling?'bottom':'top');
 		for (const rect of rects){
-			this.builder.addFloorFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+			this.builder.addFloorFace(tsMaterial,rect,
 				x + (rect.ox|0)/Object(util["tileSize"])() - 0.25*isAutotile,
 				y + (rect.oy|0)/Object(util["tileSize"])() - 0.25*isAutotile,
 				z,
@@ -6041,8 +6125,22 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 			tileId=tileConf.inside_id;
 			if(tileConf.inside_rect){ configRect = tileConf.inside_rect; }
 		}else{
-			if(tileConf.side_rect){ configRect = tileConf.side_rect; }
+			if(np.y>0){
+				if(tileConf.south_changed){ texture_side='south'; }
+			}else if(np.y<0){
+				if(tileConf.north_changed){ texture_side='north'; }
+			}else if(np.x>0){
+				if(tileConf.east_changed){ texture_side='east'; }
+			}else if(np.x<0){
+				if(tileConf.west_changed){ texture_side='west'; }
+			}
+			textureChanged=textureChanged||(`${texture_side}_changed` in tileConf);
+			const side_id = tileConf[`${texture_side}_id`];
+			if(side_id!=null){ tileId=side_id; }
+			const side_rect = tileConf[`${texture_side}_rect`];
+			if(side_rect){ configRect = side_rect; }
 		}
+		if(mv3d["a" /* default */].isTileEmpty(tileId)){ return; }
 
 		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,texture_side);
 
@@ -6052,7 +6150,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 			const rect = configRect ? configRect : mv3d["a" /* default */].getTileRects(tileId)[0];
 			const builderOptions={};
 			if(neededHeight<0){ builderOptions.flip=true; }
-			this.builder.addWallFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+			this.builder.addWallFace(tsMaterial,rect,
 				wallPos.x,
 				wallPos.y,
 				z - neededHeight/2,
@@ -6099,7 +6197,8 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 					}
 					const builderOptions={};
 					if(neededHeight<0){ builderOptions.flip=true; }
-					this.builder.addWallFace(tsMaterial,sx,sy,sw,sh,
+					const sourceRect = new PIXI.Rectangle(sx,sy,sw,sh);
+					this.builder.addWallFace(tsMaterial,sourceRect,
 						wallPos.x+0.25*ax*Math.cos(rot),
 						wallPos.y+0.25*ax*Math.sin(rot),
 						z - neededHeight*(neededHeight<0) - partHeight/2 - partHeight*az,
@@ -6141,10 +6240,12 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 			if(isAutotile&&!configRect){
 				const {x:bx,y:by} = this.getAutotileCorner(tileId,'side_changed' in tileConf,true);
 				for (let az=0;az<=1;++az){
-					this.builder.addWallFace(tsMaterial,
+					const sourceRect = new PIXI.Rectangle(
 						(edge ? (bx+rightSide*1.5) : (bx+1-rightSide*0.5) )*Object(util["tileWidth"])(),
 						(by+az*1.5)*Object(util["tileHeight"])(),
 						Object(util["tileWidth"])()/2, Object(util["tileHeight"])()/2,
+					);
+					this.builder.addWallFace(tsMaterial,sourceRect,
 						x+np.x/4,
 						y+np.y/4,
 						z-wallHeight/4-az*wallHeight/2,
@@ -6153,10 +6254,12 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 				}
 			}else{
 				const rect = configRect ? configRect : mv3d["a" /* default */].getTileRects(tileId)[0];
-				this.builder.addWallFace(tsMaterial,
+				const sourceRect = new PIXI.Rectangle(
 					rect.x+rect.width/2*(np.x>0||np.y>0),
 					rect.y,
 					rect.width/2, rect.height,
+				);
+				this.builder.addWallFace(tsMaterial,sourceRect,
 					x+np.x/4,
 					y+np.y/4,
 					z-wallHeight/2,
@@ -6184,8 +6287,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 			for (const rect of rects){
 				const irot = -Math.PI/2*i+rot;
 				const trans= isAutotile?(-partWidth/2+Math.sign(rect.ox)*partWidth):0;
-				this.builder.addWallFace(tsMaterial,
-					rect.x,rect.y,rect.width,rect.height,
+				this.builder.addWallFace(tsMaterial,rect,
 					x+trans*Math.cos(irot),
 					y+trans*Math.sin(irot),
 					z - (rect.oy|0)/Object(util["tileHeight"])()*wallHeight - partHeight/2,
@@ -6233,7 +6335,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 				const ix=(i+1)%2*-2+1, iy=(Math.floor(i/2)+1)%2*2-1;
 				const hx=Math.max(0,Object(util["sin"])(rot)*ix)*slopeHeight/2;
 				const hy=Math.max(0,Object(util["cos"])(rot)*iy)*slopeHeight/2;
-				this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+				this.builder.addSlopeFace(tsMaterial,rect,
 					x + rect.ox/Object(util["tileSize"])() - 0.25,
 					y + rect.oy/Object(util["tileSize"])() - 0.25,
 					z - slopeHeight + hx + hy,
@@ -6242,7 +6344,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 			}
 		}else{
 			const rect = tileConf.top_rect?tileConf.top_rect:mv3d["a" /* default */].getTileRects(tileId)[0];
-			this.builder.addSlopeFace(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+			this.builder.addSlopeFace(tsMaterial,rect,
 				x, y, z - slopeHeight,
 				1, slopeHeight, rot, {}
 			);
@@ -6259,7 +6361,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		}else{
 			rect = tileConf.side_rect?tileConf.side_rect:mv3d["a" /* default */].getTileRects(tileId)[0];
 		}
-		this.builder.addSlopeSide(tsMaterial,rect.x,rect.y,rect.width,rect.height,
+		this.builder.addSlopeSide(tsMaterial,rect,
 			x, y, z - slopeHeight,
 			1, slopeHeight, rot, options
 		);
@@ -6355,8 +6457,19 @@ Object.assign(mv3d["a" /* default */],{
 			return Tilemap.isTileA5(id)?4:5+Math.floor(id/256);
 		}
 	},
+	SETNUMBERS:{A1:0,A2:1,A3:2,A4:3,A5:4,B:5,C:6,D:7,E:8},
+	SETNAMES:['A1','A2','A3','A4','A5','B','C','D','E'],
 	getSetName(id){
-		return (this.getSetName._setnames||(this.getSetName._setnames=['A1','A2','A3','A4','A5','B','C','D','E']))[this.getSetNumber(id)];
+		return this.SETNAMES[this.getSetNumber(id)];
+	},
+	getTsImgUrl(name){
+		if(name in this.SETNUMBERS){
+			const setN = this.SETNUMBERS[name];
+			const tsName = $gameMap.tileset().tilesetNames[setN];
+			if(!tsName){ return Object(util["file"])(mv3d["a" /* default */].MV3D_FOLDER,`${mv3d["a" /* default */].TEXTURE_ERROR}.png`); }
+			return ImageManager.loadTileset(tsName)._url;
+		}
+		return Object(util["file"])(mv3d["a" /* default */].MV3D_FOLDER,name);
 	},
 
 	getShadowBits(x,y){
@@ -6429,12 +6542,12 @@ Object.assign(mv3d["a" /* default */],{
 		const conf = this.getTileConfig(tileId,x,y,l);
 		this._tileTextureOffset(conf,'top',tileId,tileId);
 		this._tileTextureOffset(conf,'side',tileId,tileId);
-		this._tileTextureOffset(conf,'inside',tileId,conf.side_id);
-		this._tileTextureOffset(conf,'bottom',tileId,conf.top_id);
-		this._tileTextureOffset(conf,'north',tileId,conf.side_id);
-		this._tileTextureOffset(conf,'south',tileId,conf.side_id);
-		this._tileTextureOffset(conf,'east',tileId,conf.side_id);
-		this._tileTextureOffset(conf,'west',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'inside',tileId,'side');
+		this._tileTextureOffset(conf,'bottom',tileId,'top');
+		this._tileTextureOffset(conf,'north',tileId,'side');
+		this._tileTextureOffset(conf,'south',tileId,'side');
+		this._tileTextureOffset(conf,'east',tileId,'side');
+		this._tileTextureOffset(conf,'west',tileId,'side');
 		if(!('pass' in conf)){
 			conf.pass = this.getTilePassage(tileId,conf);
 		}
@@ -6447,10 +6560,19 @@ Object.assign(mv3d["a" /* default */],{
 		if(id==null){
 			let offset = conf[`${side}_offset`];
 			if(offset){
-				id=conf[`${side}_id`]=tileId+conf.side_offset.x*tileRange+conf.side_offset.y*tileRange
+				id=conf[`${side}_id`]=tileId+offset.x*tileRange+offset.y*tileRange*8;
 			}else{
-				id=conf[`${side}_id`]=dfault;
+				if(typeof dfault === 'string'){
+					id=conf[`${side}_id`]=conf[`${dfault}_id`];
+					conf[`${side}_img`]=conf[`${dfault}_img`];
+					if(`${dfault}_rect` in conf){ conf[`${side}_rect`]=conf[`${dfault}_rect`]; }
+				}else{
+					id=conf[`${side}_id`]=dfault;
+				}
 			}
+		}
+		let img = conf[`${side}_img`];
+		if(img==null){
 			conf[`${side}_img`]=this.getSetName(id);
 		}
 	},
@@ -6638,21 +6760,14 @@ Object.assign(mv3d["a" /* default */],{
 	},
 
 	getTileLayers(x,y,z,gte=true){
+		const heights = mv3d["a" /* default */].getCollisionHeights(x,y,{layers:true,slopeMin:true}).layers;
 		let closest_diff = Infinity;
 		let layers = [0];
-		let h=0;
-		//const tileData = this.getTileData(x,y);
 		for (let l=0; l<=3; ++l){
-			//if($gameMap.tilesetFlags()[tileData[l]]&0x10){ continue; }
-			if(this.getTilePassage(x,y,l)===this.enumPassage.THROUGH){ continue; }
-			const fringe=this.getTileFringe(x,y,l);
-			const height=this.getTileHeight(x,y,l);
+			if(!(l in heights)){ continue; }
 			const conf = this.getTileConfig(x,y,l);
-			h+=fringe+height;
 			const isSlope=conf.shape===this.enumShapes.SLOPE;
-			if(isSlope){
-				h-=conf.slopeHeight||1;
-			}
+			const h = heights[l].z2;
 			const diff = z-h;
 			if( gte ? z>=h : z>h ){
 				if(diff<closest_diff||isSlope&&diff<=closest_diff){
@@ -6993,16 +7108,12 @@ Object.assign(mv3d["a" /* default */],{
 	},
 
 	async getCachedTilesetTexture(setN,animX=0,animY=0,options={}){
-		const key = `TS:${setN}|${animX},${animY}${this.getExtraBit2(options)}`;
+		const setImg = options.img||this.SETNAMES[setN];
+		const key = `TS:${setImg}|${animX},${animY}${this.getExtraBit2(options)}`;
 		if(key in this.textureCache){
 			return this.textureCache[key];
 		}
-		const tsName = $gameMap.tileset().tilesetNames[setN];
-		if(!tsName){
-			return await this.getErrorTexture();
-		}
-		//const textureSrc=`img/tilesets/${tsName}.png`;
-		const textureSrc=ImageManager.loadTileset(tsName)._url;
+		const textureSrc = mv3d["a" /* default */].getTsImgUrl(setImg);
 		const texture = await this.createTexture(textureSrc);
 		texture.hasAlpha=true;
 		this.textureCache[key]=texture;
@@ -7014,8 +7125,9 @@ Object.assign(mv3d["a" /* default */],{
 		//texture.wrapU = Texture.CLAMP_ADDRESSMODE;
 		//texture.wrapV = Texture.CLAMP_ADDRESSMODE;
 		if(options.cropTexture){
-			const ct = options.cropTexture;
-			texture.crop(ct.x,ct.y,ct.width,ct.height,true);
+			const { width, height } = texture.getBaseSize();
+			let {x,y,width:w,height:h} = mv3d["a" /* default */].finalizeTextureRect(options.cropTexture,width,height);
+			texture.crop(x,y,w,h);
 		}
 		if(animX||animY){
 			const { width, height } = texture.getBaseSize();
@@ -7030,7 +7142,7 @@ Object.assign(mv3d["a" /* default */],{
 
 	async getErrorTexture(){
 		if(this.errorTexture){ return this.errorTexture; }
-		this.errorTexture = await this.createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/errorTexture.png`);
+		this.errorTexture = await this.createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/${mv3d["a" /* default */].TEXTURE_ERROR}.png`);
 		this.errorTexture.isError=true;
 		this.errorTexture.dispose=()=>{};
 		return this.errorTexture;
@@ -7039,7 +7151,7 @@ Object.assign(mv3d["a" /* default */],{
 	async getBushAlphaTexture(){
 		if(this.bushAlphaTexture){ return this.bushAlphaTexture; }
 		this.getBushAlphaTexture.getting=true;
-		this.bushAlphaTexture = await this.createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/bushAlpha.png`);
+		this.bushAlphaTexture = await this.createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/${mv3d["a" /* default */].TEXTURE_BUSHALPHA}.png`);
 		this.bushAlphaTexture.getAlphaFromRGB=true;
 		this.bushAlphaTexture.dispose=()=>{};
 		this.getBushAlphaTexture.getting=false;
@@ -7055,7 +7167,7 @@ Object.assign(mv3d["a" /* default */],{
 
 	async getCachedTilesetMaterial(setN,animX=0,animY=0,options={}){
 		this.processMaterialOptions(options);
-		const key = `TS:${setN}|${animX},${animY}|${this.getExtraBit(options)}${this.getExtraBit2(options)}`;
+		const key = `TS:${options.img||this.SETNAMES[setN]}|${animX},${animY}|${this.getExtraBit(options)}${this.getExtraBit2(options)}`;
 		if(key in this.materialCache){
 			return this.materialCache[key];
 		}
@@ -7078,6 +7190,7 @@ Object.assign(mv3d["a" /* default */],{
 		material.backFaceCulling=options.backfaceCulling;
 		material.twoSidedLighting=options.twosided;
 		material.maxSimultaneousLights=this.LIGHT_LIMIT;
+		//material.mv3d_is_cached=true;
 		this.materialCache[key]=material;
 		return material;
 	},
@@ -7101,10 +7214,10 @@ Object.assign(mv3d["a" /* default */],{
 			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
 			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
 			if(`${side}_shadow` in conf){ options.shadow=conf[`${side}_shadow`]; }
+			if(`${side}_img` in conf){ options.img=conf[`${side}_img`]; }
 		}
 		if(conf.isCeiling){
-			options.backfaceCulling=conf.backfaceCulling;
-			options.through = conf.skylight;
+			options.through = !conf.twosided;
 		}
 		if(conf.twosided){ options.backfaceCulling=false;options.twosided=true; }
 		if('alpha' in options){ options.transparent=true; }
@@ -7177,7 +7290,6 @@ Object.assign(mv3d["a" /* default */],{
 				texture.frameData.y+texture.animY*this.animYFrame*Object(util["tileHeight"])(),
 				texture.frameData.width,
 				texture.frameData.height,
-				true
 			);
 		}
 	},
@@ -7290,7 +7402,7 @@ Object.assign(mv3d["a" /* default */],{
 
 	async getShadowMaterial(){
 		if(this._shadowMaterial){ return this._shadowMaterial; }
-		const shadowTexture = await mv3d["a" /* default */].createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/shadow.png`);
+		const shadowTexture = await mv3d["a" /* default */].createTexture(`${mv3d["a" /* default */].MV3D_FOLDER}/${mv3d["a" /* default */].TEXTURE_SHADOW}.png`);
 		const shadowMaterial = new babylon["StandardMaterial"]('shadow material', mv3d["a" /* default */].scene);
 		this._shadowMaterial=shadowMaterial;
 		shadowMaterial.diffuseTexture=shadowTexture;
@@ -7443,17 +7555,23 @@ class characters_Character extends babylon["TransformNode"]{
 	get shape(){
 		return this.model.shape;
 	}
+	get tileId(){
+		return this.getConfig('texture_id',this._tileId);
+	}
 
-	setTileMaterial(){
-		const setN = mv3d["a" /* default */].getSetNumber(this._tileId);
-		const tsName = $gameMap.tileset().tilesetNames[setN];
-		if(tsName){
-			//const textureSrc=`img/tilesets/${tsName}.png`;
-			const textureSrc=ImageManager.loadTileset(tsName)._url;
-			this.setMaterial(textureSrc);
-		}else{
-			this.setMaterial("error");
-		}
+	setTileMaterial(tileId){
+		const textureSrc = mv3d["a" /* default */].getTsImgUrl(mv3d["a" /* default */].getSetName(tileId));
+		this.setMaterial(textureSrc);
+	}
+	async setRectMaterial(img,rect){
+		const textureSrc = mv3d["a" /* default */].getTsImgUrl(img);
+		await this.setMaterial(textureSrc);
+		this.dontCrop=true;
+		const { width, height } = this.model.texture.getBaseSize();
+		rect = mv3d["a" /* default */].finalizeTextureRect(rect,width,height);
+		this.textureRect = rect;
+		this.model.texture.crop(rect.x,rect.y,rect.width,rect.height);
+		this.updateScale();
 	}
 
 	async waitBitmapLoaded(){
@@ -7477,23 +7595,29 @@ class characters_Character extends babylon["TransformNode"]{
 
 	isImageChanged(){
 		return (this._tilesetId !== $gameMap.tilesetId()
-		||this._tileId !== this._character.tileId()
+		||this._tileId !== this._character._tileId
 		||this._characterName !== this._character.characterName()
 		//||this._characterIndex !== this._character.characterIndex()
+		||this._texture_symbol !== this.getConfig('texture_symbol')
 		);
 	}
 	updateCharacter(){
 		if(!this.isBitmapReady()){ return; }
 		this.needsPositionUpdate=true;
 		this._tilesetId = $gameMap.tilesetId();
-		this._tileId = this._character.tileId();
+		this._tileId = this._character._tileId;
 		this._characterName = this._character.characterName();
 		this._characterIndex = this._character.characterIndex();
 		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
+		this._texture_symbol = this.getConfig('texture_symbol');
 		this.isEmpty=false;
 		this.model.setEnabled(true);
-		if(this._tileId>0){
-			this.setTileMaterial(this._tileId);
+		this.dontCrop=false;
+		delete this.textureRect;
+		if(this.hasConfig('texture_rect')){
+			this.setRectMaterial(this.getConfig('texture_img','B'),this.getConfig('texture_rect'));
+		}else if(this.tileId>0){
+			this.setTileMaterial(this.tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
 		}else{
@@ -7507,8 +7631,8 @@ class characters_Character extends babylon["TransformNode"]{
 		}
 	}
 	setFrame(x,y,w,h){
-		if(!this.isTextureReady()){ return; }
-		this.model.texture.crop(x,y,w,h,this._tileId>0);
+		if(!this.isTextureReady()||this.dontCrop){ return; }
+		this.model.texture.crop(x,y,w,h);
 	}
 
 	async updateScale(){
@@ -7523,8 +7647,15 @@ class characters_Character extends babylon["TransformNode"]{
 		if(!this.isBitmapReady()){ return; }
 		this.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new babylon["Vector2"](1,1));
-		this.spriteWidth=this.mv_sprite.patternWidth()/Object(util["tileSize"])() * configScale.x;
-		this.spriteHeight=this.mv_sprite.patternHeight()/Object(util["tileSize"])() * configScale.y;
+		if(this.textureRect){
+			var width = this.textureRect.width;
+			var height = this.textureRect.height;
+		}else{
+			var width = this.mv_sprite.patternWidth();
+			var height = this.mv_sprite.patternHeight();
+		}
+		this.spriteWidth = width/Object(util["tileWidth"])() * configScale.x;
+		this.spriteHeight = height/Object(util["tileHeight"])() * configScale.y;
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
 
@@ -8485,12 +8616,16 @@ Object(util["override"])(Sprite_Character.prototype,'setBlendColor',o=>function(
 	sprite.needsMaterialUpdate=true;
 });
 
+Object(util["override"])(Game_CharacterBase.prototype,'tileId',o=>function(){
+	if(this.mv3d_sprite){ return this.mv3d_sprite.tileId; }
+	return this._tileId;
+});
+
 mv3d["a" /* default */].Character = characters_Character;
 
 
-const _isOnBush = Game_CharacterBase.prototype.isOnBush;
-Game_CharacterBase.prototype.isOnBush = function() {
-	if(mv3d["a" /* default */].isDisabled()||!this.mv3d_sprite){ return _isOnBush.apply(this,arguments); }
+Object(util["override"])(Game_CharacterBase.prototype,'isOnBush',o=>function(){
+	if(!this.mv3d_sprite){ return o.apply(this,arguments); }
 	const rx=Math.round(this._realX), ry=Math.round(this._realY);
 	const tileData=mv3d["a" /* default */].getTileData(rx,ry);
 	const layers = mv3d["a" /* default */].getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight(),false);
@@ -8499,7 +8634,7 @@ Game_CharacterBase.prototype.isOnBush = function() {
 		if( (flags[tileData[l]] & 0x40) !== 0 ){ return true; }
 	}
 	return false;
-};
+});
 // CONCATENATED MODULE: ./src/animations.js
 
 
@@ -8555,7 +8690,7 @@ class animations_AnimSprite extends babylon["TransformNode"]{
 		this.texture.crop(
 			this.cellIndex%this.cellCols*this.cellWidth,
 			Math.floor(this.cellIndex/this.cellCols)*this.cellHeight,
-			this.cellWidth, this.cellHeight, true
+			this.cellWidth, this.cellHeight
 		);
 	}
 	dispose(){

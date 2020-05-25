@@ -73,7 +73,7 @@ module.exports = {
 				else{ console.log("Created README.md"); }
 			});
 
-			const mv3d_files = glob.sync("../project/img/MV3D/**/*",{nodir:true});
+			const mv3d_files = glob.sync("../project/img/MV3D/**/!(_ignore_)*",{nodir:true});
 			const zipfile = new yazl.ZipFile();
 			//zipfile.addFile('../project/js/plugins/babylon.js','js/plugins/babylon.js');
 			zipfile.addFile('../project/js/plugins/mv3d.js','js/plugins/mv3d.js');

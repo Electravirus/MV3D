@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { v2origin, tileSize, degtorad, sin, tileWidth, cos, tileHeight, overload, minmax } from './util.js';
+import { v2origin, tileSize, degtorad, sin, tileWidth, cos, tileHeight, overload, minmax, file } from './util.js';
 import { MapCell } from './mapCell.js';
 
 Object.assign(mv3d,{
@@ -32,8 +32,19 @@ Object.assign(mv3d,{
 			return Tilemap.isTileA5(id)?4:5+Math.floor(id/256);
 		}
 	},
+	SETNUMBERS:{A1:0,A2:1,A3:2,A4:3,A5:4,B:5,C:6,D:7,E:8},
+	SETNAMES:['A1','A2','A3','A4','A5','B','C','D','E'],
 	getSetName(id){
-		return (this.getSetName._setnames||(this.getSetName._setnames=['A1','A2','A3','A4','A5','B','C','D','E']))[this.getSetNumber(id)];
+		return this.SETNAMES[this.getSetNumber(id)];
+	},
+	getTsImgUrl(name){
+		if(name in this.SETNUMBERS){
+			const setN = this.SETNUMBERS[name];
+			const tsName = $gameMap.tileset().tilesetNames[setN];
+			if(!tsName){ return file(mv3d.MV3D_FOLDER,`${mv3d.TEXTURE_ERROR}.png`); }
+			return ImageManager.loadTileset(tsName)._url;
+		}
+		return file(mv3d.MV3D_FOLDER,name);
 	},
 
 	getShadowBits(x,y){
@@ -106,12 +117,12 @@ Object.assign(mv3d,{
 		const conf = this.getTileConfig(tileId,x,y,l);
 		this._tileTextureOffset(conf,'top',tileId,tileId);
 		this._tileTextureOffset(conf,'side',tileId,tileId);
-		this._tileTextureOffset(conf,'inside',tileId,conf.side_id);
-		this._tileTextureOffset(conf,'bottom',tileId,conf.top_id);
-		this._tileTextureOffset(conf,'north',tileId,conf.side_id);
-		this._tileTextureOffset(conf,'south',tileId,conf.side_id);
-		this._tileTextureOffset(conf,'east',tileId,conf.side_id);
-		this._tileTextureOffset(conf,'west',tileId,conf.side_id);
+		this._tileTextureOffset(conf,'inside',tileId,'side');
+		this._tileTextureOffset(conf,'bottom',tileId,'top');
+		this._tileTextureOffset(conf,'north',tileId,'side');
+		this._tileTextureOffset(conf,'south',tileId,'side');
+		this._tileTextureOffset(conf,'east',tileId,'side');
+		this._tileTextureOffset(conf,'west',tileId,'side');
 		if(!('pass' in conf)){
 			conf.pass = this.getTilePassage(tileId,conf);
 		}
@@ -124,10 +135,19 @@ Object.assign(mv3d,{
 		if(id==null){
 			let offset = conf[`${side}_offset`];
 			if(offset){
-				id=conf[`${side}_id`]=tileId+conf.side_offset.x*tileRange+conf.side_offset.y*tileRange
+				id=conf[`${side}_id`]=tileId+offset.x*tileRange+offset.y*tileRange*8;
 			}else{
-				id=conf[`${side}_id`]=dfault;
+				if(typeof dfault === 'string'){
+					id=conf[`${side}_id`]=conf[`${dfault}_id`];
+					conf[`${side}_img`]=conf[`${dfault}_img`];
+					if(`${dfault}_rect` in conf){ conf[`${side}_rect`]=conf[`${dfault}_rect`]; }
+				}else{
+					id=conf[`${side}_id`]=dfault;
+				}
 			}
+		}
+		let img = conf[`${side}_img`];
+		if(img==null){
 			conf[`${side}_img`]=this.getSetName(id);
 		}
 	},
@@ -315,21 +335,14 @@ Object.assign(mv3d,{
 	},
 
 	getTileLayers(x,y,z,gte=true){
+		const heights = mv3d.getCollisionHeights(x,y,{layers:true,slopeMin:true}).layers;
 		let closest_diff = Infinity;
 		let layers = [0];
-		let h=0;
-		//const tileData = this.getTileData(x,y);
 		for (let l=0; l<=3; ++l){
-			//if($gameMap.tilesetFlags()[tileData[l]]&0x10){ continue; }
-			if(this.getTilePassage(x,y,l)===this.enumPassage.THROUGH){ continue; }
-			const fringe=this.getTileFringe(x,y,l);
-			const height=this.getTileHeight(x,y,l);
+			if(!(l in heights)){ continue; }
 			const conf = this.getTileConfig(x,y,l);
-			h+=fringe+height;
 			const isSlope=conf.shape===this.enumShapes.SLOPE;
-			if(isSlope){
-				h-=conf.slopeHeight||1;
-			}
+			const h = heights[l].z2;
 			const diff = z-h;
 			if( gte ? z>=h : z>h ){
 				if(diff<closest_diff||isSlope&&diff<=closest_diff){

@@ -79,7 +79,10 @@ function TextureConfigurator(name,extraParams='',apply){
 			break;}
 		case 1:{
 			const [img] = params.group1;
-			conf[`${name}_img`]=img;
+			readTextureConfigurations(name,conf,img,0,0,'100%','100%');
+			//conf[`${name}_img`]=img;
+			//conf[`${name}_id`] = 1;
+			//conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
 			break;}
 		}
 		if(params.animx&&params.animy){
@@ -102,12 +105,16 @@ function TextureConfigurator(name,extraParams='',apply){
 }
 
 function readTextureConfigurations(name,conf,img,xstr,ystr,wstr='1',hstr='1'){
+	const validImg = mv3d.validTilesheetName(img);
+	if(validImg){ img=img.toUpperCase(); }
 	conf[`${name}_img`]=img;
 	conf[`${name}_changed`]=true;
 	let hasPixelValue=false;
+	let hasPercentValue=false;
 	const coords=[xstr,ystr,wstr,hstr].map(str=>{
 		const coord = interpretTextureCoodinate(str);
 		if(coord.isPixelValue){ hasPixelValue=true; }
+		if(coord.percentValue){ hasPercentValue=true; }
 		return coord;
 	});
 	coords.forEach(coord=>{
@@ -115,45 +122,63 @@ function readTextureConfigurations(name,conf,img,xstr,ystr,wstr='1',hstr='1'){
 	});
 	let [xcoord,ycoord,wcoord,hcoord]=coords;
 	let [x,y,w,h] = coords.map(coord=>coord.collapseValue());
-	if(mv3d.validTilesheetName(img)){
-		if(hasPixelValue){
-			if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
-				conf[`${name}_id`] = mv3d.constructTileId(img,1,0);
-				conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
-				return;
-			}
-		}else if(w===1&&h===1){
-			if(xcoord.isOffsetValue&&ycoord.isOffsetValue){
-				conf[`${name}_offset`] = new Vector2(Number(x),Number(y));
-				return;
-			}
-			if(!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
-				conf[`${name}_id`] = mv3d.constructTileId(img,x,y);
-				return;
-			}
+	if(hasPercentValue){
+	}else if(hasPixelValue){
+		if(validImg&&!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
+			conf[`${name}_id`] = mv3d.constructTileId(img,1,0);
+			conf[`${name}_rect`] = new PIXI.Rectangle(x,y,w,h);
+			return;
+		}
+	}else if(w===1&&h===1){
+		if((!img||validImg)&&xcoord.isOffsetValue&&ycoord.isOffsetValue){
+			conf[`${name}_offset`] = new Vector2(Number(x),Number(y));
+			return;
+		}
+		if(validImg&&!xcoord.isOffsetValue&&!ycoord.isOffsetValue){
+			conf[`${name}_id`] = mv3d.constructTileId(img,x,y);
+			return;
 		}
 	}
 	wcoord.usePixelValue(); hcoord.usePixelValue();
-	conf[`${name}_texture`] = {x:xcoord,y:ycoord,w:wcoord.collapseValue(),h:hcoord.collapseValue()};
+	const textureCoords = {x:xcoord,y:ycoord,w:wcoord.collapseValue(),h:hcoord.collapseValue()};
+	if(hasPercentValue){
+		textureCoords.percentRect = new PIXI.Rectangle(xcoord.percentValue,ycoord.percentValue,wcoord.percentValue,hcoord.percentValue);
+	}
+	conf[`${name}_texture`] = textureCoords;
+}
+
+mv3d.finalizeTextureRect = function(rect,width,height){
+	let {x,y,width:w,height:h} = rect;
+	if(rect.percentRect){
+		const pr = rect.percentRect;
+		x+=pr.x*width; 
+		y+=pr.y*height;
+		w+=pr.width*width;
+		h+=pr.height*height;
+	}
+	return new PIXI.Rectangle(x,y,w,h);
 }
 
 function interpretTextureCoodinate(nstr){
-	const r = /(\+?-?)(\d+\.\d*|\d*\.?\d+)(px|p|t)?/g;
+	const r = /(\+?-?)(\d+\.\d*|\d*\.?\d+)(px?|t|%)?/g;
 	const coord = new TextureCoordinate();
 	let match;
 	while(match=r.exec(nstr)){
 		const isRelative = Boolean(match[1]);
 		const isNegative = match[1].includes('-');
-		let unit = match[3]?match[3].startsWith('p')?'p':'t':'t';
+		let unit = (match[3]||'t')[0];
 		let num = Number(match[2]);
 		if(isNegative){ num*=-1; }
 		if(unit==='t'&&num%1||!match[3]&&match[2].includes('.')){ num=num*tileSize(); unit='p'; }
 		if(unit==='t'){
 			if(isRelative) coord.offsetTileValue(num);
 			else coord.setTileValue(num);
-		}else{
+		}else if(unit==='p'){
 			if(isRelative) coord.offsetPixelValue(num);
 			else coord.setPixelValue(num);
+		}else if(unit==='%'){
+			if(isRelative) coord.offsetPercentValue(num);
+			else coord.setPercentValue(num);
 		}
 	}
 	return coord;
@@ -164,6 +189,7 @@ class TextureCoordinate{
 		this.isPixelValue=false;
 		this.baseValue=null;
 		this.offsetValue=0;
+		this.percentValue=0;
 	}
 	usePixelValue(){
 		if(this.isPixelValue){ return; }
@@ -193,8 +219,17 @@ class TextureCoordinate{
 		this.usePixelValue();
 		this.offsetValue+=v;
 	}
-	collapseValue(baseValue){
-		return (this.baseValue||baseValue||0)+this.offsetValue;
+	setPercentValue(v){
+		this.usePixelValue();
+		if(this.baseValue===null){ this.baseValue=0; }
+		this.percentValue=v/100;
+	}
+	offsetPercentValue(v){
+		this.usePixelValue();
+		this.percentValue+=v/100
+	}
+	collapseValue(){
+		return (this.baseValue||0)+this.offsetValue;
 	}
 	get isOffsetValue(){
 		return this.baseValue==null;
@@ -258,6 +293,10 @@ Object.assign(mv3d,{
 				);
 			}
 		}
+		for (const id in this._REGION_DATA_MAP){
+			this.applyTextureConfigs(this._REGION_DATA_MAP[id],'B',0,0);
+			this.collapseCeilingOffsets(this._REGION_DATA_MAP[id]);
+		}
 	},
 	applyMapSettings(){
 		const mapconf = this.mapConfigurations;
@@ -309,23 +348,32 @@ Object.assign(mv3d,{
     
 
 	getMapConfig(key,dfault){
-		if(key in this.mapConfigurations){
-			return this.mapConfigurations[key];
+		return this.getConfig(this.mapConfigurations,key,dfault);
+	},
+
+	getConfig(conf,key,dfault){
+		if(key in conf){
+			return conf[key];
 		}
 		return dfault;
 	},
 
-	getCeilingConfig(){
+	getCeilingConfig(tileConf={}){
 		let conf={};
-		for (const key in this.mapConfigurations){
+		const reassign=entry=>{
+			const [key,value] = entry;
 			if(key.startsWith('ceiling_')){
-				conf[key.replace('ceiling_','bottom_')]=this.mapConfigurations[key];
+				conf[key.replace('ceiling_','bottom_')]=value;
 			}
 		}
-		conf.bottom_id = this.getMapConfig('ceiling_id',0);
-		conf.height = this.getMapConfig('ceiling_height',this.CEILING_HEIGHT);
-		conf.skylight = this.getMapConfig('ceiling_skylight',true);
-		conf.backfaceCulling = true;
+		Object.entries(this.mapConfigurations).forEach(reassign);
+		Object.entries(tileConf).forEach(reassign);
+		const getConfig=(key,dfault)=>{
+			return this.getConfig(tileConf,key,this.getMapConfig(key,dfault));
+		};
+		conf.bottom_id = getConfig('ceiling_id',0);
+		conf.height = getConfig('ceiling_height',this.CEILING_HEIGHT);
+		conf.twosided = getConfig('ceiling_backface',true);
 		conf.isCeiling = true;
 		return conf;
 	},
@@ -433,6 +481,7 @@ Object.assign(mv3d,{
 				mv3d.tilesetConfigurationFunctions.side.func(conf,params);
 			}
 		}),
+		get ceiling(){ return mv3d.mapConfigurationFunctions.ceiling; },
 		shape(conf,name,data){
 			conf.shape=mv3d.enumShapes[name.toUpperCase()];
 			if(conf.shape===mv3d.enumShapes.SLOPE && data||!('slopeHeight' in conf)){ conf.slopeHeight=Number(data)||1; }
@@ -588,6 +637,22 @@ Object.assign(mv3d,{
 				conf.collide=false;
 			}
 		},
+		texture:(()=>{
+			const configurator = TextureConfigurator('texture');
+			return new ConfigurationFunction('img,x,y,w,h',(conf,params)=>{
+				const img = (mv3d.validTilesheetName(params.img)?params.img.toUpperCase():params.img)||'B';
+				let defaultTileId = `TILE_ID_${img}` in Tilemap ? Tilemap[`TILE_ID_${img}`] : 0;
+				delete conf.texture_id;
+				delete conf.texture_img;
+				delete conf.texture_rect;
+				delete conf.texture_offset;
+				delete conf.texture_texture;
+				configurator.func(conf,params);
+				mv3d.applyTextureSideConfigs(conf,'texture',img||'B',0,0);
+				mv3d._tileTextureOffset(conf,'texture',defaultTileId,defaultTileId);
+				conf.texture_symbol=Symbol(`${img},${params.x},${params.y},${params.w},${params.h}`);
+			});
+		})(),
 	},
 	mapConfigurationFunctions:{
 		get ambient(){ return this.light; },
@@ -616,7 +681,7 @@ Object.assign(mv3d,{
 				conf[`ceiling_height`]=Number(params.height);
 			}
 			if(params.backface){
-				conf[`ceiling_skylight`]=!booleanString(params.backface);
+				conf[`ceiling_backface`]=booleanString(params.backface);
 			}
 		}),
 		edge(conf,b,data){
@@ -642,7 +707,7 @@ Object.assign(mv3d,{
 		return /^(?:a[12345]|[bcde])$/i.test(img);
 	},
 	applyTextureConfigs(conf,img,tx,ty){
-		for (const side of ['top','side','inside','bottom','north','south','east','west']){
+		for (const side of ['top','side','inside','bottom','north','south','east','west','ceiling']){
 			this.applyTextureSideConfigs(conf,side,img,tx,ty);
 		}
 		return conf;
@@ -650,7 +715,7 @@ Object.assign(mv3d,{
 	applyTextureSideConfigs(conf,side,img,tx,ty){
 		let textureCoords = conf[`${side}_texture`];
 		if(`${side}_img` in conf){ img=conf[`${side}_img`]; }
-		else{ conf[`${side}_img`]=img; }
+		//else{ conf[`${side}_img`]=img; }
 		if(textureCoords){
 			const {x:xcoord,y:ycoord,w,h}=textureCoords;
 			if(!xcoord.isPixelValue){
@@ -678,9 +743,19 @@ Object.assign(mv3d,{
 				if(ycoord.isOffsetValue){ corner.y+=ycoord.offsetValue; }
 				else{ corner.y=ycoord.collapseValue(); }
 			}
+			
+			const rect = new PIXI.Rectangle(corner.x,corner.y,w,h);
+			if(textureCoords.percentRect){
+				rect.percentRect=textureCoords.percentRect;
+			}
 			conf[`${side}_id`] = validImg?mv3d.constructTileId(img,1,0):1;
-			conf[`${side}_rect`]=new PIXI.Rectangle(corner.x,corner.y,w,h);
+			conf[`${side}_rect`]=rect;
 		}
+	},
+	collapseCeilingOffsets(conf){
+		const img = conf.ceiling_img||'B';
+		let defaultTileId = `TILE_ID_${img}` in Tilemap ? Tilemap[`TILE_ID_${img}`] : 0;
+		this._tileTextureOffset(conf,'ceiling',defaultTileId,defaultTileId);
 	},
 
 });

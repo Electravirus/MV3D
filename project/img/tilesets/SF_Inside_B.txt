@@ -1,256 +1,256 @@
-﻿Transparent|透明
-Stairs A (Up)|階段A（上り）
-Stairs B (Up)|階段B（上り）
-Stairs C (Up)|階段C（上り）
-Stairs D (Up)|階段D（上り）
-Metal Ladder|鉄ばしご
-Metal Stairs|金属階段
-Rope|ロープ
-Hole|穴
-Stairs A (Down)|階段A（下り）
-Stairs B (Down)|階段B（下り）
-Stairs C (Down)|階段C（下り）
-Stairs D (Down)|階段D（下り）
-Metal Ladder|鉄ばしご
-Metal Stairs|金属階段
-Rope|ロープ
-Midsize Window A|中型窓A
-Midsize Window B|中型窓B
-Large Window A|大型窓A
-Midsize Window C|中型窓C
-Large Window B|大型窓B
-Metal Ladder|鉄ばしご
-Metal Stairs|金属階段
-Rope|ロープ
-Midsize Window A|中型窓A
-Midsize Window B|中型窓B
-Large Window A|大型窓A
-Midsize Window C|中型窓C
-Large Window B|大型窓B
-Hole A (Metal Ladder)|穴A（鉄ばしご）
-Hole B (Metal Stairs)|穴B（金属階段）
-Hole C (Rope)|穴C（ロープ）
-Asphalt Bridge (V)|アスファルトの橋（縦）
-Asphalt Bridge (H)|アスファルトの橋（横）
-Stone Bridge (V)|石の橋（縦）
-Stone Bridge (H)|石の橋（横）
-Metal Bridge A (V)|金属の橋A（縦）
-Metal Bridge A (H)|金属の橋A（横）
-Metal Bridge B (V)|金属の橋B（縦）
-Metal Bridge B (H)|金属の橋B（横）
-Bridge Spar A (Asphalt, Center A)|橋げたA（アスファルト・中央A）
-Bridge Spar A (Asphalt, Left)|橋げたA（アスファルト・左）
-Bridge Spar A (Asphalt, Center B)|橋げたA（アスファルト・中央B）
-Bridge Spar A (Asphalt, Right)|橋げたA（アスファルト・右）
-Bridge Spar B (Metal, Center A)|橋げたB（金属・中央A）
-Bridge Spar B (Metal, Left)|橋げたB（金属・左）
-Bridge Spar B (Metal, Center B)|橋げたB（金属・中央B）
-Bridge Spar B (Metal, Right)|橋げたB（金属・右）
-Metal Fence|金属フェンス
-Metal Fence|金属フェンス
-Metal Fence|金属フェンス
-Warning Plate (Keep Out)|警告プレート（KEEP OUT）
-Connecting Bridge (Metal)|連絡橋（金属）
-Connecting Bridge (Metal)|連絡橋（金属）
-Connecting Bridge (Metal)|連絡橋（金属）
-Connecting Bridge (Metal, Stairs)|連絡橋（金属・階段）
-Metal Fence|金属フェンス
-Warning Plate (Exclamation Mark)|警告プレート（！マーク）
-Metal Fence|金属フェンス
-Warning Plate (Radioactivity Mark)|警告プレート（放射能マーク）
-Connecting Bridge (Metal)|連絡橋（金属）
-Connecting Bridge (Metal)|連絡橋（金属）
-Connecting Bridge (Metal)|連絡橋（金属）
-Connecting Bridge (Metal, Stairs)|連絡橋（金属・階段）
-Metal Fence|金属フェンス
-Metal Fence|金属フェンス
-Metal Fence|金属フェンス
-Warning Plate (Biohazard Mark)|警告プレート（バイオハザードマーク）
-Connecting Bridge (Metal)|連絡橋（金属）
-Connecting Bridge (Metal)|連絡橋（金属）
-Connecting Bridge (Metal)|連絡橋（金属）
-Podium (H)|教壇机（横）
-Pillar A (Asphalt)|柱A（アスファルト）
-Pillar B (Metal)|柱B（金属）
-Pillar C (Machine)|柱C（機械）
-Pillar D (Decoration)|柱D（装飾）
-Pillar E (Metal)|柱E（金属）
-Pillar F (Brick)|柱F（レンガ）
-Large Window C|大型窓C
-Podium (H)|教壇机（横）
-Pillar A (Asphalt)|柱A（アスファルト）
-Pillar B (Metal)|柱B（金属）
-Pillar C (Machine)|柱C（機械）
-Pillar D (Decoration)|柱D（装飾）
-Pillar E (Metal)|柱E（金属）
-Pillar F (Brick)|柱F（レンガ）
-Large Window C|大型窓C
-Podium (V)|教壇机（縦）
-Broken Pillar A (Asphalt)|折れた柱A（アスファルト）
-Broken Pillar B (Metal)|折れた柱B（金属）
-Broken Pillar C (Machine)|折れた柱C（機械）
-Broken Pillar D (Decoration)|折れた柱D（装飾）
-Broken Pillar E (Metal)|折れた柱E（金属）
-Broken Pillar F (Brick)|折れた柱F（レンガ）
-Barricade (No Entry)|バリケード（通行禁止）
-Podium (V)|教壇机（縦）
-Girder A (Asphalt, Left)|梁A（アスファルト・左）
-Girder A (Asphalt, Center)|梁A（アスファルト・中央）
-Girder A (Asphalt, Right)|梁A（アスファルト・右）
-Girder C (Decoration, Left)|梁C（装飾・左）
-Girder C (Decoration, Center)|梁C（装飾・中央）
-Girder C (Decoration, Right)|梁C（装飾・右）
-Bar (No Entry)|バー（通行禁止）
-Bar (No Entry)|バー（通行禁止）
-Girder B (Metal, Left)|梁B（金属・左）
-Girder B (Metal, Center)|梁B（金属・中央）
-Girder B (Metal, Right)|梁B（金属・右）
-Rubble A (Asphalt)|瓦礫A（アスファルト）
-Rubble B (Metal)|瓦礫B（金属）
-Fissures A|亀裂A
-Fissures B|亀裂B
-Fissures C|亀裂C
-Jail Bars|鉄格子
-Laser Barrier|レーザーバリア
-Wheelchair (Left)|車いす（左）
-Wheelchair (Right)|車いす（右）
-Pipe Frame Bed (Ruins)|パイプベッド（廃墟）
-Fissures A|亀裂A
-Fissures B|亀裂B
-Fissures C|亀裂C
-Jail Bars|鉄格子
-Laser Barrier|レーザーバリア
-Wheelchair (Bottom)|車いす（下）
-Wheelchair (Fallen)|車いす（倒れ）
-Pipe Frame Bed (Ruins)|パイプベッド（廃墟）
-Lab Equipment|実験器具
-School Desk (V)|学校机（縦）
-School Desk (H)|学校机（横）
-TV|テレビ
-Computer|PC
-Laptop|ノートPC
-Printer|プリンター
-Telephone|電話
-Intercom (Hanging)|インターホン（壁掛け）
-Tablet Device|タブレット端末
-Table Clock|置時計
-Gas Stove|ガスコンロ
-Kitchen Counter|調理台
-Sink|流し
-Exhaust Fan|換気扇
-Air Conditioner|エアコン
-Wastebasket|ゴミ箱
-Book Stand|本立て
-Document|書類
-School Chair (Bottom)|学校イス（下）
-School Chair (Top)|学校イス（上）
-School Chair (Right)|学校イス（右）
-School Chair (Left)|学校イス（左）
-Sofa (Right)|ソファ（右）
-Sofa (Left)|ソファ（左）
-Sofa (Down)|ソファ（下）
-Sofa (Up)|ソファ（下）
-Office Chair (Bottom)|オフィスチェア（下）
-Office Chair (Top)|オフィスチェア（上）
-Office Chair (Right)|オフィスチェア（右）
-Office Chair (Left)|オフィスチェア（左）
-Sofa (Right)|ソファ（右）
-Sofa (Left)|ソファ（左）
-Sofa (Top)|ソファ（上）
-Sofa (Top)|ソファ（上）
-Washing Machine|洗濯機
-Western Style Toilet|洋式便器
-Urinal|男性用便器
-Bathroom Sink|洗面台
-Bathtub (V)|バスタブ（縦）
-Bathtub (H)|バスタブ（横）
-Bathtub (H)|バスタブ（横）
-Glass Table (V)|ガラステーブル（縦）
-Washing Machine|洗濯機
-Western Style Toilet|洋式便器
-Urinal|男性用便器
-Wash Basin|洗面台
-Bathtub (V)|バスタブ（縦）
-Glass Table (H)|ガラステーブル（横）
-Glass Table (H)|ガラステーブル（横）
-Glass Table (V)|ガラステーブル（縦）
-Refrigerator|冷蔵庫
-Bookshelf A|本棚A
-Chest of Drawers A|タンスA
-Miscellaneous Item Shelf|雑貨棚
-Locker A|ロッカーA
-Document Shelf|資料棚
-Medicine Shelf|薬品棚
-Locker B (School)|ロッカーB（学校）
-Refrigerator|冷蔵庫
-Bookshelf A|本棚A
-Chest of Drawers A|タンスA
-Miscellaneous Item Shelf |雑貨棚
-Locker A|ロッカーA
-Document Shelf|資料棚
-Medicine Shelf|薬品棚
-Locker B (School)|ロッカーB（学校）
-Display Shelf A|商品陳列棚A
-Display Shelf B|商品陳列棚B
-Convenience Store Shelf A|コンビニ棚A
-Convenience Store Shelf B|コンビニ棚B
-Document Shelf (Ruins)|資料棚（廃墟）
-Chest of Drawers B (Decoration)|タンスB（装飾）
-Shelf A (Decoration)|棚A（装飾）
-Bookshelf B (Decoration)|本棚B（装飾）
-Display Shelf A|商品陳列棚A
-Display Shelf B|商品陳列棚B
-Convenience Store Shelf A|コンビニ棚A
-Convenience Store Shelf B|コンビニ棚B
-Document Shelf (Ruins)|資料棚（廃墟）
-Chest of Drawers B (Decoration)|タンスB（装飾）
-Shelf A (Decoration)|棚A（装飾）
-Bookshelf B (Decoration)|本棚B（装飾）
-Stacked Crates|積まれた木箱
-Shipping Container|コンテナ
-Stacked Cardboard Boxes|積まれたダンボール
-Vending Machine|自動販売機
-ATM|ATM
-Steel Shelf|鉄骨棚
-Operating Table|手術台
-Hospital Bed|病院ベッド
-Stacked Crates|積まれた木箱
-Shipping Container|コンテナ
-Stacked Cardboard Boxes|積まれたダンボール
-Vending Machine|自動販売機
-ATM|ATM
-Steel Shelf|鉄骨棚
-Operating Table|手術台
-Hospital Bed|病院ベッド
-Bed|ベッド
-Mattress|敷布団
-Large Bed|ダブルベッド
-Large Bed|ダブルベッド
-Pipe Frame Bed|パイプベッド
-Slot Machine |スロット
-Poker Table|ポーカー台
-Poker Table|ポーカー台
-Bed|ベッド
-Mattress|敷布団
-Large Bed|ダブルベッド
-Large Bed|ダブルベッド
-Pipe Frame Bed|パイプベッド
-Slot Machine|スロット
-Poker Table|ポーカー台
-Poker Table|ポーカー台
-Chest A (Wood)|チェストA（木製）
-Chest B (Metal)|チェストB（金属）
-Chest C (Decoration)|チェストC（装飾）
-Large Desk A|大きいデスクA
-Large Desk A|大きいデスクA
-Roulette Table|ルーレット台
-Roulette Table|ルーレット台
-Roulette Table|ルーレット台
-Side Desk A (Wood)|サイドデスクA（木製）
-Side Desk B (Metal)|サイドデスクB（金属）
-Desk|デスク
-Large Desk B|大きいデスクB
-Large Desk B|大きいデスクB
-Roulette Table|ルーレット台
-Roulette Table|ルーレット台
-Roulette Table|ルーレット台
+﻿B,0,0
+B,1,0
+B,2,0
+B,3,0
+B,4,0
+B,5,0
+B,6,0
+B,7,0
+B,0,1
+B,1,1
+B,2,1
+B,3,1
+B,4,1
+B,5,1
+B,6,1
+B,7,1
+B,0,2
+B,1,2
+B,2,2
+B,3,2
+B,4,2
+B,5,2
+B,6,2
+B,7,2
+B,0,3
+B,1,3
+B,2,3
+B,3,3
+B,4,3
+B,5,3
+B,6,3
+B,7,3
+B,0,4
+B,1,4
+B,2,4
+B,3,4
+B,4,4
+B,5,4
+B,6,4
+B,7,4
+B,0,5
+B,1,5
+B,2,5
+B,3,5
+B,4,5
+B,5,5
+B,6,5
+B,7,5
+B,0,6
+B,1,6
+B,2,6
+B,3,6
+B,4,6
+B,5,6
+B,6,6
+B,7,6
+B,0,7
+B,1,7
+B,2,7
+B,3,7
+B,4,7
+B,5,7
+B,6,7
+B,7,7
+B,0,8
+B,1,8
+B,2,8
+B,3,8
+B,4,8
+B,5,8
+B,6,8
+B,7,8
+B,0,9
+B,1,9
+B,2,9
+B,3,9
+B,4,9
+B,5,9
+B,6,9
+B,7,9
+B,0,10
+B,1,10
+B,2,10
+B,3,10
+B,4,10
+B,5,10
+B,6,10
+B,7,10
+B,0,11
+B,1,11
+B,2,11
+B,3,11
+B,4,11
+B,5,11
+B,6,11
+B,7,11
+B,0,12
+B,1,12
+B,2,12
+B,3,12
+B,4,12
+B,5,12
+B,6,12
+B,7,12
+B,0,13
+B,1,13
+B,2,13
+B,3,13
+B,4,13
+B,5,13
+B,6,13
+B,7,13
+B,0,14
+B,1,14
+B,2,14
+B,3,14
+B,4,14
+B,5,14
+B,6,14
+B,7,14
+B,0,15
+B,1,15
+B,2,15
+B,3,15
+B,4,15
+B,5,15
+B,6,15
+B,7,15
+B,0,16
+B,1,16
+B,2,16
+B,3,16
+B,4,16
+B,5,16
+B,6,16
+B,7,16
+B,0,17
+B,1,17
+B,2,17
+B,3,17
+B,4,17
+B,5,17
+B,6,17
+B,7,17
+B,0,18
+B,1,18
+B,2,18
+B,3,18
+B,4,18
+B,5,18
+B,6,18
+B,7,18
+B,0,19
+B,1,19
+B,2,19
+B,3,19
+B,4,19
+B,5,19
+B,6,19
+B,7,19
+B,0,20
+B,1,20
+B,2,20
+B,3,20
+B,4,20
+B,5,20
+B,6,20
+B,7,20
+B,0,21
+B,1,21
+B,2,21
+B,3,21
+B,4,21
+B,5,21
+B,6,21
+B,7,21
+B,0,22
+B,1,22
+B,2,22
+B,3,22
+B,4,22
+B,5,22
+B,6,22
+B,7,22
+B,0,23
+B,1,23
+B,2,23
+B,3,23
+B,4,23
+B,5,23
+B,6,23
+B,7,23
+B,0,24
+B,1,24
+B,2,24
+B,3,24
+B,4,24
+B,5,24
+B,6,24
+B,7,24
+B,0,25
+B,1,25
+B,2,25
+B,3,25
+B,4,25
+B,5,25
+B,6,25
+B,7,25
+B,0,26
+B,1,26
+B,2,26
+B,3,26
+B,4,26
+B,5,26
+B,6,26
+B,7,26
+B,0,27
+B,1,27
+B,2,27
+B,3,27
+B,4,27
+B,5,27
+B,6,27
+B,7,27
+B,0,28
+B,1,28
+B,2,28
+B,3,28
+B,4,28
+B,5,28
+B,6,28
+B,7,28
+B,0,29
+B,1,29
+B,2,29
+B,3,29
+B,4,29
+B,5,29
+B,6,29
+B,7,29
+B,0,30
+B,1,30
+B,2,30
+B,3,30
+B,4,30
+B,5,30
+B,6,30
+B,7,30
+B,0,31
+B,1,31
+B,2,31
+B,3,31
+B,4,31
+B,5,31
+B,6,31
+B,7,31

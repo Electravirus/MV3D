@@ -23,36 +23,36 @@ export class CellMeshBuilder{
 		}
 		return this.submeshBuilders[material.name];
 	}
-	addWallFace(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+	addWallFace(material,rect,x,y,z,w,h,rot,options={}){
 		const builder = this.getBuilder(material);
-		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,rect);
 		builder.addWallFace(x,y,z,w,h,rot,uvRect,options);
 		if(options.double){
 			options.flip=!options.flip;
 			builder.addWallFace(x,y,z,w,h,rot,uvRect,options);
 		}
 	}
-	addFloorFace(material,tx,ty,tw,th,x,y,z,w,h,options={}){
+	addFloorFace(material,rect,x,y,z,w,h,options={}){
 		const builder = this.getBuilder(material);
-		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,rect);
 		builder.addFloorFace(x,y,z,w,h,uvRect,options);
 		if(options.double){
 			options.flip=!options.flip;
 			builder.addFloorFace(x,y,z,w,h,uvRect,options);
 		}
 	}
-	addSlopeFace(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+	addSlopeFace(material,rect,x,y,z,w,h,rot,options={}){
 		const builder = this.getBuilder(material);
-		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,rect);
 		builder.addSlopeFace(x,y,z,w,h,rot,uvRect,options);
 		if(options.double){
 			options.flip=!options.flip;
 			builder.addSlopeFace(x,y,z,w,h,rot,uvRect,options);
 		}
 	}
-	addSlopeSide(material,tx,ty,tw,th,x,y,z,w,h,rot,options={}){
+	addSlopeSide(material,rect,x,y,z,w,h,rot,options={}){
 		const builder = this.getBuilder(material);
-		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,tx,ty,tw,th);
+		const uvRect = SubMeshBuilder.getUvRect(material.diffuseTexture,rect);
 		builder.addSlopeSide(x,y,z,w,h,rot,uvRect,options);
 		if(options.double){
 			options.flip=!options.flip;
@@ -167,8 +167,10 @@ class SubMeshBuilder{
 		this.normals.push(...normals);
 		this.uvs.push(...uvs);
 	}
-	static getUvRect(tsTexture,x,y,w,h){
+	static getUvRect(tsTexture,rect){
 		const { width, height } = tsTexture.getBaseSize();
+		rect = mv3d.finalizeTextureRect(rect,width,height);
+		let {x,y,width:w,height:h} = rect;
 		if(mv3d.EDGE_FIX){ x+=mv3d.EDGE_FIX;y+=mv3d.EDGE_FIX;w-=mv3d.EDGE_FIX*2;h-=mv3d.EDGE_FIX*2; }
 		return {
 			x1:x/width,

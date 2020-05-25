@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
 import { Texture, StandardMaterial, Color3, Color4 } from 'babylonjs';
-import { tileWidth, tileHeight, unround } from './util.js';
+import { tileWidth, tileHeight, unround, file } from './util.js';
 
 Object.assign(mv3d,{
 
@@ -36,16 +36,12 @@ Object.assign(mv3d,{
 	},
 
 	async getCachedTilesetTexture(setN,animX=0,animY=0,options={}){
-		const key = `TS:${setN}|${animX},${animY}${this.getExtraBit2(options)}`;
+		const setImg = options.img||this.SETNAMES[setN];
+		const key = `TS:${setImg}|${animX},${animY}${this.getExtraBit2(options)}`;
 		if(key in this.textureCache){
 			return this.textureCache[key];
 		}
-		const tsName = $gameMap.tileset().tilesetNames[setN];
-		if(!tsName){
-			return await this.getErrorTexture();
-		}
-		//const textureSrc=`img/tilesets/${tsName}.png`;
-		const textureSrc=ImageManager.loadTileset(tsName)._url;
+		const textureSrc = mv3d.getTsImgUrl(setImg);
 		const texture = await this.createTexture(textureSrc);
 		texture.hasAlpha=true;
 		this.textureCache[key]=texture;
@@ -57,8 +53,9 @@ Object.assign(mv3d,{
 		//texture.wrapU = Texture.CLAMP_ADDRESSMODE;
 		//texture.wrapV = Texture.CLAMP_ADDRESSMODE;
 		if(options.cropTexture){
-			const ct = options.cropTexture;
-			texture.crop(ct.x,ct.y,ct.width,ct.height,true);
+			const { width, height } = texture.getBaseSize();
+			let {x,y,width:w,height:h} = mv3d.finalizeTextureRect(options.cropTexture,width,height);
+			texture.crop(x,y,w,h);
 		}
 		if(animX||animY){
 			const { width, height } = texture.getBaseSize();
@@ -73,7 +70,7 @@ Object.assign(mv3d,{
 
 	async getErrorTexture(){
 		if(this.errorTexture){ return this.errorTexture; }
-		this.errorTexture = await this.createTexture(`${mv3d.MV3D_FOLDER}/errorTexture.png`);
+		this.errorTexture = await this.createTexture(`${mv3d.MV3D_FOLDER}/${mv3d.TEXTURE_ERROR}.png`);
 		this.errorTexture.isError=true;
 		this.errorTexture.dispose=()=>{};
 		return this.errorTexture;
@@ -82,7 +79,7 @@ Object.assign(mv3d,{
 	async getBushAlphaTexture(){
 		if(this.bushAlphaTexture){ return this.bushAlphaTexture; }
 		this.getBushAlphaTexture.getting=true;
-		this.bushAlphaTexture = await this.createTexture(`${mv3d.MV3D_FOLDER}/bushAlpha.png`);
+		this.bushAlphaTexture = await this.createTexture(`${mv3d.MV3D_FOLDER}/${mv3d.TEXTURE_BUSHALPHA}.png`);
 		this.bushAlphaTexture.getAlphaFromRGB=true;
 		this.bushAlphaTexture.dispose=()=>{};
 		this.getBushAlphaTexture.getting=false;
@@ -98,7 +95,7 @@ Object.assign(mv3d,{
 
 	async getCachedTilesetMaterial(setN,animX=0,animY=0,options={}){
 		this.processMaterialOptions(options);
-		const key = `TS:${setN}|${animX},${animY}|${this.getExtraBit(options)}${this.getExtraBit2(options)}`;
+		const key = `TS:${options.img||this.SETNAMES[setN]}|${animX},${animY}|${this.getExtraBit(options)}${this.getExtraBit2(options)}`;
 		if(key in this.materialCache){
 			return this.materialCache[key];
 		}
@@ -121,6 +118,7 @@ Object.assign(mv3d,{
 		material.backFaceCulling=options.backfaceCulling;
 		material.twoSidedLighting=options.twosided;
 		material.maxSimultaneousLights=this.LIGHT_LIMIT;
+		//material.mv3d_is_cached=true;
 		this.materialCache[key]=material;
 		return material;
 	},
@@ -144,10 +142,10 @@ Object.assign(mv3d,{
 			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
 			if(`${side}_glow` in conf){ options.glow=conf[`${side}_glow`]; }
 			if(`${side}_shadow` in conf){ options.shadow=conf[`${side}_shadow`]; }
+			if(`${side}_img` in conf){ options.img=conf[`${side}_img`]; }
 		}
 		if(conf.isCeiling){
-			options.backfaceCulling=conf.backfaceCulling;
-			options.through = conf.skylight;
+			options.through = !conf.twosided;
 		}
 		if(conf.twosided){ options.backfaceCulling=false;options.twosided=true; }
 		if('alpha' in options){ options.transparent=true; }
@@ -220,7 +218,6 @@ Object.assign(mv3d,{
 				texture.frameData.y+texture.animY*this.animYFrame*tileHeight(),
 				texture.frameData.width,
 				texture.frameData.height,
-				true
 			);
 		}
 	},

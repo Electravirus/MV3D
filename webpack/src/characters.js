@@ -1,7 +1,7 @@
 import mv3d from './mv3d.js';
 import { TransformNode, MeshBuilder, StandardMaterial, Mesh, Vector2, SpotLight, Vector3, PointLight, Color4, VertexData } from 'babylonjs';
 import { WORLDSPACE, DOUBLESIDE } from './mod_babylon.js';
-import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override, sin, cos } from './util.js';
+import { relativeNumber, ZAxis, YAxis, tileSize, degtorad, XAxis, sleep, minmax, override, sin, cos, tileWidth, tileHeight } from './util.js';
 import { ColorBlender, Blender } from './blenders.js';
 import { Model } from './model.js';
 
@@ -104,7 +104,7 @@ Object.assign(mv3d,{
 
 	async getShadowMaterial(){
 		if(this._shadowMaterial){ return this._shadowMaterial; }
-		const shadowTexture = await mv3d.createTexture(`${mv3d.MV3D_FOLDER}/shadow.png`);
+		const shadowTexture = await mv3d.createTexture(`${mv3d.MV3D_FOLDER}/${mv3d.TEXTURE_SHADOW}.png`);
 		const shadowMaterial = new StandardMaterial('shadow material', mv3d.scene);
 		this._shadowMaterial=shadowMaterial;
 		shadowMaterial.diffuseTexture=shadowTexture;
@@ -257,17 +257,23 @@ class Character extends TransformNode{
 	get shape(){
 		return this.model.shape;
 	}
+	get tileId(){
+		return this.getConfig('texture_id',this._tileId);
+	}
 
-	setTileMaterial(){
-		const setN = mv3d.getSetNumber(this._tileId);
-		const tsName = $gameMap.tileset().tilesetNames[setN];
-		if(tsName){
-			//const textureSrc=`img/tilesets/${tsName}.png`;
-			const textureSrc=ImageManager.loadTileset(tsName)._url;
-			this.setMaterial(textureSrc);
-		}else{
-			this.setMaterial("error");
-		}
+	setTileMaterial(tileId){
+		const textureSrc = mv3d.getTsImgUrl(mv3d.getSetName(tileId));
+		this.setMaterial(textureSrc);
+	}
+	async setRectMaterial(img,rect){
+		const textureSrc = mv3d.getTsImgUrl(img);
+		await this.setMaterial(textureSrc);
+		this.dontCrop=true;
+		const { width, height } = this.model.texture.getBaseSize();
+		rect = mv3d.finalizeTextureRect(rect,width,height);
+		this.textureRect = rect;
+		this.model.texture.crop(rect.x,rect.y,rect.width,rect.height);
+		this.updateScale();
 	}
 
 	async waitBitmapLoaded(){
@@ -291,23 +297,29 @@ class Character extends TransformNode{
 
 	isImageChanged(){
 		return (this._tilesetId !== $gameMap.tilesetId()
-		||this._tileId !== this._character.tileId()
+		||this._tileId !== this._character._tileId
 		||this._characterName !== this._character.characterName()
 		//||this._characterIndex !== this._character.characterIndex()
+		||this._texture_symbol !== this.getConfig('texture_symbol')
 		);
 	}
 	updateCharacter(){
 		if(!this.isBitmapReady()){ return; }
 		this.needsPositionUpdate=true;
 		this._tilesetId = $gameMap.tilesetId();
-		this._tileId = this._character.tileId();
+		this._tileId = this._character._tileId;
 		this._characterName = this._character.characterName();
 		this._characterIndex = this._character.characterIndex();
 		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
+		this._texture_symbol = this.getConfig('texture_symbol');
 		this.isEmpty=false;
 		this.model.setEnabled(true);
-		if(this._tileId>0){
-			this.setTileMaterial(this._tileId);
+		this.dontCrop=false;
+		delete this.textureRect;
+		if(this.hasConfig('texture_rect')){
+			this.setRectMaterial(this.getConfig('texture_img','B'),this.getConfig('texture_rect'));
+		}else if(this.tileId>0){
+			this.setTileMaterial(this.tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
 		}else{
@@ -321,8 +333,8 @@ class Character extends TransformNode{
 		}
 	}
 	setFrame(x,y,w,h){
-		if(!this.isTextureReady()){ return; }
-		this.model.texture.crop(x,y,w,h,this._tileId>0);
+		if(!this.isTextureReady()||this.dontCrop){ return; }
+		this.model.texture.crop(x,y,w,h);
 	}
 
 	async updateScale(){
@@ -337,8 +349,15 @@ class Character extends TransformNode{
 		if(!this.isBitmapReady()){ return; }
 		this.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new Vector2(1,1));
-		this.spriteWidth=this.mv_sprite.patternWidth()/tileSize() * configScale.x;
-		this.spriteHeight=this.mv_sprite.patternHeight()/tileSize() * configScale.y;
+		if(this.textureRect){
+			var width = this.textureRect.width;
+			var height = this.textureRect.height;
+		}else{
+			var width = this.mv_sprite.patternWidth();
+			var height = this.mv_sprite.patternHeight();
+		}
+		this.spriteWidth = width/tileWidth() * configScale.x;
+		this.spriteHeight = height/tileHeight() * configScale.y;
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
 
@@ -1299,12 +1318,16 @@ override(Sprite_Character.prototype,'setBlendColor',o=>function(){
 	sprite.needsMaterialUpdate=true;
 });
 
+override(Game_CharacterBase.prototype,'tileId',o=>function(){
+	if(this.mv3d_sprite){ return this.mv3d_sprite.tileId; }
+	return this._tileId;
+});
+
 mv3d.Character = Character;
 
 
-const _isOnBush = Game_CharacterBase.prototype.isOnBush;
-Game_CharacterBase.prototype.isOnBush = function() {
-	if(mv3d.isDisabled()||!this.mv3d_sprite){ return _isOnBush.apply(this,arguments); }
+override(Game_CharacterBase.prototype,'isOnBush',o=>function(){
+	if(!this.mv3d_sprite){ return o.apply(this,arguments); }
 	const rx=Math.round(this._realX), ry=Math.round(this._realY);
 	const tileData=mv3d.getTileData(rx,ry);
 	const layers = mv3d.getTileLayers(rx,ry,this.mv3d_sprite.z+this.mv3d_sprite.getCHeight(),false);
@@ -1313,4 +1336,4 @@ Game_CharacterBase.prototype.isOnBush = function() {
 		if( (flags[tileData[l]] & 0x40) !== 0 ){ return true; }
 	}
 	return false;
-};
+});

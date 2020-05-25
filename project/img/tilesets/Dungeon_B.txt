@@ -1,256 +1,256 @@
-﻿Transparent|透明
-Beanstalk A|豆の木A
-Stairs A (Up)|階段A（上り）
-Stairs B (Up)|階段B（上り）
-Metal Ladder|鉄ばしご
-Rope Ladder|縄ばしご
-Rope|ロープ
-Vines A|ツタA
-Beanstalk B (Snow)|豆の木B（雪）
-Beanstalk C (Dead)|豆の木C（枯れ）
-Stairs A (Down)|階段A（下り）
-Stairs B (Down)|階段B（下り）
-Metal Ladder|鉄ばしご
-Rope Ladder|縄ばしご
-Rope|ロープ
-Vines A|ツタA
-Crumbling Wall|崩れた壁
-Dug-Up Ground|掘られた床
-Stairs C (Up)|階段C（上り）
-Stairs D (Up)|階段D（上り）
-Metal Ladder|鉄ばしご
-Rope Ladder|縄ばしご
-Rope|ロープ
-Vines B (Down)|ツタB（下り）
-Crumbling Wall|崩れた壁
-Dug-Up Ground|掘られた床
-Stairs C (Down)|階段C（下り）
-Stairs D (Down)|階段D（下り）
-Hole A (Metal Ladder)|穴A（鉄ばしご）
-Hole B (Rope Ladder)|穴B（縄ばしご）
-Hole C (Rope)|穴C（ロープ）
-Hole D|穴D
-Log Bridge (V)|丸太の橋（縦）
-Log Bridge (H)|丸太の橋（横）
-Wood Bridge (V)|木の橋（縦）
-Wood Bridge (H)|木の橋（横）
-Stone Bridge (V)|石の橋（縦）
-Stone Bridge (H)|石の橋（横）
-Wood Bridge (V)|木の橋（縦）
-Wood Bridge (H)|木の橋（横）
-Bridge Spar (Wood, Center A)|橋げた（木・中央A）
-Bridge Spar (Wood, Left)|橋げた（木・左）
-Bridge Spar (Wood, Center B)|橋げた（木・中央B）
-Bridge Spar (Wood, Right)|橋げた（木・右）
-Bridge Spar (Stone, Center A)|橋げた（石・中央A）
-Bridge Spar (Stone, Left)|橋げた（石・左）
-Bridge Spar (Stone, Center B)||橋げた（石・中央B）
-Bridge Spar (Stone, Right)|橋げた（石・右）
-Gravel A (Dirt Cave)|砂利A（土洞窟）
-Gravel B (Rock Cave)|砂利B（岩洞窟）
-Gravel C (Lava Cave)|砂利C（溶岩洞窟）
-Ice Pieces |氷の欠片
-Small Sprouts A (Grass Maze)|小さな芽A（草迷宮）
-Small Crystals|小さな水晶
-Detritus (In Body)|床装飾（体内）
-Small Sprouts B (Demonic World)|小さな芽B（魔界）
-Boulder A (Dirt Cave)|岩A（土洞窟）
-Boulder B (Rock Cave)|岩B（岩洞窟）
-Boulder C (Lava Cave)|岩C（溶岩洞窟）
-Lump of Ice|氷塊
-Boulder D (Grass Maze)|岩D（草迷宮）
-Crystal|水晶
-Spherical Lump|球状突起物
-Boulder E (Demonic World)|岩E（魔界）
-Tall Rock A (Dirt Cave)|大きな岩A（土洞窟）
-Tall Rock B (Rock Cave)|大きな岩B（岩洞窟）
-Tall Rock C (Lava Cave)|大きな岩C（溶岩洞窟）
-Tall Lump of Ice|大きな氷塊
-Tall Rock D  (Grass Maze)|大きな岩D（草迷宮）
-Large Crystal|大きな水晶
-Large Growth|大型突起物
-Tall Rock E (Demonic World)|大きな岩E（魔界）
-Tall Rock A (Dirt Cave)|大きな岩A（土洞窟）
-Tall Rock B (Rock Cave)|大きな岩B（岩洞窟）
-Tall Rock C (Lava Cave)|大きな岩C（溶岩洞窟）
-Tall Lump of Ice|大きな氷塊
-Tall Rock D  (Grass Maze)|大きな岩D（草迷宮）
-Large Crystal|大きな水晶
-Large Growth|大型突起物
-Tall Rock E (Demonic World)|大きな岩E（魔界）
-Stone Pillar A|石の柱A
-Stone Pillar B|石の柱B
-Stone Pillar C|石の柱C
-Stone Pillar C (Moss)|石の柱C（苔）
-Stone Pillar C (Ice)|石の柱C（氷）
-Wood Pillar|木の柱
-Stone Pillar D|石の柱D
-Orb Pillar|オーブの柱
-Stone Pillar A|石の柱A
-Stone Pillar B|石の柱B
-Stone Pillar C|石の柱C
-Stone Pillar C (Moss)|石の柱C（苔）
-Stone Pillar C (Ice)|石の柱C（氷）
-Wood Pillar|木の柱
-Stone Pillar D|石の柱D
-Orb Pillar|オーブの柱
-Broken Stone Pillar A|折れた石の柱A
-Broken Stone Pillar B|折れた石の柱B
-Broken Stone Pillar C|折れた石の柱C
-Broken Stone Pillar C (Moss)|折れた石の柱C（苔）
-Broken Stone Pillar C (Ice)|折れた石の柱C（氷）
-Broken Wood Pillar A|折れた木の柱A
-Broken Stone Pillar D|折れた石の柱D
-Broken Orb Pillar|折れたオーブの柱
-Rubble|瓦礫A
-Rubble (Moss)|瓦礫B（苔）
-Rubble (Ice)|瓦礫C（氷）
-Broken Wood Pillar B|折れた木の柱B
-Rubble (Dirt)|瓦礫D（土）
-Scrap Wood|端材
-Barricade A (H)|バリケードA（横）
-Barricade B (V)|バリケードB（縦）
-Wall Bracing|壁の補強材
-Wall Bracing|壁の補強材
-Wall Bracing|壁の補強材
-Wall Bracing|壁の補強材
-Wall Bracing|壁の補強材
-Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
-Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
-Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
-Wall Bracing|壁の補強材
-Wall Bracing|壁の補強材
-Wall Bracing|壁の補強材
-Wall Bracing|壁の補強材
-Wall Bracing|壁の補強材
-Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
-Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
-Wall Bracing (Abandoned Mine)|壁の補強材（廃坑）
-Exit A|外への出口A
-Entrance A|入口A
-Exit B|外への出口B
-Entrance B|入口B
-Exit C|外への出口C
-Entrance C|入口C
-Window A|窓A
-Window B|窓B
-Exit D|外への出口D
-Entrance D|入口D
-Exit E|外への出口E
-Entrance E|入口E
-Light From Exit A (Top)|出口からの光A（上）
-Light From Exit B (Bottom)|出口からの光B（下）
-Window A|窓A
-Window B|窓B
-Spider Web|蜘蛛の巣
-Stone Tablet|石版
-Stone Tablet (Ruins)|石版（廃墟）
-Entrance A|入口A
-Entrance A (Extend)|入口A（延長部分）
-Entrance A (Top Half A)|入口A（上半分A）
-Entrance B|入口B
-Entrance A (Top Half B)|入口A（上半分B）
-Wall Vines A|壁のツタA
-Wall Vines B|壁のツタB
-Wall Vines C|壁のツタC
-Wall Fern|壁のシダ
-Fissures A|亀裂A
-Fissures B|亀裂B
-Fissures C|亀裂C
-Fissures D|亀裂D
-Wall Vines A|壁のツタA
-Wall Vines B|壁のツタB
-Wall Vines C|壁のツタC
-Wall Moss|壁の苔
-Fissures A|亀裂A
-Fissures B|亀裂B
-Fissures C|亀裂C
-Fissures D|亀裂D
-Monument A|石碑A
-Monument B|石碑B
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Monument A|石碑A
-Monument C|石碑C
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument|大きな石碑
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Large Monument (Lit)|大きな石碑（光）
-Statue A|石像A
-Angel Statue A|天使像A
-Angel Statue B|天使像B
-Dais|台座
-Statue B|石像B
-Demon Statue|悪魔像
-Dragon Statue|竜像
-Dragon Statue|竜像
-Statue A|石像A
-Angel Statue A|天使像A
-Angel Statue B|天使像B
-Dais|台座
-Statue B|石像B
-Demon Statue|悪魔像
-Dragon Statue|竜像
-Dragon Statue|竜像
-Large Gravel Mound A (Dirt)|大きな土砂A（土）
-Large Gravel Mound A (Dirt)|大きな土砂A（土）
-Large Gravel Mound B (Stone)|大きな土砂B（石）
-Large Gravel Mound B (Stone)|大きな土砂B（石）
-Large Gold Mound|大きな金の山
-Large Gold Mound|大きな金の山
-Large Silver Mound|大きな銀の山
-Large Silver Mound|大きな銀の山
-Large Gravel Mound A (Dirt)|大きな土砂A（土）
-Large Gravel Mound A (Dirt)|大きな土砂A（土）
-Large Gravel Mound B (Stone)|大きな土砂B（石）
-Large Gravel Mound B (Stone)|大きな土砂B（石）
-Large Gold Mound|大きな金の山
-Large Gold Mound|大きな金の山
-Large Silver Mound|大きな銀の山
-Large Silver Mound|大きな銀の山
-Gravel Mound (Dirt)|土砂A（土）
-Gravel Mound (Stone)|土砂B（石）
-Gold Bricks A|金の延べ棒A
-Gold Bricks B|金の延べ棒B
-Crate A (Dirt)|木箱A（土）
-Crate B (Stone)|木箱B（石）
-Crate C (Ruins)|木箱C（廃墟）
-Pot A (Ruins)|壺A（廃墟）
-Gold Mound|金の山
-Silver Mound|銀の山
-Silver Bricks A|銀の延べ棒A
-Silver Bricks B|銀の延べ棒B
-Crate D (Gold Dust)|木箱D（金）
-Crate E (Silver Dust)|木箱E（銀）
-Pot A|壺A
-Pot B|壺B
-Shovel|スコップ
-Pickax|つるはし
-Rope|ロープ
-Mound of Gold Coins|金貨の山
-Crate F|木箱F
-Crate G|木箱G
-Barrel A|樽A
-Barrel B (Ruins)|樽B（廃墟）
-Large Bones|大きな骸骨
-Large Bones|大きな骸骨
-Bones A|骸骨A
-Table (Ruins)|テーブル（廃墟）
-Jail Bars|鉄格子
-Jail Bars|鉄格子
-Jail Bars|鉄格子
-Jail Bars|鉄格子
-Large Bones|大きな骸骨
-Large Bones|大きな骸骨
-Bones B|骸骨B
-Stool (Ruins)|椅子（廃墟）
-Jail Bars|鉄格子
-Jail Bars|鉄格子
-Jail Bars|鉄格子
-Jail Bars|鉄格子
+﻿B,0,0
+B,1,0
+B,2,0
+B,3,0
+B,4,0
+B,5,0
+B,6,0
+B,7,0
+B,0,1
+B,1,1
+B,2,1
+B,3,1
+B,4,1
+B,5,1
+B,6,1
+B,7,1
+B,0,2
+B,1,2
+B,2,2
+B,3,2
+B,4,2
+B,5,2
+B,6,2
+B,7,2
+B,0,3
+B,1,3
+B,2,3
+B,3,3
+B,4,3
+B,5,3
+B,6,3
+B,7,3
+B,0,4
+B,1,4
+B,2,4
+B,3,4
+B,4,4
+B,5,4
+B,6,4
+B,7,4
+B,0,5
+B,1,5
+B,2,5
+B,3,5
+B,4,5
+B,5,5
+B,6,5
+B,7,5
+B,0,6
+B,1,6
+B,2,6
+B,3,6
+B,4,6
+B,5,6
+B,6,6
+B,7,6
+B,0,7
+B,1,7
+B,2,7
+B,3,7
+B,4,7
+B,5,7
+B,6,7
+B,7,7
+B,0,8
+B,1,8
+B,2,8
+B,3,8
+B,4,8
+B,5,8
+B,6,8
+B,7,8
+B,0,9
+B,1,9
+B,2,9
+B,3,9
+B,4,9
+B,5,9
+B,6,9
+B,7,9
+B,0,10
+B,1,10
+B,2,10
+B,3,10
+B,4,10
+B,5,10
+B,6,10
+B,7,10
+B,0,11
+B,1,11
+B,2,11
+B,3,11
+B,4,11
+B,5,11
+B,6,11
+B,7,11
+B,0,12
+B,1,12
+B,2,12
+B,3,12
+B,4,12
+B,5,12
+B,6,12
+B,7,12
+B,0,13
+B,1,13
+B,2,13
+B,3,13
+B,4,13
+B,5,13
+B,6,13
+B,7,13
+B,0,14
+B,1,14
+B,2,14
+B,3,14
+B,4,14
+B,5,14
+B,6,14
+B,7,14
+B,0,15
+B,1,15
+B,2,15
+B,3,15
+B,4,15
+B,5,15
+B,6,15
+B,7,15
+B,0,16
+B,1,16
+B,2,16
+B,3,16
+B,4,16
+B,5,16
+B,6,16
+B,7,16
+B,0,17
+B,1,17
+B,2,17
+B,3,17
+B,4,17
+B,5,17
+B,6,17
+B,7,17
+B,0,18
+B,1,18
+B,2,18
+B,3,18
+B,4,18
+B,5,18
+B,6,18
+B,7,18
+B,0,19
+B,1,19
+B,2,19
+B,3,19
+B,4,19
+B,5,19
+B,6,19
+B,7,19
+B,0,20
+B,1,20
+B,2,20
+B,3,20
+B,4,20
+B,5,20
+B,6,20
+B,7,20
+B,0,21
+B,1,21
+B,2,21
+B,3,21
+B,4,21
+B,5,21
+B,6,21
+B,7,21
+B,0,22
+B,1,22
+B,2,22
+B,3,22
+B,4,22
+B,5,22
+B,6,22
+B,7,22
+B,0,23
+B,1,23
+B,2,23
+B,3,23
+B,4,23
+B,5,23
+B,6,23
+B,7,23
+B,0,24
+B,1,24
+B,2,24
+B,3,24
+B,4,24
+B,5,24
+B,6,24
+B,7,24
+B,0,25
+B,1,25
+B,2,25
+B,3,25
+B,4,25
+B,5,25
+B,6,25
+B,7,25
+B,0,26
+B,1,26
+B,2,26
+B,3,26
+B,4,26
+B,5,26
+B,6,26
+B,7,26
+B,0,27
+B,1,27
+B,2,27
+B,3,27
+B,4,27
+B,5,27
+B,6,27
+B,7,27
+B,0,28
+B,1,28
+B,2,28
+B,3,28
+B,4,28
+B,5,28
+B,6,28
+B,7,28
+B,0,29
+B,1,29
+B,2,29
+B,3,29
+B,4,29
+B,5,29
+B,6,29
+B,7,29
+B,0,30
+B,1,30
+B,2,30
+B,3,30
+B,4,30
+B,5,30
+B,6,30
+B,7,30
+B,0,31
+B,1,31
+B,2,31
+B,3,31
+B,4,31
+B,5,31
+B,6,31
+B,7,31

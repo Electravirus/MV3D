@@ -1,48 +1,48 @@
-Wall A (Concrete)|壁A（コンクリート）
-Wall B (Concrete, Dirty)|壁B（コンクリート・汚れ）
-Wall C (Block)|壁C（ブロック）
-Wall D (Apartment)|壁D（マンション）
-Wall E (Apartment)|壁E（マンション）
-Wall F (Metal)|壁F（金属）
-Wall G (Metal, Red Rust)|壁G（金属・赤錆）
-Wall H (Metal, Patina)|壁H（金属・緑青錆）
-Wall A (Concrete)|壁A（コンクリート）
-Wall B (Concrete, Dirty)|壁B（コンクリート・汚れ）
-Wall C (Block)|壁C（ブロック）
-Wall D (Apartment)|壁D（マンション）
-Wall E (Apartment)|壁E（マンション）
-Wall F (Metal)|壁F（金属）
-Wall G (Metal, Red Rust)|壁G（金属・赤錆）
-Wall H (Metal, Patina)|壁H（金属・緑青錆）
-Wall I (Barracks)|壁I（バラック）
-Wall J (Barracks)|壁J（バラック）
-Wall K (Factory)|壁K（工場）
-Cliff A (Meadow)|崖A（草地)
-Wall L (Factory)|壁L（工場）
-Wall M (Factory)|壁M（工場）
-Wall N (Building)|壁N（ビル）
-Wall O (Brick)|壁O（レンガ)
-Wall I (Barracks)|壁I（バラック）
-Wall J (Barracks)|壁J（バラック）
-Wall K (Factory)|壁K（工場）
-Cliff A (Meadow)|崖A（草地)
-Wall L (Factory)|壁L（工場）
-Wall M (Factory)|壁M（工場）
-Wall N (Building)|壁N（ビル）
-Wall O (Brick)|壁O（レンガ)
-Wall P (Chinese)|壁P（中華風）
-Wall Q (Wire Mesh)|壁Q（金網）
-Wall R (Wire Mesh, Red Rust)|壁R（金網・赤錆）
-Wall S (Wire Mesh, Patina)|壁S（金網・緑青錆）
-Wall T (Wood)|壁T（木造）
-Wall U (Wood, Dirty)|壁U（木造・汚れ）
-Wall V (Building)|壁V（ビル）
-Wall W (Building)|壁W（ビル）
-Wall P (Chinese)|壁P（中華風）
-Wall Q (Wire Mesh)|壁Q（金網）
-Wall R (Wire Mesh, Red Rust)|壁R（金網・赤錆）
-Wall S (Wire Mesh, Patina)|壁S（金網・緑青錆）
-Wall T (Wood)|壁T（木造）
-Wall U (Wood, Dirty)|壁U（木造・汚れ）
-Wall V (Building)|壁V（ビル）
-Wall W (Building)|壁W（ビル）
+﻿A4,0,0
+A4,1,0
+A4,2,0
+A4,3,0
+A4,4,0
+A4,5,0
+A4,6,0
+A4,7,0
+A4,0,1
+A4,1,1
+A4,2,1
+A4,3,1
+A4,4,1
+A4,5,1
+A4,6,1
+A4,7,1
+A4,0,2
+A4,1,2
+A4,2,2
+A4,3,2
+A4,4,2
+A4,5,2
+A4,6,2
+A4,7,2
+A4,0,3
+A4,1,3
+A4,2,3
+A4,3,3
+A4,4,3
+A4,5,3
+A4,6,3
+A4,7,3
+A4,0,4
+A4,1,4
+A4,2,4
+A4,3,4
+A4,4,4
+A4,5,4
+A4,6,4
+A4,7,4
+A4,0,5
+A4,1,5
+A4,2,5
+A4,3,5
+A4,4,5
+A4,5,5
+A4,6,5
+A4,7,5

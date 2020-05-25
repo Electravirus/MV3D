@@ -178,9 +178,17 @@ assign(mv3d,{
 			this._REGION_DATA[entry.regionId]=regionData;
 			
 		}
+		for (const id in this._REGION_DATA){
+			this.applyTextureConfigs(this._REGION_DATA[id],'B',0,0);
+			this.collapseCeilingOffsets(this._REGION_DATA[id]);
+		}
 		for (let entry of JSON.parse(parameters.ttags)){
 			entry=JSON.parse(entry);
 			this.TTAG_DATA[entry.terrainTag]=this.readConfigurationFunctions(entry.conf,this.tilesetConfigurationFunctions);
+		}
+		for (const id in this.TTAG_DATA){
+			this.applyTextureConfigs(this.TTAG_DATA[id],'B',0,0);
+			this.collapseCeilingOffsets(this.TTAG_DATA[id]);
 		}
 
 		this.EVENT_CHAR_SETTINGS = this.readConfigurationFunctions(
