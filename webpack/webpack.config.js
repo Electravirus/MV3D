@@ -11,10 +11,13 @@ const sound=(()=>{const player=require('play-sound')({});return sound=>{
 	setTimeout(()=>cp.kill(),1000);
 }})();
 
+
 const getBanner=()=>`/*:
 ${fs.readFileSync("src/_info.txt")}
 @help
 ${fs.readFileSync("src/_help.txt")}
+
+${fs.readFileSync("_patrons.txt")}
 
 ${fs.readFileSync("src/_parameters.txt")}
 */
@@ -25,6 +28,8 @@ const getReadme=()=>`
 ${fs.readFileSync("src/_readme_header.txt")}
 
 ${fs.readFileSync("src/_help.txt")}
+
+${fs.readFileSync("_patrons.txt")}
 `;
 
 module.exports = {

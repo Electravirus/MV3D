@@ -301,10 +301,11 @@ class Character extends TransformNode{
 		||this._characterName !== this._character.characterName()
 		//||this._characterIndex !== this._character.characterIndex()
 		||this._texture_symbol !== this.getConfig('texture_symbol')
+		||this.isComplex !== this.model.isComplexMesh()
 		);
 	}
 	updateCharacter(){
-		if(!this.isBitmapReady()){ return; }
+		//if(!this.isBitmapReady()){ return; }
 		this.needsPositionUpdate=true;
 		this._tilesetId = $gameMap.tilesetId();
 		this._tileId = this._character._tileId;
@@ -313,12 +314,13 @@ class Character extends TransformNode{
 		this._isBigCharacter = ImageManager.isBigCharacter(this._characterName);
 		this._texture_symbol = this.getConfig('texture_symbol');
 		this.isEmpty=false;
+		this.isComplex=this.model.isComplexMesh();
 		this.model.setEnabled(true);
 		this.dontCrop=false;
 		delete this.textureRect;
 		if(this.hasConfig('texture_rect')){
 			this.setRectMaterial(this.getConfig('texture_img','B'),this.getConfig('texture_rect'));
-		}else if(this.tileId>0){
+		}else if(this.tileId>0 || this.isComplex){
 			this.setTileMaterial(this.tileId);
 		}else if(this._characterName){
 			this.setMaterial(`img/characters/${this._characterName}.png`);
@@ -344,31 +346,44 @@ class Character extends TransformNode{
 			if(this.model.mesh)this.model.mesh.scaling.set(1,1,1);
 			return;
 		}
-		//if(!this.isBitmapReady()){ await this.waitBitmapLoaded(); }
-		//if(!this.mv_sprite){ return; }
-		if(!this.isBitmapReady()){ return; }
-		this.mv_sprite.updateBitmap();
 		const configScale = this.getConfig('scale',new Vector2(1,1));
-		if(this.textureRect){
-			var width = this.textureRect.width;
-			var height = this.textureRect.height;
+		if(this.isComplex){
+			this.spriteWidth = configScale.x;
+			this.spriteHeight = configScale.y;
 		}else{
-			var width = this.mv_sprite.patternWidth();
-			var height = this.mv_sprite.patternHeight();
+			if(!this.isBitmapReady()){ return; }
+			this.mv_sprite.updateBitmap();
+			if(this.textureRect){
+				var width = this.textureRect.width;
+				var height = this.textureRect.height;
+			}else{
+				var width = this.mv_sprite.patternWidth();
+				var height = this.mv_sprite.patternHeight();
+			}
+			this.spriteWidth = width/tileWidth() * configScale.x;
+			this.spriteHeight = height/tileHeight() * configScale.y;
 		}
-		this.spriteWidth = width/tileWidth() * configScale.x;
-		this.spriteHeight = height/tileHeight() * configScale.y;
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
-
-		if(this.model.mesh)this.model.mesh.scaling.set(xscale,yscale,yscale);
+		if(this.model.mesh){
+			if(this.model.shape===mv3d.enumShapes.FLAT){
+				this.model.mesh.scaling.set(xscale,yscale,yscale);
+			}else{
+				this.model.mesh.scaling.set(xscale,yscale,xscale);
+			}
+		}
 	}
 
 	getShape(){
 		return this.getConfig('shape', mv3d.enumShapes.SPRITE );
 	}
-	updateShape(){
-		this.model.setMeshForShape(this.getShape());
+	async updateShape(){
+		const shape = this.getShape();
+		if(shape===mv3d.enumShapes.MODEL){
+			await this.model.importModel(this.getConfig('model'));
+		}else{
+			this.model.setMeshForShape(shape);
+		}
 		this.updateConfiguration();
 		this.dirtyNearbyCells();
 	}
@@ -574,6 +589,7 @@ class Character extends TransformNode{
 		this.updateScale();
 		this.updateShape();
 		this.needsMaterialUpdate=true;
+		this.needsPositionUpdate=true;
 		this.updateLightOffsets();
 	}
 
@@ -828,7 +844,7 @@ class Character extends TransformNode{
 		const inRenderDist = this.char.mv3d_inRenderDist();
 		//this.disabled=!this.visible;
 		if(this.char.isTransparent() || !inRenderDist
-		|| (this.char._characterName||this.char._tileId)&&!this.model.textureLoaded){
+		|| (this.char._characterName||this.tileId)&&!this.model.textureLoaded&&!this.isComplex){
 			this.visible=false;
 		}
 		if(!this._isEnabled){

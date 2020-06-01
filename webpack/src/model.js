@@ -1,8 +1,8 @@
 import mv3d from './mv3d.js';
-import { TransformNode, SceneLoader, Mesh, StandardMaterial } from 'babylonjs';
-import { foldername, filename } from './util.js';
+import { TransformNode, StandardMaterial } from 'babylonjs';
 
 const modelCache={};
+mv3d.modelCache=modelCache;
 
 const orphanModelList=[];
 
@@ -26,8 +26,7 @@ export class Model extends TransformNode{
 		if(this.shape===mv3d.enumShapes.XCROSS){
 			this.mesh.yaw=45;
 		}
-		if(this.character){ this.mesh.character=this.character; }
-		if(this.material){
+		if(this.material && !this.isComplexMesh()){
 			this.mesh.material=this.material;
 		}
 		if(this.character){
@@ -36,7 +35,7 @@ export class Model extends TransformNode{
 		if(this.order!=null){ this.mesh.order=this.order; }
 	}
 	isComplexMesh(){
-		return this.shape === mv3d.enumShapes.IMPORTED || this.shape === mv3d.enumShapes.MESH;
+		return this.shape === mv3d.enumShapes.MODEL || this.shape === mv3d.enumShapes.MESH;
 	}
 	async setMaterial(src){
 		let newTexture;
@@ -59,7 +58,9 @@ export class Model extends TransformNode{
 		this.material.maxSimultaneousLights=mv3d.LIGHT_LIMIT;
 		this.material.backFaceCulling=false;
 		this.material.twoSidedLighting=true;
-		this.mesh.material=this.material;
+		if(!this.isComplexMesh()){
+			this.mesh.material=this.material;
+		}
 	}
 	disposeMaterial(){
 		if(this.material){
@@ -74,13 +75,24 @@ export class Model extends TransformNode{
 		// TODO dispose differently for cached complex models
 		super.dispose(...args);
 	}
+	clearShape(){
+		this.shape=null;
+		this.model_filename=null;
+		this.mesh_text=null;
+	}
 	clearMesh(){
 		if(!this.mesh){ return; }
 		mv3d.callFeatures('destroyCharMesh',this.mesh);
 		this.mesh.dispose();
 	}
+	setMesh(mesh){
+		this.clearMesh();
+		this.mesh=mesh;
+		this.setupMesh();
+	}
 	setMeshForShape(shape){
 		if(this.shape===shape){ return; }
+		this.clearShape();
 		this.shape=shape;
 		let geometry = mv3d.Meshes.SPRITE;
 		const shapes = mv3d.enumShapes;
@@ -102,9 +114,17 @@ export class Model extends TransformNode{
 			geometry = mv3d.Meshes.BOARD;
 			break;
 		}
-		this.clearMesh();
-		this.mesh=geometry.clone();
-		this.setupMesh();
+		this.setMesh(geometry.clone());
+	}
+	async importModel(filename,useCache){
+		if(this.shape === mv3d.enumShapes.MODEL && this.model_filename === filename){
+			return;
+		}
+		this.clearShape();
+		this.model_filename = filename;
+		this.shape = mv3d.enumShapes.MODEL;
+		const mesh = await mv3d.importModel(filename);
+		this.setMesh(mesh);
 	}
 	update(){
 		if(this.mesh&&this.shape){
@@ -151,36 +171,3 @@ for(const property of ['receiveShadows','renderingGroupId','visibility','charact
 	});
 }
 
-mv3d.importModel=(url,merge=true)=>new Promise((resolve,reject)=>{
-	// TODO: Caching
-	SceneLoader.LoadAssetContainer(foldername(url), filename(url), mv3d.scene, container=>{
-		const meshes = container.meshes;
-		const materials = container.materials;
-		for (const mat of materials){
-			mat.ambientColor.set(1,1,1);
-			const texture = mat.diffuseTexture;
-			if(texture) mv3d.waitTextureLoaded(texture).then(texture=>{
-				texture.updateSamplingMode(1);
-			});
-		}
-		let totalVertices = 0;
-		for (const mesh of meshes){
-			totalVertices += mesh.getTotalVertices();
-			if(!merge){
-				mesh.renderingGroupId=mv3d.enumRenderGroups.MAIN;
-			}
-		}
-		if(merge){
-			const importedMesh = Mesh.MergeMeshes(meshes,true,totalVertices>64000,undefined,false,true);;
-			importedMesh.renderingGroupId=mv3d.enumRenderGroups.MAIN;
-			importedMesh.mv3d_materials=materials;
-			resolve(importedMesh);
-		}else{
-			const group = new MeshGroup();
-			container.addAllToScene();
-			group.addMesh(...meshes);
-			group.mv3d_materials = materials;
-			resolve(group);
-		}
-	});
-});

@@ -442,7 +442,7 @@ Object.assign(mv3d,{
 		SLOPE:7,
 		'8CROSS':8,
 		MESH:91,
-		IMPORTED:92,
+		MODEL:92,
 	},
 	enumPassage:{
 		WALL:0,

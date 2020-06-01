@@ -103,7 +103,7 @@ export class MapCell extends TransformNode{
 				}else if(shape===shapes['8CROSS']){
 					await this.loadCross(tileConf,x,y,z,l,wallHeight,0);
 					await this.loadCross(tileConf,x,y,z,l,wallHeight,45);
-				}else if(shape===shapes.SPRITE||shape===shapes.BOARD){
+				}else if(shape===shapes.SPRITE||shape===shapes.BOARD||shape===shapes.MODEL){
 					await this.loadDoodad(tileConf,x,y,z-wallHeight,shape);
 				}
 			}
@@ -141,17 +141,31 @@ export class MapCell extends TransformNode{
 		const rect = configRect ? configRect : mv3d.getTileRects(tileId)[0];
 		tileConf.cropTexture = rect;
 		tileConf.twosided = true;
-		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'top');
-		// TODO: create doodad
+		const complexShape = shape === mv3d.enumShapes.MODEL || shape === mv3d.enumShapes.MESH
+		if(complexShape){
+		}else{
+			var tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'top');
+		}
 		const doodad = new Model({orphan:false});
 		this.doodads.push(doodad);
-		doodad.setMeshForShape(shape);
-		doodad.mesh.material = tsMaterial;
+		if(shape === mv3d.enumShapes.MODEL){
+			await doodad.importModel(tileConf.model);
+		}else{
+			doodad.setMeshForShape(shape);
+		}
+		if(tsMaterial){
+			doodad.mesh.material = tsMaterial;
+		}
 		doodad.parent=this;
 		doodad.x=x; doodad.y=y; doodad.z=z;
-		const scaleX = rect.width / tileWidth() || 1;
-		const scaleY = tileConf.height||(rect.height/tileHeight()) || 1;
-		doodad.mesh.scaling.set(scaleX,scaleY,scaleY);
+
+		if(complexShape){
+			var {x:scaleX,y:scaleY} = mv3d.getConfig(tileConf,'scale',new Vector2(1,1));
+		}else{
+			var scaleX = tileConf.width||(rect.width / tileWidth()) || 1;
+			var scaleY = tileConf.height||(rect.height/tileHeight()) || 1;
+		}
+		doodad.mesh.scaling.set(scaleX,scaleY,scaleX);
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false,double=false){
 		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;
@@ -251,8 +265,9 @@ export class MapCell extends TransformNode{
 			//const npr=MapCell.neighborPositions[(+ni+1).mod(4)];
 			const npl=new Vector2(-np.y,np.x);
 			const npr=new Vector2(np.y,-np.x);
-			const leftHeight = mv3d.getCullingHeight(this.ox+x+npl.x,this.oy+y+npl.y,l,{dir:Input._makeNumpadDirection(npl.x,npl.y)});
-			const rightHeight = mv3d.getCullingHeight(this.ox+x+npr.x,this.oy+y+npr.y,l,{dir:Input._makeNumpadDirection(npr.x,npr.y)});
+			const ndir = Input._makeNumpadDirection(-np.x,-np.y);
+			const leftHeight = mv3d.getCullingHeight(this.ox+x+npl.x,this.oy+y+npl.y,l,{dir:Input._makeNumpadDirection(npl.x,npl.y),dir2:ndir});
+			const rightHeight = mv3d.getCullingHeight(this.ox+x+npr.x,this.oy+y+npr.y,l,{dir:Input._makeNumpadDirection(npr.x,npr.y),dir2:ndir});
 			const {x:bx,y:by} = this.getAutotileCorner(tileId,textureChanged,true);
 			let wallParts=Math.max(1,Math.abs(Math.round(neededHeight*2)));
 			let partHeight=Math.abs(neededHeight/wallParts);
@@ -442,6 +457,7 @@ export class MapCell extends TransformNode{
 	}
 	async loadSlopeSide(tileConf,x,y,z,l,slopeHeight,rot,options={}){
 		const tileId=tileConf.side_id;
+		if(mv3d.isTileEmpty(tileId)){ return; }
 		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'side');
 		const isAutotile = Tilemap.isAutotile(tileId)&&!tileConf.side_rect;
 		let rect;

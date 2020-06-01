@@ -90,7 +90,7 @@ const mv3d = {
 
 		this.callFeatures('update');
 
-		this.updateData();
+		//this.updateData();
 	},
 
 	loadData(key,dfault){

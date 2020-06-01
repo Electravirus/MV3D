@@ -1,0 +1,4 @@
+# Made in Blockbench 3.5.0
+newmtl 0
+map_Kd ../img/tilesets/Inside_C.png 
+newmtl none

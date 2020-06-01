@@ -402,7 +402,9 @@ Object.assign(mv3d,{
 			if(this.isSpecialShape(shape)){
 				if(shape===this.enumShapes.SLOPE){
 					height+=this.getTileHeight(x,y,l);
-					if(!opts.dir||opts.dir!==this.getSlopeDirection(x,y,l,true).dir){
+					const slopeDir = this.getSlopeDirection(x,y,l,true).dir;
+					if((!opts.dir||opts.dir!==slopeDir)
+					&&(!opts.dir2||opts.dir2!==slopeDir)){
 						height-=data.slopeHeight||1;
 					}
 				}

@@ -14,7 +14,7 @@ import './assets.js';
 import './characters.js';
 import './animations.js';
 import './parallax.js';
-import './data.js';
+//import './data.js';
 import './features.js';
 import './plugin_support/plugin_support.js';
 import './model.js';
