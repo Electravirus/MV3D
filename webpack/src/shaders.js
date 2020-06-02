@@ -19,6 +19,16 @@ function hackShaderInsert(shader,find,insert){
 }
 
 function hackDefaultShader(){
+	// When no diffuse texture, use diffuseColor as baseColor
+	hackShaderReplace('defaultPixelShader',
+	'vec3 finalDiffuse=clamp(diffuseBase*diffuseColor+emissiveColor+vAmbientColor,0.0,1.0)*baseColor.rgb;',
+	`#ifdef DIFFUSE
+	vec3 finalDiffuse=clamp(diffuseBase*diffuseColor+emissiveColor+vAmbientColor,0.0,1.0)*baseColor.rgb;
+	#else
+	vec3 finalDiffuse=clamp(diffuseBase+emissiveColor+vAmbientColor,0.0,1.0)*diffuseColor.rgb;
+	#endif
+	`);
+	// When emissive color higher than one, use illumination.
 	hackShaderReplace('defaultPixelShader',
 		'vec4 color=vec4(finalDiffuse*baseAmbientColor+finalSpecular+reflectionColor+refractionColor,alpha);',
 		`vec3 mv3d_extra_emissiveColor = max(emissiveColor-1.,0.);

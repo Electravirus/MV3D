@@ -16,7 +16,7 @@ null,
 {"id":14,"expanded":false,"name":"MAP014","order":13,"parentId":0,"scrollX":1636,"scrollY":878},
 {"id":15,"expanded":true,"name":"slope test","order":14,"parentId":0,"scrollX":1636,"scrollY":877},
 {"id":16,"expanded":true,"name":"test","order":16,"parentId":0,"scrollX":1636,"scrollY":877},
-{"id":17,"expanded":false,"name":"slope test 2","order":15,"parentId":15,"scrollX":832,"scrollY":640},
+{"id":17,"expanded":false,"name":"slope test 2","order":15,"parentId":15,"scrollX":1636,"scrollY":877},
 {"id":18,"expanded":true,"name":"fence test","order":17,"parentId":16,"scrollX":1636,"scrollY":877},
 {"id":19,"expanded":false,"name":"tree test","order":19,"parentId":16,"scrollX":1636,"scrollY":878},
 {"id":20,"expanded":false,"name":"model test","order":20,"parentId":16,"scrollX":1636,"scrollY":877}
