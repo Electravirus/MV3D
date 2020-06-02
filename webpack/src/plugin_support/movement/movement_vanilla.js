@@ -66,9 +66,9 @@ const _isMapPassable=o=>function(x,y,d){
 	}
 	
 	if(this._mv3d_isFlying()){
-		if(!mv3d.ALLOW_GLIDE&&mv3d.tileCollision(this,x2,y2,true,true)||mv3d.tileCollision(this,x2,y2,true,false)){ return false; }
+		if(!mv3d.allowGlide&&mv3d.tileCollision(this,x2,y2,true,sprite.targetElevation)||mv3d.tileCollision(this,x2,y2,true,false)){ return false; }
 	}else{
-		if(mv3d.tileCollision(this,x2,y2,true,true)){ return false; }
+		if(mv3d.tileCollision(this,x2,y2,true,false)){ return false; }
 		
 		if(sprite.falling){ return false; }
 		if(!mv3d.WALK_OFF_EDGE){

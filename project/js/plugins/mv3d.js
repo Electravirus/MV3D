@@ -233,13 +233,6 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 @param map
 @text Map Settings
 
-@param enabledDefault
-@text Enabled by Default
-@desc Whether 3D map rendering is enabled by default.
-@parent map
-@type Boolean
-@default true
-
 @param cellSize
 @text Cell Size
 @desc The size of the chunks the map is divided into.
@@ -265,7 +258,7 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 @parent map
 @type Note
 @default
-"sun(white)\nambient(default)\nfog(black|20,30)\nceiling(backface:true)"
+"enable(true)\nsun(white)\nambient(default)\nfog(black|20,30)\nceiling(backface:true)"
 
 
 @param spacer|input @text‏‏‎ ‎@desc ===============================================
@@ -847,7 +840,7 @@ const mv3d = {
 	},
 
 	isDisabled(){
-		return this.loadData('disabled', this.getMapConfig('disabled', !mv3d.ENABLED_DEFAULT ));
+		return this.loadData('disabled', this.getMapConfig('disabled', false ));
 	},
 	disable(fadeType=2){
 		mv3d.saveData('disabled',true);
@@ -2183,26 +2176,28 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Follower.prototype,'
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+/* harmony import */ var _mv3d_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
 
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Player.prototype,'moveByInput',o=>function(){
+
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_Player.prototype,'moveByInput',o=>function(){
 	$gameTemp._mv3d_altimit_moveByInput=true;
 	o.apply(this,arguments);
 	$gameTemp._mv3d_altimit_moveByInput=false;
 });
 
-mv3d.getInputDirection=function(){
-	let dir = mv3d.DIR8MOVE ? Input.dir8 : Input.dir4;
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getInputDirection=function(){
+	let dir = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].DIR8MOVE ? Input.dir8 : Input.dir4;
 	return dir;
 };
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Player.prototype,'moveVector',o=>function(vx,vy){
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_Player.prototype,'moveVector',o=>function(vx,vy){
 	if($gameTemp._mv3d_altimit_moveByInput && !this._touchTarget){
 		const _vx=vx,_vy=vy;
-		const yaw = Object(_util__WEBPACK_IMPORTED_MODULE_0__["degtorad"])(mv3d.blendCameraYaw.currentValue());
-		vx=Object(_util__WEBPACK_IMPORTED_MODULE_0__["cos"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_0__["sin"])(yaw)*_vy;
-		vy=-Object(_util__WEBPACK_IMPORTED_MODULE_0__["sin"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_0__["cos"])(yaw)*_vy;
+		const yaw = Object(_util__WEBPACK_IMPORTED_MODULE_1__["degtorad"])(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].blendCameraYaw.currentValue());
+		vx=Object(_util__WEBPACK_IMPORTED_MODULE_1__["cos"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_1__["sin"])(yaw)*_vy;
+		vy=-Object(_util__WEBPACK_IMPORTED_MODULE_1__["sin"])(yaw)*_vx + Object(_util__WEBPACK_IMPORTED_MODULE_1__["cos"])(yaw)*_vy;
 		//console.log(_vx,_vy,vx,vy);
 	}
 	if(this.mv3d_sprite && this.mv3d_sprite.platform && this.mv3d_sprite.platform.isSlope){
@@ -2222,11 +2217,11 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Player.prototype,'mo
 	o.call(this,vx,vy);
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_CharacterBase.prototype,'setDirectionVector',o=>function(vx,vy){
-	this.mv3d_setDirection(mv3d.yawToDir(Object(_util__WEBPACK_IMPORTED_MODULE_0__["pointtodeg"])(vx,vy),true));
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_CharacterBase.prototype,'setDirectionVector',o=>function(vx,vy){
+	this.mv3d_setDirection(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].yawToDir(Object(_util__WEBPACK_IMPORTED_MODULE_1__["pointtodeg"])(vx,vy),true));
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_CharacterBase.prototype,'moveVectorMap',o=>function(owner, collider, bboxTests, move, vx, vy){
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_CharacterBase.prototype,'moveVectorMap',o=>function(owner, collider, bboxTests, move, vx, vy){
 	o.apply(this,arguments);
 	const sprite = owner.mv3d_sprite;
 	if(!sprite){ return; }
@@ -2245,24 +2240,24 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_CharacterBase.protot
 		//if(tx===x&&ty===y){continue;}
 		let slope;
 		let realign = false;
-		if(slope=mv3d.isRampAt(tx,ty,sprite.z)){
-			if(mv3d.canPassRamp(10-d,slope,{z:sprite.z})){ continue; }
+		if(slope=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isRampAt(tx,ty,sprite.z)){
+			if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].canPassRamp(10-d,slope,{z:sprite.z})){ continue; }
 		}
 		const tx2 = $gameMap.roundXWithDirection(tx, 10-d);
 		const ty2 = $gameMap.roundYWithDirection(ty, 10-d);
-		if(slope=mv3d.isRampAt(tx2,ty2,sprite.z)){
-			if(mv3d.canPassRamp(d,slope)){ continue; }
+		if(slope=_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].isRampAt(tx2,ty2,sprite.z)){
+			if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].canPassRamp(d,slope)){ continue; }
 		}
 
 		let collided = false;
 		if(this._mv3d_isFlying()){
-			if(!mv3d.ALLOW_GLIDE&&mv3d.tileCollision(this,tx,ty,true,true)||mv3d.tileCollision(this,tx,ty,true,false)){ collided=true; }
+			if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].allowGlide&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,tx,ty,true,true)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,tx,ty,true,false)){ collided=true; }
 		}else{
 			if(sprite.falling){ collided=true; }
-			else if(mv3d.tileCollision(this,tx,ty,true,true)){ collided=true; }
-			else if(!mv3d.WALK_OFF_EDGE){
-				const platformz = mv3d.getPlatformFloatForCharacter(this,tx,ty);
-				if(Object(_util__WEBPACK_IMPORTED_MODULE_0__["unround"])(Math.abs(platformz-sprite.targetElevation))>mv3d.STAIR_THRESH){
+			else if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,tx,ty,true,true)){ collided=true; }
+			else if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].WALK_OFF_EDGE){
+				const platformz = _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformFloatForCharacter(this,tx,ty);
+				if(Object(_util__WEBPACK_IMPORTED_MODULE_1__["unround"])(Math.abs(platformz-sprite.targetElevation))>_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].STAIR_THRESH){
 					collided=true;
 				}
 			}
@@ -2274,7 +2269,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_CharacterBase.protot
 	}
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_CharacterBase.prototype,'moveVectorCharacters',o=>function(owner, collider, characters, loopMap, move){
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_CharacterBase.prototype,'moveVectorCharacters',o=>function(owner, collider, characters, loopMap, move){
 	const spr1=this.mv3d_sprite; if(!spr1){ return o.apply(this,arguments); }
 	const zcol1=spr1.getCollisionHeight();
 	characters=characters.filter(character=>{
@@ -2285,25 +2280,25 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_CharacterBase.protot
 	return o.call(this,owner,collider,characters,loopMap,move);
 });
 
-mv3d.Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._realY,opts={}){
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._realY,opts={}){
 	const collider = this.char.collider();
 	if(collider.type===0){
 		x+=collider.x-0.5; y+=collider.y-0.5;
 		const r = collider.radius*0.95;
 		
 		const platform = [
-			mv3d.getPlatformForCharacter(this,x,y),
-			mv3d.getPlatformForCharacter(this,x,y-r,opts),
-			mv3d.getPlatformForCharacter(this,x-r,y,opts),
-			mv3d.getPlatformForCharacter(this,x,y+r,opts),
-			mv3d.getPlatformForCharacter(this,x+r,y,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x,y),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x,y-r,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x-r,y,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x,y+r,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x+r,y,opts),
 		]
 		const diagPlatforms = [
 			-Infinity,
-			mv3d.getPlatformForCharacter(this,x-r*Math.SQRT1_2,y-r*Math.SQRT1_2,opts),
-			mv3d.getPlatformForCharacter(this,x-r*Math.SQRT1_2,y+r*Math.SQRT1_2,opts),
-			mv3d.getPlatformForCharacter(this,x+r*Math.SQRT1_2,y+r*Math.SQRT1_2,opts),
-			mv3d.getPlatformForCharacter(this,x+r*Math.SQRT1_2,y-r*Math.SQRT1_2,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x-r*Math.SQRT1_2,y-r*Math.SQRT1_2,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x-r*Math.SQRT1_2,y+r*Math.SQRT1_2,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x+r*Math.SQRT1_2,y+r*Math.SQRT1_2,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x+r*Math.SQRT1_2,y-r*Math.SQRT1_2,opts),
 		].filter(c=>c.z2<=this.z);
 		return platform.concat(diagPlatforms).reduce((a,b)=>a.z2>=b.z2?a:b);
 	}else{
@@ -2315,17 +2310,17 @@ mv3d.Character.prototype.getPlatform=function(x=this.char._realX,y=this.char._re
 			b:collider.aabbox.bottom*0.99,
 		};
 		const platform = [
-			mv3d.getPlatformForCharacter(this,x,y),
-			mv3d.getPlatformForCharacter(this,x+b.l,y+b.t,opts),
-			mv3d.getPlatformForCharacter(this,x+b.l,y+b.b,opts),
-			mv3d.getPlatformForCharacter(this,x+b.r,y+b.t,opts),
-			mv3d.getPlatformForCharacter(this,x+b.r,y+b.b,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x,y),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x+b.l,y+b.t,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x+b.l,y+b.b,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x+b.r,y+b.t,opts),
+			_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getPlatformForCharacter(this,x+b.r,y+b.b,opts),
 		].reduce((a,b)=>a.z2>=b.z2?a:b);
 		return platform;
 	}
 };
 
-mv3d.getEventsAt=function(x,y){
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].getEventsAt=function(x,y){
 	x=Math.round(x); y=Math.round(y);
 	return $gameMap.events().filter( character=>{
 		if(character.isThrough()){ return false; }
@@ -2351,7 +2346,7 @@ function zCollidersOverlap(s1,s2){
 	return s1.z1<s2.z2&&s1.z2>s2.z1;
 }
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Map.prototype,'events',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_Map.prototype,'events',o=>function(){
 	const events = o.apply(this,arguments);
 	if(!$gameTemp._mv3d_altimit_eventsHeightFilter){ return events; }
 	delete $gameTemp._mv3d_altimit_eventsHeightFilter;
@@ -2364,7 +2359,7 @@ Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Map.prototype,'event
 	});
 });
 
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Event.prototype,'checkEventTriggerTouch',o=>function(){
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_Event.prototype,'checkEventTriggerTouch',o=>function(){
 	const sprite = this.mv3d_sprite, player=$gamePlayer.mv3d_sprite;
 	if(sprite&&player){
 		if(!zCollidersOverlap(sprite,player)){ return false; }
@@ -2376,8 +2371,8 @@ const _eventsHeightFilter=o=>function(){
 	$gameTemp._mv3d_altimit_eventsHeightFilter=true;
 	return o.apply(this,arguments);
 };
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Player.prototype,'checkEventTriggerHere',_eventsHeightFilter);
-Object(_util__WEBPACK_IMPORTED_MODULE_0__["override"])(Game_Player.prototype,'checkEventTriggerThere',_eventsHeightFilter);
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_Player.prototype,'checkEventTriggerHere',_eventsHeightFilter);
+Object(_util__WEBPACK_IMPORTED_MODULE_1__["override"])(Game_Player.prototype,'checkEventTriggerThere',_eventsHeightFilter);
 
 /***/ }),
 /* 12 */
@@ -2455,9 +2450,9 @@ const _isMapPassable=o=>function(x,y,d){
 	}
 	
 	if(this._mv3d_isFlying()){
-		if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ALLOW_GLIDE&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,true)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,false)){ return false; }
+		if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].allowGlide&&_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,sprite.targetElevation)||_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,false)){ return false; }
 	}else{
-		if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,true)){ return false; }
+		if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].tileCollision(this,x2,y2,true,false)){ return false; }
 		
 		if(sprite.falling){ return false; }
 		if(!_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].WALK_OFF_EDGE){
@@ -2935,7 +2930,7 @@ Object(util["assign"])(mv3d["a" /* default */],{
 	CEILING_HEIGHT:Number(parameters.ceilingHeight),
 	LAYER_DIST:Number(parameters.layerDist),
 
-	ENABLED_DEFAULT: Object(util["booleanString"])(parameters.enabledDefault),
+	//ENABLED_DEFAULT: booleanString(parameters.enabledDefault),
 	EVENTS_UPDATE_NEAR: Object(util["booleanString"])(parameters.eventsUpdateNear),
 
 	UNLOAD_CELLS: Object(util["booleanString"])(parameters.unloadCells),
@@ -2994,7 +2989,8 @@ Object(util["assign"])(mv3d["a" /* default */],{
 	EVENT_OBJ_SETTINGS: parameter('eventObjDefaults',"",tryParseString),
 	EVENT_TILE_SETTINGS: parameter('eventTileDefaults',"",tryParseString),
 
-	ALLOW_GLIDE: Object(util["booleanString"])(parameters.allowGlide),
+	allowGlide: new attributes_Attribute('allowGlide',Object(util["booleanString"])(parameters.allowGlide),util["booleanString"]),
+	get ALLOW_GLIDE(){ return this.allowGlide; },
 
 	SPRITE_OFFSET:Number(parameters.spriteOffset)/2,
 
@@ -7308,9 +7304,9 @@ class characters_Character extends babylon["TransformNode"]{
 
 	configureHeight(){
 		this.isAbove = this.char._priorityType===2;
-		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('zlock')?mv3d["a" /* default */].EVENT_HEIGHT:0) );
+		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('zlock')&&!this.isAirship?mv3d["a" /* default */].EVENT_HEIGHT:0) );
 		this.blendElevation.setValue(height,0);
-		this.z = this.platformHeight + height;
+		if(this.isEvent) this.z = this.platformHeight + height;
 	}
 
 	updateConfiguration(){
@@ -7766,12 +7762,13 @@ class characters_Character extends babylon["TransformNode"]{
 
 		if(this.isPlayer){
 			const vehicle = this.char.vehicle();
-			if(vehicle){
+			if(vehicle&&vehicle.mv3d_sprite){
 			//if(vehicle&&vehicle._driving){
-				this.z = vehicle.z;
-				this.targetElevation = vehicle.targetElevation;
-				this.platformChar = vehicle.platformChar;
-				this.platformHeight = vehicle.platformHeight;
+				const vehicle_sprite = vehicle.mv3d_sprite;
+				this.z = vehicle_sprite.z;
+				this.targetElevation = vehicle_sprite.targetElevation;
+				this.platformChar = vehicle_sprite.platformChar;
+				this.platformHeight = vehicle_sprite.platformHeight;
 				if(vehicle._driving){ return; }
 			}
 		}

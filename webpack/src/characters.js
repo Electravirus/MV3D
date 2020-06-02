@@ -595,9 +595,9 @@ class Character extends TransformNode{
 
 	configureHeight(){
 		this.isAbove = this.char._priorityType===2;
-		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('zlock')?mv3d.EVENT_HEIGHT:0) );
+		let height = Math.max(0, this.getConfig('height',this.isAbove&&!this.hasConfig('zlock')&&!this.isAirship?mv3d.EVENT_HEIGHT:0) );
 		this.blendElevation.setValue(height,0);
-		this.z = this.platformHeight + height;
+		if(this.isEvent) this.z = this.platformHeight + height;
 	}
 
 	updateConfiguration(){
@@ -1053,12 +1053,13 @@ class Character extends TransformNode{
 
 		if(this.isPlayer){
 			const vehicle = this.char.vehicle();
-			if(vehicle){
+			if(vehicle&&vehicle.mv3d_sprite){
 			//if(vehicle&&vehicle._driving){
-				this.z = vehicle.z;
-				this.targetElevation = vehicle.targetElevation;
-				this.platformChar = vehicle.platformChar;
-				this.platformHeight = vehicle.platformHeight;
+				const vehicle_sprite = vehicle.mv3d_sprite;
+				this.z = vehicle_sprite.z;
+				this.targetElevation = vehicle_sprite.targetElevation;
+				this.platformChar = vehicle_sprite.platformChar;
+				this.platformHeight = vehicle_sprite.platformHeight;
 				if(vehicle._driving){ return; }
 			}
 		}

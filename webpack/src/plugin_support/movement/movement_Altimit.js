@@ -1,3 +1,4 @@
+import mv3d from '../../mv3d.js';
 import { override, unround, degtorad, cos, sin, pointtodeg } from "../../util";
 
 override(Game_Player.prototype,'moveByInput',o=>function(){
@@ -70,7 +71,7 @@ override(Game_CharacterBase.prototype,'moveVectorMap',o=>function(owner, collide
 
 		let collided = false;
 		if(this._mv3d_isFlying()){
-			if(!mv3d.ALLOW_GLIDE&&mv3d.tileCollision(this,tx,ty,true,true)||mv3d.tileCollision(this,tx,ty,true,false)){ collided=true; }
+			if(!mv3d.allowGlide&&mv3d.tileCollision(this,tx,ty,true,true)||mv3d.tileCollision(this,tx,ty,true,false)){ collided=true; }
 		}else{
 			if(sprite.falling){ collided=true; }
 			else if(mv3d.tileCollision(this,tx,ty,true,true)){ collided=true; }

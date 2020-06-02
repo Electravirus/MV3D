@@ -171,13 +171,6 @@
 @param map
 @text Map Settings
 
-@param enabledDefault
-@text Enabled by Default
-@desc Whether 3D map rendering is enabled by default.
-@parent map
-@type Boolean
-@default true
-
 @param cellSize
 @text Cell Size
 @desc The size of the chunks the map is divided into.
@@ -203,7 +196,7 @@
 @parent map
 @type Note
 @default
-"sun(white)\nambient(default)\nfog(black|20,30)\nceiling(backface:true)"
+"enable(true)\nsun(white)\nambient(default)\nfog(black|20,30)\nceiling(backface:true)"
 
 
 @param spacer|input @text‏‏‎ ‎@desc ===============================================

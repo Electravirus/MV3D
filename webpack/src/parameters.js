@@ -50,7 +50,7 @@ assign(mv3d,{
 	CEILING_HEIGHT:Number(parameters.ceilingHeight),
 	LAYER_DIST:Number(parameters.layerDist),
 
-	ENABLED_DEFAULT: booleanString(parameters.enabledDefault),
+	//ENABLED_DEFAULT: booleanString(parameters.enabledDefault),
 	EVENTS_UPDATE_NEAR: booleanString(parameters.eventsUpdateNear),
 
 	UNLOAD_CELLS: booleanString(parameters.unloadCells),
@@ -109,7 +109,8 @@ assign(mv3d,{
 	EVENT_OBJ_SETTINGS: parameter('eventObjDefaults',"",tryParseString),
 	EVENT_TILE_SETTINGS: parameter('eventTileDefaults',"",tryParseString),
 
-	ALLOW_GLIDE: booleanString(parameters.allowGlide),
+	allowGlide: new Attribute('allowGlide',booleanString(parameters.allowGlide),booleanString),
+	get ALLOW_GLIDE(){ return this.allowGlide; },
 
 	SPRITE_OFFSET:Number(parameters.spriteOffset)/2,
 

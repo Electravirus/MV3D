@@ -138,7 +138,7 @@ const mv3d = {
 	},
 
 	isDisabled(){
-		return this.loadData('disabled', this.getMapConfig('disabled', !mv3d.ENABLED_DEFAULT ));
+		return this.loadData('disabled', this.getMapConfig('disabled', false ));
 	},
 	disable(fadeType=2){
 		mv3d.saveData('disabled',true);

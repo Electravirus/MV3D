@@ -1,6 +1,6 @@
 [
 null,
-{"id":1,"expanded":true,"name":"MAP001","order":1,"parentId":0,"scrollX":1636,"scrollY":878},
+{"id":1,"expanded":true,"name":"MAP001","order":1,"parentId":0,"scrollX":1636,"scrollY":877},
 {"id":2,"expanded":true,"name":"disabled","order":2,"parentId":0,"scrollX":1636,"scrollY":879},
 {"id":3,"expanded":false,"name":"hedgemaze","order":3,"parentId":0,"scrollX":1089.3333333333333,"scrollY":584.6666666666666},
 {"id":4,"expanded":false,"name":"island","order":4,"parentId":0,"scrollX":1636,"scrollY":878},
