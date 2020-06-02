@@ -4327,6 +4327,13 @@ Object.assign(mv3d["a" /* default */],{
 			}
 			conf.glow.a=Object(util["booleanNumber"])(a);
 		},
+		ambient(conf,c){
+			if(isNaN(c)){
+				conf.ambient = Object(util["makeColor"])(c);
+			}else{
+				conf.ambient = new babylon["Color3"](Number(c),Number(c),Number(c));
+			}
+		},
 		pass(conf,s=''){
 			s=Object(util["falseString"])(s.toLowerCase());
 			if(!s || s[0]==='x'){
@@ -4435,6 +4442,7 @@ Object.assign(mv3d["a" /* default */],{
 			}
 			conf.glow.a=Object(util["booleanNumber"])(a);
 		},
+		get ambient(){ return mv3d["a" /* default */].tilesetConfigurationFunctions.ambient; },
 		dirfix(conf,b){
 			conf.dirfix=Object(util["booleanString"])(b);
 		},
@@ -6604,7 +6612,8 @@ Object.assign(mv3d["a" /* default */],{
 		}
 		material.mv3d_noShadow=!options.shadow;
 		material.alphaCutOff = mv3d["a" /* default */].ALPHA_CUTOFF;
-		material.ambientColor.set(1,1,1);
+		//material.ambientColor.set(1,1,1);
+		material.ambientColor.copyFrom(options.ambient);
 		material.mv3d_glowColor=options.glow;
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
@@ -6630,6 +6639,7 @@ Object.assign(mv3d["a" /* default */],{
 		if ('pass' in conf){ options.through=conf.pass===this.enumPassage.THROUGH; }
 		if ('alpha' in conf){ options.alpha=conf.alpha; }
 		if ('glow' in conf){ options.glow=conf.glow; }
+		if ('ambient' in conf){ options.ambient=conf.ambient; }
 		if ('shadow' in conf){ options.shadow=conf.shadow; }
 		if(side){
 			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
@@ -6658,6 +6668,11 @@ Object.assign(mv3d["a" /* default */],{
 			options.glow.b = Object(util["unround"])(options.glow.b,255);
 			options.glow.a = Object(util["unround"])(options.glow.a,7);
 		}else{ options.glow=new babylon["Color4"](0,0,0,0); }
+		if('ambient' in options){
+			options.ambient.r = Object(util["unround"])(options.ambient.r,255);
+			options.ambient.g = Object(util["unround"])(options.ambient.g,255);
+			options.ambient.b = Object(util["unround"])(options.ambient.b,255);
+		}else{ options.ambient=new babylon["Color3"](1,1,1); }
 		if(!('shadow' in options)){options.shadow=true;}
 		if(!('backfaceCulling' in options)){ options.backfaceCulling = mv3d["a" /* default */].BACKFACE_CULLING; }
 	},
@@ -6669,12 +6684,15 @@ Object.assign(mv3d["a" /* default */],{
 		extra|=(!options.shadow)<<4;
 		extra|=options.glow.a*7<<5;
 		extra|=options.glow.toNumber()<<8;
-		//out of bits.
+		// out of bits.
 		let string = extra.toString(36);
 		extra = 0;
 		extra|=Boolean(options.through)<<0;
 		extra|=(!options.backfaceCulling)<<1;
 		extra|=Boolean(options.twosided)<<2;
+		// 5 empty bits here
+		extra|=(0xffffff-options.ambient.toNumber())<<8;
+		// 
 		string += ','+extra.toString(36);
 		return string;
 	},
@@ -7139,6 +7157,12 @@ class characters_Character extends babylon["TransformNode"]{
 			emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
 			emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
 			emissiveColor.b+=(2-emissiveColor.b)*Math.pow(blendColor[2]/255*blendAlpha,0.5);
+
+			if(this.hasConfig('ambient')){
+				material.ambientColor.copyFrom(this.getConfig('ambient'));
+			}else{
+				material.ambientColor.set(1,1,1);
+			}
 	
 			material.mv3d_noShadow=noShadow;
 		}

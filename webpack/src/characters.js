@@ -420,6 +420,12 @@ class Character extends TransformNode{
 			emissiveColor.r+=(2-emissiveColor.r)*Math.pow(blendColor[0]/255*blendAlpha,0.5);
 			emissiveColor.g+=(2-emissiveColor.g)*Math.pow(blendColor[1]/255*blendAlpha,0.5);
 			emissiveColor.b+=(2-emissiveColor.b)*Math.pow(blendColor[2]/255*blendAlpha,0.5);
+
+			if(this.hasConfig('ambient')){
+				material.ambientColor.copyFrom(this.getConfig('ambient'));
+			}else{
+				material.ambientColor.set(1,1,1);
+			}
 	
 			material.mv3d_noShadow=noShadow;
 		}

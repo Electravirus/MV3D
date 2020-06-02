@@ -501,6 +501,13 @@ Object.assign(mv3d,{
 			}
 			conf.glow.a=booleanNumber(a);
 		},
+		ambient(conf,c){
+			if(isNaN(c)){
+				conf.ambient = makeColor(c);
+			}else{
+				conf.ambient = new Color3(Number(c),Number(c),Number(c));
+			}
+		},
 		pass(conf,s=''){
 			s=falseString(s.toLowerCase());
 			if(!s || s[0]==='x'){
@@ -609,6 +616,7 @@ Object.assign(mv3d,{
 			}
 			conf.glow.a=booleanNumber(a);
 		},
+		get ambient(){ return mv3d.tilesetConfigurationFunctions.ambient; },
 		dirfix(conf,b){
 			conf.dirfix=booleanString(b);
 		},

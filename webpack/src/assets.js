@@ -111,7 +111,8 @@ Object.assign(mv3d,{
 		}
 		material.mv3d_noShadow=!options.shadow;
 		material.alphaCutOff = mv3d.ALPHA_CUTOFF;
-		material.ambientColor.set(1,1,1);
+		//material.ambientColor.set(1,1,1);
+		material.ambientColor.copyFrom(options.ambient);
 		material.mv3d_glowColor=options.glow;
 		material.emissiveColor.copyFrom(options.glow);
 		material.specularColor.set(0,0,0);
@@ -137,6 +138,7 @@ Object.assign(mv3d,{
 		if ('pass' in conf){ options.through=conf.pass===this.enumPassage.THROUGH; }
 		if ('alpha' in conf){ options.alpha=conf.alpha; }
 		if ('glow' in conf){ options.glow=conf.glow; }
+		if ('ambient' in conf){ options.ambient=conf.ambient; }
 		if ('shadow' in conf){ options.shadow=conf.shadow; }
 		if(side){
 			if(`${side}_alpha` in conf){ options.alpha=conf[`${side}_alpha`]; }
@@ -165,6 +167,11 @@ Object.assign(mv3d,{
 			options.glow.b = unround(options.glow.b,255);
 			options.glow.a = unround(options.glow.a,7);
 		}else{ options.glow=new Color4(0,0,0,0); }
+		if('ambient' in options){
+			options.ambient.r = unround(options.ambient.r,255);
+			options.ambient.g = unround(options.ambient.g,255);
+			options.ambient.b = unround(options.ambient.b,255);
+		}else{ options.ambient=new Color3(1,1,1); }
 		if(!('shadow' in options)){options.shadow=true;}
 		if(!('backfaceCulling' in options)){ options.backfaceCulling = mv3d.BACKFACE_CULLING; }
 	},
@@ -176,12 +183,15 @@ Object.assign(mv3d,{
 		extra|=(!options.shadow)<<4;
 		extra|=options.glow.a*7<<5;
 		extra|=options.glow.toNumber()<<8;
-		//out of bits.
+		// out of bits.
 		let string = extra.toString(36);
 		extra = 0;
 		extra|=Boolean(options.through)<<0;
 		extra|=(!options.backfaceCulling)<<1;
 		extra|=Boolean(options.twosided)<<2;
+		// 5 empty bits here
+		extra|=(0xffffff-options.ambient.toNumber())<<8;
+		// 
 		string += ','+extra.toString(36);
 		return string;
 	},
