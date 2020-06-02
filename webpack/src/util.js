@@ -102,21 +102,21 @@ export const deprecated=message=>{
 	console.warn(message);
 };
 
+export const throttle=(func,interval=100)=>{
+	let last_call = 0;
+	return function(){
+		if(Date.now()-last_call>interval){
+			func.apply(this,arguments);
+			last_call = Date.now();
+		}
+	};
+}
+
 // directions
 
 export const dirtoh=d=>5 + ((d-1)%3-1);
 export const dirtov=d=>5 + (Math.floor((d-1)/3)-1)*3;
 export const hvtodir=(h,v)=>5 + (Math.floor((v-1)/3)-1)*3 + ((h-1)%3-1);
-
-// useful consts
-export const XAxis = new Vector3(1,0,0);
-export const YAxis = new Vector3(0,1,0);
-export const ZAxis = new Vector3(0,0,1);
-export const v2origin = new Vector2(0,0);
-export const v3origin = new Vector3(0,0,0);
-
-export const PI = Math.PI;
-export const PI2 = Math.PI*2;
 
 // overloading
 
@@ -166,4 +166,12 @@ export const assign=(obj,methods)=>{
 };
 
 
-//
+// useful consts
+export const XAxis = new Vector3(1,0,0);
+export const YAxis = new Vector3(0,1,0);
+export const ZAxis = new Vector3(0,0,1);
+export const v2origin = new Vector2(0,0);
+export const v3origin = new Vector3(0,0,0);
+
+export const PI = Math.PI;
+export const PI2 = Math.PI*2;

@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { override } from './util.js';
+import { override, throttle } from './util.js';
 import { Feature } from './features.js';
 
 
@@ -151,10 +151,7 @@ Scene_Map.prototype.processMapTouch = function() {
 		if (TouchInput.isPressed()) {
 			if (this._touchCount === 0 || this._touchCount >= 15) {
 				
-				const intersection = mv3d.scene.pick(TouchInput.x*mv3d.RES_SCALE,TouchInput.y*mv3d.RES_SCALE,raycastPredicate);
-				if(intersection.hit){
-					mv3d.processMapTouch(intersection);
-				}
+				mv3d.processMapTouch();
 
 			}
 			this._touchCount++;
@@ -164,15 +161,18 @@ Scene_Map.prototype.processMapTouch = function() {
 	}
 };
 
-mv3d.processMapTouch=function(intersection){
-	const point = {x:intersection.pickedPoint.x, y:-intersection.pickedPoint.z};
-	const mesh = intersection.pickedMesh;
-	if(mesh.character){
-		point.x=mesh.character.x;
-		point.y=mesh.character.y;
+mv3d.processMapTouch=throttle(function(){
+	const intersection = mv3d.scene.pick(TouchInput.x*mv3d.RES_SCALE,TouchInput.y*mv3d.RES_SCALE,raycastPredicate);
+	if(intersection.hit){
+		const point = {x:intersection.pickedPoint.x, y:-intersection.pickedPoint.z};
+		const mesh = intersection.pickedMesh;
+		if(mesh.character){
+			point.x=mesh.character.x;
+			point.y=mesh.character.y;
+		}
+		mv3d.setDestination(point.x,point.y);
 	}
-	mv3d.setDestination(point.x,point.y);
-};
+},100);
 
 mv3d.setDestination=function(x,y){
 	$gameTemp.setDestination(Math.round(x), Math.round(y));

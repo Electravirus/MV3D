@@ -953,9 +953,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "filename", function() { return filename; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "foldername", function() { return foldername; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deprecated", function() { return deprecated; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "throttle", function() { return throttle; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dirtoh", function() { return dirtoh; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "dirtov", function() { return dirtov; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hvtodir", function() { return hvtodir; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "overload", function() { return overload; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "override", function() { return override; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "assign", function() { return assign; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "XAxis", function() { return XAxis; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "YAxis", function() { return YAxis; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ZAxis", function() { return ZAxis; });
@@ -963,9 +967,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "v3origin", function() { return v3origin; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PI", function() { return PI; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PI2", function() { return PI2; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "overload", function() { return overload; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "override", function() { return override; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "assign", function() { return assign; });
 /* harmony import */ var _mv3d__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 
 
@@ -1071,21 +1072,21 @@ const deprecated=message=>{
 	console.warn(message);
 };
 
+const throttle=(func,interval=100)=>{
+	let last_call = 0;
+	return function(){
+		if(Date.now()-last_call>interval){
+			func.apply(this,arguments);
+			last_call = Date.now();
+		}
+	};
+}
+
 // directions
 
 const dirtoh=d=>5 + ((d-1)%3-1);
 const dirtov=d=>5 + (Math.floor((d-1)/3)-1)*3;
 const hvtodir=(h,v)=>5 + (Math.floor((v-1)/3)-1)*3 + ((h-1)%3-1);
-
-// useful consts
-const XAxis = new Vector3(1,0,0);
-const YAxis = new Vector3(0,1,0);
-const ZAxis = new Vector3(0,0,1);
-const v2origin = new Vector2(0,0);
-const v3origin = new Vector3(0,0,0);
-
-const PI = Math.PI;
-const PI2 = Math.PI*2;
 
 // overloading
 
@@ -1135,7 +1136,16 @@ const assign=(obj,methods)=>{
 };
 
 
-//
+// useful consts
+const XAxis = new Vector3(1,0,0);
+const YAxis = new Vector3(0,1,0);
+const ZAxis = new Vector3(0,0,1);
+const v2origin = new Vector2(0,0);
+const v3origin = new Vector3(0,0,0);
+
+const PI = Math.PI;
+const PI2 = Math.PI*2;
+
 
 /***/ }),
 /* 2 */
@@ -3644,10 +3654,7 @@ Scene_Map.prototype.processMapTouch = function() {
 		if (TouchInput.isPressed()) {
 			if (this._touchCount === 0 || this._touchCount >= 15) {
 				
-				const intersection = mv3d["a" /* default */].scene.pick(TouchInput.x*mv3d["a" /* default */].RES_SCALE,TouchInput.y*mv3d["a" /* default */].RES_SCALE,input_raycastPredicate);
-				if(intersection.hit){
-					mv3d["a" /* default */].processMapTouch(intersection);
-				}
+				mv3d["a" /* default */].processMapTouch();
 
 			}
 			this._touchCount++;
@@ -3657,15 +3664,18 @@ Scene_Map.prototype.processMapTouch = function() {
 	}
 };
 
-mv3d["a" /* default */].processMapTouch=function(intersection){
-	const point = {x:intersection.pickedPoint.x, y:-intersection.pickedPoint.z};
-	const mesh = intersection.pickedMesh;
-	if(mesh.character){
-		point.x=mesh.character.x;
-		point.y=mesh.character.y;
+mv3d["a" /* default */].processMapTouch=Object(util["throttle"])(function(){
+	const intersection = mv3d["a" /* default */].scene.pick(TouchInput.x*mv3d["a" /* default */].RES_SCALE,TouchInput.y*mv3d["a" /* default */].RES_SCALE,input_raycastPredicate);
+	if(intersection.hit){
+		const point = {x:intersection.pickedPoint.x, y:-intersection.pickedPoint.z};
+		const mesh = intersection.pickedMesh;
+		if(mesh.character){
+			point.x=mesh.character.x;
+			point.y=mesh.character.y;
+		}
+		mv3d["a" /* default */].setDestination(point.x,point.y);
 	}
-	mv3d["a" /* default */].setDestination(point.x,point.y);
-};
+},100);
 
 mv3d["a" /* default */].setDestination=function(x,y){
 	$gameTemp.setDestination(Math.round(x), Math.round(y));
