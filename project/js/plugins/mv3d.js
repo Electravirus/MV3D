@@ -1,7 +1,7 @@
 /*:
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
 version 0.6.1
-@author Dread/Nyanak
+@author Cutievirus
 @help
 
 Requires version 1.6 of RPG Maker MV.  
@@ -40,13 +40,17 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - AmalgamAsh
 - Goatse Man
 - Kaine Lowe
-- S Hagen
+- Anthony Xue
 - Lemongreen 
+- Mr.W 
+- Galatic Acid
+- CheshireSoft 
 
 ## Patron Knights:
 
 - CattleDog
 - hsumi1 .
+- Ben B
 - Whitely
 - L
 - Nemo Ma
@@ -56,7 +60,9 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - RetroChaos
 - Collin
 - Trick
-- Cernos Whitefang
+- Christian Cano
+- WanNyan 
+- Jimmy McCarney
 
 
 
@@ -71,7 +77,7 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 @option SUBMENU
 @option ENABLE
 @option DISABLE
-@default SUBMENU
+@default ENABLE
 
 
 @param renderDistOptionName
@@ -111,25 +117,25 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 @min 0
 
 
-@param mipmapOptionName
-@text Mipmapping Option Name
-@desc symbol name: mv3d-mipmap
-@parent options
-@type Text
-@default Mipmapping
+#param mipmapOptionName
+#text Mipmapping Option Name
+#desc symbol name: mv3d-mipmap
+#parent options
+#type Text
+#default Mipmapping
 
-@param mipmap
-@text Mipmapping Default
-@parent mipmapOptionName
-@type Boolean
-@default true
+#param mipmap
+#text Mipmapping Default
+#parent mipmapOptionName
+#type Boolean
+#default false
 
-@param mipmapOption
-@text Mipmapping Option
-@desc Should Mipmapping appear on options menu?
-@parent mipmapOptionName
-@type Boolean
-@default true
+#param mipmapOption
+#text Mipmapping Option
+#desc Should Mipmapping appear on options menu?
+#parent mipmapOptionName
+#type Boolean
+#default true
 
 
 @param fovOptionName
@@ -2717,7 +2723,9 @@ Graphics._updateAllElements = function() {
 
 const _graphics_render=Graphics.render;
 Graphics.render=function(){
-	mv3d["a" /* default */].render();
+	if( !mv3d["a" /* default */].isDisabled() && SceneManager._scene instanceof Scene_Map ){
+		mv3d["a" /* default */].render();
+	}
 	_graphics_render.apply(this,arguments);
 };
 
@@ -4476,6 +4484,7 @@ Object.assign(mv3d["a" /* default */],{
 				conf.collide=true;
 			}else if(s[0]==='o'){
 				conf.platform=true;
+				if(conf.collide===false||conf.collide==null)conf.collide=true;
 			}else{
 				conf.platform=false;
 				conf.collide=false;
@@ -6944,6 +6953,7 @@ class characters_Character extends babylon["TransformNode"]{
 		this.prevZ = this.z;
 		this.needsPositionUpdate=true;
 		this.needsMaterialUpdate=true;
+		this.needsScaleUpdate=false;
 		//this.elevation = 0;
 
 		mv3d["a" /* default */].getShadowMesh().then(shadow=>{
@@ -7087,6 +7097,7 @@ class characters_Character extends babylon["TransformNode"]{
 	}
 
 	async updateScale(){
+		this.needsScaleUpdate=false;
 		if(this.isEmpty){
 			this.spriteWidth=1;
 			this.spriteHeight=1;
@@ -7098,7 +7109,7 @@ class characters_Character extends babylon["TransformNode"]{
 			this.spriteWidth = configScale.x;
 			this.spriteHeight = configScale.y;
 		}else{
-			if(!this.isBitmapReady()){ return; }
+			if(!this.isBitmapReady()){ this.needsScaleUpdate=true; return; }
 			this.mv_sprite.updateBitmap();
 			if(this.textureRect){
 				var width = this.textureRect.width;
@@ -7391,6 +7402,7 @@ class characters_Character extends babylon["TransformNode"]{
 
 	intensiveUpdate(){
 		this.setupLightInclusionLists();
+		this.updateScale();
 	}
 
 	setupLightInclusionLists(){
@@ -7640,6 +7652,10 @@ class characters_Character extends babylon["TransformNode"]{
 			this.updateEmissive();
 			this.needsMaterialUpdate=false;
 		}
+		if(this.needsScaleUpdate){
+			this.updateScale();
+			this.needsScaleUpdate=false;
+		}
 		this.char.mv3d_positionUpdated=this.needsPositionUpdate;
 		this.needsPositionUpdate=false;
 		//this.mesh.renderOutline=true;
@@ -7664,7 +7680,7 @@ class characters_Character extends babylon["TransformNode"]{
 		this.updateLights();
 
 		// updating the scale every frame still doesn't fix all problems with ChronoEngine.
-		this.updateScale();
+		//this.updateScale();
 	}
 
 	updateEmpty(){
@@ -7985,8 +8001,9 @@ class characters_Character extends babylon["TransformNode"]{
 	}
 
 	getCHeight(){
-		let collide = this.getConfig('collide',this.model.shape===mv3d["a" /* default */].enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
-		return collide===true ? this.spriteHeight : Number(collide);
+		const dfault = this.model.shape===mv3d["a" /* default */].enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight;
+		let collide = this.getConfig('collide',dfault);
+		return collide===true ? dfault : Number(collide);
 	}
 
 	getCollider(){

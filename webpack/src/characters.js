@@ -197,6 +197,7 @@ class Character extends TransformNode{
 		this.prevZ = this.z;
 		this.needsPositionUpdate=true;
 		this.needsMaterialUpdate=true;
+		this.needsScaleUpdate=false;
 		//this.elevation = 0;
 
 		mv3d.getShadowMesh().then(shadow=>{
@@ -340,6 +341,7 @@ class Character extends TransformNode{
 	}
 
 	async updateScale(){
+		this.needsScaleUpdate=false;
 		if(this.isEmpty){
 			this.spriteWidth=1;
 			this.spriteHeight=1;
@@ -351,7 +353,7 @@ class Character extends TransformNode{
 			this.spriteWidth = configScale.x;
 			this.spriteHeight = configScale.y;
 		}else{
-			if(!this.isBitmapReady()){ return; }
+			if(!this.isBitmapReady()){ this.needsScaleUpdate=true; return; }
 			this.mv_sprite.updateBitmap();
 			if(this.textureRect){
 				var width = this.textureRect.width;
@@ -644,6 +646,7 @@ class Character extends TransformNode{
 
 	intensiveUpdate(){
 		this.setupLightInclusionLists();
+		this.updateScale();
 	}
 
 	setupLightInclusionLists(){
@@ -893,6 +896,10 @@ class Character extends TransformNode{
 			this.updateEmissive();
 			this.needsMaterialUpdate=false;
 		}
+		if(this.needsScaleUpdate){
+			this.updateScale();
+			this.needsScaleUpdate=false;
+		}
 		this.char.mv3d_positionUpdated=this.needsPositionUpdate;
 		this.needsPositionUpdate=false;
 		//this.mesh.renderOutline=true;
@@ -917,7 +924,7 @@ class Character extends TransformNode{
 		this.updateLights();
 
 		// updating the scale every frame still doesn't fix all problems with ChronoEngine.
-		this.updateScale();
+		//this.updateScale();
 	}
 
 	updateEmpty(){
@@ -1238,8 +1245,9 @@ class Character extends TransformNode{
 	}
 
 	getCHeight(){
-		let collide = this.getConfig('collide',this.model.shape===mv3d.enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight);
-		return collide===true ? this.spriteHeight : Number(collide);
+		const dfault = this.model.shape===mv3d.enumShapes.FLAT||this.char._priorityType===0?0:this.spriteHeight;
+		let collide = this.getConfig('collide',dfault);
+		return collide===true ? dfault : Number(collide);
 	}
 
 	getCollider(){

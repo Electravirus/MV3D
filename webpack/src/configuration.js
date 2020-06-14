@@ -640,6 +640,7 @@ Object.assign(mv3d,{
 				conf.collide=true;
 			}else if(s[0]==='o'){
 				conf.platform=true;
+				if(conf.collide===false||conf.collide==null)conf.collide=true;
 			}else{
 				conf.platform=false;
 				conf.collide=false;

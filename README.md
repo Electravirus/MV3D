@@ -41,13 +41,17 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - AmalgamAsh
 - Goatse Man
 - Kaine Lowe
-- S Hagen
+- Anthony Xue
 - Lemongreen 
+- Mr.W 
+- Galatic Acid
+- CheshireSoft 
 
 ## Patron Knights:
 
 - CattleDog
 - hsumi1 .
+- Ben B
 - Whitely
 - L
 - Nemo Ma
@@ -57,6 +61,8 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - RetroChaos
 - Collin
 - Trick
-- Cernos Whitefang
+- Christian Cano
+- WanNyan 
+- Jimmy McCarney
 
 

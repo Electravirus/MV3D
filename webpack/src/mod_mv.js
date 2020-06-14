@@ -16,7 +16,9 @@ Graphics._updateAllElements = function() {
 
 const _graphics_render=Graphics.render;
 Graphics.render=function(){
-	mv3d.render();
+	if( !mv3d.isDisabled() && SceneManager._scene instanceof Scene_Map ){
+		mv3d.render();
+	}
 	_graphics_render.apply(this,arguments);
 };
 

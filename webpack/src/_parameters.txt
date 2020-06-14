@@ -9,7 +9,7 @@
 @option SUBMENU
 @option ENABLE
 @option DISABLE
-@default SUBMENU
+@default ENABLE
 
 
 @param renderDistOptionName
@@ -49,25 +49,25 @@
 @min 0
 
 
-@param mipmapOptionName
-@text Mipmapping Option Name
-@desc symbol name: mv3d-mipmap
-@parent options
-@type Text
-@default Mipmapping
+#param mipmapOptionName
+#text Mipmapping Option Name
+#desc symbol name: mv3d-mipmap
+#parent options
+#type Text
+#default Mipmapping
 
-@param mipmap
-@text Mipmapping Default
-@parent mipmapOptionName
-@type Boolean
-@default true
+#param mipmap
+#text Mipmapping Default
+#parent mipmapOptionName
+#type Boolean
+#default false
 
-@param mipmapOption
-@text Mipmapping Option
-@desc Should Mipmapping appear on options menu?
-@parent mipmapOptionName
-@type Boolean
-@default true
+#param mipmapOption
+#text Mipmapping Option
+#desc Should Mipmapping appear on options menu?
+#parent mipmapOptionName
+#type Boolean
+#default true
 
 
 @param fovOptionName
