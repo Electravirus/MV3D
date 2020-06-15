@@ -43,8 +43,8 @@ Object.assign(mv3d,{
 	},
 
 	updateDynamicNormals(){
-		if(!mv3d.DYNAMIC_NORMALS){ return; }
-		const pitch = this.blendCameraPitch.currentValue();
+		if(!mv3d.DYNAMIC_NORMALS||!this.blendSunColor){ return; }
+		const pitch = this.blendSunColor.averageCurrentValue()<128 ? this.blendSunColor.averageCurrentValue()/128 * this.blendCameraPitch.currentValue() : this.blendCameraPitch.currentValue();
 		const y = sin(degtorad(pitch));
 		const z = -cos(degtorad(pitch));
 		this.Meshes.SPRITE.updateVerticesData(BABYLON.VertexBuffer.NormalKind, [ 0,y,z, 0,y,z, 0,y,z, 0,y,z ]);

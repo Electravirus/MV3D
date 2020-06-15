@@ -150,7 +150,7 @@ Object.assign(mv3d,{
 			this.updateDirection();
 			this.updateFov();
 
-			if(mv3d.DYNAMIC_NORMALS && (reorient||this.blendCameraPitch.updated) ){
+			if(mv3d.DYNAMIC_NORMALS && (reorient||this.blendCameraPitch.updated||(this.blendSunColor&&this.blendSunColor.updated)) ){
 				this.updateDynamicNormals();
 			}
 		}
@@ -302,10 +302,19 @@ export class ColorBlender{
 		this.g=new Blender(`${key}_g`,dfault>>8&0xff,track);
 		this.b=new Blender(`${key}_b`,dfault&0xff,track);
 	}
+	get updated(){
+		return this.r.updated||this.g.updated||this.b.updated;
+	}
 	setValue(color,time){
 		this.r.setValue(color>>16,time);
 		this.g.setValue(color>>8&0xff,time);
 		this.b.setValue(color&0xff,time);
+	}
+	averageCurrentValue(){
+		return (this.r.value+this.g.value+this.b.value)/3|0;
+	}
+	averageTargetValue(){
+		return (this.r.targetValue()+this.g.targetValue()+this.b.targetValue())/3|0;
 	}
 	currentValue(){
 		return this.r.value<<16|this.g.value<<8|this.b.value;
