@@ -1,5 +1,6 @@
 import mv3d from './mv3d.js';
 import { TransformNode, StandardMaterial } from 'babylonjs';
+import { sleep } from './util.js';
 
 const modelCache={};
 mv3d.modelCache=modelCache;
@@ -116,7 +117,7 @@ export class Model extends TransformNode{
 		}
 		this.setMesh(geometry.clone());
 	}
-	async importModel(filename,useCache){
+	async importModel(filename,opts={}){
 		if(this.shape === mv3d.enumShapes.MODEL && this.model_filename === filename){
 			return;
 		}
@@ -124,6 +125,11 @@ export class Model extends TransformNode{
 		this.model_filename = filename;
 		this.shape = mv3d.enumShapes.MODEL;
 		const mesh = await mv3d.importModel(filename);
+		if(!opts.nodelay){
+			mesh.setEnabled(false);
+			await sleep(100);
+			mesh.setEnabled(true);
+		}
 		this.setMesh(mesh);
 	}
 	update(){

@@ -104,7 +104,8 @@ export class MapCell extends TransformNode{
 					await this.loadCross(tileConf,x,y,z,l,wallHeight,0);
 					await this.loadCross(tileConf,x,y,z,l,wallHeight,45);
 				}else if(shape===shapes.SPRITE||shape===shapes.BOARD||shape===shapes.MODEL){
-					await this.loadDoodad(tileConf,x,y,z-wallHeight,shape);
+					//await
+					this.loadDoodad(tileConf,x,y,z-wallHeight,shape);
 				}
 			}
 			if(!mv3d.isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
@@ -149,7 +150,7 @@ export class MapCell extends TransformNode{
 		const doodad = new Model({orphan:false});
 		this.doodads.push(doodad);
 		if(shape === mv3d.enumShapes.MODEL){
-			await doodad.importModel(tileConf.model);
+			await doodad.importModel(tileConf.model,{nodelay:true});
 		}else{
 			doodad.setMeshForShape(shape);
 		}

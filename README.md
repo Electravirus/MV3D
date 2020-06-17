@@ -44,6 +44,7 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - Anthony Xue
 - Lemongreen 
 - Mr.W 
+- Diviciacusdev 
 - Galatic Acid
 - CheshireSoft 
 

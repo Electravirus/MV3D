@@ -43,6 +43,7 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - Anthony Xue
 - Lemongreen 
 - Mr.W 
+- Diviciacusdev 
 - Galatic Acid
 - CheshireSoft 
 
@@ -5175,6 +5176,7 @@ class MapCellBuilder_SubMeshBuilder{
 
 
 
+
 const modelCache={};
 mv3d["a" /* default */].modelCache=modelCache;
 
@@ -5290,7 +5292,7 @@ class model_Model extends babylon["TransformNode"]{
 		}
 		this.setMesh(geometry.clone());
 	}
-	async importModel(filename,useCache){
+	async importModel(filename,opts={}){
 		if(this.shape === mv3d["a" /* default */].enumShapes.MODEL && this.model_filename === filename){
 			return;
 		}
@@ -5298,6 +5300,11 @@ class model_Model extends babylon["TransformNode"]{
 		this.model_filename = filename;
 		this.shape = mv3d["a" /* default */].enumShapes.MODEL;
 		const mesh = await mv3d["a" /* default */].importModel(filename);
+		if(!opts.nodelay){
+			mesh.setEnabled(false);
+			await Object(util["sleep"])(100);
+			mesh.setEnabled(true);
+		}
 		this.setMesh(mesh);
 	}
 	update(){
@@ -5453,7 +5460,8 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 					await this.loadCross(tileConf,x,y,z,l,wallHeight,0);
 					await this.loadCross(tileConf,x,y,z,l,wallHeight,45);
 				}else if(shape===shapes.SPRITE||shape===shapes.BOARD||shape===shapes.MODEL){
-					await this.loadDoodad(tileConf,x,y,z-wallHeight,shape);
+					//await
+					this.loadDoodad(tileConf,x,y,z-wallHeight,shape);
 				}
 			}
 			if(!mv3d["a" /* default */].isTileEmpty(ceiling.bottom_id) && !ceiling.cull){
@@ -5498,7 +5506,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		const doodad = new model_Model({orphan:false});
 		this.doodads.push(doodad);
 		if(shape === mv3d["a" /* default */].enumShapes.MODEL){
-			await doodad.importModel(tileConf.model);
+			await doodad.importModel(tileConf.model,{nodelay:true});
 		}else{
 			doodad.setMeshForShape(shape);
 		}
