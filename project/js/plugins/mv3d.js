@@ -1,6 +1,6 @@
 /*:
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
-version 0.6.1
+version 0.6.2
 @author Cutievirus
 @help
 
