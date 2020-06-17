@@ -1,11 +1,19 @@
 import mv3d from './mv3d.js';
-import { TransformNode, StandardMaterial } from 'babylonjs';
+import { TransformNode, StandardMaterial, InstancedMesh } from 'babylonjs';
 import { sleep } from './util.js';
 
-const modelCache={};
-mv3d.modelCache=modelCache;
+const modelInstanceCache={};
+mv3d.modelInstanceCache=modelInstanceCache;
 
 const orphanModelList=[];
+
+mv3d.clearModelCache=function(){
+	for (const key in modelInstanceCache){
+		const mesh = modelInstanceCache[key];
+		delete modelInstanceCache[key];
+		mesh.dispose(false,true);
+	}
+};
 
 export class Model extends TransformNode{
 	constructor(opts={}){
@@ -73,8 +81,15 @@ export class Model extends TransformNode{
 	}
 	dispose(...args){
 		this.disposeMaterial();
-		// TODO dispose differently for cached complex models
-		super.dispose(...args);
+		if(this.isComplexMesh()){
+			if(this.mesh instanceof InstancedMesh){
+				super.dispose(false,false);
+			}else{
+				super.dispose(false,true);
+			}
+		}else{
+			super.dispose(...args);
+		}
 	}
 	clearShape(){
 		this.shape=null;
@@ -124,7 +139,20 @@ export class Model extends TransformNode{
 		this.clearShape();
 		this.model_filename = filename;
 		this.shape = mv3d.enumShapes.MODEL;
-		const mesh = await mv3d.importModel(filename);
+		if(opts.useInstance){
+			if(filename in modelInstanceCache){
+				while(modelInstanceCache[filename]==='loading'){ await sleep(10); }
+				var mesh = modelInstanceCache[filename];
+			}else{
+				modelInstanceCache[filename]='loading';
+				var mesh = await mv3d.importModel(filename);
+				modelInstanceCache[filename]=mesh;
+				mv3d.scene.removeMesh(mesh);
+			}
+			mesh = mesh.createInstance();
+		}else{
+			var mesh = await mv3d.importModel(filename);
+		}
 		if(!opts.nodelay){
 			mesh.setEnabled(false);
 			await sleep(100);

@@ -5177,10 +5177,18 @@ class MapCellBuilder_SubMeshBuilder{
 
 
 
-const modelCache={};
-mv3d["a" /* default */].modelCache=modelCache;
+const modelInstanceCache={};
+mv3d["a" /* default */].modelInstanceCache=modelInstanceCache;
 
 const orphanModelList=[];
+
+mv3d["a" /* default */].clearModelCache=function(){
+	for (const key in modelInstanceCache){
+		const mesh = modelInstanceCache[key];
+		delete modelInstanceCache[key];
+		mesh.dispose(false,true);
+	}
+};
 
 class model_Model extends babylon["TransformNode"]{
 	constructor(opts={}){
@@ -5248,8 +5256,15 @@ class model_Model extends babylon["TransformNode"]{
 	}
 	dispose(...args){
 		this.disposeMaterial();
-		// TODO dispose differently for cached complex models
-		super.dispose(...args);
+		if(this.isComplexMesh()){
+			if(this.mesh instanceof babylon["InstancedMesh"]){
+				super.dispose(false,false);
+			}else{
+				super.dispose(false,true);
+			}
+		}else{
+			super.dispose(...args);
+		}
 	}
 	clearShape(){
 		this.shape=null;
@@ -5299,7 +5314,20 @@ class model_Model extends babylon["TransformNode"]{
 		this.clearShape();
 		this.model_filename = filename;
 		this.shape = mv3d["a" /* default */].enumShapes.MODEL;
-		const mesh = await mv3d["a" /* default */].importModel(filename);
+		if(opts.useInstance){
+			if(filename in modelInstanceCache){
+				while(modelInstanceCache[filename]==='loading'){ await Object(util["sleep"])(10); }
+				var mesh = modelInstanceCache[filename];
+			}else{
+				modelInstanceCache[filename]='loading';
+				var mesh = await mv3d["a" /* default */].importModel(filename);
+				modelInstanceCache[filename]=mesh;
+				mv3d["a" /* default */].scene.removeMesh(mesh);
+			}
+			mesh = mesh.createInstance();
+		}else{
+			var mesh = await mv3d["a" /* default */].importModel(filename);
+		}
 		if(!opts.nodelay){
 			mesh.setEnabled(false);
 			await Object(util["sleep"])(100);
@@ -5506,7 +5534,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		const doodad = new model_Model({orphan:false});
 		this.doodads.push(doodad);
 		if(shape === mv3d["a" /* default */].enumShapes.MODEL){
-			await doodad.importModel(tileConf.model,{nodelay:true});
+			await doodad.importModel(tileConf.model,{nodelay:true, useInstance:true});
 		}else{
 			doodad.setMeshForShape(shape);
 		}
@@ -5522,7 +5550,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 			var scaleX = tileConf.width||(rect.width / Object(util["tileWidth"])()) || 1;
 			var scaleY = tileConf.height||(rect.height/Object(util["tileHeight"])()) || 1;
 		}
-		doodad.mesh.scaling.set(scaleX,scaleY,scaleX);
+		doodad.scaling.set(scaleX,scaleY,scaleX);
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false,double=false){
 		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;
@@ -6423,6 +6451,8 @@ Object.assign(mv3d["a" /* default */],{
 			this.cells[key].dispose(false,true);
 		}
 		this.cells={};
+		// clear model cache
+		this.clearModelCache();
 	},
 	reloadMap(){
 		this.clearMapCells();
@@ -7118,7 +7148,7 @@ class characters_Character extends babylon["TransformNode"]{
 		if(this.isEmpty){
 			this.spriteWidth=1;
 			this.spriteHeight=1;
-			if(this.model.mesh)this.model.mesh.scaling.set(1,1,1);
+			if(this.model.mesh)this.model.scaling.set(1,1,1);
 			return;
 		}
 		const configScale = this.getConfig('scale',new babylon["Vector2"](1,1));
@@ -7142,9 +7172,9 @@ class characters_Character extends babylon["TransformNode"]{
 		const yscale = this.spriteHeight;
 		if(this.model.mesh){
 			if(this.model.shape===mv3d["a" /* default */].enumShapes.FLAT){
-				this.model.mesh.scaling.set(xscale,yscale,yscale);
+				this.model.scaling.set(xscale,yscale,yscale);
 			}else{
-				this.model.mesh.scaling.set(xscale,yscale,xscale);
+				this.model.scaling.set(xscale,yscale,xscale);
 			}
 		}
 	}

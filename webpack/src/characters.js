@@ -345,7 +345,7 @@ class Character extends TransformNode{
 		if(this.isEmpty){
 			this.spriteWidth=1;
 			this.spriteHeight=1;
-			if(this.model.mesh)this.model.mesh.scaling.set(1,1,1);
+			if(this.model.mesh)this.model.scaling.set(1,1,1);
 			return;
 		}
 		const configScale = this.getConfig('scale',new Vector2(1,1));
@@ -369,9 +369,9 @@ class Character extends TransformNode{
 		const yscale = this.spriteHeight;
 		if(this.model.mesh){
 			if(this.model.shape===mv3d.enumShapes.FLAT){
-				this.model.mesh.scaling.set(xscale,yscale,yscale);
+				this.model.scaling.set(xscale,yscale,yscale);
 			}else{
-				this.model.mesh.scaling.set(xscale,yscale,xscale);
+				this.model.scaling.set(xscale,yscale,xscale);
 			}
 		}
 	}

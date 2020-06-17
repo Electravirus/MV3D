@@ -34,6 +34,8 @@ Object.assign(mv3d,{
 			this.cells[key].dispose(false,true);
 		}
 		this.cells={};
+		// clear model cache
+		this.clearModelCache();
 	},
 	reloadMap(){
 		this.clearMapCells();

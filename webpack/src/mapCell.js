@@ -150,7 +150,7 @@ export class MapCell extends TransformNode{
 		const doodad = new Model({orphan:false});
 		this.doodads.push(doodad);
 		if(shape === mv3d.enumShapes.MODEL){
-			await doodad.importModel(tileConf.model,{nodelay:true});
+			await doodad.importModel(tileConf.model,{nodelay:true, useInstance:true});
 		}else{
 			doodad.setMeshForShape(shape);
 		}
@@ -166,7 +166,7 @@ export class MapCell extends TransformNode{
 			var scaleX = tileConf.width||(rect.width / tileWidth()) || 1;
 			var scaleY = tileConf.height||(rect.height/tileHeight()) || 1;
 		}
-		doodad.mesh.scaling.set(scaleX,scaleY,scaleX);
+		doodad.scaling.set(scaleX,scaleY,scaleX);
 	}
 	async loadTile(tileConf,x,y,z,l,ceiling=false,double=false){
 		const tileId = ceiling?tileConf.bottom_id:tileConf.top_id;
