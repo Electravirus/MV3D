@@ -3201,6 +3201,16 @@ Object.assign(mv3d["a" /* default */],{
 		}
 	},
 
+	cameraTrack:null,
+	cameraTrackTime:0,
+	cameraTrackMode:0,
+	setCameraTrack(target,time=0,mode=3){
+		if(!target){ this.cameraTrack=null; return; }
+		this.cameraTrack=target;
+		this.cameraTrackTime=time;
+		this.cameraTrackMode=mode;
+	},
+
 	setupBlenders(){
 		this.blendFogColor = new ColorBlender('fogColor',this.FOG_COLOR);
 		this.blendFogNear = new blenders_Blender('fogNear',this.FOG_NEAR);
@@ -3231,6 +3241,22 @@ Object.assign(mv3d["a" /* default */],{
 				this.cameraTargets[0]=$gamePlayer;
 			}
 		}
+
+		// camera tracking
+		if(this.cameraTrack){
+			if(this.cameraTrackMode&1){
+				const yaw = Object(util["radtodeg"])(Math.atan2(-(this.cameraTrack.y-this.cameraStick.y),this.cameraTrack.x-this.cameraStick.x))-90;
+				if(this.blendCameraYaw.targetValue()!==yaw){ this.blendCameraYaw.setValue(yaw,this.cameraTrackTime); }
+			}
+			if(this.cameraTrackMode&2){
+				const dist = babylon["Vector2"].Distance(new babylon["Vector2"](this.cameraTrack.x,this.cameraTrack.y), new babylon["Vector2"](this.cameraNode.absolutePosition.x,-this.cameraNode.absolutePosition.z));
+				const zdist = this.cameraTrack.z - this.cameraNode.absolutePosition.y;
+				const pitch = Object(util["radtodeg"])(Math.atan(zdist/dist)) + 90;
+				if(this.blendCameraPitch.targetValue()!==pitch){ this.blendCameraPitch.setValue(pitch,this.cameraTrackTime); }
+			}
+		}
+
+		// camera following
 		if(this.blendCameraTransition.update() && this.cameraTargets.length>=2){
 			const t = this.blendCameraTransition.currentValue();
 			let char1=this.cameraTargets[0];
@@ -4748,7 +4774,9 @@ mv3d["a" /* default */].PluginCommand=class{
 			case 'zoom'     : this.zoom  (a[1],time); return;
 			case 'height'   : this.height(a[1],time); return;
 			case 'mode'     : this.cameramode(a[1]); return;
+			case 'follow'   :
 			case 'target'   : this._cameraTarget(a[1],time); return;
+			case 'track'    : this._cameraTrack(...a); return
 			case 'pan'      : this.pan(a[1],a[2],a[3]); return;
 		}
 	}
@@ -4763,6 +4791,18 @@ mv3d["a" /* default */].PluginCommand=class{
 	height(n,time=1){ this._RELATIVE_BLEND(mv3d["a" /* default */].blendCameraHeight,n,time); }
 	_cameraTarget(target,time){
 		mv3d["a" /* default */].setCameraTarget(this.TARGET_CHAR(target), time);
+	}
+	_cameraTrack(...a){
+		a.shift();
+		let mode = 3;
+		switch(a[0].toLowerCase()){
+			case 'pitch': mode=2; a.shift(); break;
+			case 'yaw': mode=1; a.shift(); break;
+		}
+		let target = Object(util["falseString"])(a[0]);
+		if(target){ target = this.TARGET_CHAR(target); }
+		const time = this._TIME(a[1]);
+		mv3d["a" /* default */].setCameraTrack(target,time,mode);
 	}
 	pan(x,y,time=1){
 		console.log(x,y,time);

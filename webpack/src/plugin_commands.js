@@ -1,5 +1,5 @@
 import mv3d from './mv3d.js';
-import { makeColor, relativeNumber, booleanString, sleep } from './util.js';
+import { makeColor, relativeNumber, booleanString, sleep, falseString } from './util.js';
 
 const _pluginCommand = Game_Interpreter.prototype.pluginCommand;
 Game_Interpreter.prototype.pluginCommand = function(command, args) {
@@ -59,7 +59,9 @@ mv3d.PluginCommand=class{
 			case 'zoom'     : this.zoom  (a[1],time); return;
 			case 'height'   : this.height(a[1],time); return;
 			case 'mode'     : this.cameramode(a[1]); return;
+			case 'follow'   :
 			case 'target'   : this._cameraTarget(a[1],time); return;
+			case 'track'    : this._cameraTrack(...a); return
 			case 'pan'      : this.pan(a[1],a[2],a[3]); return;
 		}
 	}
@@ -74,6 +76,18 @@ mv3d.PluginCommand=class{
 	height(n,time=1){ this._RELATIVE_BLEND(mv3d.blendCameraHeight,n,time); }
 	_cameraTarget(target,time){
 		mv3d.setCameraTarget(this.TARGET_CHAR(target), time);
+	}
+	_cameraTrack(...a){
+		a.shift();
+		let mode = 3;
+		switch(a[0].toLowerCase()){
+			case 'pitch': mode=2; a.shift(); break;
+			case 'yaw': mode=1; a.shift(); break;
+		}
+		let target = falseString(a[0]);
+		if(target){ target = this.TARGET_CHAR(target); }
+		const time = this._TIME(a[1]);
+		mv3d.setCameraTrack(target,time,mode);
 	}
 	pan(x,y,time=1){
 		console.log(x,y,time);

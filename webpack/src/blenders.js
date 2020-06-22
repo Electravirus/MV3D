@@ -1,6 +1,6 @@
 import mv3d from './mv3d.js';
-import { ZAxis, XAxis } from "./util.js";
-import { Ray, Vector3 } from 'babylonjs';
+import { ZAxis, XAxis, radtodeg } from "./util.js";
+import { Ray, Vector3, Vector2 } from 'babylonjs';
 import { ORTHOGRAPHIC_CAMERA, LOCALSPACE } from './mod_babylon.js';
 
 const raycastPredicate=mesh=>{
@@ -36,6 +36,16 @@ Object.assign(mv3d,{
 		}
 	},
 
+	cameraTrack:null,
+	cameraTrackTime:0,
+	cameraTrackMode:0,
+	setCameraTrack(target,time=0,mode=3){
+		if(!target){ this.cameraTrack=null; return; }
+		this.cameraTrack=target;
+		this.cameraTrackTime=time;
+		this.cameraTrackMode=mode;
+	},
+
 	setupBlenders(){
 		this.blendFogColor = new ColorBlender('fogColor',this.FOG_COLOR);
 		this.blendFogNear = new Blender('fogNear',this.FOG_NEAR);
@@ -66,6 +76,22 @@ Object.assign(mv3d,{
 				this.cameraTargets[0]=$gamePlayer;
 			}
 		}
+
+		// camera tracking
+		if(this.cameraTrack){
+			if(this.cameraTrackMode&1){
+				const yaw = radtodeg(Math.atan2(-(this.cameraTrack.y-this.cameraStick.y),this.cameraTrack.x-this.cameraStick.x))-90;
+				if(this.blendCameraYaw.targetValue()!==yaw){ this.blendCameraYaw.setValue(yaw,this.cameraTrackTime); }
+			}
+			if(this.cameraTrackMode&2){
+				const dist = Vector2.Distance(new Vector2(this.cameraTrack.x,this.cameraTrack.y), new Vector2(this.cameraNode.absolutePosition.x,-this.cameraNode.absolutePosition.z));
+				const zdist = this.cameraTrack.z - this.cameraNode.absolutePosition.y;
+				const pitch = radtodeg(Math.atan(zdist/dist)) + 90;
+				if(this.blendCameraPitch.targetValue()!==pitch){ this.blendCameraPitch.setValue(pitch,this.cameraTrackTime); }
+			}
+		}
+
+		// camera following
 		if(this.blendCameraTransition.update() && this.cameraTargets.length>=2){
 			const t = this.blendCameraTransition.currentValue();
 			let char1=this.cameraTargets[0];
