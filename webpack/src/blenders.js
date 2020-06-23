@@ -78,16 +78,16 @@ Object.assign(mv3d,{
 		}
 
 		// camera tracking
-		if(this.cameraTrack){
+		if(this.cameraTrack && this.cameraTrack!==this.cameraTargets[0]){
 			if(this.cameraTrackMode&1){
-				const yaw = radtodeg(Math.atan2(-(this.cameraTrack.y-this.cameraStick.y),this.cameraTrack.x-this.cameraStick.x))-90;
+				const yaw = radtodeg(Math.atan2(-(this.cameraTrack._realY-this.cameraStick.y),this.cameraTrack._realX-this.cameraStick.x))-90;
 				if(this.blendCameraYaw.targetValue()!==yaw){ this.blendCameraYaw.setValue(yaw,this.cameraTrackTime); }
 			}
 			if(this.cameraTrackMode&2){
-				const dist = Vector2.Distance(new Vector2(this.cameraTrack.x,this.cameraTrack.y), new Vector2(this.cameraNode.absolutePosition.x,-this.cameraNode.absolutePosition.z));
-				const zdist = this.cameraTrack.z - this.cameraNode.absolutePosition.y;
+				const dist = Vector2.Distance(new Vector2(this.cameraTrack._realX,this.cameraTrack._realY), new Vector2(this.cameraStick.absolutePosition.x,-this.cameraStick.absolutePosition.z));
+				const zdist = this.cameraTrack.z - this.cameraStick.absolutePosition.y;
 				const pitch = radtodeg(Math.atan(zdist/dist)) + 90;
-				if(this.blendCameraPitch.targetValue()!==pitch){ this.blendCameraPitch.setValue(pitch,this.cameraTrackTime); }
+				if(this.blendCameraPitch.targetValue()!==pitch && isFinite(pitch)){ this.blendCameraPitch.setValue(pitch,this.cameraTrackTime); }
 			}
 		}
 
