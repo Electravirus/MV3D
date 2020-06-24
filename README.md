@@ -64,6 +64,7 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - Trick
 - Christian Cano
 - WanNyan 
+- MageisHero
 - Jimmy McCarney
 
 

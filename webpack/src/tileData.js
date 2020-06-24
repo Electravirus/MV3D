@@ -243,6 +243,18 @@ Object.assign(mv3d,{
 		return height;
 	},
 
+	getTileRot(tileConf,x,y){
+		const shadowBits = this.getShadowBits(x,y);
+		if(shadowBits in this._SHADOW_ROTS){ return this._SHADOW_ROTS[shadowBits]; }
+		return this.getConfig(tileConf,'rot',0);
+	},
+	_SHADOW_ROTS: {
+		0b0011: 180,
+		0b1010: 90,
+		0b0101: 270,
+		0b1100: 0,
+	},
+
 	getSlopeDirection(x,y,l,fullData=false){
 		const stackHeight = this.getStackHeight(x,y,l);
 		const tileId = this.getTileData(x,y)[l];
@@ -477,7 +489,7 @@ Object.assign(mv3d,{
 
 	isSpecialShape(shape){
 		const shapes = mv3d.enumShapes;
-		return shape===shapes.FENCE||shape===shapes.CROSS||shape===shapes.XCROSS||shape===shapes.SLOPE;
+		return shape===shapes.FENCE||shape===shapes.WALL||shape===shapes.CROSS||shape===shapes.XCROSS||shape===shapes['8CROSS']||shape===shapes.SLOPE;
 	},
 	isPlatformShape(shape){
 		const shapes = mv3d.enumShapes;

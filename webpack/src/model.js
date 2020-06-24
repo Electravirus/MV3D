@@ -123,6 +123,7 @@ export class Model extends TransformNode{
 		case shapes['8CROSS']:
 			geometry = mv3d.Meshes['8CROSS'];
 			break;
+		case shapes.FENCE:
 		case shapes.WALL:
 			geometry = mv3d.Meshes.WALL;
 			break;
@@ -143,6 +144,7 @@ export class Model extends TransformNode{
 			if(filename in modelInstanceCache){
 				while(modelInstanceCache[filename]==='loading'){ await sleep(10); }
 				var mesh = modelInstanceCache[filename];
+				mesh.receiveShadows=true;
 			}else{
 				modelInstanceCache[filename]='loading';
 				var mesh = await mv3d.importModel(filename);

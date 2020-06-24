@@ -30,5 +30,6 @@
 - Trick
 - Christian Cano
 - WanNyan 
+- MageisHero
 - Jimmy McCarney
 

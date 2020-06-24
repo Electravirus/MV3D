@@ -1,6 +1,6 @@
 /*:
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
-version 0.6.2
+version 0.6.3
 @author Cutievirus
 @help
 
@@ -63,6 +63,7 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - Trick
 - Christian Cano
 - WanNyan 
+- MageisHero
 - Jimmy McCarney
 
 
@@ -4316,11 +4317,11 @@ Object.assign(mv3d["a" /* default */],{
 		CARDBOARD:2,
 		SPRITE:3,
 		FENCE:4,
-		WALL:4,
-		CROSS:5,
-		XCROSS:6,
-		SLOPE:7,
+		WALL:5,
+		CROSS:6,
+		XCROSS:7,
 		'8CROSS':8,
+		SLOPE:9,
 		MESH:91,
 		MODEL:92,
 	},
@@ -4401,6 +4402,7 @@ Object.assign(mv3d["a" /* default */],{
 		shadow(conf,b=true){
 			conf.shadow=Object(util["booleanString"])(b);
 		},
+		rot(conf,n){ conf.rot=Number(n); },
 	},
 	eventConfigurationFunctions:{
 		height(conf,n){
@@ -5338,6 +5340,7 @@ class model_Model extends babylon["TransformNode"]{
 		case shapes['8CROSS']:
 			geometry = mv3d["a" /* default */].Meshes['8CROSS'];
 			break;
+		case shapes.FENCE:
 		case shapes.WALL:
 			geometry = mv3d["a" /* default */].Meshes.WALL;
 			break;
@@ -5358,6 +5361,7 @@ class model_Model extends babylon["TransformNode"]{
 			if(filename in modelInstanceCache){
 				while(modelInstanceCache[filename]==='loading'){ await Object(util["sleep"])(10); }
 				var mesh = modelInstanceCache[filename];
+				mesh.receiveShadows=true;
 			}else{
 				modelInstanceCache[filename]='loading';
 				var mesh = await mv3d["a" /* default */].importModel(filename);
@@ -5522,6 +5526,8 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 				}
 				if(shape===shapes.FENCE){
 					await this.loadFence(tileConf,x,y,z,l,wallHeight);
+				}else if(shape===shapes.WALL){
+					await this.loadShapeWall(tileConf,x,y,z,l,wallHeight);
 				}else if(shape===shapes.CROSS||shape===shapes.XCROSS){
 					await this.loadCross(tileConf,x,y,z,l,wallHeight,shape===shapes.XCROSS ? 45 : 0);
 				}else if(shape===shapes['8CROSS']){
@@ -5583,6 +5589,10 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		}
 		doodad.parent=this;
 		doodad.x=x; doodad.y=y; doodad.z=z;
+		
+		if(shape!==mv3d["a" /* default */].enumShapes.SPRITE && shape!==mv3d["a" /* default */].enumShapes.BOARD){
+			doodad.yaw = mv3d["a" /* default */].getTileRot(tileConf,this.ox+x,this.oy+y);
+		}
 
 		if(complexShape){
 			var {x:scaleX,y:scaleY} = mv3d["a" /* default */].getConfig(tileConf,'scale',new babylon["Vector2"](1,1));
@@ -5810,6 +5820,7 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 		}else{
 			rects = mv3d["a" /* default */].getTileRects(tileId);
 		}
+		angle += mv3d["a" /* default */].getTileRot(tileConf,this.ox+x,this.oy+y);
 		const rot = tileConf.shape===mv3d["a" /* default */].enumShapes.XCROSS ? Math.PI/4 : Object(util["degtorad"])(angle);
 		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
 		const partWidth = (tileConf.width||rects[0].width/Object(util["tileWidth"])())/(isAutotile?2:1);
@@ -5824,6 +5835,32 @@ class mapCell_MapCell extends babylon["TransformNode"]{
 					partWidth, partHeight, irot, {double:true, abnormal:mv3d["a" /* default */].ABNORMAL}
 				);
 			}
+		}
+	}
+	async loadShapeWall(tileConf,x,y,z,l,wallHeight,angle=0){
+		const tileId = tileConf.side_id;
+		if(mv3d["a" /* default */].isTileEmpty(tileId)){ return; }
+		const configRect = tileConf.side_rect;
+		const tsMaterial = await mv3d["a" /* default */].getCachedTilesetMaterialForTile(tileConf,'side');
+		const isAutotile = Tilemap.isAutotile(tileId);
+		let rects;
+		if(configRect){
+			rects=[configRect];
+		}else{
+			rects = mv3d["a" /* default */].getTileRects(tileId);
+		}
+		angle += mv3d["a" /* default */].getTileRot(tileConf,this.ox+x,this.oy+y);
+		const rot = Object(util["degtorad"])(angle);
+		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
+		const partWidth = (tileConf.width||rects[0].width/Object(util["tileWidth"])())/(isAutotile?2:1);
+		for (const rect of rects){
+			const trans= isAutotile?(-partWidth/2+Math.sign(rect.ox)*partWidth):0;
+			this.builder.addWallFace(tsMaterial,rect,
+				x+trans*Math.cos(rot),
+				y+trans*Math.sin(rot),
+				z - (rect.oy|0)/Object(util["tileHeight"])()*wallHeight - partHeight/2,
+				partWidth, partHeight, rot, {double:true, abnormal:mv3d["a" /* default */].ABNORMAL}
+			);
 		}
 	}
 	async loadSlope(tileConf,x,y,z,l,slopeHeight){
@@ -6199,6 +6236,18 @@ Object.assign(mv3d["a" /* default */],{
 		return height;
 	},
 
+	getTileRot(tileConf,x,y){
+		const shadowBits = this.getShadowBits(x,y);
+		if(shadowBits in this._SHADOW_ROTS){ return this._SHADOW_ROTS[shadowBits]; }
+		return this.getConfig(tileConf,'rot',0);
+	},
+	_SHADOW_ROTS: {
+		0b0011: 180,
+		0b1010: 90,
+		0b0101: 270,
+		0b1100: 0,
+	},
+
 	getSlopeDirection(x,y,l,fullData=false){
 		const stackHeight = this.getStackHeight(x,y,l);
 		const tileId = this.getTileData(x,y)[l];
@@ -6433,7 +6482,7 @@ Object.assign(mv3d["a" /* default */],{
 
 	isSpecialShape(shape){
 		const shapes = mv3d["a" /* default */].enumShapes;
-		return shape===shapes.FENCE||shape===shapes.CROSS||shape===shapes.XCROSS||shape===shapes.SLOPE;
+		return shape===shapes.FENCE||shape===shapes.WALL||shape===shapes.CROSS||shape===shapes.XCROSS||shape===shapes['8CROSS']||shape===shapes.SLOPE;
 	},
 	isPlatformShape(shape){
 		const shapes = mv3d["a" /* default */].enumShapes;

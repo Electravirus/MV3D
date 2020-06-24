@@ -98,6 +98,8 @@ export class MapCell extends TransformNode{
 				}
 				if(shape===shapes.FENCE){
 					await this.loadFence(tileConf,x,y,z,l,wallHeight);
+				}else if(shape===shapes.WALL){
+					await this.loadShapeWall(tileConf,x,y,z,l,wallHeight);
 				}else if(shape===shapes.CROSS||shape===shapes.XCROSS){
 					await this.loadCross(tileConf,x,y,z,l,wallHeight,shape===shapes.XCROSS ? 45 : 0);
 				}else if(shape===shapes['8CROSS']){
@@ -159,6 +161,10 @@ export class MapCell extends TransformNode{
 		}
 		doodad.parent=this;
 		doodad.x=x; doodad.y=y; doodad.z=z;
+		
+		if(shape!==mv3d.enumShapes.SPRITE && shape!==mv3d.enumShapes.BOARD){
+			doodad.yaw = mv3d.getTileRot(tileConf,this.ox+x,this.oy+y);
+		}
 
 		if(complexShape){
 			var {x:scaleX,y:scaleY} = mv3d.getConfig(tileConf,'scale',new Vector2(1,1));
@@ -386,6 +392,7 @@ export class MapCell extends TransformNode{
 		}else{
 			rects = mv3d.getTileRects(tileId);
 		}
+		angle += mv3d.getTileRot(tileConf,this.ox+x,this.oy+y);
 		const rot = tileConf.shape===mv3d.enumShapes.XCROSS ? Math.PI/4 : degtorad(angle);
 		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
 		const partWidth = (tileConf.width||rects[0].width/tileWidth())/(isAutotile?2:1);
@@ -400,6 +407,32 @@ export class MapCell extends TransformNode{
 					partWidth, partHeight, irot, {double:true, abnormal:mv3d.ABNORMAL}
 				);
 			}
+		}
+	}
+	async loadShapeWall(tileConf,x,y,z,l,wallHeight,angle=0){
+		const tileId = tileConf.side_id;
+		if(mv3d.isTileEmpty(tileId)){ return; }
+		const configRect = tileConf.side_rect;
+		const tsMaterial = await mv3d.getCachedTilesetMaterialForTile(tileConf,'side');
+		const isAutotile = Tilemap.isAutotile(tileId);
+		let rects;
+		if(configRect){
+			rects=[configRect];
+		}else{
+			rects = mv3d.getTileRects(tileId);
+		}
+		angle += mv3d.getTileRot(tileConf,this.ox+x,this.oy+y);
+		const rot = degtorad(angle);
+		const partHeight = isAutotile ? wallHeight/2 : wallHeight;
+		const partWidth = (tileConf.width||rects[0].width/tileWidth())/(isAutotile?2:1);
+		for (const rect of rects){
+			const trans= isAutotile?(-partWidth/2+Math.sign(rect.ox)*partWidth):0;
+			this.builder.addWallFace(tsMaterial,rect,
+				x+trans*Math.cos(rot),
+				y+trans*Math.sin(rot),
+				z - (rect.oy|0)/tileHeight()*wallHeight - partHeight/2,
+				partWidth, partHeight, rot, {double:true, abnormal:mv3d.ABNORMAL}
+			);
 		}
 	}
 	async loadSlope(tileConf,x,y,z,l,slopeHeight){

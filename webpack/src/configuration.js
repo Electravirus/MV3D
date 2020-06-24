@@ -436,11 +436,11 @@ Object.assign(mv3d,{
 		CARDBOARD:2,
 		SPRITE:3,
 		FENCE:4,
-		WALL:4,
-		CROSS:5,
-		XCROSS:6,
-		SLOPE:7,
+		WALL:5,
+		CROSS:6,
+		XCROSS:7,
 		'8CROSS':8,
+		SLOPE:9,
 		MESH:91,
 		MODEL:92,
 	},
@@ -521,6 +521,7 @@ Object.assign(mv3d,{
 		shadow(conf,b=true){
 			conf.shadow=booleanString(b);
 		},
+		rot(conf,n){ conf.rot=Number(n); },
 	},
 	eventConfigurationFunctions:{
 		height(conf,n){
