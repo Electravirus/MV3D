@@ -368,10 +368,15 @@ class Character extends TransformNode{
 		const xscale = this.spriteWidth;
 		const yscale = this.spriteHeight;
 		if(this.model.mesh){
-			if(this.model.shape===mv3d.enumShapes.FLAT){
+			if(this.model.shape===mv3d.enumShapes.SPRITE){
+				this.model.scaling.set(1,1,1);
+				this.model.mesh.scaling.set(xscale,yscale,yscale);
+			}else if(this.model.shape===mv3d.enumShapes.FLAT){
 				this.model.scaling.set(xscale,yscale,yscale);
+				this.model.mesh.scaling.set(1,1,1);
 			}else{
 				this.model.scaling.set(xscale,yscale,xscale);
+				this.model.mesh.scaling.set(1,1,1);
 			}
 		}
 	}
