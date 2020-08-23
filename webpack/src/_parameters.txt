@@ -204,6 +204,27 @@
 @param input
 @text Input & Gameplay
 
+@param inputCameraMouse
+@text Mouse Camera Control
+@parent input
+@type Boolean
+@default false
+
+@param inputCameraGamepad
+@text Gamepad Camera Control
+@parent input
+@type Boolean
+@default true
+
+@param inputGamepadTurnButton
+@text Gamepad Turn Button
+@parent input
+@type Select
+@option Bumpers
+@option Triggers
+@option Unchanged
+@default Bumpers
+
 @param WASD
 @text WASD
 @parent input

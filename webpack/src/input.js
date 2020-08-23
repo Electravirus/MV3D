@@ -2,6 +2,29 @@ import mv3d from './mv3d.js';
 import { override, throttle } from './util.js';
 import { Feature } from './features.js';
 
+mv3d._gamepadStick={
+	x:0,
+	y:0,
+};
+
+override(Input, '_pollGamepads',o=>function(gamepad){
+	mv3d._gamepadStick.x=0;
+	mv3d._gamepadStick.y=0;
+	o.apply(this,arguments);
+},true);
+
+override(Input, '_updateGamepadState',o=>function(gamepad){
+	o.apply(this,arguments);
+	const threshold = 0.1;
+	const max = 1 - threshold;
+	const axes = gamepad.axes;
+	if (Math.abs(axes[2]) > threshold) {
+		mv3d._gamepadStick.x -= ( axes[2] - Math.sign(axes[2])*threshold ) / max;
+    }
+    if (Math.abs(axes[3]) > threshold) {
+        mv3d._gamepadStick.y -= ( axes[3] - Math.sign(axes[2])*threshold ) / max;
+    }
+});
 
 Object.assign(mv3d,{
 	updateInput(){
@@ -40,6 +63,17 @@ Object.assign(mv3d,{
 				this.blendCameraPitch.setValue(Math.min(179,this.blendCameraPitch.targetValue()+increment),0.1);
 			}else if(Input.isPressed('pagedown')){
 				this.blendCameraPitch.setValue(Math.max(1,this.blendCameraPitch.targetValue()-increment),0.1);
+			}
+		}
+
+		if(mv3d.inputCameraGamepad){
+			if(mv3d._gamepadStick.x){
+				const increment = mv3d.YAW_SPEED / 60;
+				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d._gamepadStick.x*increment,0.1);
+			}
+			if(mv3d._gamepadStick.y){
+				const increment = mv3d.PITCH_SPEED / 60;
+				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d._gamepadStick.y*increment,0.1);
 			}
 		}
 	},
@@ -97,6 +131,20 @@ mv3d.setupInput=function(){
 		83:'down',     // S
 		68:'right',    // D
 	});
+
+	if(mv3d.GAMEPAD_TURN_BUTTON){
+		Object.assign(Input.gamepadMapper,mv3d.GAMEPAD_TURN_BUTTON===1?{
+			4: 'rotleft',   // LB
+			5: 'rotright',  // RB
+			6: 'pageup',    // LT
+			7: 'pagedown',  // RT
+		}:{
+			4: 'pageup',    // LB
+			5: 'pagedown',  // RB
+			6: 'rotleft',   // LT
+			7: 'rotright',  // RT
+		});
+	}
 	const descriptors={
 		rotleft:getInputDescriptor('pageup','rotleft', 'rotleft'),
 		rotright:getInputDescriptor('pagedown','rotright', 'rotright'),
@@ -147,6 +195,10 @@ const raycastPredicate=mesh=>{
 const _process_map_touch = Scene_Map.prototype.processMapTouch;
 Scene_Map.prototype.processMapTouch = function() {
 	if (mv3d.isDisabled()){ return _process_map_touch.apply(this,arguments); }
+	if(mv3d.inputCameraMouse){
+		Graphics._canvas.requestPointerLock();
+		return;
+	}
 	if (TouchInput.isTriggered() || this._touchCount > 0) {
 		if (TouchInput.isPressed()) {
 			if (this._touchCount === 0 || this._touchCount >= 15) {
@@ -160,6 +212,33 @@ Scene_Map.prototype.processMapTouch = function() {
 		}
 	}
 };
+
+
+override(TouchInput,'_onMouseMove',o=>function(e){
+	if(document.pointerLockElement && mv3d.blendCameraYaw){
+		if(e.movementX){
+			const increment = e.movementX / Graphics.width;
+			mv3d.blendCameraYaw.setValue(mv3d.blendCameraYaw.targetValue()-increment*90,0.1,false);
+		}
+		if(e.movementY){
+			const increment = e.movementY / Graphics.width;
+			mv3d.blendCameraPitch.setValue(mv3d.blendCameraPitch.targetValue()-increment*90,0.1,false);
+		}
+	}
+});
+
+override(Scene_Map.prototype,'isMapTouchOk',o=>function(){
+	const isOk = o.apply(this,arguments);
+	if(!isOk||!mv3d.inputCameraMouse){
+		document.exitPointerLock();
+	}
+	return isOk;
+},true);
+
+override(Scene_Map.prototype,'stop',o=>function(){
+	o.apply(this,arguments);
+	document.exitPointerLock();
+},true);
 
 mv3d.processMapTouch=throttle(function(){
 	const intersection = mv3d.scene.pick(TouchInput.x*mv3d.RES_SCALE,TouchInput.y*mv3d.RES_SCALE,raycastPredicate);

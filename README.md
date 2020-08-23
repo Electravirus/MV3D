@@ -34,7 +34,6 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 
 ## Patron Heroes:
 
-- Rikyu
 - AMemoryofEternity 
 - Fyoha 
 - 冬空 橙
@@ -42,29 +41,38 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - Goatse Man
 - Kaine Lowe
 - Anthony Xue
-- Lemongreen 
-- Mr.W 
-- Diviciacusdev 
+- Kaibris
 - Galatic Acid
-- CheshireSoft 
+- Ricky Smith
+- james gray
+- Bird Man
+- Matthias Herrmann
+- OneDrive
 
 ## Patron Knights:
 
 - CattleDog
 - hsumi1 .
-- Ben B
 - Whitely
 - L
 - Nemo Ma
-- Gaikiken 
 - Clumsydemonwithfire 
 - Matteo Calbi
 - RetroChaos
 - Collin
 - Trick
 - Christian Cano
-- WanNyan 
 - MageisHero
+- Rareica
 - Jimmy McCarney
+- Jesse 
+- sef 
+- Man Meat
+- Jovon Hampton
+- Joseph Reyes
+- Brendan Lundy
+- moxri 
+- ManaBomb
+- + 1 hidden
 
 

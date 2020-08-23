@@ -136,6 +136,10 @@ assign(mv3d,{
 	get TURN_INCREMENT(){ return mv3d.turnIncrement; },
 	WASD: booleanString(parameters.WASD),
 
+	inputCameraMouse: new Attribute('inputCameraMouse',String(parameters.inputCameraMouse),booleanString),
+	inputCameraGamepad: new Attribute('inputCameraGamepad',String(parameters.inputCameraGamepad),booleanString),
+	GAMEPAD_TURN_BUTTON: parameter('inputGamepadTurnButton',0,v=>{return {'U':0,'B':1,'T':2}[v[0]]||0;}),
+
 	KEYBOARD_PITCH: booleanString(parameters.keyboardPitch),
 	KEYBOARD_TURN: falseString(parameters.keyboardTurn),
 	KEYBOARD_STRAFE: falseString(parameters.keyboardStrafe),

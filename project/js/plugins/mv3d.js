@@ -1,6 +1,6 @@
 /*:
 @plugindesc 3D rendering in RPG Maker MV with babylon.js
-version 0.6.3
+version 0.6.4
 @author Cutievirus
 @help
 
@@ -33,7 +33,6 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 
 ## Patron Heroes:
 
-- Rikyu
 - AMemoryofEternity 
 - Fyoha 
 - 冬空 橙
@@ -41,30 +40,39 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 - Goatse Man
 - Kaine Lowe
 - Anthony Xue
-- Lemongreen 
-- Mr.W 
-- Diviciacusdev 
+- Kaibris
 - Galatic Acid
-- CheshireSoft 
+- Ricky Smith
+- james gray
+- Bird Man
+- Matthias Herrmann
+- OneDrive
 
 ## Patron Knights:
 
 - CattleDog
 - hsumi1 .
-- Ben B
 - Whitely
 - L
 - Nemo Ma
-- Gaikiken 
 - Clumsydemonwithfire 
 - Matteo Calbi
 - RetroChaos
 - Collin
 - Trick
 - Christian Cano
-- WanNyan 
 - MageisHero
+- Rareica
 - Jimmy McCarney
+- Jesse 
+- sef 
+- Man Meat
+- Jovon Hampton
+- Joseph Reyes
+- Brendan Lundy
+- moxri 
+- ManaBomb
+- + 1 hidden
 
 
 
@@ -273,6 +281,27 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 
 @param input
 @text Input & Gameplay
+
+@param inputCameraMouse
+@text Mouse Camera Control
+@parent input
+@type Boolean
+@default false
+
+@param inputCameraGamepad
+@text Gamepad Camera Control
+@parent input
+@type Boolean
+@default true
+
+@param inputGamepadTurnButton
+@text Gamepad Turn Button
+@parent input
+@type Select
+@option Bumpers
+@option Triggers
+@option Unchanged
+@default Bumpers
 
 @param WASD
 @text WASD
@@ -3046,6 +3075,10 @@ Object(util["assign"])(mv3d["a" /* default */],{
 	get TURN_INCREMENT(){ return mv3d["a" /* default */].turnIncrement; },
 	WASD: Object(util["booleanString"])(parameters.WASD),
 
+	inputCameraMouse: new attributes_Attribute('inputCameraMouse',String(parameters.inputCameraMouse),util["booleanString"]),
+	inputCameraGamepad: new attributes_Attribute('inputCameraGamepad',String(parameters.inputCameraGamepad),util["booleanString"]),
+	GAMEPAD_TURN_BUTTON: parameter('inputGamepadTurnButton',0,v=>{return {'U':0,'B':1,'T':2}[v[0]]||0;}),
+
 	KEYBOARD_PITCH: Object(util["booleanString"])(parameters.keyboardPitch),
 	KEYBOARD_TURN: Object(util["falseString"])(parameters.keyboardTurn),
 	KEYBOARD_STRAFE: Object(util["falseString"])(parameters.keyboardStrafe),
@@ -3560,6 +3593,29 @@ var features = __webpack_require__(4);
 
 
 
+mv3d["a" /* default */]._gamepadStick={
+	x:0,
+	y:0,
+};
+
+Object(util["override"])(Input, '_pollGamepads',o=>function(gamepad){
+	mv3d["a" /* default */]._gamepadStick.x=0;
+	mv3d["a" /* default */]._gamepadStick.y=0;
+	o.apply(this,arguments);
+},true);
+
+Object(util["override"])(Input, '_updateGamepadState',o=>function(gamepad){
+	o.apply(this,arguments);
+	const threshold = 0.1;
+	const max = 1 - threshold;
+	const axes = gamepad.axes;
+	if (Math.abs(axes[2]) > threshold) {
+		mv3d["a" /* default */]._gamepadStick.x -= ( axes[2] - Math.sign(axes[2])*threshold ) / max;
+    }
+    if (Math.abs(axes[3]) > threshold) {
+        mv3d["a" /* default */]._gamepadStick.y -= ( axes[3] - Math.sign(axes[2])*threshold ) / max;
+    }
+});
 
 Object.assign(mv3d["a" /* default */],{
 	updateInput(){
@@ -3598,6 +3654,17 @@ Object.assign(mv3d["a" /* default */],{
 				this.blendCameraPitch.setValue(Math.min(179,this.blendCameraPitch.targetValue()+increment),0.1);
 			}else if(Input.isPressed('pagedown')){
 				this.blendCameraPitch.setValue(Math.max(1,this.blendCameraPitch.targetValue()-increment),0.1);
+			}
+		}
+
+		if(mv3d["a" /* default */].inputCameraGamepad){
+			if(mv3d["a" /* default */]._gamepadStick.x){
+				const increment = mv3d["a" /* default */].YAW_SPEED / 60;
+				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d["a" /* default */]._gamepadStick.x*increment,0.1);
+			}
+			if(mv3d["a" /* default */]._gamepadStick.y){
+				const increment = mv3d["a" /* default */].PITCH_SPEED / 60;
+				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d["a" /* default */]._gamepadStick.y*increment,0.1);
 			}
 		}
 	},
@@ -3655,6 +3722,20 @@ mv3d["a" /* default */].setupInput=function(){
 		83:'down',     // S
 		68:'right',    // D
 	});
+
+	if(mv3d["a" /* default */].GAMEPAD_TURN_BUTTON){
+		Object.assign(Input.gamepadMapper,mv3d["a" /* default */].GAMEPAD_TURN_BUTTON===1?{
+			4: 'rotleft',   // LB
+			5: 'rotright',  // RB
+			6: 'pageup',    // LT
+			7: 'pagedown',  // RT
+		}:{
+			4: 'pageup',    // LB
+			5: 'pagedown',  // RB
+			6: 'rotleft',   // LT
+			7: 'rotright',  // RT
+		});
+	}
 	const descriptors={
 		rotleft:getInputDescriptor('pageup','rotleft', 'rotleft'),
 		rotright:getInputDescriptor('pagedown','rotright', 'rotright'),
@@ -3705,6 +3786,10 @@ const input_raycastPredicate=mesh=>{
 const _process_map_touch = Scene_Map.prototype.processMapTouch;
 Scene_Map.prototype.processMapTouch = function() {
 	if (mv3d["a" /* default */].isDisabled()){ return _process_map_touch.apply(this,arguments); }
+	if(mv3d["a" /* default */].inputCameraMouse){
+		Graphics._canvas.requestPointerLock();
+		return;
+	}
 	if (TouchInput.isTriggered() || this._touchCount > 0) {
 		if (TouchInput.isPressed()) {
 			if (this._touchCount === 0 || this._touchCount >= 15) {
@@ -3718,6 +3803,33 @@ Scene_Map.prototype.processMapTouch = function() {
 		}
 	}
 };
+
+
+Object(util["override"])(TouchInput,'_onMouseMove',o=>function(e){
+	if(document.pointerLockElement && mv3d["a" /* default */].blendCameraYaw){
+		if(e.movementX){
+			const increment = e.movementX / Graphics.width;
+			mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].blendCameraYaw.targetValue()-increment*90,0.1,false);
+		}
+		if(e.movementY){
+			const increment = e.movementY / Graphics.width;
+			mv3d["a" /* default */].blendCameraPitch.setValue(mv3d["a" /* default */].blendCameraPitch.targetValue()-increment*90,0.1,false);
+		}
+	}
+});
+
+Object(util["override"])(Scene_Map.prototype,'isMapTouchOk',o=>function(){
+	const isOk = o.apply(this,arguments);
+	if(!isOk||!mv3d["a" /* default */].inputCameraMouse){
+		document.exitPointerLock();
+	}
+	return isOk;
+},true);
+
+Object(util["override"])(Scene_Map.prototype,'stop',o=>function(){
+	o.apply(this,arguments);
+	document.exitPointerLock();
+},true);
 
 mv3d["a" /* default */].processMapTouch=Object(util["throttle"])(function(){
 	const intersection = mv3d["a" /* default */].scene.pick(TouchInput.x*mv3d["a" /* default */].RES_SCALE,TouchInput.y*mv3d["a" /* default */].RES_SCALE,input_raycastPredicate);
