@@ -183,6 +183,34 @@ https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 @default 100
 @min 0 @max 180
 
+@param invertYOptionName
+@text Invert Y Axis Option Name
+@desc symbol name: mv3d-inverty
+@parent options
+@type Text
+@default Invert Y Axis
+
+@param invertYOption
+@text Invert Y Axis Option
+@desc Should invert Y axis appear on options menu?
+@parent invertYOptionName
+@type Boolean
+@default true
+
+@param lookSensitivityOptionName
+@text Look Sensitivity Option Name
+@desc symbol name: mv3d-looksensitivity
+@parent options
+@type Text
+@default Look Sensitivity
+
+@param lookSensitivityOption
+@text Look Sensitivity Option
+@desc Should look sensitivity appear in options menu
+@parent lookSensitivityOptionName
+@type Boolean
+@default true
+
 @param spacer|graphics @text‏‏‎ ‎@desc ===============================================
 
 @param graphics
@@ -1503,6 +1531,24 @@ if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_MIPMAP) _mv3d
 	type:'bool',
 	apply(v){ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].MIPMAP=v; _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].needReloadMap=true; },
 	default:_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].MIPMAP,
+};
+
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].invertY=false;
+if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_INVERTY) _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options['mv3d-inverty']={
+	name: _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_NAME_INVERTY,
+	type:'bool',
+	apply(v){ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].invertY=v; },
+	default: false,
+};
+
+_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].lookSensitivity=1.0;
+if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_LOOKSENSITIVITY) _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].options['mv3d-looksensitivity']={
+	name: _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].OPTION_NAME_LOOKSENSITIVITY,
+	min:10, max:400,
+	increment:10,
+	wrap:false,
+	apply(v){ _mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].lookSensitivity=v/100; },
+	default:100,
 };
 
 if(_mv3d_js__WEBPACK_IMPORTED_MODULE_0__[/* default */ "a"].ENABLE_3D_OPTIONS){
@@ -3011,6 +3057,10 @@ Object(util["assign"])(mv3d["a" /* default */],{
 	OPTION_NAME_FOV: parameter('fovOptionName',"FOV",String),
 	OPTION_FOV_MIN: parameter('fovMin',50,Number),
 	OPTION_FOV_MAX: parameter('fovMax',100,Number),
+	OPTION_INVERTY: parameter('invertYOption',true,util["booleanString"]),
+	OPTION_NAME_INVERTY: parameter('invertYOptionName',"Invert Y Axis", String),
+	OPTION_LOOKSENSITIVITY: parameter('lookSensitivityOption',true,util["booleanString"]),
+	OPTION_NAME_LOOKSENSITIVITY: parameter('lookSensitivityOptionName',"Look Sensitivity", String),
 
 	STAIR_THRESH: Number(parameters.stairThresh),
 	WALK_OFF_EDGE:Object(util["booleanString"])(parameters.walkOffEdge),
@@ -3659,12 +3709,12 @@ Object.assign(mv3d["a" /* default */],{
 
 		if(mv3d["a" /* default */].inputCameraGamepad){
 			if(mv3d["a" /* default */]._gamepadStick.x){
-				const increment = mv3d["a" /* default */].YAW_SPEED / 60;
+				const increment = mv3d["a" /* default */].YAW_SPEED / 60 * mv3d["a" /* default */].lookSensitivity;
 				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d["a" /* default */]._gamepadStick.x*increment,0.1);
 			}
 			if(mv3d["a" /* default */]._gamepadStick.y){
-				const increment = mv3d["a" /* default */].PITCH_SPEED / 60;
-				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d["a" /* default */]._gamepadStick.y*increment,0.1);
+				const increment = mv3d["a" /* default */].PITCH_SPEED / 60 * mv3d["a" /* default */].lookSensitivity;
+				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d["a" /* default */]._gamepadStick.y*increment*(mv3d["a" /* default */].invertY*-2+1),0.1);
 			}
 		}
 	},
@@ -3808,12 +3858,12 @@ Scene_Map.prototype.processMapTouch = function() {
 Object(util["override"])(TouchInput,'_onMouseMove',o=>function(e){
 	if(document.pointerLockElement && mv3d["a" /* default */].blendCameraYaw){
 		if(e.movementX){
-			const increment = e.movementX / Graphics.width;
-			mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].blendCameraYaw.targetValue()-increment*90,0.1,false);
+			const increment = e.movementX / Graphics.width * 90 * mv3d["a" /* default */].lookSensitivity;
+			mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].blendCameraYaw.targetValue()-increment,0.1,false);
 		}
 		if(e.movementY){
-			const increment = e.movementY / Graphics.width;
-			mv3d["a" /* default */].blendCameraPitch.setValue(mv3d["a" /* default */].blendCameraPitch.targetValue()-increment*90,0.1,false);
+			const increment = e.movementY / Graphics.width * 90 * mv3d["a" /* default */].lookSensitivity;
+			mv3d["a" /* default */].blendCameraPitch.setValue(mv3d["a" /* default */].blendCameraPitch.targetValue()-increment*(mv3d["a" /* default */].invertY*-2+1),0.1,false);
 		}
 	}
 });

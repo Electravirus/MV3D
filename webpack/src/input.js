@@ -68,12 +68,12 @@ Object.assign(mv3d,{
 
 		if(mv3d.inputCameraGamepad){
 			if(mv3d._gamepadStick.x){
-				const increment = mv3d.YAW_SPEED / 60;
+				const increment = mv3d.YAW_SPEED / 60 * mv3d.lookSensitivity;
 				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d._gamepadStick.x*increment,0.1);
 			}
 			if(mv3d._gamepadStick.y){
-				const increment = mv3d.PITCH_SPEED / 60;
-				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d._gamepadStick.y*increment,0.1);
+				const increment = mv3d.PITCH_SPEED / 60 * mv3d.lookSensitivity;
+				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d._gamepadStick.y*increment*(mv3d.invertY*-2+1),0.1);
 			}
 		}
 	},
@@ -217,12 +217,12 @@ Scene_Map.prototype.processMapTouch = function() {
 override(TouchInput,'_onMouseMove',o=>function(e){
 	if(document.pointerLockElement && mv3d.blendCameraYaw){
 		if(e.movementX){
-			const increment = e.movementX / Graphics.width;
-			mv3d.blendCameraYaw.setValue(mv3d.blendCameraYaw.targetValue()-increment*90,0.1,false);
+			const increment = e.movementX / Graphics.width * 90 * mv3d.lookSensitivity;
+			mv3d.blendCameraYaw.setValue(mv3d.blendCameraYaw.targetValue()-increment,0.1,false);
 		}
 		if(e.movementY){
-			const increment = e.movementY / Graphics.width;
-			mv3d.blendCameraPitch.setValue(mv3d.blendCameraPitch.targetValue()-increment*90,0.1,false);
+			const increment = e.movementY / Graphics.width * 90 * mv3d.lookSensitivity;
+			mv3d.blendCameraPitch.setValue(mv3d.blendCameraPitch.targetValue()-increment*(mv3d.invertY*-2+1),0.1,false);
 		}
 	}
 });

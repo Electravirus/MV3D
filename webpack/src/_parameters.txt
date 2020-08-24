@@ -105,6 +105,34 @@
 @default 100
 @min 0 @max 180
 
+@param invertYOptionName
+@text Invert Y Axis Option Name
+@desc symbol name: mv3d-inverty
+@parent options
+@type Text
+@default Invert Y Axis
+
+@param invertYOption
+@text Invert Y Axis Option
+@desc Should invert Y axis appear on options menu?
+@parent invertYOptionName
+@type Boolean
+@default true
+
+@param lookSensitivityOptionName
+@text Look Sensitivity Option Name
+@desc symbol name: mv3d-looksensitivity
+@parent options
+@type Text
+@default Look Sensitivity
+
+@param lookSensitivityOption
+@text Look Sensitivity Option
+@desc Should look sensitivity appear in options menu
+@parent lookSensitivityOptionName
+@type Boolean
+@default true
+
 @param spacer|graphics @text‏‏‎ ‎@desc ===============================================
 
 @param graphics

@@ -28,6 +28,24 @@ if(mv3d.OPTION_MIPMAP) mv3d.options['mv3d-mipmap']={
 	default:mv3d.MIPMAP,
 };
 
+mv3d.invertY=false;
+if(mv3d.OPTION_INVERTY) mv3d.options['mv3d-inverty']={
+	name: mv3d.OPTION_NAME_INVERTY,
+	type:'bool',
+	apply(v){ mv3d.invertY=v; },
+	default: false,
+};
+
+mv3d.lookSensitivity=1.0;
+if(mv3d.OPTION_LOOKSENSITIVITY) mv3d.options['mv3d-looksensitivity']={
+	name: mv3d.OPTION_NAME_LOOKSENSITIVITY,
+	min:10, max:400,
+	increment:10,
+	wrap:false,
+	apply(v){ mv3d.lookSensitivity=v/100; },
+	default:100,
+};
+
 if(mv3d.ENABLE_3D_OPTIONS){
 	require('./options_enabled.js');
 }

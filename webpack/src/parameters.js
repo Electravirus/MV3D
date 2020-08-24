@@ -72,6 +72,10 @@ assign(mv3d,{
 	OPTION_NAME_FOV: parameter('fovOptionName',"FOV",String),
 	OPTION_FOV_MIN: parameter('fovMin',50,Number),
 	OPTION_FOV_MAX: parameter('fovMax',100,Number),
+	OPTION_INVERTY: parameter('invertYOption',true,booleanString),
+	OPTION_NAME_INVERTY: parameter('invertYOptionName',"Invert Y Axis", String),
+	OPTION_LOOKSENSITIVITY: parameter('lookSensitivityOption',true,booleanString),
+	OPTION_NAME_LOOKSENSITIVITY: parameter('lookSensitivityOptionName',"Look Sensitivity", String),
 
 	STAIR_THRESH: Number(parameters.stairThresh),
 	WALK_OFF_EDGE:booleanString(parameters.walkOffEdge),
