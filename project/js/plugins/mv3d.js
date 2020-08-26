@@ -3918,7 +3918,13 @@ Object(util["override"])(TouchInput,'_onMouseMove',o=>function(e){
 Object(util["override"])(Scene_Map.prototype,'isMapTouchOk',o=>function(){
 	const isOk = o.apply(this,arguments);
 	if(!isOk||!mv3d["a" /* default */].inputCameraMouse){
-		document.exitPointerLock();
+		if(document.pointerLockElement){
+			document.exitPointerLock();
+		}
+	}else{
+		if(!document.pointerLockElement){
+			Graphics._canvas.requestPointerLock();
+		}
 	}
 	return isOk;
 },true);

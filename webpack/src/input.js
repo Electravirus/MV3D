@@ -277,7 +277,13 @@ override(TouchInput,'_onMouseMove',o=>function(e){
 override(Scene_Map.prototype,'isMapTouchOk',o=>function(){
 	const isOk = o.apply(this,arguments);
 	if(!isOk||!mv3d.inputCameraMouse){
-		document.exitPointerLock();
+		if(document.pointerLockElement){
+			document.exitPointerLock();
+		}
+	}else{
+		if(!document.pointerLockElement){
+			Graphics._canvas.requestPointerLock();
+		}
 	}
 	return isOk;
 },true);
