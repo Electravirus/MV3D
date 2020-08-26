@@ -3648,6 +3648,13 @@ mv3d["a" /* default */]._gamepadStick={
 	y:0,
 };
 
+
+mv3d["a" /* default */]._touchState={
+	lastX:0,
+	lastY:0,
+	isTouching:false,
+};
+
 Object(util["override"])(Input, '_pollGamepads',o=>function(gamepad){
 	mv3d["a" /* default */]._gamepadStick.x=0;
 	mv3d["a" /* default */]._gamepadStick.y=0;
@@ -3716,6 +3723,32 @@ Object.assign(mv3d["a" /* default */],{
 				const increment = mv3d["a" /* default */].PITCH_SPEED / 60 * mv3d["a" /* default */].lookSensitivity;
 				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d["a" /* default */]._gamepadStick.y*increment*(mv3d["a" /* default */].invertY*-2+1),0.1);
 			}
+		}
+
+		if(mv3d["a" /* default */].inputCameraMouse){
+			mv3d["a" /* default */]._touchState.isTapped = !TouchInput._screenPressed && mv3d["a" /* default */]._touchState.touchCount>0 && mv3d["a" /* default */]._touchState.touchCount<15 && Math.abs(mv3d["a" /* default */]._touchState.deltaX)<5 && Math.abs(mv3d["a" /* default */]._touchState.deltaY)<5;
+			if(TouchInput._screenPressed){
+				if(mv3d["a" /* default */]._touchState.isTouching){
+					mv3d["a" /* default */]._touchState.deltaX=TouchInput.x-mv3d["a" /* default */]._touchState.lastX;
+					mv3d["a" /* default */]._touchState.deltaY=TouchInput.y-mv3d["a" /* default */]._touchState.lastY;
+					if(mv3d["a" /* default */]._touchState.deltaX){
+						const increment = mv3d["a" /* default */]._touchState.deltaX / Graphics.width * 180;
+						this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-increment*mv3d["a" /* default */].lookSensitivity,0.1);
+					}
+					if(mv3d["a" /* default */]._touchState.deltaY){
+						const increment = mv3d["a" /* default */]._touchState.deltaY / Graphics.width * 180;
+						this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()-increment*mv3d["a" /* default */].lookSensitivity*(mv3d["a" /* default */].invertY*-2+1),0.1);
+					}
+					++mv3d["a" /* default */]._touchState.touchCount;
+				}else{
+					mv3d["a" /* default */]._touchState.isTouching=true;
+				}
+			}else{
+				mv3d["a" /* default */]._touchState.isTouching=false;
+				mv3d["a" /* default */]._touchState.touchCount=0;
+			}
+			mv3d["a" /* default */]._touchState.lastX=TouchInput.x;
+			mv3d["a" /* default */]._touchState.lastY=TouchInput.y;
 		}
 	},
 
@@ -3836,13 +3869,17 @@ const input_raycastPredicate=mesh=>{
 const _process_map_touch = Scene_Map.prototype.processMapTouch;
 Scene_Map.prototype.processMapTouch = function() {
 	if (mv3d["a" /* default */].isDisabled()){ return _process_map_touch.apply(this,arguments); }
-	if(mv3d["a" /* default */].inputCameraMouse){
-		Graphics._canvas.requestPointerLock();
-		return;
-	}
 	if (TouchInput.isTriggered() || this._touchCount > 0) {
-		if (TouchInput.isPressed()) {
-			if (this._touchCount === 0 || this._touchCount >= 15) {
+		
+		if(mv3d["a" /* default */].inputCameraMouse && !mv3d["a" /* default */]._touchState.isTapped){
+			Graphics._canvas.requestPointerLock();
+			this._touchCount++;
+			return;
+		}
+
+		if (TouchInput.isPressed() || mv3d["a" /* default */]._touchState.isTapped) {
+			
+			if (this._touchCount === 0 || this._touchCount >= 15 || mv3d["a" /* default */]._touchState.isTapped) {
 				
 				mv3d["a" /* default */].processMapTouch();
 
@@ -3853,33 +3890,6 @@ Scene_Map.prototype.processMapTouch = function() {
 		}
 	}
 };
-
-
-Object(util["override"])(TouchInput,'_onMouseMove',o=>function(e){
-	if(document.pointerLockElement && mv3d["a" /* default */].blendCameraYaw){
-		if(e.movementX){
-			const increment = e.movementX / Graphics.width * 90 * mv3d["a" /* default */].lookSensitivity;
-			mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].blendCameraYaw.targetValue()-increment,0.1,false);
-		}
-		if(e.movementY){
-			const increment = e.movementY / Graphics.width * 90 * mv3d["a" /* default */].lookSensitivity;
-			mv3d["a" /* default */].blendCameraPitch.setValue(mv3d["a" /* default */].blendCameraPitch.targetValue()-increment*(mv3d["a" /* default */].invertY*-2+1),0.1,false);
-		}
-	}
-});
-
-Object(util["override"])(Scene_Map.prototype,'isMapTouchOk',o=>function(){
-	const isOk = o.apply(this,arguments);
-	if(!isOk||!mv3d["a" /* default */].inputCameraMouse){
-		document.exitPointerLock();
-	}
-	return isOk;
-},true);
-
-Object(util["override"])(Scene_Map.prototype,'stop',o=>function(){
-	o.apply(this,arguments);
-	document.exitPointerLock();
-},true);
 
 mv3d["a" /* default */].processMapTouch=Object(util["throttle"])(function(){
 	const intersection = mv3d["a" /* default */].scene.pick(TouchInput.x*mv3d["a" /* default */].RES_SCALE,TouchInput.y*mv3d["a" /* default */].RES_SCALE,input_raycastPredicate);
@@ -3893,6 +3903,30 @@ mv3d["a" /* default */].processMapTouch=Object(util["throttle"])(function(){
 		mv3d["a" /* default */].setDestination(point.x,point.y);
 	}
 },100);
+
+Object(util["override"])(TouchInput,'_onMouseMove',o=>function(e){
+	if(e.movementX){
+		const increment = e.movementX / Graphics.width * 180 * mv3d["a" /* default */].lookSensitivity;
+		mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].blendCameraYaw.targetValue()-increment,0.1,false);
+	}
+	if(e.movementY){
+		const increment = e.movementY / Graphics.width * 180 * mv3d["a" /* default */].lookSensitivity;
+		mv3d["a" /* default */].blendCameraPitch.setValue(mv3d["a" /* default */].blendCameraPitch.targetValue()-increment*(mv3d["a" /* default */].invertY*-2+1),0.1,false);
+	}
+},()=> !mv3d["a" /* default */].isDisabled() && mv3d["a" /* default */].inputCameraMouse && document.pointerLockElement && mv3d["a" /* default */].blendCameraYaw );
+
+Object(util["override"])(Scene_Map.prototype,'isMapTouchOk',o=>function(){
+	const isOk = o.apply(this,arguments);
+	if(!isOk||!mv3d["a" /* default */].inputCameraMouse){
+		document.exitPointerLock();
+	}
+	return isOk;
+},true);
+
+Object(util["override"])(Scene_Map.prototype,'stop',o=>function(){
+	o.apply(this,arguments);
+	document.exitPointerLock();
+},true);
 
 mv3d["a" /* default */].setDestination=function(x,y){
 	$gameTemp.setDestination(Math.round(x), Math.round(y));

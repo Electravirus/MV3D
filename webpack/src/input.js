@@ -7,6 +7,13 @@ mv3d._gamepadStick={
 	y:0,
 };
 
+
+mv3d._touchState={
+	lastX:0,
+	lastY:0,
+	isTouching:false,
+};
+
 override(Input, '_pollGamepads',o=>function(gamepad){
 	mv3d._gamepadStick.x=0;
 	mv3d._gamepadStick.y=0;
@@ -75,6 +82,32 @@ Object.assign(mv3d,{
 				const increment = mv3d.PITCH_SPEED / 60 * mv3d.lookSensitivity;
 				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d._gamepadStick.y*increment*(mv3d.invertY*-2+1),0.1);
 			}
+		}
+
+		if(mv3d.inputCameraMouse){
+			mv3d._touchState.isTapped = !TouchInput._screenPressed && mv3d._touchState.touchCount>0 && mv3d._touchState.touchCount<15 && Math.abs(mv3d._touchState.deltaX)<5 && Math.abs(mv3d._touchState.deltaY)<5;
+			if(TouchInput._screenPressed){
+				if(mv3d._touchState.isTouching){
+					mv3d._touchState.deltaX=TouchInput.x-mv3d._touchState.lastX;
+					mv3d._touchState.deltaY=TouchInput.y-mv3d._touchState.lastY;
+					if(mv3d._touchState.deltaX){
+						const increment = mv3d._touchState.deltaX / Graphics.width * 180;
+						this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-increment*mv3d.lookSensitivity,0.1);
+					}
+					if(mv3d._touchState.deltaY){
+						const increment = mv3d._touchState.deltaY / Graphics.width * 180;
+						this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()-increment*mv3d.lookSensitivity*(mv3d.invertY*-2+1),0.1);
+					}
+					++mv3d._touchState.touchCount;
+				}else{
+					mv3d._touchState.isTouching=true;
+				}
+			}else{
+				mv3d._touchState.isTouching=false;
+				mv3d._touchState.touchCount=0;
+			}
+			mv3d._touchState.lastX=TouchInput.x;
+			mv3d._touchState.lastY=TouchInput.y;
 		}
 	},
 
@@ -195,13 +228,17 @@ const raycastPredicate=mesh=>{
 const _process_map_touch = Scene_Map.prototype.processMapTouch;
 Scene_Map.prototype.processMapTouch = function() {
 	if (mv3d.isDisabled()){ return _process_map_touch.apply(this,arguments); }
-	if(mv3d.inputCameraMouse){
-		Graphics._canvas.requestPointerLock();
-		return;
-	}
 	if (TouchInput.isTriggered() || this._touchCount > 0) {
-		if (TouchInput.isPressed()) {
-			if (this._touchCount === 0 || this._touchCount >= 15) {
+		
+		if(mv3d.inputCameraMouse && !mv3d._touchState.isTapped){
+			Graphics._canvas.requestPointerLock();
+			this._touchCount++;
+			return;
+		}
+
+		if (TouchInput.isPressed() || mv3d._touchState.isTapped) {
+			
+			if (this._touchCount === 0 || this._touchCount >= 15 || mv3d._touchState.isTapped) {
 				
 				mv3d.processMapTouch();
 
@@ -212,33 +249,6 @@ Scene_Map.prototype.processMapTouch = function() {
 		}
 	}
 };
-
-
-override(TouchInput,'_onMouseMove',o=>function(e){
-	if(document.pointerLockElement && mv3d.blendCameraYaw){
-		if(e.movementX){
-			const increment = e.movementX / Graphics.width * 90 * mv3d.lookSensitivity;
-			mv3d.blendCameraYaw.setValue(mv3d.blendCameraYaw.targetValue()-increment,0.1,false);
-		}
-		if(e.movementY){
-			const increment = e.movementY / Graphics.width * 90 * mv3d.lookSensitivity;
-			mv3d.blendCameraPitch.setValue(mv3d.blendCameraPitch.targetValue()-increment*(mv3d.invertY*-2+1),0.1,false);
-		}
-	}
-});
-
-override(Scene_Map.prototype,'isMapTouchOk',o=>function(){
-	const isOk = o.apply(this,arguments);
-	if(!isOk||!mv3d.inputCameraMouse){
-		document.exitPointerLock();
-	}
-	return isOk;
-},true);
-
-override(Scene_Map.prototype,'stop',o=>function(){
-	o.apply(this,arguments);
-	document.exitPointerLock();
-},true);
 
 mv3d.processMapTouch=throttle(function(){
 	const intersection = mv3d.scene.pick(TouchInput.x*mv3d.RES_SCALE,TouchInput.y*mv3d.RES_SCALE,raycastPredicate);
@@ -252,6 +262,30 @@ mv3d.processMapTouch=throttle(function(){
 		mv3d.setDestination(point.x,point.y);
 	}
 },100);
+
+override(TouchInput,'_onMouseMove',o=>function(e){
+	if(e.movementX){
+		const increment = e.movementX / Graphics.width * 180 * mv3d.lookSensitivity;
+		mv3d.blendCameraYaw.setValue(mv3d.blendCameraYaw.targetValue()-increment,0.1,false);
+	}
+	if(e.movementY){
+		const increment = e.movementY / Graphics.width * 180 * mv3d.lookSensitivity;
+		mv3d.blendCameraPitch.setValue(mv3d.blendCameraPitch.targetValue()-increment*(mv3d.invertY*-2+1),0.1,false);
+	}
+},()=> !mv3d.isDisabled() && mv3d.inputCameraMouse && document.pointerLockElement && mv3d.blendCameraYaw );
+
+override(Scene_Map.prototype,'isMapTouchOk',o=>function(){
+	const isOk = o.apply(this,arguments);
+	if(!isOk||!mv3d.inputCameraMouse){
+		document.exitPointerLock();
+	}
+	return isOk;
+},true);
+
+override(Scene_Map.prototype,'stop',o=>function(){
+	o.apply(this,arguments);
+	document.exitPointerLock();
+},true);
 
 mv3d.setDestination=function(x,y){
 	$gameTemp.setDestination(Math.round(x), Math.round(y));
