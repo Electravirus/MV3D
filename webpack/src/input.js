@@ -41,7 +41,9 @@ Object.assign(mv3d,{
 	updateInputCamera(){
 		if(this.isDisabled()||this.loadData('cameraLocked')||!$gamePlayer.canMove()){ return; }
 		const is1stPerson = this.is1stPerson();
-		if( this.loadData('allowRotation',mv3d.KEYBOARD_TURN) || is1stPerson ){
+		const allowRotation = this.loadData('allowRotation',mv3d.KEYBOARD_TURN) || is1stPerson;
+		const allowPitch = this.loadData('allowPitch',mv3d.KEYBOARD_PITCH);
+		if( allowRotation ){
 			const leftKey=mv3d.getTurnKey('left'), rightKey=mv3d.getTurnKey('right');
 			if(mv3d.TURN_INCREMENT>1){
 				const turning = this.blendCameraYaw.currentValue()!==this.blendCameraYaw.targetValue();
@@ -62,7 +64,7 @@ Object.assign(mv3d,{
 				}
 			}
 		}
-		if( this.loadData('allowPitch',mv3d.KEYBOARD_PITCH) ){
+		if( allowPitch ){
 			const increment = mv3d.PITCH_SPEED / 60;
 			if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
 				// do nothing
@@ -74,11 +76,11 @@ Object.assign(mv3d,{
 		}
 
 		if(mv3d.inputCameraGamepad){
-			if(mv3d._gamepadStick.x){
+			if(mv3d._gamepadStick.x && allowRotation){
 				const increment = mv3d.YAW_SPEED / 60 * mv3d.lookSensitivity;
 				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d._gamepadStick.x*increment,0.1);
 			}
-			if(mv3d._gamepadStick.y){
+			if(mv3d._gamepadStick.y && allowPitch){
 				const increment = mv3d.PITCH_SPEED / 60 * mv3d.lookSensitivity;
 				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d._gamepadStick.y*increment*(mv3d.invertY*-2+1),0.1);
 			}
@@ -90,11 +92,11 @@ Object.assign(mv3d,{
 				if(mv3d._touchState.isTouching){
 					mv3d._touchState.deltaX=TouchInput.x-mv3d._touchState.lastX;
 					mv3d._touchState.deltaY=TouchInput.y-mv3d._touchState.lastY;
-					if(mv3d._touchState.deltaX){
+					if(mv3d._touchState.deltaX && allowRotation){
 						const increment = mv3d._touchState.deltaX / Graphics.width * 180;
 						this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-increment*mv3d.lookSensitivity,0.1);
 					}
-					if(mv3d._touchState.deltaY){
+					if(mv3d._touchState.deltaY && allowPitch){
 						const increment = mv3d._touchState.deltaY / Graphics.width * 180;
 						this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()-increment*mv3d.lookSensitivity*(mv3d.invertY*-2+1),0.1);
 					}
@@ -264,15 +266,17 @@ mv3d.processMapTouch=throttle(function(){
 },100);
 
 override(TouchInput,'_onMouseMove',o=>function(e){
-	if(e.movementX){
+	const allowRotation = mv3d.loadData('allowRotation',mv3d.KEYBOARD_TURN) || mv3d.is1stPerson();
+	const allowPitch = mv3d.loadData('allowPitch',mv3d.KEYBOARD_PITCH);
+	if(e.movementX && allowRotation){
 		const increment = e.movementX / Graphics.width * 180 * mv3d.lookSensitivity;
 		mv3d.blendCameraYaw.setValue(mv3d.blendCameraYaw.targetValue()-increment,0.1,false);
 	}
-	if(e.movementY){
+	if(e.movementY && allowPitch){
 		const increment = e.movementY / Graphics.width * 180 * mv3d.lookSensitivity;
 		mv3d.blendCameraPitch.setValue(mv3d.blendCameraPitch.targetValue()-increment*(mv3d.invertY*-2+1),0.1,false);
 	}
-},()=> !mv3d.isDisabled() && mv3d.inputCameraMouse && document.pointerLockElement && mv3d.blendCameraYaw );
+},()=> !mv3d.isDisabled() && !mv3d.loadData('cameraLocked') && mv3d.inputCameraMouse && document.pointerLockElement && mv3d.blendCameraYaw );
 
 override(Scene_Map.prototype,'isMapTouchOk',o=>function(){
 	const isOk = o.apply(this,arguments);

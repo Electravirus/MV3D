@@ -3682,7 +3682,9 @@ Object.assign(mv3d["a" /* default */],{
 	updateInputCamera(){
 		if(this.isDisabled()||this.loadData('cameraLocked')||!$gamePlayer.canMove()){ return; }
 		const is1stPerson = this.is1stPerson();
-		if( this.loadData('allowRotation',mv3d["a" /* default */].KEYBOARD_TURN) || is1stPerson ){
+		const allowRotation = this.loadData('allowRotation',mv3d["a" /* default */].KEYBOARD_TURN) || is1stPerson;
+		const allowPitch = this.loadData('allowPitch',mv3d["a" /* default */].KEYBOARD_PITCH);
+		if( allowRotation ){
 			const leftKey=mv3d["a" /* default */].getTurnKey('left'), rightKey=mv3d["a" /* default */].getTurnKey('right');
 			if(mv3d["a" /* default */].TURN_INCREMENT>1){
 				const turning = this.blendCameraYaw.currentValue()!==this.blendCameraYaw.targetValue();
@@ -3703,7 +3705,7 @@ Object.assign(mv3d["a" /* default */],{
 				}
 			}
 		}
-		if( this.loadData('allowPitch',mv3d["a" /* default */].KEYBOARD_PITCH) ){
+		if( allowPitch ){
 			const increment = mv3d["a" /* default */].PITCH_SPEED / 60;
 			if(Input.isPressed('pageup')&&Input.isPressed('pagedown')){
 				// do nothing
@@ -3715,11 +3717,11 @@ Object.assign(mv3d["a" /* default */],{
 		}
 
 		if(mv3d["a" /* default */].inputCameraGamepad){
-			if(mv3d["a" /* default */]._gamepadStick.x){
+			if(mv3d["a" /* default */]._gamepadStick.x && allowRotation){
 				const increment = mv3d["a" /* default */].YAW_SPEED / 60 * mv3d["a" /* default */].lookSensitivity;
 				this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()+mv3d["a" /* default */]._gamepadStick.x*increment,0.1);
 			}
-			if(mv3d["a" /* default */]._gamepadStick.y){
+			if(mv3d["a" /* default */]._gamepadStick.y && allowPitch){
 				const increment = mv3d["a" /* default */].PITCH_SPEED / 60 * mv3d["a" /* default */].lookSensitivity;
 				this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()+mv3d["a" /* default */]._gamepadStick.y*increment*(mv3d["a" /* default */].invertY*-2+1),0.1);
 			}
@@ -3731,11 +3733,11 @@ Object.assign(mv3d["a" /* default */],{
 				if(mv3d["a" /* default */]._touchState.isTouching){
 					mv3d["a" /* default */]._touchState.deltaX=TouchInput.x-mv3d["a" /* default */]._touchState.lastX;
 					mv3d["a" /* default */]._touchState.deltaY=TouchInput.y-mv3d["a" /* default */]._touchState.lastY;
-					if(mv3d["a" /* default */]._touchState.deltaX){
+					if(mv3d["a" /* default */]._touchState.deltaX && allowRotation){
 						const increment = mv3d["a" /* default */]._touchState.deltaX / Graphics.width * 180;
 						this.blendCameraYaw.setValue(this.blendCameraYaw.targetValue()-increment*mv3d["a" /* default */].lookSensitivity,0.1);
 					}
-					if(mv3d["a" /* default */]._touchState.deltaY){
+					if(mv3d["a" /* default */]._touchState.deltaY && allowPitch){
 						const increment = mv3d["a" /* default */]._touchState.deltaY / Graphics.width * 180;
 						this.blendCameraPitch.setValue(this.blendCameraPitch.targetValue()-increment*mv3d["a" /* default */].lookSensitivity*(mv3d["a" /* default */].invertY*-2+1),0.1);
 					}
@@ -3905,15 +3907,17 @@ mv3d["a" /* default */].processMapTouch=Object(util["throttle"])(function(){
 },100);
 
 Object(util["override"])(TouchInput,'_onMouseMove',o=>function(e){
-	if(e.movementX){
+	const allowRotation = mv3d["a" /* default */].loadData('allowRotation',mv3d["a" /* default */].KEYBOARD_TURN) || mv3d["a" /* default */].is1stPerson();
+	const allowPitch = mv3d["a" /* default */].loadData('allowPitch',mv3d["a" /* default */].KEYBOARD_PITCH);
+	if(e.movementX && allowRotation){
 		const increment = e.movementX / Graphics.width * 180 * mv3d["a" /* default */].lookSensitivity;
 		mv3d["a" /* default */].blendCameraYaw.setValue(mv3d["a" /* default */].blendCameraYaw.targetValue()-increment,0.1,false);
 	}
-	if(e.movementY){
+	if(e.movementY && allowPitch){
 		const increment = e.movementY / Graphics.width * 180 * mv3d["a" /* default */].lookSensitivity;
 		mv3d["a" /* default */].blendCameraPitch.setValue(mv3d["a" /* default */].blendCameraPitch.targetValue()-increment*(mv3d["a" /* default */].invertY*-2+1),0.1,false);
 	}
-},()=> !mv3d["a" /* default */].isDisabled() && mv3d["a" /* default */].inputCameraMouse && document.pointerLockElement && mv3d["a" /* default */].blendCameraYaw );
+},()=> !mv3d["a" /* default */].isDisabled() && !mv3d["a" /* default */].loadData('cameraLocked') && mv3d["a" /* default */].inputCameraMouse && document.pointerLockElement && mv3d["a" /* default */].blendCameraYaw );
 
 Object(util["override"])(Scene_Map.prototype,'isMapTouchOk',o=>function(){
 	const isOk = o.apply(this,arguments);
