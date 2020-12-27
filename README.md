@@ -2,13 +2,13 @@
  MV3D
 ======
 
-This repository is out of date!
+**This repository is out of date!**
 
 The newest version of the plugin can be found at itch.io or patreon.
 
-https://www.patreon.com/cutievirus
-https://cutievirus.itch.io/mv3d
-https://cutievirus.itch.io/mz3d
+https://www.patreon.com/cutievirus  
+https://cutievirus.itch.io/mv3d  
+https://cutievirus.itch.io/mz3d  
 
 A 3D rendering plugin for RPG Maker MV.
 
