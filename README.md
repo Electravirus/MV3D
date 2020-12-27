@@ -2,8 +2,15 @@
  MV3D
 ======
 
-A 3D rendering plugin for RPG Maker MV.
+This repository is out of date!
 
+The newest version of the plugin can be found at itch.io or patreon.
+
+https://www.patreon.com/cutievirus
+https://cutievirus.itch.io/mv3d
+https://cutievirus.itch.io/mz3d
+
+A 3D rendering plugin for RPG Maker MV.
 
 Requires version 1.6 of RPG Maker MV.  
 
@@ -30,49 +37,5 @@ For full documentation, please see the [wiki].
 https://github.com/Dread-chan/MV3D/blob/master/plugin.zip
 
 [wiki]:https://mv3d.cutievirus.com/documentation
-
-
-## Patron Heroes:
-
-- AMemoryofEternity 
-- Fyoha 
-- 冬空 橙
-- AmalgamAsh
-- Goatse Man
-- Kaine Lowe
-- Anthony Xue
-- Kaibris
-- Galatic Acid
-- Ricky Smith
-- james gray
-- Bird Man
-- Matthias Herrmann
-- OneDrive
-
-## Patron Knights:
-
-- CattleDog
-- hsumi1 .
-- Whitely
-- L
-- Nemo Ma
-- Clumsydemonwithfire 
-- Matteo Calbi
-- RetroChaos
-- Collin
-- Trick
-- Christian Cano
-- MageisHero
-- Rareica
-- Jimmy McCarney
-- Jesse 
-- sef 
-- Man Meat
-- Jovon Hampton
-- Joseph Reyes
-- Brendan Lundy
-- moxri 
-- ManaBomb
-- + 1 hidden
 
 
